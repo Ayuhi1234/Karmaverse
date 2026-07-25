@@ -131,7 +131,6 @@ const ALL_ITEMS: CatalogueItem[] = [
   { id: 'tx3', catId: '10', subCategory: 'Jeans', unit: 'kg', coins: 300, itemIcon: Shirt, image: require('../../assets/catalogue/jeans.jpg') },
   { id: 'tx4', catId: '10', subCategory: 'Premium Sarees', unit: 'kg', coins: 500, itemIcon: Shirt, image: require('../../assets/catalogue/premium-sarees.jpg') },
   { id: 'tx5', catId: '10', subCategory: 'Non-Premium Sarees', unit: 'kg', coins: 200, itemIcon: Shirt, image: require('../../assets/catalogue/non-premium-sarees.jpg') },
-  { id: 'tx6', catId: '10', subCategory: 'Cartons', unit: 'kg', coins: 50, itemIcon: PackageOpen, image: require('../../assets/catalogue/cartons.jpg') },
   { id: 'tx7', catId: '10', subCategory: 'Other Textiles', unit: 'kg', coins: 50, itemIcon: Shirt, image: require('../../assets/catalogue/other-textiles.jpg') },
 ];
 
