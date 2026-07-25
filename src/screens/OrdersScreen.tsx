@@ -63,7 +63,7 @@ export function OrdersScreen({ navigation }: any) {
     const dateObj = new Date(order.pickupDate);
     const dateStr = dateObj.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
 
-    const mainCategory = order.categories?.[0]?.subCategory || order.categories?.[0]?.category || 'Mixed Waste';
+    const mainCategory = order.categories?.[0]?.subCategory || order.categories?.[0]?.category || 'Mixed items';
     const typeLabel = order.categories?.length > 1 ? `${mainCategory} +${order.categories.length - 1}` : mainCategory;
 
     const rawId = order._id || order.id || '00000000';
@@ -108,7 +108,7 @@ export function OrdersScreen({ navigation }: any) {
         <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={styles.header}>
           <View style={styles.headerTop}>
             <Text style={styles.headerSubtitle}>Track your impact</Text>
-            <Text style={styles.headerTitle}>My pickups</Text>
+            <Text style={styles.headerTitle}>My sustainable pickups</Text>
           </View>
 
           {/* Custom Tab Switcher (Integrated into Header bottom) */}
@@ -117,7 +117,7 @@ export function OrdersScreen({ navigation }: any) {
               style={[styles.tabBtn, activeTab === 'Active' && styles.tabBtnActive]}
               onPress={() => setActiveTab('Active')}
             >
-              <Text style={[styles.tabText, activeTab === 'Active' && styles.tabTextActive]}>Active pickups</Text>
+              <Text style={[styles.tabText, activeTab === 'Active' && styles.tabTextActive]}>Active</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.tabBtn, activeTab === 'History' && styles.tabBtnActive]}

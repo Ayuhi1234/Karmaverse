@@ -15,15 +15,7 @@ const MAX = 1200;
 
 const FEATURE_DETAILS = [
   {
-    id: 'pickup', title: 'Schedule a pickup', emoji: '🚛',
-    desc: 'Give your old items a second life — book a doorstep pickup in 3 taps and earn KarmaCoins for going green.',
-    steps: ['Pick what you want to recycle', 'Choose date & time slot', 'Agent comes to your door', 'Earn KarmaCoins XP instantly'],
-    benefit: 'Earn coins on every pickup',
-    gradient: ['#052e16', '#15803d'] as [string, string],
-    accent: '#4ade80',
-  },
-  {
-    id: 'refer', title: 'Refer & earn', emoji: '👥',
+    id: 'refer', title: 'Refer & earn', emoji: '👥', icon: Gift,
     desc: 'Share your referral code with friends. When they make their first pickup, you both get bonus KarmaCoins XP!',
     steps: ['Share your unique code', 'Friend signs up & books pickup', 'Both earn bonus coins', 'No limit on referrals'],
     benefit: 'Bonus coins for every friend',
@@ -31,15 +23,23 @@ const FEATURE_DETAILS = [
     accent: '#fb7185',
   },
   {
-    id: 'knowledge', title: 'Knowledge hub', emoji: '📚',
-    desc: 'Learn about sustainable living with curated articles, tips, and guides on waste management and recycling.',
+    id: 'knowledge', title: 'Knowledge hub', emoji: '📚', icon: BookOpen,
+    desc: 'Learn about sustainable living with curated articles, tips, and guides on recycling and the circular economy.',
     steps: ['Browse eco articles', 'Learn recycling tips', 'Share with friends', 'Make better choices'],
     benefit: 'Become an eco expert',
     gradient: ['#164e63', '#0891b2'] as [string, string],
     accent: '#22d3ee',
   },
   {
-    id: 'waste', title: 'Recycle almost anything', emoji: '♻️',
+    id: 'pickup', title: 'Schedule a pickup', emoji: '🚛', icon: Truck,
+    desc: 'Give your old items a second life — book a doorstep pickup in 3 taps and earn KarmaCoins for going green.',
+    steps: ['Pick what you want to recycle', 'Choose date & time slot', 'Agent comes to your door', 'Earn KarmaCoins XP instantly'],
+    benefit: 'Earn coins on every pickup',
+    gradient: ['#052e16', '#15803d'] as [string, string],
+    accent: '#4ade80',
+  },
+  {
+    id: 'waste', title: 'Recycle almost anything', emoji: '♻️', icon: Recycle,
     desc: 'From old gadgets to glass bottles — we give 10 categories of household items a responsible second life, away from landfills.',
     steps: ['Phones, laptops & appliances', 'Plastic, paper & metal', 'Glass, shoes & textiles', 'Every item earns KarmaCoins'],
     benefit: 'Nothing goes to waste',
@@ -47,15 +47,15 @@ const FEATURE_DETAILS = [
     accent: '#fbbf24',
   },
   {
-    id: 'instant', title: 'Instant credit', emoji: '⚡',
-    desc: 'No waiting — KarmaCoins XP are credited to your wallet immediately after the agent verifies and collects your waste.',
+    id: 'instant', title: 'Instant credit', emoji: '⚡', icon: Zap,
+    desc: 'No waiting — KarmaCoins XP are credited to your wallet immediately after the agent verifies and collects your recyclables.',
     steps: ['Agent weighs items at door', 'Verification done on spot', 'Coins added instantly', 'Check wallet in real-time'],
     benefit: 'Zero wait for rewards',
     gradient: ['#312e81', '#4f46e5'] as [string, string],
     accent: '#818cf8',
   },
   {
-    id: 'agents', title: 'Verified agents', emoji: '🛡️',
+    id: 'agents', title: 'Verified agents', emoji: '🛡️', icon: Shield,
     desc: 'All our pickup agents are background-verified and trained. Track them live on the map and contact directly from the app.',
     steps: ['Background-checked partners', 'Live GPS tracking', 'Direct call from app', 'Rate after every pickup'],
     benefit: 'Safe & trusted pickups',
@@ -100,7 +100,7 @@ export function DashboardScreen({ navigation }: any) {
           if (o.status === 'COMPLETED') st = 'Completed';
           if (o.status === 'IN_TRANSIT' || o.status === 'ACCEPTED') st = 'In Transit';
           if (o.status === 'CANCELLED') st = 'Cancelled';
-          const cat = o.categories?.[0]?.subCategory || o.categories?.[0]?.category || 'Mixed Waste';
+          const cat = o.categories?.[0]?.subCategory || o.categories?.[0]?.category || 'Mixed items';
           const date = new Date(o.pickupDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
           return { id: `#${(o._id || o.id || '').substring(0, 8).toUpperCase()}`, type: cat, date, status: st, credits: o.totalKarmaCoins || 0, raw: o };
         }));
@@ -170,10 +170,10 @@ export function DashboardScreen({ navigation }: any) {
             {isMobile ? (
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
                 {[
-                  { icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total coins' },
+                  { icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total Karma Coins (KC)' },
                   { icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Day streak' },
-                  { icon: Trophy, color: '#c084fc', val: `${quizStreak}`, label: 'Quiz streak' },
-                  { icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Pickups done' },
+                  { icon: Trophy, color: '#c084fc', val: `${quizStreak}`, label: 'Eco Quiz Streak' },
+                  { icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Sustainability Actions' },
                 ].map((st, i) => (
                   <View key={i} style={{ width: Math.floor((width - 2 * pad - 8) / 2), backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 14, padding: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 }}>
@@ -189,10 +189,10 @@ export function DashboardScreen({ navigation }: any) {
             ) : (
               <View style={z.heroRight}>
                 {[
-                  { icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total coins' },
+                  { icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total Karma Coins (KC)' },
                   { icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Day streak' },
-                  { icon: Trophy, color: '#c084fc', val: `${quizStreak}`, label: 'Quiz streak' },
-                  { icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Pickups done' },
+                  { icon: Trophy, color: '#c084fc', val: `${quizStreak}`, label: 'Eco Quiz Streak' },
+                  { icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Sustainability Actions' },
                 ].map((st, i) => (
                   <View key={i} style={z.statCard}>
                     <View style={z.statTop}>
@@ -256,6 +256,21 @@ export function DashboardScreen({ navigation }: any) {
         </View>
       </View>
 
+      {/* ════════ REFER BANNER ════════ */}
+      <View style={[z.container, { marginTop: 28, paddingHorizontal: pad }]}>
+        <LinearGradient colors={['#052e16', '#166534']} style={[z.referBanner, isMobile && { flexDirection: 'column', gap: 16, padding: 20 }]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
+          <View style={z.referBannerDecor} />
+          <View style={{ flex: isMobile ? undefined : 1, zIndex: 1 }}>
+            <Text style={[z.referTitle, isMobile && { fontSize: 18 }]}>Invite friends, earn together</Text>
+            <Text style={z.referSub}>Share your referral code and both of you earn bonus KarmaCoins XP on their first pickup.</Text>
+          </View>
+          <TouchableOpacity style={z.referBtn} onPress={() => nav('Referral')}>
+            <Users size={18} color="#052e16" />
+            <Text style={z.referBtnText}>Refer now</Text>
+          </TouchableOpacity>
+        </LinearGradient>
+      </View>
+
       {/* ════════ DISCOVER FEATURES ════════ */}
       <View style={[z.container, { marginTop: 28, paddingHorizontal: pad }]}>
         <View style={z.sectionHead}>
@@ -267,8 +282,7 @@ export function DashboardScreen({ navigation }: any) {
 
         <View style={[z.discoverRow, isMobile && { gap: 10 }]}>
           {FEATURE_DETAILS.map((f, i) => {
-            const icons = [Truck, Gift, BookOpen, Recycle, Zap, Shield];
-            const Icon = icons[i] || Package;
+            const Icon = f.icon || Package;
             const cardW = isMobile ? Math.floor((width - 2 * pad - 10) / 2) : undefined;
             return (
               <TouchableOpacity
@@ -369,21 +383,6 @@ export function DashboardScreen({ navigation }: any) {
             })}
           </View>
         )}
-      </View>
-
-      {/* ════════ REFER BANNER ════════ */}
-      <View style={[z.container, { marginTop: 28, paddingHorizontal: pad }]}>
-        <LinearGradient colors={['#052e16', '#166534']} style={[z.referBanner, isMobile && { flexDirection: 'column', gap: 16, padding: 20 }]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
-          <View style={z.referBannerDecor} />
-          <View style={{ flex: isMobile ? undefined : 1, zIndex: 1 }}>
-            <Text style={[z.referTitle, isMobile && { fontSize: 18 }]}>Invite friends, earn together</Text>
-            <Text style={z.referSub}>Share your referral code and both of you earn bonus KarmaCoins XP on their first pickup.</Text>
-          </View>
-          <TouchableOpacity style={z.referBtn} onPress={() => nav('Referral')}>
-            <Users size={18} color="#052e16" />
-            <Text style={z.referBtnText}>Refer now</Text>
-          </TouchableOpacity>
-        </LinearGradient>
       </View>
 
       <View style={{ height: 60 }} />

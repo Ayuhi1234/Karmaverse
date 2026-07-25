@@ -10,18 +10,24 @@ import { REDEEM_INFO_MESSAGE, showRedeemInfoNow, isRedeemLive } from '../utils/r
 const showWithdrawInfo = () => showRedeemInfoNow();
 
 export function WalletScreen({ navigation }: any) {
+  // balance = current spendable/redeemable coins (used for redeem flow)
+  // lifetime = totalCoinsEarned — never decreases on redeem
   const [balance, setBalance] = useState(0);
+  const [lifetime, setLifetime] = useState(0);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchWalletData = async () => {
       try {
-        const [profileData, txData] = await Promise.all([
+        const [profileData, txData]: [any, any] = await Promise.all([
           profileService.getProfile().catch(() => ({})),
           profileService.getTransactionHistory().catch(() => []),
         ]);
-        setBalance(profileData.karmaCoins || profileData.coins || 0);
+        const spendable = profileData.karmaCoins ?? profileData.coins ?? profileData.balance ?? 0;
+        setBalance(spendable);
+        // Lifetime total ever earned — backfilled server-side for all users.
+        setLifetime(profileData.totalCoinsEarned ?? spendable);
         setTransactions(Array.isArray(txData) ? txData : []);
       } catch (error) {
         console.error('Wallet fetch error:', error);
@@ -60,7 +66,7 @@ export function WalletScreen({ navigation }: any) {
         {/* Header — same as home screen: paddingTop 60, same gradient, same radius */}
         <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={styles.header}>
           <View style={styles.titleRow}>
-            <Text style={styles.headerTitle}>My Wallet</Text>
+            <Text style={styles.headerTitle}>My wallet</Text>
             <TouchableOpacity style={styles.historyBtn} onPress={() => navigation.navigate('RedeemHistory')}>
               <History size={18} color="white" />
             </TouchableOpacity>
@@ -69,7 +75,7 @@ export function WalletScreen({ navigation }: any) {
           {/* Balance card */}
           <View style={styles.balanceCard}>
             <View style={styles.cardTopRow}>
-              <Text style={styles.cardLabel}>TOTAL KARMACOINS XP</Text>
+              <Text style={styles.cardLabel}>Total earned</Text>
               <View style={styles.activeTag}>
                 <View style={styles.activeDot} />
                 <Text style={styles.activeText}>Active</Text>
@@ -77,10 +83,22 @@ export function WalletScreen({ navigation }: any) {
             </View>
             <View style={styles.balanceRow}>
               <KarmaCoin size={44} glow animated />
-              <Text style={styles.balanceText}>{balance.toLocaleString()}</Text>
+              <View>
+                <Text style={styles.balanceText}>{lifetime.toLocaleString()}</Text>
+                <Text style={styles.unitTag} numberOfLines={1}>KarmaCoins XP</Text>
+              </View>
             </View>
             <View style={styles.cardDivider} />
-            <Text style={styles.cardSub}>≈ ₹{(balance * 0.1).toFixed(0)} Value Equivalent</Text>
+            <View style={styles.redeemableRow}>
+              <View>
+                <Text style={styles.redeemableLabel}>Available to redeem</Text>
+                <View style={styles.redeemableValueRow}>
+                  <KarmaCoin size={18} />
+                  <Text style={styles.redeemableValue}>{balance.toLocaleString()}</Text>
+                </View>
+              </View>
+              <Text style={styles.cardSub}>≈ ₹{(balance * 0.1).toFixed(0)} value</Text>
+            </View>
           </View>
         </LinearGradient>
 
@@ -118,7 +136,7 @@ export function WalletScreen({ navigation }: any) {
 
         {/* Transaction History */}
         <View style={styles.historySection}>
-          <Text style={styles.sectionTitle}>Recent Transactions</Text>
+          <Text style={styles.sectionTitle}>Recent transactions</Text>
 
           {isLoading ? (
             <View style={{ alignItems: 'center', paddingVertical: 40 }}>
@@ -190,14 +208,19 @@ const styles = StyleSheet.create({
     maxWidth: 800, width: '100%', alignSelf: 'center',
   },
   cardTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
-  cardLabel: { color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: '800', letterSpacing: 1.2 },
+  cardLabel: { color: 'rgba(255,255,255,0.6)', fontSize: 13, fontWeight: '700', letterSpacing: 0.3 },
+  unitTag: { color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: '600', letterSpacing: 0.3, marginTop: -2, flexShrink: 0 },
   activeTag: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.12)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20, gap: 6 },
   activeDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#86efac' },
   activeText: { color: 'white', fontSize: 10, fontWeight: '700' },
-  balanceRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  balanceRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   balanceText: { fontSize: 44, fontWeight: '900', color: 'white', letterSpacing: -1 },
   cardDivider: { height: 1, backgroundColor: 'rgba(255,255,255,0.12)', marginVertical: 14 },
   cardSub: { color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: '600' },
+  redeemableRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
+  redeemableLabel: { color: 'rgba(255,255,255,0.6)', fontSize: 12, fontWeight: '700', letterSpacing: 0.3, marginBottom: 6 },
+  redeemableValueRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  redeemableValue: { color: 'white', fontSize: 22, fontWeight: '900', letterSpacing: -0.5 },
 
   redeemBanner: {
     marginTop: 16, marginHorizontal: 16, padding: 14, borderRadius: 16,

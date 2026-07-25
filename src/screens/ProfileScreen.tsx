@@ -81,6 +81,7 @@ export function ProfileScreen({ navigation }: any) {
           phone: isRealPhone(data.phone) ? `+91 ${cleanPhone(data.phone)}` : '',
           email: data.email || '',
           coins: data.karmaCoins || data.coins || 0,
+          totalEarned: data.totalCoinsEarned ?? (data.karmaCoins || data.coins || 0),
           streak: quizStreak,
           address: data.address
             ? (typeof data.address === 'object' ? data.address.fullAddress : data.address)
@@ -640,7 +641,7 @@ export function ProfileScreen({ navigation }: any) {
                   <View style={styles.statDivider} />
                   <View style={styles.statPill}>
                     <KarmaCoin size={14} />
-                    <Text style={styles.statText}>{userProfile?.coins || 0} coins</Text>
+                    <Text style={styles.statText}>{(userProfile?.totalEarned || 0).toLocaleString()} earned</Text>
                   </View>
                 </View>
 
@@ -700,7 +701,7 @@ export function ProfileScreen({ navigation }: any) {
                   title="Help & support"
                   onPress={() => showAlert(
                     'Help & support',
-                    'Reach out to us anytime:\n\nEmail: cto.team@0waste.co.in\nAddress: PLOT 62, Sector 8 Rd, Imt Manesar, Gurugram, Haryana 122503'
+                    'Reach out to us anytime:\n\nEmail: cto.team@0waste.co.in\nAddress: PLOT 62, Sector 8, Imt Manesar, Gurugram, Haryana 122503'
                   )}
                 />
                 <View style={styles.divider} />

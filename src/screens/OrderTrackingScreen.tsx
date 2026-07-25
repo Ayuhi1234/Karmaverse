@@ -30,6 +30,7 @@ const BASE_STEPS = [
   { key: 'ORDER_PLACED',   label: 'Order placed',       sublabel: 'Your pickup request is confirmed' },
   { key: 'AGENT_ASSIGNED', label: 'Agent assigned',     sublabel: 'Agent accepted and is on the way' },
   { key: 'AGENT_REACHED',  label: 'Agent reached',      sublabel: 'Agent has reached your location' },
+  { key: 'VERIFICATION',   label: 'Verification', sublabel: 'Waste weighed, KarmaCoins credited' },
   { key: 'COMPLETED',      label: 'Completed',           sublabel: 'Reached warehouse and completed' },
 ];
 
@@ -289,7 +290,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <ArrowLeft size={20} color="white" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Live Tracking</Text>
+        <Text style={styles.headerTitle}>Live tracking</Text>
         <TouchableOpacity style={styles.helpIconBtn}>
           <HelpCircle size={20} color="white" />
         </TouchableOpacity>
@@ -371,7 +372,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
         {/* Live Status */}
         <View style={styles.liveStatusRow}>
           <Animated.View style={[styles.liveDot, { transform: [{ scale: pulseAnim }], backgroundColor: isPool ? '#f59e0b' : '#22c55e' }]} />
-          <Text style={styles.liveStatusLabel}>Live Status</Text>
+          <Text style={styles.liveStatusLabel}>Live status</Text>
           <Text style={styles.liveStatusTime}>Just now</Text>
         </View>
         <Text style={styles.liveStatusText}>{liveMessage}</Text>
@@ -394,7 +395,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
             <Text style={styles.statValue}>{distanceKm !== null ? `${distanceKm} km` : '—'}</Text>
-            <Text style={styles.statLabel}>Distance Away</Text>
+            <Text style={styles.statLabel}>Distance away</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
@@ -409,7 +410,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
         </View>
 
         {/* Progress Steps */}
-        <Text style={styles.sectionTitle}>Tracking Progress</Text>
+        <Text style={styles.sectionTitle}>Tracking progress</Text>
         <View style={styles.stepsContainer}>
           {steps.map((step, index) => (
             <View key={step.key} style={styles.stepRow}>
@@ -458,7 +459,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
 
         <TouchableOpacity style={styles.secondaryBtn}>
           <HelpCircle size={16} color="#475569" />
-          <Text style={styles.secondaryBtnText}>Need Help?</Text>
+          <Text style={styles.secondaryBtnText}>Need help?</Text>
         </TouchableOpacity>
 
         {/* Cancel Button — only before agent reaches */}

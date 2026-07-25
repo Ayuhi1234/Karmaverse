@@ -1,5 +1,5 @@
 // Legal content for KarmaVer$e. Edit the copy here — the LegalScreen renders it.
-// Source of truth: 3R Zero Waste legal documentation.
+// Source of truth: 3RZeroWaste legal documentation.
 // Kept in sync with /legal/TERMS_AND_CONDITIONS.md, /legal/PRIVACY_POLICY.md and
 // /legal/DATA_DELETION.md — update together.
 
@@ -21,7 +21,7 @@ export const TERMS: LegalDoc = {
   title: 'Terms & conditions',
   updated: 'July 2026',
   intro:
-    'Welcome to KarmaVer$e, operated by 3R Zero Waste. By downloading, installing, or using the KarmaVer$e app or website, you agree to be bound by these terms. If you do not agree, please do not use the service.',
+    'Welcome to KarmaVer$e, operated by 3RZeroWaste. By downloading, installing, or using the KarmaVer$e app or website, you agree to be bound by these terms. If you do not agree, please do not use the service.',
   sections: [
     {
       heading: 'Definitions',
@@ -119,7 +119,7 @@ export const TERMS: LegalDoc = {
     {
       heading: 'Intellectual property',
       bullets: [
-        'The KarmaVer$e app, website, logo, the names “KarmaVer$e” and “KarmaCoins XP,” and all related content, features, and functionality are owned by 3R Zero Waste and protected by applicable intellectual property laws',
+        'The KarmaVer$e app, website, logo, the names “KarmaVer$e” and “KarmaCoins XP,” and all related content, features, and functionality are owned by 3RZeroWaste and protected by applicable intellectual property laws',
         'You may not copy, modify, distribute, sell, or lease any part of the app or its content without our prior written consent',
         'Any feedback, ratings, or reviews you submit may be used by us to operate and improve the platform. You grant us a non-exclusive, royalty-free, worldwide license to use such content for that purpose',
       ],
@@ -136,7 +136,7 @@ export const TERMS: LegalDoc = {
     {
       heading: 'Indemnification',
       bullets: [
-        'You agree to indemnify and hold harmless 3R Zero Waste, its officers, employees, and Agents from any claims, damages, losses, or expenses (including reasonable legal fees) arising from your violation of these terms, misuse of the service, or violation of any law or third-party rights',
+        'You agree to indemnify and hold harmless 3RZeroWaste, its officers, employees, and Agents from any claims, damages, losses, or expenses (including reasonable legal fees) arising from your violation of these terms, misuse of the service, or violation of any law or third-party rights',
       ],
     },
     {
@@ -160,7 +160,7 @@ export const TERMS: LegalDoc = {
     {
       heading: 'General provisions',
       bullets: [
-        'Entire agreement: these terms, together with our Privacy Policy, constitute the entire agreement between you and 3R Zero Waste regarding the service',
+        'Entire agreement: these terms, together with our Privacy Policy, constitute the entire agreement between you and 3RZeroWaste regarding the service',
         'Severability: if any provision of these terms is found invalid or unenforceable, the remaining provisions continue in full force and effect',
         'No waiver: our failure to enforce any right or provision of these terms is not a waiver of that right or provision',
         'Assignment: we may assign or transfer these terms in connection with a merger, acquisition, or sale of assets. You may not assign your rights or obligations under these terms without our prior written consent',
@@ -179,20 +179,20 @@ export const TERMS: LegalDoc = {
       body: ['For any questions or complaints about these terms or the service:'],
       bullets: [
         'Email: info@0waste.co.in',
-        'Address: 3R Zero Waste, Plot 62, Sector 8 Rd, IMT Manesar, Gurugram, Haryana 122503',
+        'Address: 3RZeroWaste, Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122503',
         'In-app: use the “Need help?” option',
       ],
     },
   ],
   closing:
-    'By using KarmaVer$e, you acknowledge that you have read, understood, and agreed to these terms and conditions. © 2026 KarmaVer$e by 3R Zero Waste. All rights reserved.',
+    'By using KarmaVer$e, you acknowledge that you have read, understood, and agreed to these terms and conditions. © 2026 KarmaVer$e by 3RZeroWaste. All rights reserved.',
 };
 
 export const PRIVACY: LegalDoc = {
   title: 'Privacy policy',
   updated: 'July 2026',
   intro:
-    'This policy explains what information KarmaVer$e (by 3R Zero Waste) collects, how we use it, and the choices you have. We are committed to protecting your privacy and handling your data responsibly.',
+    'This policy explains what information KarmaVer$e (by 3RZeroWaste) collects, how we use it, and the choices you have. We are committed to protecting your privacy and handling your data responsibly.',
   sections: [
     {
       heading: 'Information we collect',
@@ -318,11 +318,11 @@ export const PRIVACY: LegalDoc = {
       body: ['For any privacy questions or requests:'],
       bullets: [
         'Email: info@0waste.co.in',
-        'Address: 3R Zero Waste, Plot 62, Sector 8 Rd, IMT Manesar, Gurugram, Haryana 122503',
+        'Address: 3RZeroWaste, Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122503',
       ],
     },
   ],
-  closing: '© 2026 KarmaVer$e by 3R Zero Waste. All rights reserved.',
+  closing: '© 2026 KarmaVer$e by 3RZeroWaste. All rights reserved.',
 };
 
 export const DATA_DELETION: LegalDoc = {
@@ -363,9 +363,9 @@ export const DATA_DELETION: LegalDoc = {
       body: ['For questions about this process:'],
       bullets: [
         'Email: info@0waste.co.in',
-        'Address: 3R Zero Waste, Plot 62, Sector 8 Rd, IMT Manesar, Gurugram, Haryana 122503',
+        'Address: 3RZeroWaste, Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122503',
       ],
     },
   ],
-  closing: '© 2026 KarmaVer$e by 3R Zero Waste. All rights reserved.',
+  closing: '© 2026 KarmaVer$e by 3RZeroWaste. All rights reserved.',
 };

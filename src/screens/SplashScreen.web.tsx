@@ -6,7 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import {
   Truck, Gift, Shield,
   Recycle, Users, Coins, ArrowRight,
-  BookOpen, Mail, MapPin,
+  BookOpen, Mail, MapPin, Phone,
   Sprout, Trophy, Flame, Brain, Handshake, Building2,
   Target, Percent, GraduationCap, Leaf,
   HeartHandshake, Sparkles, Home as HomeIcon, Store, Megaphone,
@@ -19,7 +19,7 @@ const isMobile = W < 768;
 const MAX = 1100;
 
 const KARMA_PHRASE = 'Rewards.';
-const HEADLINE_TEXT = `Turning Sustainable Gestures\ninto ${KARMA_PHRASE}`;
+const HEADLINE_TEXT = `Smart Sustainability,\nReal ${KARMA_PHRASE}`;
 const KARMA_SPLIT = HEADLINE_TEXT.length - KARMA_PHRASE.length;
 
 // Card used across every grid: fades + slides up the first time it scrolls into
@@ -184,9 +184,14 @@ export function SplashScreen({ navigation, route }: any) {
                 out the same way as the original artwork (icon left, wordmark on
                 top, tagline underneath) — the tagline is real text here instead
                 of the tiny raster copy, so it stays crisp at navbar scale. */}
-            <Image source={require('../../assets/logo-icon.png')} resizeMode="contain" style={[s.navIconImg, isMobile && { width: 40, height: 42 }]} />
+            <Image source={require('../../assets/logo-icon.png')} resizeMode="contain" style={[s.navIconImg, isMobile && { width: 48, height: 50 }]} />
             <View>
-              <Image source={require('../../assets/logo-wordmark.png')} resizeMode="contain" style={[s.navWordmarkImg, isMobile && { width: 108, height: 20 }]} />
+              {/* Solid crisp text instead of the hollow/outlined wordmark image
+                  (the raster "Karma" was outline-only and read faintly on dark). */}
+              <Text style={[s.navWordText, isMobile && { fontSize: 22 }]}>
+                <Text style={{ color: '#ffffff' }}>Karma</Text>
+                <Text style={{ color: '#4ade80' }}>Ver$e</Text>
+              </Text>
               {!isMobile && (
                 <Text style={s.navTagline}>
                   <Text style={{ color: '#86efac' }}>EARN</Text>
@@ -205,7 +210,7 @@ export function SplashScreen({ navigation, route }: any) {
                 <Text style={s.navTabText}>Home</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => scrollToSection('howItWorks')}>
-                <Text style={s.navTabText}>How it works</Text>
+                <Text style={s.navTabText}>Flow</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => scrollToSection('rewards')}>
                 <Text style={s.navTabText}>Rewards</Text>
@@ -233,7 +238,7 @@ export function SplashScreen({ navigation, route }: any) {
             {/* Badge */}
             <View style={s.heroBadge}>
               <View style={s.heroBadgeDot} />
-              <Text style={s.heroBadgeText}>India's Sustainability Rewards Ecosystem</Text>
+              <Text style={s.heroBadgeText}>AI-Powered Sustainability Rewards</Text>
             </View>
 
             <Text style={[s.heroTitle, isMobile && { fontSize: 34 }]}>
@@ -243,15 +248,18 @@ export function SplashScreen({ navigation, route }: any) {
               )}
               <Animated.Text style={[s.heroCursor, { opacity: cursorBlink }]}>|</Animated.Text>
             </Text>
+
+            <Text style={[s.heroTagline, isMobile && { fontSize: 18 }]}>“Kar Bhala Toh Ho Bhala.” 🌱</Text>
+
             <Text style={[s.heroSub, isMobile && { fontSize: 16 }]}>
-              Every sustainable action deserves recognition. KarmaVer$e transforms your everyday
-              eco-friendly choices into KarmaCoins that unlock real rewards — while creating
-              measurable environmental impact.
+              KarmaVer$e rewards every sustainable action — schedule doorstep recycling pickups,
+              sharpen your green knowledge with our AI-powered eco-quiz, and turn it all into
+              KarmaCoins with real, measurable impact.
             </Text>
 
             <View style={s.poweredByBadge}>
               <View style={s.poweredByDot}><Text style={s.poweredByDotText}>3R</Text></View>
-              <Text style={s.poweredByText}>Powered by <Text style={{ color: 'white', fontWeight: '800' }}>3R Zero Waste</Text></Text>
+              <Text style={s.poweredByText}>Powered by <Text style={{ color: 'white', fontWeight: '800' }}>3RZeroWaste</Text></Text>
             </View>
 
             {/* CTA */}
@@ -296,7 +304,7 @@ export function SplashScreen({ navigation, route }: any) {
               sustainable action generates value.
             </Text>
 
-            <View style={[s.featGrid, { marginTop: 36 }, isMobile && { flexDirection: 'column' }]}>
+            <View style={[s.featGrid, { marginTop: 36 }]}>
               {[
                 { icon: Users, color: '#16a34a', label: 'Citizens' },
                 { icon: HomeIcon, color: '#0891b2', label: 'Housing societies' },
@@ -307,9 +315,9 @@ export function SplashScreen({ navigation, route }: any) {
                 { icon: Truck, color: '#7c3aed', label: 'Pickup partners' },
                 { icon: Store, color: '#ea580c', label: 'Sustainable brands' },
               ].map((eco, i) => (
-                <Card key={i} delay={i * 50} style={[s.ecoCard, { width: isMobile ? '47%' : '22%' }]}>
+                <Card key={i} delay={i * 50} style={[s.ecoCard, { width: isMobile ? '47%' : '22%', flexGrow: 1 }]}>
                   <View style={[s.featIconBg, { backgroundColor: eco.color + '15' }]}>
-                    <eco.icon size={20} color={eco.color} />
+                    <eco.icon size={24} color={eco.color} />
                   </View>
                   <Text style={s.ecoLabel}>{eco.label}</Text>
                 </Card>
@@ -321,8 +329,8 @@ export function SplashScreen({ navigation, route }: any) {
         {/* ── HOW IT WORKS ── */}
         <View style={s.section} onLayout={(e) => { sectionY.current.howItWorks = e.nativeEvent.layout.y; }}>
           <View style={[s.container, isMobile && { paddingHorizontal: 20 }]}>
-            <Text style={s.sectionLabel}>HOW IT WORKS</Text>
-            <Text style={[s.sectionTitle, isMobile && { fontSize: 28 }]}>Simple actions. Meaningful rewards.</Text>
+            <Text style={s.sectionLabel}>FLOW</Text>
+            <Text style={[s.sectionTitle, isMobile && { fontSize: 28 }]}>Sustainable actions. AI-enabled rewards.</Text>
 
             <View style={[s.stepsRow, isMobile && { flexDirection: 'column' }]}>
               {[
@@ -362,16 +370,16 @@ export function SplashScreen({ navigation, route }: any) {
 
             <View style={[s.featGrid, { marginTop: 28 }, isMobile && { flexDirection: 'column' }]}>
               {[
-                { icon: Leaf, color: '#16a34a', title: 'Eco products', desc: 'Sustainable goods for everyday life.' },
-                { icon: Gift, color: '#e11d48', title: 'Gift cards', desc: 'Vouchers from your favourite brands.' },
-                { icon: Percent, color: '#0891b2', title: 'Shopping discounts', desc: 'Save on the things you already buy.' },
-                { icon: Sparkles, color: '#d97706', title: 'Exclusive experiences', desc: 'Unlock experiences money can\'t buy.' },
-                { icon: Handshake, color: '#7c3aed', title: 'Partner rewards', desc: 'Curated offers from our brand partners.' },
-                { icon: Sprout, color: '#059669', title: 'Tree plantation', desc: 'Turn coins into real trees planted.' },
+                { icon: Leaf, color: '#16a34a', title: 'Green Store', desc: 'Sustainable goods that give back to the planet.' },
+                { icon: Gift, color: '#e11d48', title: 'Eco Gift Cards', desc: 'Green vouchers from your favourite brands.' },
+                { icon: Percent, color: '#0891b2', title: 'Conscious Savings', desc: 'Save on the everyday things you already buy.' },
+                { icon: Sparkles, color: '#d97706', title: 'Eco Experiences', desc: 'Unlock green experiences money can\'t buy.' },
+                { icon: Handshake, color: '#7c3aed', title: 'Impact Partners', desc: 'Curated offers from our sustainable partners.' },
+                { icon: Sprout, color: '#059669', title: 'Plant a Tree', desc: 'Convert coins into real trees, real impact.' },
               ].map((r, i) => (
                 <Card key={i} delay={i * 70} style={[s.featCard, { width: isMobile ? '100%' : '31%' }]}>
                   <View style={[s.featIconBg, { backgroundColor: r.color + '15' }]}>
-                    <r.icon size={22} color={r.color} />
+                    <r.icon size={26} color={r.color} />
                   </View>
                   <Text style={s.featTitle}>{r.title}</Text>
                   <Text style={s.featDesc}>{r.desc}</Text>
@@ -387,21 +395,23 @@ export function SplashScreen({ navigation, route }: any) {
             <Text style={s.sectionLabel}>LEARNING & ENGAGEMENT</Text>
             <Text style={[s.sectionTitle, { marginBottom: 16 }, isMobile && { fontSize: 28 }]}>Learn. Act. Earn.</Text>
             <Text style={[s.sectionIntro, isMobile && { fontSize: 15 }]}>
-              Build sustainable habits through interactive challenges, learning modules, eco-quizzes,
-              daily missions, and community campaigns. Every lesson can become real-world impact.
+              Refer friends, play the daily eco-quiz, join community campaigns, take on challenges,
+              and explore our learning modules and knowledge hub. Every step turns into real-world impact.
             </Text>
 
             <View style={[s.featGrid, { marginTop: 36 }, isMobile && { flexDirection: 'column' }]}>
               {[
-                { icon: Trophy, color: '#d97706', title: 'Interactive challenges', desc: 'Compete, climb the board, stay motivated.' },
-                { icon: BookOpen, color: '#0891b2', title: 'Learning modules', desc: 'Bite-sized lessons on real sustainability topics.' },
-                { icon: Brain, color: '#7c3aed', title: 'Eco-quizzes', desc: 'AI-generated daily quizzes — never a repeat.' },
-                { icon: Flame, color: '#e11d48', title: 'Daily missions', desc: 'Build a streak. Make sustainability a habit.' },
-                { icon: Megaphone, color: '#16a34a', title: 'Community campaigns', desc: 'Join drives that turn learning into action.' },
+                { icon: Gift, color: '#e11d48', title: 'Refer & Earn', desc: 'Invite friends — you both earn bonus KarmaCoins.' },
+                { icon: Brain, color: '#7c3aed', title: 'Daily Eco Quiz', desc: 'AI-generated daily quiz — never a repeat.' },
+                { icon: Megaphone, color: '#16a34a', title: 'Sustainability Community Campaigns', desc: 'Join drives that turn learning into action.' },
+                { icon: Trophy, color: '#d97706', title: 'Interactive Challenges', desc: 'Compete, climb the board, stay motivated.' },
+                { icon: BookOpen, color: '#0891b2', title: 'Learning Modules', desc: 'Bite-sized lessons on real sustainability topics.' },
+                { icon: Sprout, color: '#059669', title: 'Sustainability Knowledge', desc: 'Deep-dive guides to live greener every day.' },
+                { icon: GraduationCap, color: '#2563eb', title: 'Knowledge Hub', desc: 'Curated articles, tips, and eco stories.' },
               ].map((l, i) => (
                 <Card key={i} delay={i * 60} style={[s.featCard, { width: isMobile ? '100%' : '22%' }]}>
                   <View style={[s.featIconBg, { backgroundColor: l.color + '15' }]}>
-                    <l.icon size={22} color={l.color} />
+                    <l.icon size={26} color={l.color} />
                   </View>
                   <Text style={s.featTitle}>{l.title}</Text>
                   <Text style={s.featDesc}>{l.desc}</Text>
@@ -419,7 +429,7 @@ export function SplashScreen({ navigation, route }: any) {
                 <Image source={require('../../assets/logo-nav.png')} resizeMode="contain" style={s.footerLogoImg} />
               </View>
               <Text style={s.footerDesc}>
-                3R Zero Waste® was founded to do waste management differently — turning India's growing waste into value through the circular economy. KarmaVerse is its sustainability rewards ecosystem.
+                3RZeroWaste® was founded to do waste management differently — turning India's growing waste into value through the circular economy. KarmaVerse is its sustainability rewards ecosystem.
               </Text>
               <TouchableOpacity onPress={() => Linking.openURL('https://0waste.co.in/')}>
                 <Text style={[s.footerLink, { marginTop: 10, color: '#4ade80', fontWeight: '700' }]}>0waste.co.in ↗</Text>
@@ -430,7 +440,7 @@ export function SplashScreen({ navigation, route }: any) {
               <View style={s.footerLinks}>
                 <Text style={s.footerLinkTitle}>Product</Text>
                 <TouchableOpacity onPress={() => scrollToSection('howItWorks')}>
-                  <Text style={s.footerLink}>How it works</Text>
+                  <Text style={s.footerLink}>Flow</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => scrollToSection('rewards')}>
                   <Text style={s.footerLink}>Rewards</Text>
@@ -455,19 +465,23 @@ export function SplashScreen({ navigation, route }: any) {
 
               <View style={s.footerLinks}>
                 <Text style={s.footerLinkTitle}>Contact us</Text>
-                <TouchableOpacity style={s.footerContactRow} onPress={() => Linking.openURL('mailto:cto.team@0waste.co.in')}>
+                <TouchableOpacity style={s.footerContactRow} onPress={() => Linking.openURL('mailto:info@0waste.co.in')}>
                   <Mail size={14} color="#4ade80" />
-                  <Text style={s.footerLink}>cto.team@0waste.co.in</Text>
+                  <Text style={s.footerLink}>info@0waste.co.in</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={s.footerContactRow} onPress={() => Linking.openURL('tel:+917093198828')}>
+                  <Phone size={14} color="#4ade80" />
+                  <Text style={s.footerLink}>+91 70931 98828</Text>
                 </TouchableOpacity>
                 <View style={s.footerContactRow}>
                   <MapPin size={14} color="#4ade80" style={{ marginTop: 2 }} />
-                  <Text style={[s.footerLink, { flex: 1 }]}>Plot 62, Sector 8 Rd, IMT Manesar, Gurugram, Haryana 122503</Text>
+                  <Text style={[s.footerLink, { flex: 1 }]}>Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122503</Text>
                 </View>
               </View>
             </View>
           </View>
           <View style={[s.container, s.footerBottom, isMobile && { paddingHorizontal: 20 }]}>
-            <Text style={s.footerCopy}>© 2026 KarmaVer$e by 3R Zero Waste. All rights reserved.</Text>
+            <Text style={s.footerCopy}>© 2026 KarmaVer$e by 3RZeroWaste. All rights reserved.</Text>
           </View>
         </View>
 
@@ -492,9 +506,9 @@ const s = StyleSheet.create({
   },
   navInner: { maxWidth: MAX, width: '100%', alignSelf: 'center', paddingHorizontal: 32, paddingVertical: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   navLogoRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  navIconImg: { width: 62, height: 65 },
-  navWordmarkImg: { width: 92, height: 17 },
-  navTagline: { fontSize: 8.5, fontWeight: '800', letterSpacing: 0.8, marginTop: 2 },
+  navIconImg: { width: 70, height: 73 },
+  navWordText: { fontSize: 28, fontWeight: '900', letterSpacing: -0.5, lineHeight: 32 },
+  navTagline: { fontSize: 9.5, fontWeight: '800', letterSpacing: 0.9, marginTop: 3 },
   navTabs: { flexDirection: 'row', alignItems: 'center', gap: 24 },
   navTabText: { color: 'rgba(255,255,255,0.75)', fontSize: 14, fontWeight: '700' },
 
@@ -504,8 +518,9 @@ const s = StyleSheet.create({
   heroContent: { maxWidth: MAX, width: '100%', alignSelf: 'center', paddingHorizontal: 32, paddingTop: 60 },
   heroBadge: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(255,255,255,0.08)', alignSelf: 'flex-start', borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', marginBottom: 24 },
   heroBadgeDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#4ade80' },
-  heroBadgeText: { color: 'rgba(255,255,255,0.8)', fontSize: 13, fontWeight: '600' },
-  heroTitle: { fontSize: 50, fontWeight: '900', color: 'white', letterSpacing: -1.5, lineHeight: 60, marginBottom: 20 },
+  heroBadgeText: { color: 'rgba(255,255,255,0.8)', fontSize: 16, fontWeight: '700' },
+  heroTitle: { fontSize: 50, fontWeight: '900', color: 'white', letterSpacing: -1.5, lineHeight: 60, marginBottom: 12 },
+  heroTagline: { fontSize: 22, fontWeight: '700', fontStyle: 'italic', color: '#4ade80', marginBottom: 18 },
   heroCursor: { color: '#4ade80', fontWeight: '400' },
   heroSub: { fontSize: 18, color: 'rgba(255,255,255,0.7)', fontWeight: '500', lineHeight: 28, maxWidth: 620, marginBottom: 32 },
   heroCTA: { flexDirection: 'row', gap: 16, marginTop: 28, marginBottom: 44 },
@@ -540,23 +555,23 @@ const s = StyleSheet.create({
 
   // Steps
   stepsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 20 },
-  stepCard: { flex: 1, backgroundColor: 'white', borderRadius: 20, padding: 28, borderWidth: 1, borderColor: '#f1f5f9', position: 'relative' },
-  stepIconBg: { width: 56, height: 56, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginBottom: 18 },
+  stepCard: { flex: 1, backgroundColor: 'white', borderRadius: 20, padding: 26, borderWidth: 1, borderColor: '#e2e8f0', position: 'relative', shadowColor: '#0f172a', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.06, shadowRadius: 18, elevation: 3 },
+  stepIconBg: { width: 54, height: 54, borderRadius: 15, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
   stepNum: { position: 'absolute', top: 20, right: 20, width: 28, height: 28, borderRadius: 14, backgroundColor: '#f1f5f9', alignItems: 'center', justifyContent: 'center' },
   stepNumText: { fontSize: 13, fontWeight: '900', color: '#94a3b8' },
-  stepTitle: { fontSize: 17, fontWeight: '800', color: '#0f172a', marginBottom: 8 },
-  stepDesc: { fontSize: 14, color: '#64748b', fontWeight: '500', lineHeight: 22 },
+  stepTitle: { fontSize: 20, fontWeight: '800', color: '#0f172a', marginBottom: 7 },
+  stepDesc: { fontSize: 14.5, color: '#64748b', fontWeight: '500', lineHeight: 22 },
 
   // Generic card grid — reused for Rewards and Learning
   featGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 16 },
-  featCard: { backgroundColor: 'white', borderRadius: 18, padding: 24, borderWidth: 1, borderColor: '#e2e8f0' },
-  featIconBg: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginBottom: 14 },
-  featTitle: { fontSize: 16, fontWeight: '800', color: '#0f172a', marginBottom: 6 },
-  featDesc: { fontSize: 13, color: '#64748b', fontWeight: '500', lineHeight: 20 },
+  featCard: { backgroundColor: 'white', borderRadius: 18, padding: 26, borderWidth: 1, borderColor: '#e2e8f0', shadowColor: '#0f172a', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.06, shadowRadius: 18, elevation: 3 },
+  featIconBg: { width: 54, height: 54, borderRadius: 15, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
+  featTitle: { fontSize: 20, fontWeight: '800', color: '#0f172a', marginBottom: 7 },
+  featDesc: { fontSize: 14.5, color: '#64748b', fontWeight: '500', lineHeight: 22 },
 
   // Ecosystem chips (icon + label only)
-  ecoCard: { backgroundColor: 'white', borderRadius: 16, padding: 18, borderWidth: 1, borderColor: '#e2e8f0', alignItems: 'flex-start' },
-  ecoLabel: { fontSize: 14, fontWeight: '800', color: '#0f172a' },
+  ecoCard: { backgroundColor: 'white', borderRadius: 16, padding: 22, borderWidth: 1, borderColor: '#e2e8f0', alignItems: 'flex-start', shadowColor: '#0f172a', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.06, shadowRadius: 18, elevation: 3 },
+  ecoLabel: { fontSize: 16, fontWeight: '800', color: '#0f172a' },
 
   // Rewards
   rewardsVisualRow: { flexDirection: 'row', alignItems: 'center', gap: 24, marginBottom: 8 },
@@ -566,7 +581,7 @@ const s = StyleSheet.create({
   footerContent: { flexDirection: 'row', gap: 32, paddingBottom: 40 },
   footerBrand: { flex: 1.2 },
   footerLogoRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
-  footerLogoImg: { width: 170, height: 80 },
+  footerLogoImg: { width: 220, height: 104 },
   footerDesc: { color: '#94a3b8', fontSize: 14, fontWeight: '500', lineHeight: 22, maxWidth: 320 },
   footerLinksRow: { flex: 2, flexDirection: 'row', justifyContent: 'space-between' },
   footerLinks: { gap: 12, flex: 1 },
