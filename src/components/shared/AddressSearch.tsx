@@ -5,11 +5,10 @@ import {
   StatusBar, Platform, KeyboardAvoidingView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { MapPin, ArrowLeft, Navigation2, Home, Briefcase, MapPinned, Pencil } from 'lucide-react-native';
+import { MapPin, ArrowLeft, Navigation2, Home, Briefcase, MapPinned, Pencil, X } from 'lucide-react-native';
 import * as Location from 'expo-location';
 import { mapService, MapSuggestion } from '../../services/mapService';
 import { MapPicker } from './MapPicker';
-import { showAlert } from '../../utils/alert';
 
 export interface AddressDetails {
   houseNo: string;
@@ -81,6 +80,7 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
   const [receiverName, setReceiverName] = useState('');
   const [receiverPhone, setReceiverPhone] = useState('');
   const [label, setLabel] = useState('Home');
+  const [toast, setToast] = useState<string | null>(null);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const geocodeDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -111,6 +111,7 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
       setQuery('');
       setSuggestions([]);
       setError(null);
+      setToast(null);
       setHouseNo(initialDetails?.houseNo || '');
       setBuilding(initialDetails?.building || '');
       setLandmark(initialDetails?.landmark || '');
@@ -216,15 +217,15 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
   const handleSaveDetails = () => {
     if (!resolvedCoords) return;
     if (!houseNo.trim()) {
-      showAlert('Missing details', 'Please enter your house / flat number.');
+      setToast('Please enter your house / flat number');
       return;
     }
     if (!receiverName.trim()) {
-      showAlert('Missing details', 'Please enter the receiver name.');
+      setToast('Please enter the receiver name');
       return;
     }
     if (!/^[6-9]\d{9}$/.test(receiverPhone.trim())) {
-      showAlert('Invalid phone', 'Please enter a valid 10-digit receiver mobile number.');
+      setToast('Please enter a valid 10-digit receiver mobile number');
       return;
     }
     const fullAddress = composeFullAddress(houseNo, building, resolvedAddress, landmark, receiverName, receiverPhone);
@@ -301,6 +302,19 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
               <Text style={styles.confirmBtnText}>Save address</Text>
             </TouchableOpacity>
           </SafeAreaView>
+
+          {/* Centered dismissible validation toast (in-app, not a browser alert) */}
+          {!!toast && (
+            <View style={styles.toastOverlay} pointerEvents="box-none">
+              <View style={styles.toastCard}>
+                <View style={styles.toastIcon}><Text style={styles.toastIconText}>!</Text></View>
+                <Text style={styles.toastText}>{toast}</Text>
+                <TouchableOpacity onPress={() => setToast(null)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                  <X size={18} color="#94a3b8" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
         </KeyboardAvoidingView>
       </Modal>
     );
@@ -532,6 +546,12 @@ const styles = StyleSheet.create({
   confirmBtn: { backgroundColor: '#16a34a', borderRadius: 14, paddingVertical: 15, alignItems: 'center' },
   confirmBtnDisabled: { backgroundColor: '#a7d7b8' },
   confirmBtnText: { color: 'white', fontSize: 15, fontWeight: '800' },
+
+  toastOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 },
+  toastCard: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: 'white', borderRadius: 16, paddingVertical: 16, paddingHorizontal: 18, maxWidth: 420, width: '100%', borderWidth: 1, borderColor: '#fecaca', shadowColor: '#000', shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.18, shadowRadius: 28, elevation: 12 },
+  toastIcon: { width: 30, height: 30, borderRadius: 15, backgroundColor: '#fee2e2', alignItems: 'center', justifyContent: 'center' },
+  toastIconText: { color: '#dc2626', fontSize: 17, fontWeight: '900' },
+  toastText: { flex: 1, color: '#0f172a', fontSize: 14, fontWeight: '600', lineHeight: 20 },
 
   // Details form
   detailsScroll: { padding: 20, paddingBottom: 32, maxWidth: 640, width: '100%', alignSelf: 'center' },
