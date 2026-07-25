@@ -171,7 +171,7 @@ export function DashboardScreen({ navigation }: any) {
             {isMobile ? (
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
                 {[
-                  { icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total Karma Coins (KC)' },
+                  { icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total Karma Coins' },
                   { icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Day streak' },
                   { icon: Trophy, color: '#c084fc', val: `${quizStreak}`, label: 'Eco Quiz Streak' },
                   { icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Sustainability Actions' },
@@ -190,7 +190,7 @@ export function DashboardScreen({ navigation }: any) {
             ) : (
               <View style={z.heroRight}>
                 {[
-                  { icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total Karma Coins (KC)' },
+                  { icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total Karma Coins' },
                   { icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Day streak' },
                   { icon: Trophy, color: '#c084fc', val: `${quizStreak}`, label: 'Eco Quiz Streak' },
                   { icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Sustainability Actions' },
