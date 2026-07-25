@@ -117,7 +117,7 @@ export function OrdersScreen({ navigation }: any) {
               style={[styles.tabBtn, activeTab === 'Active' && styles.tabBtnActive]}
               onPress={() => setActiveTab('Active')}
             >
-              <Text style={[styles.tabText, activeTab === 'Active' && styles.tabTextActive]}>Active pickups</Text>
+              <Text style={[styles.tabText, activeTab === 'Active' && styles.tabTextActive]}>Active</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.tabBtn, activeTab === 'History' && styles.tabBtnActive]}
