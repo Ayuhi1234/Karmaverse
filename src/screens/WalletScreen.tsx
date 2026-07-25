@@ -83,8 +83,10 @@ export function WalletScreen({ navigation }: any) {
             </View>
             <View style={styles.balanceRow}>
               <KarmaCoin size={44} glow animated />
-              <Text style={styles.balanceText}>{lifetime.toLocaleString()}</Text>
-              <Text style={styles.unitTag}>KarmaCoins XP</Text>
+              <View>
+                <Text style={styles.balanceText}>{lifetime.toLocaleString()}</Text>
+                <Text style={styles.unitTag}>KarmaCoins XP</Text>
+              </View>
             </View>
             <View style={styles.cardDivider} />
             <View style={styles.redeemableRow}>
@@ -93,7 +95,6 @@ export function WalletScreen({ navigation }: any) {
                 <View style={styles.redeemableValueRow}>
                   <KarmaCoin size={18} />
                   <Text style={styles.redeemableValue}>{balance.toLocaleString()}</Text>
-                  <Text style={styles.unitTagSm}>KarmaCoins XP</Text>
                 </View>
               </View>
               <Text style={styles.cardSub}>≈ ₹{(balance * 0.1).toFixed(0)} value</Text>
@@ -204,12 +205,11 @@ const styles = StyleSheet.create({
   },
   cardTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
   cardLabel: { color: 'rgba(255,255,255,0.6)', fontSize: 13, fontWeight: '700', letterSpacing: 0.3 },
-  unitTag: { color: 'rgba(255,255,255,0.55)', fontSize: 13, fontWeight: '700', marginBottom: 6, alignSelf: 'flex-end' },
-  unitTagSm: { color: 'rgba(255,255,255,0.45)', fontSize: 11, fontWeight: '600' },
+  unitTag: { color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: '600', letterSpacing: 0.3, marginTop: -2 },
   activeTag: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.12)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20, gap: 6 },
   activeDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#86efac' },
   activeText: { color: 'white', fontSize: 10, fontWeight: '700' },
-  balanceRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  balanceRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   balanceText: { fontSize: 44, fontWeight: '900', color: 'white', letterSpacing: -1 },
   cardDivider: { height: 1, backgroundColor: 'rgba(255,255,255,0.12)', marginVertical: 14 },
   cardSub: { color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: '600' },
