@@ -15,7 +15,7 @@ const FALLBACK = {
   id: 'KC12345',
   status: 'COMPLETED',
   address: 'Green Park Society, Sector 16, Noida, UP 201301',
-  wasteType: 'Mixed Waste',
+  wasteType: 'Mixed items',
   estWeight: '2.5 kg',
   estCoins: 45,
   agent: { name: 'Ravi Kumar', rating: 4.8, initials: 'RK', phone: '+91 98765 43210' },
@@ -116,7 +116,7 @@ export function BookingDetailsScreen({ navigation, route }: any) {
           {/* Details Grid */}
           <View style={styles.detailsGrid}>
             <View style={styles.gridItem}>
-              <Text style={styles.gridLabel}>Waste Type</Text>
+              <Text style={styles.gridLabel}>Item type</Text>
               <Text style={styles.gridValue}>{booking.wasteType}</Text>
             </View>
             <View style={styles.gridItem}>

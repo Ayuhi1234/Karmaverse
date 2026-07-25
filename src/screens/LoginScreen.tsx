@@ -1218,7 +1218,7 @@ export function LoginScreen({ navigation }: any) {
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={{ fontSize: 13, fontWeight: '800', color: '#064e3b' }}>Schedule your first pickup</Text>
-                <Text style={{ fontSize: 11, color: '#64748b', fontWeight: '500' }}>Recycle waste & earn even more coins</Text>
+                <Text style={{ fontSize: 11, color: '#64748b', fontWeight: '500' }}>Recycle & earn even more coins</Text>
               </View>
             </View>
           </View>

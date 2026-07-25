@@ -63,7 +63,7 @@ export function OrdersScreen({ navigation }: any) {
     const dateObj = new Date(order.pickupDate);
     const dateStr = dateObj.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
 
-    const mainCategory = order.categories?.[0]?.subCategory || order.categories?.[0]?.category || 'Mixed Waste';
+    const mainCategory = order.categories?.[0]?.subCategory || order.categories?.[0]?.category || 'Mixed items';
     const typeLabel = order.categories?.length > 1 ? `${mainCategory} +${order.categories.length - 1}` : mainCategory;
 
     const rawId = order._id || order.id || '00000000';

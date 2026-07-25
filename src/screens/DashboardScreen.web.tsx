@@ -32,7 +32,7 @@ const FEATURE_DETAILS = [
   },
   {
     id: 'knowledge', title: 'Knowledge hub', emoji: '📚',
-    desc: 'Learn about sustainable living with curated articles, tips, and guides on waste management and recycling.',
+    desc: 'Learn about sustainable living with curated articles, tips, and guides on recycling and the circular economy.',
     steps: ['Browse eco articles', 'Learn recycling tips', 'Share with friends', 'Make better choices'],
     benefit: 'Become an eco expert',
     gradient: ['#164e63', '#0891b2'] as [string, string],
@@ -48,7 +48,7 @@ const FEATURE_DETAILS = [
   },
   {
     id: 'instant', title: 'Instant credit', emoji: '⚡',
-    desc: 'No waiting — KarmaCoins XP are credited to your wallet immediately after the agent verifies and collects your waste.',
+    desc: 'No waiting — KarmaCoins XP are credited to your wallet immediately after the agent verifies and collects your recyclables.',
     steps: ['Agent weighs items at door', 'Verification done on spot', 'Coins added instantly', 'Check wallet in real-time'],
     benefit: 'Zero wait for rewards',
     gradient: ['#312e81', '#4f46e5'] as [string, string],
@@ -100,7 +100,7 @@ export function DashboardScreen({ navigation }: any) {
           if (o.status === 'COMPLETED') st = 'Completed';
           if (o.status === 'IN_TRANSIT' || o.status === 'ACCEPTED') st = 'In Transit';
           if (o.status === 'CANCELLED') st = 'Cancelled';
-          const cat = o.categories?.[0]?.subCategory || o.categories?.[0]?.category || 'Mixed Waste';
+          const cat = o.categories?.[0]?.subCategory || o.categories?.[0]?.category || 'Mixed items';
           const date = new Date(o.pickupDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
           return { id: `#${(o._id || o.id || '').substring(0, 8).toUpperCase()}`, type: cat, date, status: st, credits: o.totalKarmaCoins || 0, raw: o };
         }));
