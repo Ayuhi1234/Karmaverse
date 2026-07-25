@@ -75,7 +75,7 @@ export function WalletScreen({ navigation }: any) {
           {/* Balance card */}
           <View style={styles.balanceCard}>
             <View style={styles.cardTopRow}>
-              <Text style={styles.cardLabel}>TOTAL KARMACOINS XP EARNED</Text>
+              <Text style={styles.cardLabel}>Total earned</Text>
               <View style={styles.activeTag}>
                 <View style={styles.activeDot} />
                 <Text style={styles.activeText}>Active</Text>
@@ -84,14 +84,16 @@ export function WalletScreen({ navigation }: any) {
             <View style={styles.balanceRow}>
               <KarmaCoin size={44} glow animated />
               <Text style={styles.balanceText}>{lifetime.toLocaleString()}</Text>
+              <Text style={styles.unitTag}>KarmaCoins XP</Text>
             </View>
             <View style={styles.cardDivider} />
             <View style={styles.redeemableRow}>
               <View>
-                <Text style={styles.redeemableLabel}>REDEEMABLE KARMACOINS XP</Text>
+                <Text style={styles.redeemableLabel}>Available to redeem</Text>
                 <View style={styles.redeemableValueRow}>
                   <KarmaCoin size={18} />
                   <Text style={styles.redeemableValue}>{balance.toLocaleString()}</Text>
+                  <Text style={styles.unitTagSm}>KarmaCoins XP</Text>
                 </View>
               </View>
               <Text style={styles.cardSub}>≈ ₹{(balance * 0.1).toFixed(0)} value</Text>
@@ -201,7 +203,9 @@ const styles = StyleSheet.create({
     maxWidth: 800, width: '100%', alignSelf: 'center',
   },
   cardTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
-  cardLabel: { color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: '800', letterSpacing: 1.2 },
+  cardLabel: { color: 'rgba(255,255,255,0.6)', fontSize: 13, fontWeight: '700', letterSpacing: 0.3 },
+  unitTag: { color: 'rgba(255,255,255,0.55)', fontSize: 13, fontWeight: '700', marginBottom: 6, alignSelf: 'flex-end' },
+  unitTagSm: { color: 'rgba(255,255,255,0.45)', fontSize: 11, fontWeight: '600' },
   activeTag: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.12)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20, gap: 6 },
   activeDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#86efac' },
   activeText: { color: 'white', fontSize: 10, fontWeight: '700' },
@@ -210,7 +214,7 @@ const styles = StyleSheet.create({
   cardDivider: { height: 1, backgroundColor: 'rgba(255,255,255,0.12)', marginVertical: 14 },
   cardSub: { color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: '600' },
   redeemableRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
-  redeemableLabel: { color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: '800', letterSpacing: 1.2, marginBottom: 6 },
+  redeemableLabel: { color: 'rgba(255,255,255,0.6)', fontSize: 12, fontWeight: '700', letterSpacing: 0.3, marginBottom: 6 },
   redeemableValueRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   redeemableValue: { color: 'white', fontSize: 22, fontWeight: '900', letterSpacing: -0.5 },
 
