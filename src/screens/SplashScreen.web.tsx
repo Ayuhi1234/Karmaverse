@@ -312,7 +312,7 @@ export function SplashScreen({ navigation, route }: any) {
               ].map((eco, i) => (
                 <Card key={i} delay={i * 50} style={[s.ecoCard, { width: isMobile ? '47%' : '22%', flexGrow: 1 }]}>
                   <View style={[s.featIconBg, { backgroundColor: eco.color + '15' }]}>
-                    <eco.icon size={20} color={eco.color} />
+                    <eco.icon size={24} color={eco.color} />
                   </View>
                   <Text style={s.ecoLabel}>{eco.label}</Text>
                 </Card>
@@ -365,16 +365,16 @@ export function SplashScreen({ navigation, route }: any) {
 
             <View style={[s.featGrid, { marginTop: 28 }, isMobile && { flexDirection: 'column' }]}>
               {[
-                { icon: Leaf, color: '#16a34a', title: 'Eco products', desc: 'Sustainable goods for everyday life.' },
-                { icon: Gift, color: '#e11d48', title: 'Gift cards', desc: 'Vouchers from your favourite brands.' },
-                { icon: Percent, color: '#0891b2', title: 'Shopping discounts', desc: 'Save on the things you already buy.' },
-                { icon: Sparkles, color: '#d97706', title: 'Exclusive experiences', desc: 'Unlock experiences money can\'t buy.' },
-                { icon: Handshake, color: '#7c3aed', title: 'Partner rewards', desc: 'Curated offers from our brand partners.' },
-                { icon: Sprout, color: '#059669', title: 'Tree plantation', desc: 'Turn coins into real trees planted.' },
+                { icon: Leaf, color: '#16a34a', title: 'Green Store', desc: 'Sustainable goods that give back to the planet.' },
+                { icon: Gift, color: '#e11d48', title: 'Eco Gift Cards', desc: 'Green vouchers from your favourite brands.' },
+                { icon: Percent, color: '#0891b2', title: 'Conscious Savings', desc: 'Save on the everyday things you already buy.' },
+                { icon: Sparkles, color: '#d97706', title: 'Eco Experiences', desc: 'Unlock green experiences money can\'t buy.' },
+                { icon: Handshake, color: '#7c3aed', title: 'Impact Partners', desc: 'Curated offers from our sustainable partners.' },
+                { icon: Sprout, color: '#059669', title: 'Plant a Tree', desc: 'Convert coins into real trees, real impact.' },
               ].map((r, i) => (
                 <Card key={i} delay={i * 70} style={[s.featCard, { width: isMobile ? '100%' : '31%' }]}>
                   <View style={[s.featIconBg, { backgroundColor: r.color + '15' }]}>
-                    <r.icon size={22} color={r.color} />
+                    <r.icon size={26} color={r.color} />
                   </View>
                   <Text style={s.featTitle}>{r.title}</Text>
                   <Text style={s.featDesc}>{r.desc}</Text>
@@ -404,7 +404,7 @@ export function SplashScreen({ navigation, route }: any) {
               ].map((l, i) => (
                 <Card key={i} delay={i * 60} style={[s.featCard, { width: isMobile ? '100%' : '22%' }]}>
                   <View style={[s.featIconBg, { backgroundColor: l.color + '15' }]}>
-                    <l.icon size={22} color={l.color} />
+                    <l.icon size={26} color={l.color} />
                   </View>
                   <Text style={s.featTitle}>{l.title}</Text>
                   <Text style={s.featDesc}>{l.desc}</Text>
@@ -553,10 +553,10 @@ const s = StyleSheet.create({
 
   // Generic card grid — reused for Rewards and Learning
   featGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 16 },
-  featCard: { backgroundColor: 'white', borderRadius: 18, padding: 24, borderWidth: 1, borderColor: '#e2e8f0' },
-  featIconBg: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginBottom: 14 },
-  featTitle: { fontSize: 16, fontWeight: '800', color: '#0f172a', marginBottom: 6 },
-  featDesc: { fontSize: 13, color: '#64748b', fontWeight: '500', lineHeight: 20 },
+  featCard: { backgroundColor: 'white', borderRadius: 18, padding: 26, borderWidth: 1, borderColor: '#e2e8f0', shadowColor: '#0f172a', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.06, shadowRadius: 18, elevation: 3 },
+  featIconBg: { width: 54, height: 54, borderRadius: 15, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
+  featTitle: { fontSize: 20, fontWeight: '800', color: '#0f172a', marginBottom: 7 },
+  featDesc: { fontSize: 14.5, color: '#64748b', fontWeight: '500', lineHeight: 22 },
 
   // Ecosystem chips (icon + label only)
   ecoCard: { backgroundColor: 'white', borderRadius: 16, padding: 18, borderWidth: 1, borderColor: '#e2e8f0', alignItems: 'flex-start' },
