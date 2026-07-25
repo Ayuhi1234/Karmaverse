@@ -28,7 +28,7 @@ export function WebFooter() {
           {/* About */}
           <View style={[s.col, isMobile && { flex: undefined }]}>
             <View style={s.logoRow}>
-              <Image source={require('../../../assets/logo-nav.png')} style={{ height: 52, width: 110, resizeMode: 'contain' }} />
+              <Image source={require('../../../assets/logo-nav.png')} style={{ height: 68, width: 144, resizeMode: 'contain' }} />
             </View>
             <Text style={s.aboutText}>
               India's rewarding recycling platform. Turn your waste into KarmaCoins XP — schedule free doorstep pickups and earn rewards for every kg recycled.
@@ -85,7 +85,7 @@ export function WebFooter() {
                 <View style={s.contactRow}>
                   <MapPin size={14} color="#94a3b8" />
                   <Text style={s.contactText}>PLOT 62, Sector 8, Imt Manesar, Gurugram, Haryana 122503</Text>
-                </View>
+                                                                                                                                                                                    </View>
               </View>
             </>
           )}

@@ -566,7 +566,7 @@ const s = StyleSheet.create({
   footerContent: { flexDirection: 'row', gap: 32, paddingBottom: 40 },
   footerBrand: { flex: 1.2 },
   footerLogoRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
-  footerLogoImg: { width: 170, height: 80 },
+  footerLogoImg: { width: 220, height: 104 },
   footerDesc: { color: '#94a3b8', fontSize: 14, fontWeight: '500', lineHeight: 22, maxWidth: 320 },
   footerLinksRow: { flex: 2, flexDirection: 'row', justifyContent: 'space-between' },
   footerLinks: { gap: 12, flex: 1 },
