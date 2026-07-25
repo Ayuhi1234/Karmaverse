@@ -460,7 +460,7 @@ export function SchedulePickupScreen({ navigation }: any) {
       <View style={styles.successContainer}>
         <CheckCircle2 size={100} color="#16a34a" />
         <Text style={styles.successTitle}>Pickup scheduled!</Text>
-        <Text style={styles.successSub}>Thank you for recycling {cartCalculations.totalItems} items.</Text>
+        <Text style={styles.successSub}>Thank you for recycling {cartCalculations.totalItems} {cartCalculations.totalItems === 1 ? 'item' : 'items'}.</Text>
       </View>
     );
   }
@@ -557,7 +557,7 @@ export function SchedulePickupScreen({ navigation }: any) {
       {cartCalculations.totalItems > 0 && (
         <View style={styles.floatingCart}>
           <View style={styles.cartInfo}>
-            <Text style={styles.cartItemText}>{cartCalculations.totalItems} items added</Text>
+            <Text style={styles.cartItemText}>{cartCalculations.totalItems} {cartCalculations.totalItems === 1 ? 'item' : 'items'} added</Text>
             <View style={{flexDirection: 'row', alignItems: 'center', gap: 4}}>
               <Text style={styles.cartRewardText}>Est. Reward: +{cartCalculations.totalCoins}</Text>
               <KarmaCoin size={12} />
@@ -690,7 +690,7 @@ export function SchedulePickupScreen({ navigation }: any) {
             <KarmaCoin size={24} />
             <Text style={styles.estimateValue}>+{cartCalculations.totalCoins}</Text>
           </View>
-          <Text style={styles.estimateNote}>For {cartCalculations.totalItems} items. Final value credited after verification.</Text>
+          <Text style={styles.estimateNote}>For {cartCalculations.totalItems} {cartCalculations.totalItems === 1 ? 'item' : 'items'}. Final value credited after verification.</Text>
         </View>
         <View style={styles.estimateBigCoin}><KarmaCoin size={60} glow /></View>
       </View>
