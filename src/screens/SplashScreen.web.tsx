@@ -279,9 +279,9 @@ export function SplashScreen({ navigation, route }: any) {
             {/* Highlights: Act → Earn → Redeem */}
             <View style={[s.heroHighlightsRow, isMobile && { flexDirection: 'column' }]}>
               {[
-                { icon: Sprout, title: 'Sustainable actions', desc: 'Complete meaningful eco-friendly activities every day.' },
-                { icon: Coins, title: 'Earn KarmaCoins', desc: 'Receive rewards for every verified sustainable contribution.' },
-                { icon: Gift, title: 'Redeem rewards', desc: 'Exchange KarmaCoins for products, discounts & experiences.' },
+                { icon: Sprout, title: 'Sustainable actions', desc: 'Complete meaningful eco-friendly activities every day' },
+                { icon: Coins, title: 'Earn KarmaCoins', desc: 'Receive rewards for every verified sustainable contribution' },
+                { icon: Gift, title: 'Redeem rewards', desc: 'Exchange KarmaCoins for products, discounts & experiences' },
               ].map((h, i) => (
                 <View key={i} style={s.heroHighlightCard}>
                   <View style={s.heroHighlightIconBg}><h.icon size={18} color="#4ade80" /></View>
