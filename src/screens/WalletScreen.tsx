@@ -106,7 +106,11 @@ export function WalletScreen({ navigation }: any) {
             <ArrowUpRight size={18} color="#d97706" />
             <Text style={[styles.actionLabel, { color: '#d97706' }]}>Transfer</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.actionBtn, styles.actionBtnRed]} onPress={showWithdrawInfo} activeOpacity={0.8}>
+          <TouchableOpacity
+            style={[styles.actionBtn, styles.actionBtnRed]}
+            onPress={() => navigation.navigate('Donation', { balance })}
+            activeOpacity={0.8}
+          >
             <Heart size={18} color="#e11d48" />
             <Text style={[styles.actionLabel, { color: '#e11d48' }]}>Donate</Text>
           </TouchableOpacity>

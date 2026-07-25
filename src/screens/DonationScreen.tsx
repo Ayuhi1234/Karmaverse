@@ -1,0 +1,174 @@
+import React, { useEffect, useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, StatusBar, SafeAreaView } from 'react-native';
+import { ChevronLeft, HeartHandshake, TreePine, Monitor, Laptop } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { KarmaCoin } from '../components/shared/KarmaCoin';
+import { profileService } from '../services/profile';
+import { showAlert } from '../utils/alert';
+
+// UI-only for now — no backend donation endpoint exists yet. Wire this up to a real
+// API (deduct coins, record the donation) once the backend contract is available.
+const DONATION_OPTIONS = [
+  {
+    id: 'tree',
+    icon: TreePine,
+    title: 'Plant One Tree',
+    desc: 'Fund a sapling planted and maintained by the foundation.',
+    coins: 2000,
+    color: '#16a34a',
+    bg: '#f0fdf4',
+  },
+  {
+    id: 'computer',
+    icon: Monitor,
+    title: 'Computer Donation',
+    desc: 'Refurbish and gift a computer to a student in need.',
+    coins: 100000,
+    color: '#0ea5e9',
+    bg: '#f0f9ff',
+  },
+  {
+    id: 'laptop',
+    icon: Laptop,
+    title: 'Laptop Donation',
+    desc: 'Refurbish and gift a laptop to a student in need.',
+    coins: 50000,
+    color: '#8b5cf6',
+    bg: '#faf5ff',
+  },
+];
+
+export function DonationScreen({ navigation, route }: any) {
+  const [balance, setBalance] = useState<number>(route?.params?.balance || 0);
+
+  useEffect(() => {
+    profileService.getProfile()
+      .then((profile) => setBalance(profile.karmaCoins || profile.coins || 0))
+      .catch(() => {});
+  }, []);
+
+  const handleDonate = (option: typeof DONATION_OPTIONS[number]) => {
+    showAlert(
+      '🌱 Donations opening soon!',
+      `Thanks for wanting to support the 3R Waste Foundation. The "${option.title}" donation will be live shortly — check back soon!`
+    );
+  };
+
+  return (
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#064e3b" />
+      <View style={styles.topNotchFiller} />
+
+      <LinearGradient colors={['#064e3b', '#15803d']} style={styles.header}>
+        <SafeAreaView>
+          <View style={styles.headerRow}>
+            <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+              <ChevronLeft size={22} color="white" />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Donate</Text>
+            <View style={{ width: 36 }} />
+          </View>
+
+          <View style={styles.balancePill}>
+            <KarmaCoin size={22} />
+            <Text style={styles.balanceText}>{balance.toLocaleString()} available</Text>
+          </View>
+        </SafeAreaView>
+      </LinearGradient>
+
+      <ScrollView style={styles.scroll} contentContainerStyle={{ paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+
+          {/* Foundation branding */}
+          <View style={styles.foundationCard}>
+            <View style={styles.foundationIconBg}>
+              <HeartHandshake size={26} color="#15803d" />
+            </View>
+            <Text style={styles.foundationLabel}>IN PARTNERSHIP WITH</Text>
+            <Text style={styles.foundationName}>3R Waste Foundation</Text>
+            <Text style={styles.foundationDesc}>
+              Every donation goes directly to the 3R Waste Foundation, supporting environmental and
+              community welfare initiatives.
+            </Text>
+          </View>
+
+          <Text style={styles.sectionTitle}>Choose a donation</Text>
+
+          {DONATION_OPTIONS.map((option) => {
+            const Icon = option.icon;
+            const canAfford = balance >= option.coins;
+            return (
+              <View key={option.id} style={styles.optionCard}>
+                <View style={[styles.optionIconBg, { backgroundColor: option.bg }]}>
+                  <Icon size={22} color={option.color} />
+                </View>
+                <View style={styles.optionInfo}>
+                  <Text style={styles.optionTitle}>{option.title}</Text>
+                  <Text style={styles.optionDesc}>{option.desc}</Text>
+                  <View style={styles.optionCoinRow}>
+                    <KarmaCoin size={16} />
+                    <Text style={styles.optionCoinText}>{option.coins.toLocaleString()} KC</Text>
+                  </View>
+                </View>
+                <TouchableOpacity
+                  style={[styles.donateBtn, !canAfford && styles.donateBtnDisabled]}
+                  onPress={() => handleDonate(option)}
+                  activeOpacity={0.8}
+                >
+                  <Text style={[styles.donateBtnText, !canAfford && styles.donateBtnTextDisabled]}>Donate</Text>
+                </TouchableOpacity>
+              </View>
+            );
+          })}
+        </View>
+      </ScrollView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#f4f4f5' },
+  topNotchFiller: { position: 'absolute', top: 0, left: 0, right: 0, height: 60, backgroundColor: '#064e3b' },
+  scroll: { flex: 1 },
+
+  header: { paddingBottom: 20 },
+  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 10, maxWidth: 800, width: '100%', alignSelf: 'center' },
+  backBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },
+  headerTitle: { fontSize: 20, fontWeight: '900', color: 'white', textAlign: 'center' },
+
+  balancePill: {
+    flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'center',
+    backgroundColor: 'rgba(255,255,255,0.12)', borderRadius: 100, paddingHorizontal: 16, paddingVertical: 8, marginTop: 16,
+  },
+  balanceText: { color: 'white', fontWeight: '800', fontSize: 13 },
+
+  content: { padding: 20, maxWidth: 800, width: '100%', alignSelf: 'center' },
+
+  foundationCard: {
+    backgroundColor: 'white', borderRadius: 20, padding: 22, alignItems: 'center',
+    borderWidth: 1, borderColor: '#e2e8f0', marginBottom: 28,
+  },
+  foundationIconBg: { width: 52, height: 52, borderRadius: 26, backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
+  foundationLabel: { fontSize: 11, fontWeight: '800', color: '#94a3b8', letterSpacing: 1.2, marginBottom: 4 },
+  foundationName: { fontSize: 18, fontWeight: '900', color: '#0f172a', marginBottom: 8 },
+  foundationDesc: { fontSize: 13, color: '#64748b', textAlign: 'center', lineHeight: 20, fontWeight: '500' },
+
+  sectionTitle: { fontSize: 15, fontWeight: '800', color: '#0f172a', marginBottom: 14 },
+
+  optionCard: {
+    flexDirection: 'row', alignItems: 'center', backgroundColor: 'white', borderRadius: 18,
+    padding: 16, marginBottom: 12, borderWidth: 1, borderColor: '#f1f5f9',
+    elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8,
+  },
+  optionIconBg: { width: 46, height: 46, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  optionInfo: { flex: 1, marginLeft: 12, marginRight: 10 },
+  optionTitle: { fontSize: 14, fontWeight: '800', color: '#0f172a', marginBottom: 3 },
+  optionDesc: { fontSize: 12, color: '#64748b', fontWeight: '500', marginBottom: 6, lineHeight: 16 },
+  optionCoinRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  optionCoinText: { fontSize: 12, fontWeight: '800', color: '#15803d' },
+
+  donateBtn: { backgroundColor: '#15803d', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 100 },
+  donateBtnDisabled: { backgroundColor: '#f1f5f9' },
+  donateBtnText: { color: 'white', fontWeight: '800', fontSize: 12 },
+  donateBtnTextDisabled: { color: '#94a3b8' },
+});
