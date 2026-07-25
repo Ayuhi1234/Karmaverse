@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Share, ActivityIndicator, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Share, ActivityIndicator, StatusBar, Platform, Modal, Linking } from 'react-native';
 import { showAlert } from '../utils/alert';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ChevronLeft, Share2, Copy, Users, Gift, CheckCircle2, Clock } from 'lucide-react-native';
+import { ChevronLeft, Share2, Copy, Users, Gift, CheckCircle2, Clock, X, MessageCircle, Linkedin, Facebook, Twitter, Instagram, Mail, Link2 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { referralService } from '../services/referral';
@@ -14,6 +14,37 @@ export function ReferralScreen({ navigation }: any) {
   const [totalEarned, setTotalEarned] = useState(0);
   const [referrals, setReferrals] = useState<any[]>([]);
   const [copied, setCopied] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+
+  const shareUrl = `https://karmaverse.earth/?ref=${referralCode}`;
+  const shareMsg = `Join KarmaVer$e and we both earn 1,000 KarmaCoins XP! 🌱 Use my referral code ${referralCode}`;
+
+  const copyLink = () => {
+    const text = `${shareMsg} ${shareUrl}`;
+    const nav: any = typeof navigator !== 'undefined' ? navigator : null;
+    if (nav?.clipboard?.writeText) nav.clipboard.writeText(text);
+    else Share.share({ message: text }).catch(() => {});
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const SHARE_TARGETS = [
+    { key: 'whatsapp', label: 'WhatsApp', icon: MessageCircle, color: '#25D366', url: `https://wa.me/?text=${encodeURIComponent(shareMsg + ' ' + shareUrl)}` },
+    { key: 'linkedin', label: 'LinkedIn', icon: Linkedin, color: '#0A66C2', url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}` },
+    { key: 'facebook', label: 'Facebook', icon: Facebook, color: '#1877F2', url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}` },
+    { key: 'x', label: 'X', icon: Twitter, color: '#0f172a', url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareMsg)}&url=${encodeURIComponent(shareUrl)}` },
+    { key: 'email', label: 'Email', icon: Mail, color: '#ea4335', url: `mailto:?subject=${encodeURIComponent('Join KarmaVer$e')}&body=${encodeURIComponent(shareMsg + '\n\n' + shareUrl)}` },
+    { key: 'instagram', label: 'Instagram', icon: Instagram, color: '#E4405F', url: '' },
+    { key: 'copy', label: 'Copy link', icon: Link2, color: '#16a34a', url: '' },
+  ];
+
+  const openTarget = (t: typeof SHARE_TARGETS[number]) => {
+    setShareOpen(false);
+    if (t.key === 'copy') { copyLink(); showAlert('Link copied', 'Your referral link is copied — paste it anywhere!'); return; }
+    if (t.key === 'instagram') { copyLink(); showAlert('Link copied', 'Instagram has no direct share — paste the copied link in your story or DM'); return; }
+    if (Platform.OS === 'web') { (window as any).open(t.url, '_blank'); }
+    else Linking.openURL(t.url).catch(() => {});
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -39,20 +70,30 @@ export function ReferralScreen({ navigation }: any) {
 
   const handleCopy = async () => {
     if (!referralCode) return;
-    // Use native Share as copy — works on all platforms without extra packages
-    try {
-      await Share.share({ message: referralCode });
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (_) {}
+    const nav: any = typeof navigator !== 'undefined' ? navigator : null;
+    if (nav?.clipboard?.writeText) {
+      nav.clipboard.writeText(referralCode).catch(() => {});
+    } else {
+      try { await Share.share({ message: referralCode }); } catch (_) {}
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const handleShare = async () => {
     if (!referralCode) return;
+    // Mobile browsers + native: use the OS share sheet. Desktop web: open our
+    // own menu with direct links to each app (WhatsApp, LinkedIn, FB, X, etc).
+    if (Platform.OS === 'web') {
+      const nav: any = typeof navigator !== 'undefined' ? navigator : null;
+      if (nav?.share) {
+        try { await nav.share({ title: 'KarmaVer$e', text: shareMsg, url: shareUrl }); return; } catch (_) { /* fall through */ }
+      }
+      setShareOpen(true);
+      return;
+    }
     try {
-      await Share.share({
-        message: `Join KarmaVer$e and we both get 1,000 KarmaCoins XP! 🌱\n\nUse my referral code: ${referralCode}\nOr tap the link: karmacoin://r/${referralCode}\n\nDownload the app and start recycling for rewards!`,
-      });
+      await Share.share({ message: `${shareMsg}\n${shareUrl}` });
     } catch (_) {}
   };
 
@@ -187,11 +228,44 @@ export function ReferralScreen({ navigation }: any) {
 
         </ScrollView>
       </SafeAreaView>
+
+      {/* Share menu (desktop web / no native share) */}
+      <Modal visible={shareOpen} transparent animationType="fade" onRequestClose={() => setShareOpen(false)}>
+        <TouchableOpacity style={styles.shareBackdrop} activeOpacity={1} onPress={() => setShareOpen(false)}>
+          <TouchableOpacity style={styles.shareSheet} activeOpacity={1} onPress={() => {}}>
+            <View style={styles.shareHeader}>
+              <Text style={styles.shareTitle}>Share your code</Text>
+              <TouchableOpacity onPress={() => setShareOpen(false)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                <X size={20} color="#64748b" />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.shareGrid}>
+              {SHARE_TARGETS.map((t) => (
+                <TouchableOpacity key={t.key} style={styles.shareOption} onPress={() => openTarget(t)} activeOpacity={0.8}>
+                  <View style={[styles.shareOptionIcon, { backgroundColor: t.color }]}>
+                    <t.icon size={22} color="#fff" />
+                  </View>
+                  <Text style={styles.shareOptionLabel}>{t.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  shareBackdrop: { flex: 1, backgroundColor: 'rgba(15,23,42,0.5)', alignItems: 'center', justifyContent: 'center', padding: 20 },
+  shareSheet: { backgroundColor: 'white', borderRadius: 24, padding: 22, width: '100%', maxWidth: 420, shadowColor: '#000', shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.2, shadowRadius: 30, elevation: 12 },
+  shareHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 },
+  shareTitle: { fontSize: 18, fontWeight: '800', color: '#0f172a' },
+  shareGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8 },
+  shareOption: { width: 84, alignItems: 'center', paddingVertical: 10, gap: 8 },
+  shareOptionIcon: { width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center' },
+  shareOptionLabel: { fontSize: 12, fontWeight: '600', color: '#475569' },
+
   rootContainer: { flex: 1, backgroundColor: '#7e22ce' },
   scrollBg: { flex: 1, backgroundColor: '#f8fafc' },
   topNotchFiller: { position: 'absolute', top: 0, left: 0, right: 0, height: 60, backgroundColor: '#7e22ce' },
