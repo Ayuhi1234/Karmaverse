@@ -544,12 +544,12 @@ const s = StyleSheet.create({
 
   // Steps
   stepsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 20 },
-  stepCard: { flex: 1, backgroundColor: 'white', borderRadius: 20, padding: 28, borderWidth: 1, borderColor: '#f1f5f9', position: 'relative' },
-  stepIconBg: { width: 56, height: 56, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginBottom: 18 },
+  stepCard: { flex: 1, backgroundColor: 'white', borderRadius: 20, padding: 26, borderWidth: 1, borderColor: '#e2e8f0', position: 'relative', shadowColor: '#0f172a', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.06, shadowRadius: 18, elevation: 3 },
+  stepIconBg: { width: 54, height: 54, borderRadius: 15, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
   stepNum: { position: 'absolute', top: 20, right: 20, width: 28, height: 28, borderRadius: 14, backgroundColor: '#f1f5f9', alignItems: 'center', justifyContent: 'center' },
   stepNumText: { fontSize: 13, fontWeight: '900', color: '#94a3b8' },
-  stepTitle: { fontSize: 17, fontWeight: '800', color: '#0f172a', marginBottom: 8 },
-  stepDesc: { fontSize: 14, color: '#64748b', fontWeight: '500', lineHeight: 22 },
+  stepTitle: { fontSize: 20, fontWeight: '800', color: '#0f172a', marginBottom: 7 },
+  stepDesc: { fontSize: 14.5, color: '#64748b', fontWeight: '500', lineHeight: 22 },
 
   // Generic card grid — reused for Rewards and Learning
   featGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 16 },
@@ -559,8 +559,8 @@ const s = StyleSheet.create({
   featDesc: { fontSize: 14.5, color: '#64748b', fontWeight: '500', lineHeight: 22 },
 
   // Ecosystem chips (icon + label only)
-  ecoCard: { backgroundColor: 'white', borderRadius: 16, padding: 18, borderWidth: 1, borderColor: '#e2e8f0', alignItems: 'flex-start' },
-  ecoLabel: { fontSize: 14, fontWeight: '800', color: '#0f172a' },
+  ecoCard: { backgroundColor: 'white', borderRadius: 16, padding: 22, borderWidth: 1, borderColor: '#e2e8f0', alignItems: 'flex-start', shadowColor: '#0f172a', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.06, shadowRadius: 18, elevation: 3 },
+  ecoLabel: { fontSize: 16, fontWeight: '800', color: '#0f172a' },
 
   // Rewards
   rewardsVisualRow: { flexDirection: 'row', alignItems: 'center', gap: 24, marginBottom: 8 },
