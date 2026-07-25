@@ -256,6 +256,21 @@ export function DashboardScreen({ navigation }: any) {
         </View>
       </View>
 
+      {/* ════════ REFER BANNER ════════ */}
+      <View style={[z.container, { marginTop: 28, paddingHorizontal: pad }]}>
+        <LinearGradient colors={['#052e16', '#166534']} style={[z.referBanner, isMobile && { flexDirection: 'column', gap: 16, padding: 20 }]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
+          <View style={z.referBannerDecor} />
+          <View style={{ flex: isMobile ? undefined : 1, zIndex: 1 }}>
+            <Text style={[z.referTitle, isMobile && { fontSize: 18 }]}>Invite friends, earn together</Text>
+            <Text style={z.referSub}>Share your referral code and both of you earn bonus KarmaCoins XP on their first pickup.</Text>
+          </View>
+          <TouchableOpacity style={z.referBtn} onPress={() => nav('Referral')}>
+            <Users size={18} color="#052e16" />
+            <Text style={z.referBtnText}>Refer now</Text>
+          </TouchableOpacity>
+        </LinearGradient>
+      </View>
+
       {/* ════════ DISCOVER FEATURES ════════ */}
       <View style={[z.container, { marginTop: 28, paddingHorizontal: pad }]}>
         <View style={z.sectionHead}>
@@ -369,21 +384,6 @@ export function DashboardScreen({ navigation }: any) {
             })}
           </View>
         )}
-      </View>
-
-      {/* ════════ REFER BANNER ════════ */}
-      <View style={[z.container, { marginTop: 28, paddingHorizontal: pad }]}>
-        <LinearGradient colors={['#052e16', '#166534']} style={[z.referBanner, isMobile && { flexDirection: 'column', gap: 16, padding: 20 }]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
-          <View style={z.referBannerDecor} />
-          <View style={{ flex: isMobile ? undefined : 1, zIndex: 1 }}>
-            <Text style={[z.referTitle, isMobile && { fontSize: 18 }]}>Invite friends, earn together</Text>
-            <Text style={z.referSub}>Share your referral code and both of you earn bonus KarmaCoins XP on their first pickup.</Text>
-          </View>
-          <TouchableOpacity style={z.referBtn} onPress={() => nav('Referral')}>
-            <Users size={18} color="#052e16" />
-            <Text style={z.referBtnText}>Refer now</Text>
-          </TouchableOpacity>
-        </LinearGradient>
       </View>
 
       <View style={{ height: 60 }} />
