@@ -262,7 +262,7 @@ export function DashboardScreen({ navigation }: any) {
           <View style={z.referBannerDecor} />
           <View style={{ flex: isMobile ? undefined : 1, zIndex: 1 }}>
             <Text style={[z.referTitle, isMobile && { fontSize: 18 }]}>Invite friends, earn together</Text>
-            <Text style={z.referSub}>Share your referral code and both of you earn bonus KarmaCoins XP on their first pickup.</Text>
+            <Text style={z.referSub}>Share your referral code and both of you earn 1,000 bonus KarmaCoins XP on their first pickup.</Text>
           </View>
           <TouchableOpacity style={z.referBtn} onPress={() => nav('Referral')}>
             <Users size={18} color="#422006" />
