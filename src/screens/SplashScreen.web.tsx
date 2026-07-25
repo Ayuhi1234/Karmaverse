@@ -330,14 +330,14 @@ export function SplashScreen({ navigation, route }: any) {
         <View style={s.section} onLayout={(e) => { sectionY.current.howItWorks = e.nativeEvent.layout.y; }}>
           <View style={[s.container, isMobile && { paddingHorizontal: 20 }]}>
             <Text style={s.sectionLabel}>FLOW</Text>
-            <Text style={[s.sectionTitle, isMobile && { fontSize: 28 }]}>Sustainable actions. AI-enabled rewards.</Text>
+            <Text style={[s.sectionTitle, isMobile && { fontSize: 28 }]}>Sustainable actions, AI-enabled rewards</Text>
 
             <View style={[s.stepsRow, isMobile && { flexDirection: 'column' }]}>
               {[
-                { num: '1', icon: Target, color: '#16a34a', bg: '#f0fdf4', title: 'Choose sustainable actions', desc: 'Schedule a pickup, play the eco-quiz, or complete a challenge.' },
-                { num: '2', icon: Shield, color: '#0891b2', bg: '#ecfeff', title: 'Complete & verify', desc: 'Your action is checked and verified for authenticity.' },
-                { num: '3', icon: Coins, color: '#d97706', bg: '#fffbeb', title: 'Earn KarmaCoins', desc: 'Coins are credited to your wallet instantly.' },
-                { num: '4', icon: Gift, color: '#e11d48', bg: '#fff1f2', title: 'Redeem rewards', desc: 'Trade coins for products, discounts, or real-world impact.' },
+                { num: '1', icon: Target, color: '#16a34a', bg: '#f0fdf4', title: 'Choose sustainable actions', desc: 'Schedule a pickup, play the eco-quiz, or complete a challenge' },
+                { num: '2', icon: Shield, color: '#0891b2', bg: '#ecfeff', title: 'Complete & verify', desc: 'Your action is checked and verified for authenticity' },
+                { num: '3', icon: Coins, color: '#d97706', bg: '#fffbeb', title: 'Earn KarmaCoins', desc: 'Coins are credited to your wallet instantly' },
+                { num: '4', icon: Gift, color: '#e11d48', bg: '#fff1f2', title: 'Redeem rewards', desc: 'Trade coins for products, discounts, or real-world impact' },
               ].map((step, i) => (
                 <Card key={i} delay={i * 80} style={[s.stepCard, { width: isMobile ? '100%' : '23%', flex: undefined }]}>
                   <View style={[s.stepIconBg, { backgroundColor: step.bg }]}>
@@ -370,12 +370,12 @@ export function SplashScreen({ navigation, route }: any) {
 
             <View style={[s.featGrid, { marginTop: 28 }, isMobile && { flexDirection: 'column' }]}>
               {[
-                { icon: Leaf, color: '#16a34a', title: 'Green Store', desc: 'Sustainable goods that give back to the planet.' },
-                { icon: Gift, color: '#e11d48', title: 'Eco Gift Cards', desc: 'Green vouchers from your favourite brands.' },
-                { icon: Percent, color: '#0891b2', title: 'Conscious Savings', desc: 'Save on the everyday things you already buy.' },
-                { icon: Sparkles, color: '#d97706', title: 'Eco Experiences', desc: 'Unlock green experiences money can\'t buy.' },
-                { icon: Handshake, color: '#7c3aed', title: 'Impact Partners', desc: 'Curated offers from our sustainable partners.' },
-                { icon: Sprout, color: '#059669', title: 'Plant a Tree', desc: 'Convert coins into real trees, real impact.' },
+                { icon: Leaf, color: '#16a34a', title: 'Green Store', desc: 'Sustainable goods that give back to the planet' },
+                { icon: Gift, color: '#e11d48', title: 'Eco Gift Cards', desc: 'Green vouchers from your favourite brands' },
+                { icon: Percent, color: '#0891b2', title: 'Conscious Savings', desc: 'Save on the everyday things you already buy' },
+                { icon: Sparkles, color: '#d97706', title: 'Eco Experiences', desc: 'Unlock green experiences money can\'t buy' },
+                { icon: Handshake, color: '#7c3aed', title: 'Impact Partners', desc: 'Curated offers from our sustainable partners' },
+                { icon: Sprout, color: '#059669', title: 'Plant a Tree', desc: 'Convert coins into real trees, real impact' },
               ].map((r, i) => (
                 <Card key={i} delay={i * 70} style={[s.featCard, { width: isMobile ? '100%' : '31%' }]}>
                   <View style={[s.featIconBg, { backgroundColor: r.color + '15' }]}>
@@ -401,13 +401,13 @@ export function SplashScreen({ navigation, route }: any) {
 
             <View style={[s.featGrid, { marginTop: 36 }, isMobile && { flexDirection: 'column' }]}>
               {[
-                { icon: Gift, color: '#e11d48', title: 'Refer & Earn', desc: 'Invite friends — you both earn bonus KarmaCoins.' },
-                { icon: Brain, color: '#7c3aed', title: 'Daily Eco Quiz', desc: 'AI-generated daily quiz — never a repeat.' },
-                { icon: Megaphone, color: '#16a34a', title: 'Sustainability Community Campaigns', desc: 'Join drives that turn learning into action.' },
-                { icon: Trophy, color: '#d97706', title: 'Interactive Challenges', desc: 'Compete, climb the board, stay motivated.' },
-                { icon: BookOpen, color: '#0891b2', title: 'Learning Modules', desc: 'Bite-sized lessons on real sustainability topics.' },
-                { icon: Sprout, color: '#059669', title: 'Sustainability Knowledge', desc: 'Deep-dive guides to live greener every day.' },
-                { icon: GraduationCap, color: '#2563eb', title: 'Knowledge Hub', desc: 'Curated articles, tips, and eco stories.' },
+                { icon: Gift, color: '#e11d48', title: 'Refer & Earn', desc: 'Invite friends — you both earn bonus KarmaCoins' },
+                { icon: Brain, color: '#7c3aed', title: 'Daily Eco Quiz', desc: 'AI-generated daily quiz — never a repeat' },
+                { icon: Megaphone, color: '#16a34a', title: 'Sustainability Community Campaigns', desc: 'Join drives that turn learning into action' },
+                { icon: Trophy, color: '#d97706', title: 'Interactive Challenges', desc: 'Compete, climb the board, stay motivated' },
+                { icon: BookOpen, color: '#0891b2', title: 'Learning Modules', desc: 'Bite-sized lessons on real sustainability topics' },
+                { icon: Sprout, color: '#059669', title: 'Sustainability Knowledge', desc: 'Deep-dive guides to live greener every day' },
+                { icon: GraduationCap, color: '#2563eb', title: 'Knowledge Hub', desc: 'Curated articles, tips, and eco stories' },
               ].map((l, i) => (
                 <Card key={i} delay={i * 60} style={[s.featCard, { width: isMobile ? '100%' : '22%' }]}>
                   <View style={[s.featIconBg, { backgroundColor: l.color + '15' }]}>
