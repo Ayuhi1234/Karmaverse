@@ -189,13 +189,19 @@ const parseCartKey = (key: string): { id: string; condition?: Condition } => {
 const rateFor = (item: CatalogueItem, condition?: Condition) =>
   item.hasCondition ? (condition === 'Not Working' ? item.coinsNotWorking || 0 : item.coinsWorking || 0) : item.coins || 0;
 
+// Start hour (24h) of each time slot below — used to decide whether today still
+// has a bookable slot left.
+const SLOT_START_HOURS = [9, 12, 15, 18];
+
 const generateDates = () => {
   const dates = [];
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const now = new Date();
-  // Include today only if before 6 PM, otherwise start from tomorrow
-  const startFrom = now.getHours() < 18 ? 0 : 1;
-  for (let i = startFrom; i <= startFrom + 5; i++) {
+  // Show today only if it still has at least one slot whose start time hasn't
+  // passed; otherwise skip straight to tomorrow. Always produce 7 days.
+  const todayHasSlot = SLOT_START_HOURS.some((h) => h > now.getHours());
+  let i = todayHasSlot ? 0 : 1;
+  while (dates.length < 7) {
     const d = new Date();
     d.setDate(d.getDate() + i);
     d.setHours(9, 0, 0, 0);
@@ -205,6 +211,7 @@ const generateDates = () => {
       num: d.getDate().toString(),
       fullDate: d.toISOString()
     });
+    i++;
   }
   return dates;
 };
