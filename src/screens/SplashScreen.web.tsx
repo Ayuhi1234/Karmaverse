@@ -184,9 +184,9 @@ export function SplashScreen({ navigation, route }: any) {
                 out the same way as the original artwork (icon left, wordmark on
                 top, tagline underneath) — the tagline is real text here instead
                 of the tiny raster copy, so it stays crisp at navbar scale. */}
-            <Image source={require('../../assets/logo-icon.png')} resizeMode="contain" style={[s.navIconImg, isMobile && { width: 40, height: 42 }]} />
+            <Image source={require('../../assets/logo-icon.png')} resizeMode="contain" style={[s.navIconImg, isMobile && { width: 48, height: 50 }]} />
             <View>
-              <Image source={require('../../assets/logo-wordmark.png')} resizeMode="contain" style={[s.navWordmarkImg, isMobile && { width: 108, height: 20 }]} />
+              <Image source={require('../../assets/logo-wordmark.png')} resizeMode="contain" style={[s.navWordmarkImg, isMobile && { width: 140, height: 25 }]} />
               {!isMobile && (
                 <Text style={s.navTagline}>
                   <Text style={{ color: '#86efac' }}>EARN</Text>
@@ -492,9 +492,9 @@ const s = StyleSheet.create({
   },
   navInner: { maxWidth: MAX, width: '100%', alignSelf: 'center', paddingHorizontal: 32, paddingVertical: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   navLogoRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  navIconImg: { width: 62, height: 65 },
-  navWordmarkImg: { width: 92, height: 17 },
-  navTagline: { fontSize: 8.5, fontWeight: '800', letterSpacing: 0.8, marginTop: 2 },
+  navIconImg: { width: 70, height: 73 },
+  navWordmarkImg: { width: 165, height: 30 },
+  navTagline: { fontSize: 9.5, fontWeight: '800', letterSpacing: 0.9, marginTop: 3 },
   navTabs: { flexDirection: 'row', alignItems: 'center', gap: 24 },
   navTabText: { color: 'rgba(255,255,255,0.75)', fontSize: 14, fontWeight: '700' },
 
