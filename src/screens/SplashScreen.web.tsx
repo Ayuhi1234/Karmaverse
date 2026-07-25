@@ -186,7 +186,12 @@ export function SplashScreen({ navigation, route }: any) {
                 of the tiny raster copy, so it stays crisp at navbar scale. */}
             <Image source={require('../../assets/logo-icon.png')} resizeMode="contain" style={[s.navIconImg, isMobile && { width: 48, height: 50 }]} />
             <View>
-              <Image source={require('../../assets/logo-wordmark.png')} resizeMode="contain" style={[s.navWordmarkImg, isMobile && { width: 140, height: 25 }]} />
+              {/* Solid crisp text instead of the hollow/outlined wordmark image
+                  (the raster "Karma" was outline-only and read faintly on dark). */}
+              <Text style={[s.navWordText, isMobile && { fontSize: 22 }]}>
+                <Text style={{ color: '#ffffff' }}>Karma</Text>
+                <Text style={{ color: '#4ade80' }}>Ver$e</Text>
+              </Text>
               {!isMobile && (
                 <Text style={s.navTagline}>
                   <Text style={{ color: '#86efac' }}>EARN</Text>
@@ -496,7 +501,7 @@ const s = StyleSheet.create({
   navInner: { maxWidth: MAX, width: '100%', alignSelf: 'center', paddingHorizontal: 32, paddingVertical: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   navLogoRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   navIconImg: { width: 70, height: 73 },
-  navWordmarkImg: { width: 165, height: 30 },
+  navWordText: { fontSize: 28, fontWeight: '900', letterSpacing: -0.5, lineHeight: 32 },
   navTagline: { fontSize: 9.5, fontWeight: '800', letterSpacing: 0.9, marginTop: 3 },
   navTabs: { flexDirection: 'row', alignItems: 'center', gap: 24 },
   navTabText: { color: 'rgba(255,255,255,0.75)', fontSize: 14, fontWeight: '700' },
