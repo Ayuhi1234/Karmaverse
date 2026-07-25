@@ -106,7 +106,7 @@ export function WalletScreen({ navigation }: any) {
         <View style={[styles.redeemBanner, { flexDirection: 'row', alignItems: 'center', gap: 8 }]}>
           <KarmaCoin size={18} />
           <Text style={[styles.redeemBannerText, { flex: 1 }]}>
-            {isRedeemLive() ? '10 KarmaCoins XP = ₹1 — tap Redeem to cash out anytime! ♻️✨' : REDEEM_INFO_MESSAGE}
+            {REDEEM_INFO_MESSAGE}
           </Text>
         </View>
 

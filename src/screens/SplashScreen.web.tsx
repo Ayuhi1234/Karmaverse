@@ -7,9 +7,9 @@ import {
   Truck, Gift, Shield,
   Recycle, Users, Coins, ArrowRight,
   BookOpen, Mail, MapPin, Phone,
-  Sprout, Trophy, Flame, Brain, Handshake, Building2,
-  Target, Percent, GraduationCap, Leaf,
-  HeartHandshake, Sparkles, Home as HomeIcon, Store, Megaphone,
+  Sprout, Trophy, Flame, Brain, Building2,
+  Target, GraduationCap,
+  HeartHandshake, Home as HomeIcon, Store, Megaphone,
 } from 'lucide-react-native';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { MascotPopupBanner } from '../components/shared/MascotPopupBanner';
@@ -370,19 +370,19 @@ export function SplashScreen({ navigation, route }: any) {
 
             <View style={[s.featGrid, { marginTop: 28 }, isMobile && { flexDirection: 'column' }]}>
               {[
-                { icon: Leaf, color: '#16a34a', title: 'Green Store', desc: 'Sustainable goods that give back to the planet' },
-                { icon: Gift, color: '#e11d48', title: 'Eco Gift Cards', desc: 'Green vouchers from your favourite brands' },
-                { icon: Percent, color: '#0891b2', title: 'Conscious Savings', desc: 'Save on the everyday things you already buy' },
-                { icon: Sparkles, color: '#d97706', title: 'Eco Experiences', desc: 'Unlock green experiences money can\'t buy' },
-                { icon: Handshake, color: '#7c3aed', title: 'Impact Partners', desc: 'Curated offers from our sustainable partners' },
-                { icon: Sprout, color: '#059669', title: 'Plant a Tree', desc: 'Convert coins into real trees, real impact' },
+                { img: require('../../assets/rewards/green-store.jpg'), title: 'Green Store', desc: 'Sustainable goods that give back to the planet' },
+                { img: require('../../assets/rewards/gift-cards.jpg'), title: 'Eco Gift Cards', desc: 'Green vouchers from your favourite brands' },
+                { img: require('../../assets/rewards/savings.jpg'), title: 'Conscious Savings', desc: 'Save on the everyday things you already buy' },
+                { img: require('../../assets/rewards/experiences.jpg'), title: 'Eco Experiences', desc: 'Unlock green experiences money can\'t buy' },
+                { img: require('../../assets/rewards/partners.jpg'), title: 'Impact Partners', desc: 'Curated offers from our sustainable partners' },
+                { img: require('../../assets/rewards/plant-tree.jpg'), title: 'Plant a Tree', desc: 'Convert coins into real trees, real impact' },
               ].map((r, i) => (
-                <Card key={i} delay={i * 70} style={[s.featCard, { width: isMobile ? '100%' : '31%' }]}>
-                  <View style={[s.featIconBg, { backgroundColor: r.color + '15' }]}>
-                    <r.icon size={26} color={r.color} />
+                <Card key={i} delay={i * 70} style={[s.rewardCard, { width: isMobile ? '100%' : '31%' }]}>
+                  <Image source={r.img} resizeMode="cover" style={s.rewardImg} />
+                  <View style={s.rewardBody}>
+                    <Text style={s.featTitle}>{r.title}</Text>
+                    <Text style={s.featDesc}>{r.desc}</Text>
                   </View>
-                  <Text style={s.featTitle}>{r.title}</Text>
-                  <Text style={s.featDesc}>{r.desc}</Text>
                 </Card>
               ))}
             </View>
@@ -565,6 +565,9 @@ const s = StyleSheet.create({
   // Generic card grid — reused for Rewards and Learning
   featGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 16 },
   featCard: { backgroundColor: 'white', borderRadius: 18, padding: 26, borderWidth: 1, borderColor: '#e2e8f0', shadowColor: '#0f172a', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.06, shadowRadius: 18, elevation: 3 },
+  rewardCard: { backgroundColor: 'white', borderRadius: 18, borderWidth: 1, borderColor: '#e2e8f0', overflow: 'hidden', shadowColor: '#0f172a', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.06, shadowRadius: 18, elevation: 3 },
+  rewardImg: { width: '100%', height: 140 },
+  rewardBody: { padding: 22 },
   featIconBg: { width: 54, height: 54, borderRadius: 15, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
   featTitle: { fontSize: 20, fontWeight: '800', color: '#0f172a', marginBottom: 7 },
   featDesc: { fontSize: 14.5, color: '#64748b', fontWeight: '500', lineHeight: 22 },
