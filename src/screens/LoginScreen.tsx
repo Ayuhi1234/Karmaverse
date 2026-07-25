@@ -733,6 +733,11 @@ export function LoginScreen({ navigation }: any) {
           </PrimaryButton>
 
           {/* Social login — brand icon buttons only */}
+          <View style={styles.dividerRow}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>or sign up with</Text>
+            <View style={styles.dividerLine} />
+          </View>
           <View style={styles.socialRow}>
               {Platform.OS === 'web' ? (
                 googleBtnError ? (
@@ -758,7 +763,7 @@ export function LoginScreen({ navigation }: any) {
                 )
               ) : (
                 <TouchableOpacity style={styles.socialIconBtn} activeOpacity={0.8} onPress={handleGoogleSignInNative}>
-                  <Svg width="26" height="26" viewBox="0 0 48 48">
+                  <Svg width="28" height="28" viewBox="0 0 48 48">
                     <Path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.7 17.74 9.5 24 9.5z" />
                     <Path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
                     <Path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
@@ -776,7 +781,7 @@ export function LoginScreen({ navigation }: any) {
                 {isLoading ? (
                   <ActivityIndicator color="#1877F2" size="small" />
                 ) : (
-                  <Svg width="28" height="28" viewBox="0 0 24 24">
+                  <Svg width="32" height="32" viewBox="0 0 24 24">
                     <Path fill="#1877F2" d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.51 1.49-3.9 3.77-3.9 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.89h2.78l-.44 2.91h-2.34V22c4.78-.76 8.44-4.92 8.44-9.94z" />
                   </Svg>
                 )}
