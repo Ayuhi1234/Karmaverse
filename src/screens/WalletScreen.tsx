@@ -11,17 +11,24 @@ const showWithdrawInfo = () => showRedeemInfoNow();
 
 export function WalletScreen({ navigation }: any) {
   const [balance, setBalance] = useState(0);
+  const [redeemable, setRedeemable] = useState(0);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchWalletData = async () => {
       try {
-        const [profileData, txData] = await Promise.all([
+        const [profileData, txData]: [any, any] = await Promise.all([
           profileService.getProfile().catch(() => ({})),
           profileService.getTransactionHistory().catch(() => []),
         ]);
-        setBalance(profileData.karmaCoins || profileData.coins || 0);
+        const total = profileData.karmaCoins || profileData.coins || 0;
+        setBalance(total);
+        // Redeemable = coins eligible to cash out. Uses the backend field when
+        // present; until it ships, all earned coins are treated as redeemable.
+        setRedeemable(
+          profileData.redeemableKarmaCoins ?? profileData.redeemableCoins ?? total
+        );
         setTransactions(Array.isArray(txData) ? txData : []);
       } catch (error) {
         console.error('Wallet fetch error:', error);
@@ -69,7 +76,7 @@ export function WalletScreen({ navigation }: any) {
           {/* Balance card */}
           <View style={styles.balanceCard}>
             <View style={styles.cardTopRow}>
-              <Text style={styles.cardLabel}>TOTAL KARMACOINS XP</Text>
+              <Text style={styles.cardLabel}>TOTAL KC</Text>
               <View style={styles.activeTag}>
                 <View style={styles.activeDot} />
                 <Text style={styles.activeText}>Active</Text>
@@ -80,7 +87,16 @@ export function WalletScreen({ navigation }: any) {
               <Text style={styles.balanceText}>{balance.toLocaleString()}</Text>
             </View>
             <View style={styles.cardDivider} />
-            <Text style={styles.cardSub}>≈ ₹{(balance * 0.1).toFixed(0)} Value Equivalent</Text>
+            <View style={styles.redeemableRow}>
+              <View>
+                <Text style={styles.redeemableLabel}>REDEEMABLE KC</Text>
+                <View style={styles.redeemableValueRow}>
+                  <KarmaCoin size={18} />
+                  <Text style={styles.redeemableValue}>{redeemable.toLocaleString()}</Text>
+                </View>
+              </View>
+              <Text style={styles.cardSub}>≈ ₹{(redeemable * 0.1).toFixed(0)} value</Text>
+            </View>
           </View>
         </LinearGradient>
 
@@ -194,6 +210,10 @@ const styles = StyleSheet.create({
   balanceText: { fontSize: 44, fontWeight: '900', color: 'white', letterSpacing: -1 },
   cardDivider: { height: 1, backgroundColor: 'rgba(255,255,255,0.12)', marginVertical: 14 },
   cardSub: { color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: '600' },
+  redeemableRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
+  redeemableLabel: { color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: '800', letterSpacing: 1.2, marginBottom: 6 },
+  redeemableValueRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  redeemableValue: { color: 'white', fontSize: 22, fontWeight: '900', letterSpacing: -0.5 },
 
   redeemBanner: {
     marginTop: 16, marginHorizontal: 16, padding: 14, borderRadius: 16,
