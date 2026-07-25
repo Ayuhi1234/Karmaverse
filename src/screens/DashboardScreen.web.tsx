@@ -63,6 +63,14 @@ const STATUS_CLR: any = {
   Cancelled: { bg: '#fee2e2', text: '#dc2626' },
 };
 
+// Time-aware greeting based on the user's device clock.
+const getGreeting = () => {
+  const h = new Date().getHours();
+  if (h < 12) return 'Good morning';
+  if (h < 17) return 'Good afternoon';
+  return 'Good evening';
+};
+
 export function DashboardScreen({ navigation }: any) {
   const { width } = useWindowDimensions();
   const isMobile = width < 768;
@@ -141,7 +149,7 @@ export function DashboardScreen({ navigation }: any) {
           <View style={[z.heroGrid, isMobile && { flexDirection: 'column', gap: 20, alignItems: 'stretch' }]}>
             {/* Left: Greeting + Balance */}
             <View style={z.heroLeft}>
-              <Text style={z.heroGreet}>Welcome back,</Text>
+              <Text style={z.heroGreet}>{getGreeting()},</Text>
               <Text style={[z.heroName, isMobile && { fontSize: 20 }]}>{userName || '...'}</Text>
               <View style={z.heroBalance}>
                 <View style={z.heroCoinGlow}>
