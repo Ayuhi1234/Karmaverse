@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Truck, Gamepad2, Coins, ChevronRight, Package, Users, Gift, BookOpen, Star, Flame, Recycle, ArrowRight, Zap, Sparkles, Shield, Trophy, Calendar, X, CheckCircle2, BadgeCheck, ShieldCheck } from 'lucide-react-native';
+import { Truck, Gamepad2, Coins, ChevronRight, Package, Users, Gift, BookOpen, Star, Flame, ArrowRight, Sparkles, Trophy, Calendar, X, CheckCircle2, BadgeCheck, ShieldCheck } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { WebFooter } from '../components/shared/WebFooter';
@@ -39,28 +39,12 @@ const FEATURE_DETAILS = [
     accent: '#4ade80',
   },
   {
-    id: 'waste', title: 'Recycle almost anything', emoji: '♻️', icon: Recycle,
-    desc: 'From old gadgets to glass bottles — we give 10 categories of household items a responsible second life, away from landfills.',
-    steps: ['Phones, laptops & appliances', 'Plastic, paper & metal', 'Glass, shoes & textiles', 'Every item earns KarmaCoins'],
-    benefit: 'Nothing goes to waste',
-    gradient: ['#78350f', '#d97706'] as [string, string],
-    accent: '#fbbf24',
-  },
-  {
-    id: 'instant', title: 'Instant credit', emoji: '⚡', icon: Zap,
-    desc: 'No waiting — KarmaCoins XP are credited to your wallet immediately after the agent verifies and collects your recyclables.',
-    steps: ['Agent weighs items at door', 'Verification done on spot', 'Coins added instantly', 'Check wallet in real-time'],
-    benefit: 'Zero wait for rewards',
-    gradient: ['#312e81', '#4f46e5'] as [string, string],
-    accent: '#818cf8',
-  },
-  {
-    id: 'agents', title: 'Verified agents', emoji: '🛡️', icon: Shield,
-    desc: 'All our pickup agents are background-verified and trained. Track them live on the map and contact directly from the app.',
-    steps: ['Background-checked partners', 'Live GPS tracking', 'Direct call from app', 'Rate after every pickup'],
-    benefit: 'Safe & trusted pickups',
-    gradient: ['#134e4a', '#14b8a6'] as [string, string],
-    accent: '#2dd4bf',
+    id: 'quiz', title: 'Daily eco-quiz', emoji: '🧠', icon: Gamepad2, route: 'Quiz',
+    desc: 'Test your green IQ with a fresh AI-generated quiz every day and earn KarmaCoins XP for every correct answer.',
+    steps: ['Play a new quiz daily', 'Answer eco questions', 'Earn coins per answer', 'Build your streak'],
+    benefit: 'Learn and earn daily',
+    gradient: ['#4c1d95', '#7c3aed'] as [string, string],
+    accent: '#c084fc',
   },
 ];
 
@@ -289,7 +273,7 @@ export function DashboardScreen({ navigation }: any) {
                 key={f.id}
                 style={[z.discoverCard, cardW ? { width: cardW } : undefined]}
                 activeOpacity={0.85}
-                onPress={() => (f.id === 'knowledge' ? nav('KnowledgeHub') : setSelectedFeature(f))}
+                onPress={() => (f.id === 'knowledge' ? nav('KnowledgeHub') : (f as any).route ? nav((f as any).route) : setSelectedFeature(f))}
               >
                 <LinearGradient colors={f.gradient} style={z.discoverCardInner} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
                   <View style={z.discoverCardDecor} />
