@@ -238,7 +238,7 @@ export function SplashScreen({ navigation, route }: any) {
             {/* Badge */}
             <View style={s.heroBadge}>
               <View style={s.heroBadgeDot} />
-              <Text style={s.heroBadgeText}>AI-Powered Sustainability Rewards</Text>
+              <Text style={s.heroBadgeText}>AI-Powered Sustainability Platform</Text>
             </View>
 
             <Text style={[s.heroTitle, isMobile && { fontSize: 34 }]}>
