@@ -46,7 +46,8 @@ type Condition = typeof CONDITIONS[number];
 type CatalogueItem = {
   id: string;
   catId: string;
-  subCategory: string;             // exact backend name
+  subCategory: string;             // exact backend name (sent in the booking payload)
+  label?: string;                  // friendlier display name; falls back to subCategory
   unit: 'kg' | 'piece';
   coins?: number;                  // items without a condition dropdown
   coinsWorking?: number;           // condition items
@@ -126,8 +127,8 @@ const ALL_ITEMS: CatalogueItem[] = [
   { id: 'pl4', catId: '9', subCategory: 'Other Plastic', unit: 'kg', coins: 10, itemIcon: Droplets, image: require('../../assets/catalogue/other-plastic.jpg') },
 
   // 10. Textile Waste (kg) — per-item rates pending exact confirmation from backend
-  { id: 'tx1', catId: '10', subCategory: 'Grade 1 Clothing', unit: 'kg', coins: 500, itemIcon: Shirt, image: require('../../assets/catalogue/grade-1-clothing.jpg') },
-  { id: 'tx2', catId: '10', subCategory: 'Grade 2 Clothing', unit: 'kg', coins: 200, itemIcon: Shirt, image: require('../../assets/catalogue/grade-2-clothing.jpg') },
+  { id: 'tx1', catId: '10', subCategory: 'Grade 1 Clothing', label: 'Branded Usable Clothes', unit: 'kg', coins: 500, itemIcon: Shirt, image: require('../../assets/catalogue/grade-1-clothing.jpg') },
+  { id: 'tx2', catId: '10', subCategory: 'Grade 2 Clothing', label: 'Used Non-Usable Clothes', unit: 'kg', coins: 200, itemIcon: Shirt, image: require('../../assets/catalogue/grade-2-clothing.jpg') },
   { id: 'tx3', catId: '10', subCategory: 'Jeans', unit: 'kg', coins: 300, itemIcon: Shirt, image: require('../../assets/catalogue/jeans.jpg') },
   { id: 'tx4', catId: '10', subCategory: 'Premium Sarees', unit: 'kg', coins: 500, itemIcon: Shirt, image: require('../../assets/catalogue/premium-sarees.jpg') },
   { id: 'tx5', catId: '10', subCategory: 'Non-Premium Sarees', unit: 'kg', coins: 200, itemIcon: Shirt, image: require('../../assets/catalogue/non-premium-sarees.jpg') },
@@ -477,6 +478,11 @@ export function SchedulePickupScreen({ navigation }: any) {
       </View>
 
       <ScrollView contentContainerStyle={styles.gridContent}>
+        {activeCategory === '3' && (
+          <View style={styles.glassNote}>
+            <Text style={styles.glassNoteText}>Please note: broken or shattered glass is not accepted for safety reasons. Only intact bottles and jars.</Text>
+          </View>
+        )}
         <View style={styles.gridContainer}>
           {displayedItems.map((item) => {
             const hasCond = !!item.hasCondition;
@@ -496,7 +502,7 @@ export function SchedulePickupScreen({ navigation }: any) {
                 </View>
 
                 <View style={styles.cardInfo}>
-                  <Text style={styles.itemName} numberOfLines={2}>{item.subCategory}</Text>
+                  <Text style={styles.itemName} numberOfLines={2}>{item.label || item.subCategory}</Text>
                   <Text style={styles.itemUnit}>{unitLabel(item.unit)}</Text>
 
                   {item.minQty ? (
@@ -749,6 +755,8 @@ const styles = StyleSheet.create({
   filterTextActive: { fontSize: 13, color: 'white', fontWeight: '800' },
 
   gridContent: { paddingBottom: 120, maxWidth: 900, width: '100%', alignSelf: 'center' },
+  glassNote: { marginHorizontal: 16, marginTop: 12, backgroundColor: '#fffbeb', borderWidth: 1, borderColor: '#fde68a', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10 },
+  glassNoteText: { color: '#92400e', fontSize: 12.5, fontWeight: '600', lineHeight: 18 },
   gridContainer: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 12, marginTop: 10, maxWidth: 900, alignSelf: 'center', width: '100%', justifyContent: 'center' },
   
   cardContainer: { width: CARD_WIDTH, backgroundColor: 'white', borderRadius: 18, marginBottom: 10, marginHorizontal: CARD_MARGIN, overflow: 'hidden', elevation: 2, borderWidth: 2, borderColor: 'transparent' },
