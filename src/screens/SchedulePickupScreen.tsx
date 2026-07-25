@@ -26,7 +26,7 @@ const CARD_WIDTH = (Math.min(width, 900) - 40 - (CARD_MARGIN * 2 * COLS)) / COLS
 // name is what the user sees; backendName is the enum value the booking API
 // accepts (renaming those requires a backend change first).
 const CATEGORIES = [
-  { id: '5', name: 'Appliances & TV', backendName: 'Home Appliances & Electronics', color: '#8b5cf6', icon: Tv },
+  { id: '5', name: 'Appliances', backendName: 'Home Appliances & Electronics', color: '#8b5cf6', icon: Tv },
   { id: '1', name: 'E-Waste (Phones & Computers)', backendName: 'Phones & Computers', color: '#0ea5e9', icon: Smartphone },
   { id: '2', name: 'Mixed E-Waste', backendName: 'Mixed E-Waste', color: '#14b8a6', icon: Cable },
   { id: '9', name: 'Plastic', backendName: 'Plastic', color: '#3b82f6', icon: Droplets },
