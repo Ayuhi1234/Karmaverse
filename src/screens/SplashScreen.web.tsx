@@ -240,7 +240,6 @@ export function SplashScreen({ navigation, route }: any) {
             <Animated.Image
               source={require('../../assets/sdg-wheel.png')}
               resizeMode="contain"
-              pointerEvents="none"
               style={[s.heroSdg, { transform: [{ translateY: floatA.interpolate({ inputRange: [0, 1], outputRange: [0, -14] }) }] }]}
             />
           )}
@@ -526,7 +525,7 @@ const s = StyleSheet.create({
   // Hero
   hero: { paddingBottom: 60, minHeight: 500 },
   heroCircle: { position: 'absolute', borderRadius: 999, backgroundColor: 'white' },
-  heroSdg: { position: 'absolute', right: 60, top: 120, width: 380, height: 380, opacity: 0.95 },
+  heroSdg: { position: 'absolute', right: 60, top: 120, width: 380, height: 380, opacity: 0.95, pointerEvents: 'none' as any },
   heroContent: { maxWidth: MAX, width: '100%', alignSelf: 'center', paddingHorizontal: 32, paddingTop: 60 },
   heroBadge: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(255,255,255,0.08)', alignSelf: 'flex-start', borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', marginBottom: 24 },
   heroBadgeDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#4ade80' },
