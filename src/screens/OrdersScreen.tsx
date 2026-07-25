@@ -108,7 +108,7 @@ export function OrdersScreen({ navigation }: any) {
         <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={styles.header}>
           <View style={styles.headerTop}>
             <Text style={styles.headerSubtitle}>Track your impact</Text>
-            <Text style={styles.headerTitle}>My pickups</Text>
+            <Text style={styles.headerTitle}>My sustainable pickups</Text>
           </View>
 
           {/* Custom Tab Switcher (Integrated into Header bottom) */}
