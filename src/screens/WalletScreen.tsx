@@ -67,7 +67,7 @@ export function WalletScreen({ navigation }: any) {
         {/* Header — same as home screen: paddingTop 60, same gradient, same radius */}
         <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={styles.header}>
           <View style={styles.titleRow}>
-            <Text style={styles.headerTitle}>My Wallet</Text>
+            <Text style={styles.headerTitle}>My wallet</Text>
             <TouchableOpacity style={styles.historyBtn} onPress={() => navigation.navigate('RedeemHistory')}>
               <History size={18} color="white" />
             </TouchableOpacity>
@@ -130,7 +130,7 @@ export function WalletScreen({ navigation }: any) {
 
         {/* Transaction History */}
         <View style={styles.historySection}>
-          <Text style={styles.sectionTitle}>Recent Transactions</Text>
+          <Text style={styles.sectionTitle}>Recent transactions</Text>
 
           {isLoading ? (
             <View style={{ alignItems: 'center', paddingVertical: 40 }}>

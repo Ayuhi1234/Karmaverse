@@ -79,7 +79,7 @@ export function BookingDetailsScreen({ navigation, route }: any) {
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
             <ArrowLeft size={20} color="#0f172a" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Booking Details</Text>
+          <Text style={styles.headerTitle}>Booking details</Text>
           <TouchableOpacity style={styles.moreBtn}>
             <MoreHorizontal size={20} color="#0f172a" />
           </TouchableOpacity>
@@ -120,7 +120,7 @@ export function BookingDetailsScreen({ navigation, route }: any) {
               <Text style={styles.gridValue}>{booking.wasteType}</Text>
             </View>
             <View style={styles.gridItem}>
-              <Text style={styles.gridLabel}>Est. Coins</Text>
+              <Text style={styles.gridLabel}>Est. coins</Text>
               <View style={styles.coinsRow}>
                 <Text style={styles.gridValue}>{booking.estCoins} </Text>
                 <KarmaCoin size={14} />
