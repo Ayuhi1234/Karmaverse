@@ -258,7 +258,7 @@ export function DashboardScreen({ navigation }: any) {
 
       {/* ════════ REFER BANNER ════════ */}
       <View style={[z.container, { marginTop: 28, paddingHorizontal: pad }]}>
-        <LinearGradient colors={['#052e16', '#166534']} style={[z.referBanner, isMobile && { flexDirection: 'column', gap: 16, padding: 20 }]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
+        <LinearGradient colors={['#4338ca', '#7c3aed', '#db2777']} style={[z.referBanner, isMobile && { flexDirection: 'column', gap: 16, padding: 20 }]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
           <View style={z.referBannerDecor} />
           <View style={{ flex: isMobile ? undefined : 1, zIndex: 1 }}>
             <Text style={[z.referTitle, isMobile && { fontSize: 18 }]}>Invite friends, earn together</Text>
@@ -507,7 +507,7 @@ const z = StyleSheet.create({
 
   // Refer banner
   referBanner: { borderRadius: 24, padding: 32, flexDirection: 'row', alignItems: 'center', gap: 32, overflow: 'hidden', position: 'relative' },
-  referBannerDecor: { position: 'absolute', top: -40, right: 100, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(74,222,128,0.08)' },
+  referBannerDecor: { position: 'absolute', top: -40, right: 100, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,255,255,0.1)' },
   referTitle: { color: 'white', fontSize: 22, fontWeight: '900', marginBottom: 8 },
   referSub: { color: 'rgba(255,255,255,0.6)', fontSize: 14, fontWeight: '500', lineHeight: 22 },
   referBtn: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#4ade80', borderRadius: 14, paddingHorizontal: 24, paddingVertical: 14, flexShrink: 0 },
