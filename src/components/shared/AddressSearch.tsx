@@ -9,6 +9,7 @@ import { MapPin, ArrowLeft, Navigation2, Home, Briefcase, MapPinned, Pencil } fr
 import * as Location from 'expo-location';
 import { mapService, MapSuggestion } from '../../services/mapService';
 import { MapPicker } from './MapPicker';
+import { showAlert } from '../../utils/alert';
 
 export interface AddressDetails {
   houseNo: string;
@@ -80,7 +81,6 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
   const [receiverName, setReceiverName] = useState('');
   const [receiverPhone, setReceiverPhone] = useState('');
   const [label, setLabel] = useState('Home');
-  const [detailError, setDetailError] = useState<string | null>(null);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const geocodeDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -111,7 +111,6 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
       setQuery('');
       setSuggestions([]);
       setError(null);
-      setDetailError(null);
       setHouseNo(initialDetails?.houseNo || '');
       setBuilding(initialDetails?.building || '');
       setLandmark(initialDetails?.landmark || '');
@@ -217,15 +216,15 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
   const handleSaveDetails = () => {
     if (!resolvedCoords) return;
     if (!houseNo.trim()) {
-      setDetailError('Please enter your house / flat number.');
+      showAlert('Missing details', 'Please enter your house / flat number.');
       return;
     }
     if (!receiverName.trim()) {
-      setDetailError('Please enter the receiver name.');
+      showAlert('Missing details', 'Please enter the receiver name.');
       return;
     }
     if (!/^[6-9]\d{9}$/.test(receiverPhone.trim())) {
-      setDetailError('Please enter a valid 10-digit receiver mobile number.');
+      showAlert('Invalid phone', 'Please enter a valid 10-digit receiver mobile number.');
       return;
     }
     const fullAddress = composeFullAddress(houseNo, building, resolvedAddress, landmark, receiverName, receiverPhone);
@@ -295,8 +294,6 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
                 );
               })}
             </View>
-
-            {!!detailError && <Text style={styles.detailErrorText}>{detailError}</Text>}
           </ScrollView>
 
           <SafeAreaView edges={['bottom']} style={styles.bottomSheet}>
@@ -567,5 +564,4 @@ const styles = StyleSheet.create({
   labelPillText: { fontSize: 13, fontWeight: '700', color: '#64748b' },
   labelPillTextActive: { color: '#15803d' },
 
-  detailErrorText: { color: '#ef4444', fontSize: 13, fontWeight: '600', marginTop: 14 },
 });
