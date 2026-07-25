@@ -265,7 +265,7 @@ export function DashboardScreen({ navigation }: any) {
             <Text style={z.referSub}>Share your referral code and both of you earn bonus KarmaCoins XP on their first pickup.</Text>
           </View>
           <TouchableOpacity style={z.referBtn} onPress={() => nav('Referral')}>
-            <Users size={18} color="#052e16" />
+            <Users size={18} color="#422006" />
             <Text style={z.referBtnText}>Refer now</Text>
           </TouchableOpacity>
         </LinearGradient>
@@ -510,8 +510,8 @@ const z = StyleSheet.create({
   referBannerDecor: { position: 'absolute', top: -40, right: 100, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,255,255,0.1)' },
   referTitle: { color: 'white', fontSize: 22, fontWeight: '900', marginBottom: 8 },
   referSub: { color: 'rgba(255,255,255,0.6)', fontSize: 14, fontWeight: '500', lineHeight: 22 },
-  referBtn: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#4ade80', borderRadius: 14, paddingHorizontal: 24, paddingVertical: 14, flexShrink: 0 },
-  referBtnText: { color: '#052e16', fontWeight: '900', fontSize: 15 },
+  referBtn: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#facc15', borderRadius: 14, paddingHorizontal: 24, paddingVertical: 14, flexShrink: 0 },
+  referBtnText: { color: '#422006', fontWeight: '900', fontSize: 15 },
 
   // Modal
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', alignItems: 'center', justifyContent: 'center', padding: 24 },
