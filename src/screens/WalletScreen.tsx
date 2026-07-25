@@ -85,7 +85,7 @@ export function WalletScreen({ navigation }: any) {
               <KarmaCoin size={44} glow animated />
               <View>
                 <Text style={styles.balanceText}>{lifetime.toLocaleString()}</Text>
-                <Text style={styles.unitTag}>KarmaCoins XP</Text>
+                <Text style={styles.unitTag} numberOfLines={1}>KarmaCoins XP</Text>
               </View>
             </View>
             <View style={styles.cardDivider} />
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
   },
   cardTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
   cardLabel: { color: 'rgba(255,255,255,0.6)', fontSize: 13, fontWeight: '700', letterSpacing: 0.3 },
-  unitTag: { color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: '600', letterSpacing: 0.3, marginTop: -2 },
+  unitTag: { color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: '600', letterSpacing: 0.3, marginTop: -2, flexShrink: 0 },
   activeTag: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.12)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20, gap: 6 },
   activeDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#86efac' },
   activeText: { color: 'white', fontSize: 10, fontWeight: '700' },
