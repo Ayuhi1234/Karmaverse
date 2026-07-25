@@ -6,7 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import {
   Truck, Gift, Shield,
   Recycle, Users, Coins, ArrowRight,
-  BookOpen, Mail, MapPin,
+  BookOpen, Mail, MapPin, Phone,
   Sprout, Trophy, Flame, Brain, Handshake, Building2,
   Target, Percent, GraduationCap, Leaf,
   HeartHandshake, Sparkles, Home as HomeIcon, Store, Megaphone,
@@ -465,9 +465,13 @@ export function SplashScreen({ navigation, route }: any) {
 
               <View style={s.footerLinks}>
                 <Text style={s.footerLinkTitle}>Contact us</Text>
-                <TouchableOpacity style={s.footerContactRow} onPress={() => Linking.openURL('mailto:cto.team@0waste.co.in')}>
+                <TouchableOpacity style={s.footerContactRow} onPress={() => Linking.openURL('mailto:info@0waste.co.in')}>
                   <Mail size={14} color="#4ade80" />
-                  <Text style={s.footerLink}>cto.team@0waste.co.in</Text>
+                  <Text style={s.footerLink}>info@0waste.co.in</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={s.footerContactRow} onPress={() => Linking.openURL('tel:+917093198828')}>
+                  <Phone size={14} color="#4ade80" />
+                  <Text style={s.footerLink}>+91 70931 98828</Text>
                 </TouchableOpacity>
                 <View style={s.footerContactRow}>
                   <MapPin size={14} color="#4ade80" style={{ marginTop: 2 }} />
