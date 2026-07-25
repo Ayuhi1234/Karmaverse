@@ -170,10 +170,10 @@ export function DashboardScreen({ navigation }: any) {
             {isMobile ? (
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
                 {[
-                  { icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total coins' },
+                  { icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total Karma Coins (KC)' },
                   { icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Day streak' },
-                  { icon: Trophy, color: '#c084fc', val: `${quizStreak}`, label: 'Quiz streak' },
-                  { icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Pickups done' },
+                  { icon: Trophy, color: '#c084fc', val: `${quizStreak}`, label: 'Eco Quiz Streak' },
+                  { icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Sustainability Actions' },
                 ].map((st, i) => (
                   <View key={i} style={{ width: Math.floor((width - 2 * pad - 8) / 2), backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 14, padding: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 }}>
@@ -189,10 +189,10 @@ export function DashboardScreen({ navigation }: any) {
             ) : (
               <View style={z.heroRight}>
                 {[
-                  { icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total coins' },
+                  { icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total Karma Coins (KC)' },
                   { icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Day streak' },
-                  { icon: Trophy, color: '#c084fc', val: `${quizStreak}`, label: 'Quiz streak' },
-                  { icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Pickups done' },
+                  { icon: Trophy, color: '#c084fc', val: `${quizStreak}`, label: 'Eco Quiz Streak' },
+                  { icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Sustainability Actions' },
                 ].map((st, i) => (
                   <View key={i} style={z.statCard}>
                     <View style={z.statTop}>
