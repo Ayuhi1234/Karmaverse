@@ -330,7 +330,7 @@ export function SplashScreen({ navigation, route }: any) {
         <View style={s.section} onLayout={(e) => { sectionY.current.howItWorks = e.nativeEvent.layout.y; }}>
           <View style={[s.container, isMobile && { paddingHorizontal: 20 }]}>
             <Text style={s.sectionLabel}>FLOW</Text>
-            <Text style={[s.sectionTitle, isMobile && { fontSize: 28 }]}>Simple actions. Meaningful rewards.</Text>
+            <Text style={[s.sectionTitle, isMobile && { fontSize: 28 }]}>Sustainable actions. AI-enabled rewards.</Text>
 
             <View style={[s.stepsRow, isMobile && { flexDirection: 'column' }]}>
               {[
