@@ -15,15 +15,7 @@ const MAX = 1200;
 
 const FEATURE_DETAILS = [
   {
-    id: 'pickup', title: 'Schedule a pickup', emoji: '🚛',
-    desc: 'Give your old items a second life — book a doorstep pickup in 3 taps and earn KarmaCoins for going green.',
-    steps: ['Pick what you want to recycle', 'Choose date & time slot', 'Agent comes to your door', 'Earn KarmaCoins XP instantly'],
-    benefit: 'Earn coins on every pickup',
-    gradient: ['#052e16', '#15803d'] as [string, string],
-    accent: '#4ade80',
-  },
-  {
-    id: 'refer', title: 'Refer & earn', emoji: '👥',
+    id: 'refer', title: 'Refer & earn', emoji: '👥', icon: Gift,
     desc: 'Share your referral code with friends. When they make their first pickup, you both get bonus KarmaCoins XP!',
     steps: ['Share your unique code', 'Friend signs up & books pickup', 'Both earn bonus coins', 'No limit on referrals'],
     benefit: 'Bonus coins for every friend',
@@ -31,7 +23,7 @@ const FEATURE_DETAILS = [
     accent: '#fb7185',
   },
   {
-    id: 'knowledge', title: 'Knowledge hub', emoji: '📚',
+    id: 'knowledge', title: 'Knowledge hub', emoji: '📚', icon: BookOpen,
     desc: 'Learn about sustainable living with curated articles, tips, and guides on recycling and the circular economy.',
     steps: ['Browse eco articles', 'Learn recycling tips', 'Share with friends', 'Make better choices'],
     benefit: 'Become an eco expert',
@@ -39,7 +31,15 @@ const FEATURE_DETAILS = [
     accent: '#22d3ee',
   },
   {
-    id: 'waste', title: 'Recycle almost anything', emoji: '♻️',
+    id: 'pickup', title: 'Schedule a pickup', emoji: '🚛', icon: Truck,
+    desc: 'Give your old items a second life — book a doorstep pickup in 3 taps and earn KarmaCoins for going green.',
+    steps: ['Pick what you want to recycle', 'Choose date & time slot', 'Agent comes to your door', 'Earn KarmaCoins XP instantly'],
+    benefit: 'Earn coins on every pickup',
+    gradient: ['#052e16', '#15803d'] as [string, string],
+    accent: '#4ade80',
+  },
+  {
+    id: 'waste', title: 'Recycle almost anything', emoji: '♻️', icon: Recycle,
     desc: 'From old gadgets to glass bottles — we give 10 categories of household items a responsible second life, away from landfills.',
     steps: ['Phones, laptops & appliances', 'Plastic, paper & metal', 'Glass, shoes & textiles', 'Every item earns KarmaCoins'],
     benefit: 'Nothing goes to waste',
@@ -47,7 +47,7 @@ const FEATURE_DETAILS = [
     accent: '#fbbf24',
   },
   {
-    id: 'instant', title: 'Instant credit', emoji: '⚡',
+    id: 'instant', title: 'Instant credit', emoji: '⚡', icon: Zap,
     desc: 'No waiting — KarmaCoins XP are credited to your wallet immediately after the agent verifies and collects your recyclables.',
     steps: ['Agent weighs items at door', 'Verification done on spot', 'Coins added instantly', 'Check wallet in real-time'],
     benefit: 'Zero wait for rewards',
@@ -55,7 +55,7 @@ const FEATURE_DETAILS = [
     accent: '#818cf8',
   },
   {
-    id: 'agents', title: 'Verified agents', emoji: '🛡️',
+    id: 'agents', title: 'Verified agents', emoji: '🛡️', icon: Shield,
     desc: 'All our pickup agents are background-verified and trained. Track them live on the map and contact directly from the app.',
     steps: ['Background-checked partners', 'Live GPS tracking', 'Direct call from app', 'Rate after every pickup'],
     benefit: 'Safe & trusted pickups',
@@ -282,8 +282,7 @@ export function DashboardScreen({ navigation }: any) {
 
         <View style={[z.discoverRow, isMobile && { gap: 10 }]}>
           {FEATURE_DETAILS.map((f, i) => {
-            const icons = [Truck, Gift, BookOpen, Recycle, Zap, Shield];
-            const Icon = icons[i] || Package;
+            const Icon = f.icon || Package;
             const cardW = isMobile ? Math.floor((width - 2 * pad - 10) / 2) : undefined;
             return (
               <TouchableOpacity
