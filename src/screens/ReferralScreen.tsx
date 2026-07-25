@@ -94,7 +94,7 @@ export function ReferralScreen({ navigation }: any) {
                   <View style={styles.codeBox}>
                     <Text style={styles.codeLabel}>YOUR REFERRAL CODE</Text>
                     <View style={styles.codeRow}>
-                      <Text style={styles.codeValue} selectable>
+                      <Text style={styles.codeValue} selectable numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.5}>
                         {referralCode || '—'}
                       </Text>
                       <TouchableOpacity
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
   codeBox: { width: '100%', backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 20, padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)', marginBottom: 16 },
   codeLabel: { color: 'rgba(255,255,255,0.7)', fontSize: 11, fontWeight: '700', letterSpacing: 1.5, marginBottom: 8 },
   codeRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  codeValue: { color: 'white', fontSize: 26, fontWeight: '900', letterSpacing: 2, flex: 1 },
+  codeValue: { color: 'white', fontSize: 22, fontWeight: '900', letterSpacing: 1, flex: 1 },
   copyBtn: { backgroundColor: 'white', width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
 
   shareBtn: { flexDirection: 'row', backgroundColor: 'rgba(255,255,255,0.2)', width: '100%', height: 56, borderRadius: 16, alignItems: 'center', justifyContent: 'center', gap: 12, borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.3)' },

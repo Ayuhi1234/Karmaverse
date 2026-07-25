@@ -10,8 +10,10 @@ import { REDEEM_INFO_MESSAGE, showRedeemInfoNow, isRedeemLive } from '../utils/r
 const showWithdrawInfo = () => showRedeemInfoNow();
 
 export function WalletScreen({ navigation }: any) {
+  // balance = current spendable/redeemable coins (used for redeem flow)
+  // lifetime = totalCoinsEarned — never decreases on redeem
   const [balance, setBalance] = useState(0);
-  const [redeemable, setRedeemable] = useState(0);
+  const [lifetime, setLifetime] = useState(0);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -22,13 +24,10 @@ export function WalletScreen({ navigation }: any) {
           profileService.getProfile().catch(() => ({})),
           profileService.getTransactionHistory().catch(() => []),
         ]);
-        const total = profileData.karmaCoins || profileData.coins || 0;
-        setBalance(total);
-        // Redeemable = coins eligible to cash out. Uses the backend field when
-        // present; until it ships, all earned coins are treated as redeemable.
-        setRedeemable(
-          profileData.redeemableKarmaCoins ?? profileData.redeemableCoins ?? total
-        );
+        const spendable = profileData.karmaCoins ?? profileData.coins ?? profileData.balance ?? 0;
+        setBalance(spendable);
+        // Lifetime total ever earned — backfilled server-side for all users.
+        setLifetime(profileData.totalCoinsEarned ?? spendable);
         setTransactions(Array.isArray(txData) ? txData : []);
       } catch (error) {
         console.error('Wallet fetch error:', error);
@@ -76,7 +75,7 @@ export function WalletScreen({ navigation }: any) {
           {/* Balance card */}
           <View style={styles.balanceCard}>
             <View style={styles.cardTopRow}>
-              <Text style={styles.cardLabel}>TOTAL KC</Text>
+              <Text style={styles.cardLabel}>TOTAL KC EARNED</Text>
               <View style={styles.activeTag}>
                 <View style={styles.activeDot} />
                 <Text style={styles.activeText}>Active</Text>
@@ -84,7 +83,7 @@ export function WalletScreen({ navigation }: any) {
             </View>
             <View style={styles.balanceRow}>
               <KarmaCoin size={44} glow animated />
-              <Text style={styles.balanceText}>{balance.toLocaleString()}</Text>
+              <Text style={styles.balanceText}>{lifetime.toLocaleString()}</Text>
             </View>
             <View style={styles.cardDivider} />
             <View style={styles.redeemableRow}>
@@ -92,10 +91,10 @@ export function WalletScreen({ navigation }: any) {
                 <Text style={styles.redeemableLabel}>REDEEMABLE KC</Text>
                 <View style={styles.redeemableValueRow}>
                   <KarmaCoin size={18} />
-                  <Text style={styles.redeemableValue}>{redeemable.toLocaleString()}</Text>
+                  <Text style={styles.redeemableValue}>{balance.toLocaleString()}</Text>
                 </View>
               </View>
-              <Text style={styles.cardSub}>≈ ₹{(redeemable * 0.1).toFixed(0)} value</Text>
+              <Text style={styles.cardSub}>≈ ₹{(balance * 0.1).toFixed(0)} value</Text>
             </View>
           </View>
         </LinearGradient>
