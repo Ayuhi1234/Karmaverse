@@ -493,14 +493,8 @@ export function LoginScreen({ navigation }: any) {
 
     setEmailError('');
 
-    // check-user only understands email today (phone lookup pending on the
-    // backend) — the login endpoint DOES accept a phone identifier, so for a
-    // phone we skip the check and go straight to the password step.
-    if (isPhoneInput) {
-      setStep('login');
-      return;
-    }
-
+    // check-user now supports both email and phone — route to the password step
+    // only if an account actually exists, otherwise send the user to sign up.
     setStep('checking');
     try {
       const res = await authService.checkUser(raw);
@@ -508,7 +502,9 @@ export function LoginScreen({ navigation }: any) {
       if (res?.data?.isRegistered) {
         setStep('login');
       } else {
-        setEmail(raw);
+        // Pre-fill the right field on the sign-up form based on what they typed
+        if (isPhoneInput) setPhone(raw);
+        else setEmail(raw);
         setStep('signup');
       }
     } catch (error: any) {
