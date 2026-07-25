@@ -469,7 +469,7 @@ const z = StyleSheet.create({
   viewAll: { color: '#16a34a', fontWeight: '700', fontSize: 14 },
 
   // Discover
-  discoverRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 16 },
+  discoverRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 16, justifyContent: 'center' },
   discoverCard: { width: '31.5%', borderRadius: 16, overflow: 'hidden', shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.08, shadowRadius: 12, elevation: 3 },
   discoverCardInner: { padding: 18, minHeight: 150, justifyContent: 'space-between', position: 'relative', overflow: 'hidden' },
   discoverCardDecor: { position: 'absolute', top: -15, right: -15, width: 60, height: 60, borderRadius: 30, backgroundColor: 'rgba(255,255,255,0.08)' },
