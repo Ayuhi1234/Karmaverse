@@ -401,7 +401,7 @@ export function SplashScreen({ navigation, route }: any) {
 
             <View style={[s.featGrid, { marginTop: 36 }, isMobile && { flexDirection: 'column' }]}>
               {[
-                { icon: Gift, color: '#e11d48', title: 'Refer & Earn', desc: 'Invite friends — you both earn bonus KarmaCoins' },
+                { icon: Gift, color: '#e11d48', title: 'Refer & Earn', desc: 'Invite friends — you both earn 1,000 bonus KarmaCoins XP' },
                 { icon: Brain, color: '#7c3aed', title: 'Daily Eco Quiz', desc: 'AI-generated daily quiz — never a repeat' },
                 { icon: Megaphone, color: '#16a34a', title: 'Sustainability Community Campaigns', desc: 'Join drives that turn learning into action' },
                 { icon: Trophy, color: '#d97706', title: 'Interactive Challenges', desc: 'Compete, climb the board, stay motivated' },

@@ -616,13 +616,20 @@ export function LoginScreen({ navigation }: any) {
         );
       } else {
         const isPhoneId = /^\d+$/.test(identifier.trim());
+        const backendMsg = error?.response?.data?.message || '';
+        // Backend leaks a bcrypt error ("Illegal arguments: string, undefined")
+        // when the account has no password hash — i.e. it was created via Google
+        // or Facebook. Show a helpful message instead of the raw error.
+        const noPasswordSet = /illegal arguments|data and hash arguments required/i.test(backendMsg);
         showAlert(
           isNetworkError ? 'No internet connection' : 'Login failed',
           isNetworkError
             ? 'Please check your network connection and try again.'
-            : isPhoneId && status === 401
-              ? 'Incorrect password, or no account exists with this mobile number. New here? Go back and sign up with your email.'
-              : (error?.response?.data?.message || 'Incorrect email or password. Please try again.')
+            : noPasswordSet
+              ? 'This account was created using Google or Facebook, so it has no password. Please continue with Google or Facebook, or use “Forgot password” to set one.'
+              : isPhoneId && status === 401
+                ? 'Incorrect password, or no account exists with this mobile number. New here? Go back and sign up with your email.'
+                : (backendMsg || 'Incorrect email or password. Please try again.')
         );
       }
     } finally {
