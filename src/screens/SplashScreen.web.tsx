@@ -395,17 +395,19 @@ export function SplashScreen({ navigation, route }: any) {
             <Text style={s.sectionLabel}>LEARNING & ENGAGEMENT</Text>
             <Text style={[s.sectionTitle, { marginBottom: 16 }, isMobile && { fontSize: 28 }]}>Learn. Act. Earn.</Text>
             <Text style={[s.sectionIntro, isMobile && { fontSize: 15 }]}>
-              Build sustainable habits through interactive challenges, learning modules, eco-quizzes,
-              daily missions, and community campaigns. Every lesson can become real-world impact.
+              Refer friends, play the daily eco-quiz, join community campaigns, take on challenges,
+              and explore our learning modules and knowledge hub. Every step turns into real-world impact.
             </Text>
 
             <View style={[s.featGrid, { marginTop: 36 }, isMobile && { flexDirection: 'column' }]}>
               {[
-                { icon: Trophy, color: '#d97706', title: 'Interactive challenges', desc: 'Compete, climb the board, stay motivated.' },
-                { icon: BookOpen, color: '#0891b2', title: 'Learning modules', desc: 'Bite-sized lessons on real sustainability topics.' },
-                { icon: Brain, color: '#7c3aed', title: 'Eco-quizzes', desc: 'AI-generated daily quizzes — never a repeat.' },
-                { icon: Flame, color: '#e11d48', title: 'Daily missions', desc: 'Build a streak. Make sustainability a habit.' },
-                { icon: Megaphone, color: '#16a34a', title: 'Community campaigns', desc: 'Join drives that turn learning into action.' },
+                { icon: Gift, color: '#e11d48', title: 'Refer & Earn', desc: 'Invite friends — you both earn bonus KarmaCoins.' },
+                { icon: Brain, color: '#7c3aed', title: 'Daily Eco Quiz', desc: 'AI-generated daily quiz — never a repeat.' },
+                { icon: Megaphone, color: '#16a34a', title: 'Sustainability Community Campaigns', desc: 'Join drives that turn learning into action.' },
+                { icon: Trophy, color: '#d97706', title: 'Interactive Challenges', desc: 'Compete, climb the board, stay motivated.' },
+                { icon: BookOpen, color: '#0891b2', title: 'Learning Modules', desc: 'Bite-sized lessons on real sustainability topics.' },
+                { icon: Sprout, color: '#059669', title: 'Sustainability Knowledge', desc: 'Deep-dive guides to live greener every day.' },
+                { icon: GraduationCap, color: '#2563eb', title: 'Knowledge Hub', desc: 'Curated articles, tips, and eco stories.' },
               ].map((l, i) => (
                 <Card key={i} delay={i * 60} style={[s.featCard, { width: isMobile ? '100%' : '22%' }]}>
                   <View style={[s.featIconBg, { backgroundColor: l.color + '15' }]}>
