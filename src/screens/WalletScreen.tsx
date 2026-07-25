@@ -75,7 +75,7 @@ export function WalletScreen({ navigation }: any) {
           {/* Balance card */}
           <View style={styles.balanceCard}>
             <View style={styles.cardTopRow}>
-              <Text style={styles.cardLabel}>TOTAL KC EARNED</Text>
+              <Text style={styles.cardLabel}>TOTAL KARMACOINS XP EARNED</Text>
               <View style={styles.activeTag}>
                 <View style={styles.activeDot} />
                 <Text style={styles.activeText}>Active</Text>
@@ -88,7 +88,7 @@ export function WalletScreen({ navigation }: any) {
             <View style={styles.cardDivider} />
             <View style={styles.redeemableRow}>
               <View>
-                <Text style={styles.redeemableLabel}>REDEEMABLE KC</Text>
+                <Text style={styles.redeemableLabel}>REDEEMABLE KARMACOINS XP</Text>
                 <View style={styles.redeemableValueRow}>
                   <KarmaCoin size={18} />
                   <Text style={styles.redeemableValue}>{balance.toLocaleString()}</Text>
