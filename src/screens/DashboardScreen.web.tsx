@@ -66,6 +66,7 @@ const STATUS_CLR: any = {
 // Time-aware greeting based on the user's device clock.
 const getGreeting = () => {
   const h = new Date().getHours();
+  if (h < 5) return 'Burning the midnight oil 🌙';
   if (h < 12) return 'Good morning';
   if (h < 17) return 'Good afternoon';
   return 'Good evening';
