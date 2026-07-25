@@ -251,7 +251,7 @@ export function SplashScreen({ navigation, route }: any) {
 
             <View style={s.poweredByBadge}>
               <View style={s.poweredByDot}><Text style={s.poweredByDotText}>3R</Text></View>
-              <Text style={s.poweredByText}>Powered by <Text style={{ color: 'white', fontWeight: '800' }}>3R Zero Waste</Text></Text>
+              <Text style={s.poweredByText}>Powered by <Text style={{ color: 'white', fontWeight: '800' }}>3RZeroWaste</Text></Text>
             </View>
 
             {/* CTA */}
@@ -419,7 +419,7 @@ export function SplashScreen({ navigation, route }: any) {
                 <Image source={require('../../assets/logo-nav.png')} resizeMode="contain" style={s.footerLogoImg} />
               </View>
               <Text style={s.footerDesc}>
-                3R Zero Waste® was founded to do waste management differently — turning India's growing waste into value through the circular economy. KarmaVerse is its sustainability rewards ecosystem.
+                3RZeroWaste® was founded to do waste management differently — turning India's growing waste into value through the circular economy. KarmaVerse is its sustainability rewards ecosystem.
               </Text>
               <TouchableOpacity onPress={() => Linking.openURL('https://0waste.co.in/')}>
                 <Text style={[s.footerLink, { marginTop: 10, color: '#4ade80', fontWeight: '700' }]}>0waste.co.in ↗</Text>
@@ -467,7 +467,7 @@ export function SplashScreen({ navigation, route }: any) {
             </View>
           </View>
           <View style={[s.container, s.footerBottom, isMobile && { paddingHorizontal: 20 }]}>
-            <Text style={s.footerCopy}>© 2026 KarmaVer$e by 3R Zero Waste. All rights reserved.</Text>
+            <Text style={s.footerCopy}>© 2026 KarmaVer$e by 3RZeroWaste. All rights reserved.</Text>
           </View>
         </View>
 
@@ -504,7 +504,7 @@ const s = StyleSheet.create({
   heroContent: { maxWidth: MAX, width: '100%', alignSelf: 'center', paddingHorizontal: 32, paddingTop: 60 },
   heroBadge: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(255,255,255,0.08)', alignSelf: 'flex-start', borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', marginBottom: 24 },
   heroBadgeDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#4ade80' },
-  heroBadgeText: { color: 'rgba(255,255,255,0.8)', fontSize: 13, fontWeight: '600' },
+  heroBadgeText: { color: 'rgba(255,255,255,0.8)', fontSize: 16, fontWeight: '700' },
   heroTitle: { fontSize: 50, fontWeight: '900', color: 'white', letterSpacing: -1.5, lineHeight: 60, marginBottom: 20 },
   heroCursor: { color: '#4ade80', fontWeight: '400' },
   heroSub: { fontSize: 18, color: 'rgba(255,255,255,0.7)', fontWeight: '500', lineHeight: 28, maxWidth: 620, marginBottom: 32 },
