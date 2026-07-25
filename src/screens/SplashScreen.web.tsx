@@ -19,7 +19,7 @@ const isMobile = W < 768;
 const MAX = 1100;
 
 const KARMA_PHRASE = 'Rewards.';
-const HEADLINE_TEXT = `Turning Sustainable Gestures\ninto ${KARMA_PHRASE}`;
+const HEADLINE_TEXT = `Smart Sustainability,\nReal ${KARMA_PHRASE}`;
 const KARMA_SPLIT = HEADLINE_TEXT.length - KARMA_PHRASE.length;
 
 // Card used across every grid: fades + slides up the first time it scrolls into
@@ -233,7 +233,7 @@ export function SplashScreen({ navigation, route }: any) {
             {/* Badge */}
             <View style={s.heroBadge}>
               <View style={s.heroBadgeDot} />
-              <Text style={s.heroBadgeText}>India's Sustainability Rewards Ecosystem</Text>
+              <Text style={s.heroBadgeText}>AI-Powered Sustainability Rewards</Text>
             </View>
 
             <Text style={[s.heroTitle, isMobile && { fontSize: 34 }]}>
@@ -243,10 +243,13 @@ export function SplashScreen({ navigation, route }: any) {
               )}
               <Animated.Text style={[s.heroCursor, { opacity: cursorBlink }]}>|</Animated.Text>
             </Text>
+
+            <Text style={[s.heroTagline, isMobile && { fontSize: 18 }]}>“Kar Bhala Toh Ho Bhala.” 🌱</Text>
+
             <Text style={[s.heroSub, isMobile && { fontSize: 16 }]}>
-              Every sustainable action deserves recognition. KarmaVer$e transforms your everyday
-              eco-friendly choices into KarmaCoins that unlock real rewards 🎁 while creating
-              measurable environmental impact.
+              KarmaVer$e rewards every sustainable action — schedule doorstep recycling pickups,
+              sharpen your green knowledge with our AI-powered eco-quiz, and turn it all into
+              KarmaCoins with real, measurable impact.
             </Text>
 
             <View style={s.poweredByBadge}>
@@ -505,7 +508,8 @@ const s = StyleSheet.create({
   heroBadge: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(255,255,255,0.08)', alignSelf: 'flex-start', borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', marginBottom: 24 },
   heroBadgeDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#4ade80' },
   heroBadgeText: { color: 'rgba(255,255,255,0.8)', fontSize: 16, fontWeight: '700' },
-  heroTitle: { fontSize: 50, fontWeight: '900', color: 'white', letterSpacing: -1.5, lineHeight: 60, marginBottom: 20 },
+  heroTitle: { fontSize: 50, fontWeight: '900', color: 'white', letterSpacing: -1.5, lineHeight: 60, marginBottom: 12 },
+  heroTagline: { fontSize: 22, fontWeight: '700', fontStyle: 'italic', color: '#4ade80', marginBottom: 18 },
   heroCursor: { color: '#4ade80', fontWeight: '400' },
   heroSub: { fontSize: 18, color: 'rgba(255,255,255,0.7)', fontWeight: '500', lineHeight: 28, maxWidth: 620, marginBottom: 32 },
   heroCTA: { flexDirection: 'row', gap: 16, marginTop: 28, marginBottom: 44 },
