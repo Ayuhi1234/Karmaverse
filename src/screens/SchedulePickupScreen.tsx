@@ -348,7 +348,14 @@ export function SchedulePickupScreen({ navigation }: any) {
   }, [cart]);
 
   // Derived Grid Logic for Step 1
-  const displayedItems = useMemo(() => ALL_ITEMS.filter(item => item.catId === activeCategory), [activeCategory]);
+  // Sort each category's items by coin value, high → low. Condition items sort
+  // by their Working value (the higher of the two).
+  const sortCoins = (item: CatalogueItem) =>
+    item.hasCondition ? (item.coinsWorking || 0) : (item.coins || 0);
+  const displayedItems = useMemo(
+    () => ALL_ITEMS.filter(item => item.catId === activeCategory).sort((a, b) => sortCoins(b) - sortCoins(a)),
+    [activeCategory]
+  );
   const activeCatData = CATEGORIES.find(c => c.id === activeCategory);
 
   const handleConfirmPickup = async () => {
