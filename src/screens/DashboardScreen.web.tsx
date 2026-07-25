@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Truck, Gamepad2, Coins, ChevronRight, Package, Users, Gift, BookOpen, Star, Flame, ArrowRight, Sparkles, Trophy, Calendar, X, CheckCircle2, BadgeCheck, ShieldCheck } from 'lucide-react-native';
+import { Truck, Gamepad2, Coins, ChevronRight, Package, Users, Gift, BookOpen, Star, Flame, ArrowRight, Zap, Sparkles, Trophy, Calendar, X, CheckCircle2, BadgeCheck, ShieldCheck } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { WebFooter } from '../components/shared/WebFooter';
@@ -45,6 +45,14 @@ const FEATURE_DETAILS = [
     benefit: 'Learn and earn daily',
     gradient: ['#4c1d95', '#7c3aed'] as [string, string],
     accent: '#c084fc',
+  },
+  {
+    id: 'instant', title: 'Instant credit', emoji: '⚡', icon: Zap,
+    desc: 'No waiting — KarmaCoins XP are credited to your wallet immediately after the agent verifies and collects your recyclables.',
+    steps: ['Agent weighs items at door', 'Verification done on spot', 'Coins added instantly', 'Check wallet in real-time'],
+    benefit: 'Zero wait for rewards',
+    gradient: ['#312e81', '#4f46e5'] as [string, string],
+    accent: '#818cf8',
   },
 ];
 
