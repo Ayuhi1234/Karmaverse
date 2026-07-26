@@ -312,14 +312,6 @@ export function DashboardScreen({ navigation, route }: any) {
         </LinearGradient>
       </View>
 
-      {/* ════════ FIRST PICKUP CTA ════════ */}
-      <View style={[z.container, { marginTop: 28, paddingHorizontal: pad }]}>
-        <TouchableOpacity style={z.firstPickupCta} onPress={() => nav('SchedulePickup')} activeOpacity={0.85}>
-          <Truck size={18} color="white" />
-          <Text style={z.firstPickupCtaText}>Schedule Your First Pickup</Text>
-          <ArrowRight size={16} color="white" />
-        </TouchableOpacity>
-      </View>
 
       {/* ════════ DISCOVER FEATURES ════════ */}
       <View style={[z.container, { marginTop: 28, paddingHorizontal: pad }]}>
