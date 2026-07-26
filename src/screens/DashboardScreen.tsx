@@ -6,6 +6,7 @@ import { Bell, ChevronRight, Truck, Camera, Clock, Users, Package, Flame, Gamepa
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { QuizCalendarModal } from '../components/shared/QuizCalendarModal';
 import { NotificationPanel } from '../components/shared/NotificationPanel';
+import { LaunchDayPopup } from '../components/shared/LaunchDayPopup';
 import { useNotifications } from '../context/NotificationContext';
 import { profileService } from '../services/profile';
 import { getLocalDateStr, getLocalYesterdayStr } from '../utils/quizDate';
@@ -13,6 +14,16 @@ import { bookingService } from '../services/booking';
 import { BACKEND_BASE } from '../services/api';
 import { REDEEM_INFO_MESSAGE, showRedeemInfoOnce } from '../utils/redeemInfo';
 import { getStableUserSuffix } from '../utils/userId';
+import { isLaunchDay } from '../utils/launchDay';
+import { EARLY_BIRD_COINS } from '../utils/earlyBird';
+
+const FEATURED_REWARDS = [
+  { emoji: '☕', brand: 'Not Just Chaai', label: 'Café Coupons', gradient: ['#7c2d12', '#c2410c'] as [string, string] },
+  { emoji: '🎁', brand: 'Three Sixty', label: 'Premium Gift Cards', gradient: ['#581c87', '#9333ea'] as [string, string] },
+  { emoji: '📱', brand: 'Cashify', label: 'Refurbished Smartphones', gradient: ['#164e63', '#0891b2'] as [string, string] },
+  { emoji: '📱', brand: 'Grest', label: 'Refurbished Smartphones', gradient: ['#134e4a', '#0f766e'] as [string, string] },
+  { emoji: '🍽️', brand: 'Dining Voucher', label: 'Couple & Family Dining', gradient: ['#831843', '#be185d'] as [string, string] },
+];
 
 const STATUS_COLOR: any = {
   Completed: { bg: "rgba(22,163,74,0.1)", text: "#16a34a", dot: "#16a34a" },
@@ -137,7 +148,7 @@ function getGreeting(): string {
   return 'Good evening';
 }
 
-export function DashboardScreen({ navigation }: any) {
+export function DashboardScreen({ navigation, route }: any) {
   const [userName, setUserName] = useState('Loading...');
   const [balance, setBalance] = useState(0);
   const [streak, setStreak] = useState(0);
@@ -151,6 +162,18 @@ export function DashboardScreen({ navigation }: any) {
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [selectedFeature, setSelectedFeature] = useState<typeof FEATURES[0] | null>(null);
   const [quizPlayedToday, setQuizPlayedToday] = useState(false);
+  const [showLaunchPopup, setShowLaunchPopup] = useState(false);
+  const [showWelcomeBonusBanner, setShowWelcomeBonusBanner] = useState(false);
+
+  // New signup arriving straight from the Welcome Celebration scratch card —
+  // show the "coins added" banner once, then clear the param so it doesn't
+  // reappear on the next tab focus.
+  useEffect(() => {
+    if (route?.params?.justClaimedWelcomeBonus) {
+      setShowWelcomeBonusBanner(true);
+      navigation.setParams({ justClaimedWelcomeBonus: undefined });
+    }
+  }, [route?.params?.justClaimedWelcomeBonus]);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -233,6 +256,17 @@ export function DashboardScreen({ navigation }: any) {
     (async () => {
       const token = await AsyncStorage.getItem('userToken');
       showRedeemInfoOnce(`firstHomeRedeemInfo_${getStableUserSuffix(token)}`);
+
+      if (isLaunchDay()) {
+        const suffix = getStableUserSuffix(token);
+        const todayStr = getLocalDateStr();
+        const key = `launchDayConfettiSeen_${suffix}`;
+        const lastSeen = await AsyncStorage.getItem(key);
+        if (lastSeen !== todayStr) {
+          setShowLaunchPopup(true);
+          await AsyncStorage.setItem(key, todayStr);
+        }
+      }
     })();
 
     return unsubscribe;
@@ -347,6 +381,40 @@ export function DashboardScreen({ navigation }: any) {
           </View>
         </View>
       </LinearGradient>
+
+      {/* Welcome bonus banner — shown once, right after claiming on the scratch card */}
+      {showWelcomeBonusBanner && (
+        <View style={styles.section}>
+          <TouchableOpacity activeOpacity={0.9} onPress={() => setShowWelcomeBonusBanner(false)}>
+            <LinearGradient colors={['#166534', '#15803d', '#22c55e']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.welcomeBonusBanner}>
+              <KarmaCoin size={26} />
+              <Text style={styles.welcomeBonusText}>🎁 Welcome, Early Bird! Your {EARLY_BIRD_COINS.toLocaleString()} Karma Coins have been credited successfully. Schedule your first pickup today and unlock even more rewards, badges, and exclusive partner vouchers.</Text>
+              <X size={16} color="rgba(255,255,255,0.7)" />
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Featured Rewards */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Featured rewards 🎁</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12 }}>
+          {FEATURED_REWARDS.map((r, i) => (
+            <View key={i} style={styles.rewardCard}>
+              <LinearGradient colors={r.gradient} style={styles.rewardCardInner} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+                <Text style={styles.rewardCardEmoji}>{r.emoji}</Text>
+                <Text style={styles.rewardCardBrand}>{r.brand}</Text>
+                <Text style={styles.rewardCardLabel}>{r.label}</Text>
+              </LinearGradient>
+            </View>
+          ))}
+        </ScrollView>
+        <TouchableOpacity style={styles.firstPickupCta} onPress={() => navigation.navigate('SchedulePickup')} activeOpacity={0.85}>
+          <Truck size={18} color="white" />
+          <Text style={styles.firstPickupCtaText}>Schedule Your First Pickup</Text>
+          <ArrowRight size={16} color="white" />
+        </TouchableOpacity>
+      </View>
 
       {/* Impact Cards */}
       {/* Feature Discovery — Swipeable Cards */}
@@ -571,6 +639,8 @@ export function DashboardScreen({ navigation }: any) {
       onMarkAllRead={markAllRead}
       onClearAll={clearAll}
     />
+
+    {showLaunchPopup && <LaunchDayPopup onClose={() => setShowLaunchPopup(false)} />}
     </View>
   );
 }
@@ -675,4 +745,17 @@ const styles = StyleSheet.create({
   modalBenefitText: { fontSize: 15, fontWeight: '800' },
   modalCta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 16, paddingVertical: 14, borderRadius: 100 },
   modalCtaText: { color: 'white', fontWeight: '900', fontSize: 15 },
+
+  // Welcome bonus banner
+  welcomeBonusBanner: { flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 16, padding: 14 },
+  welcomeBonusText: { flex: 1, color: 'white', fontSize: 12, fontWeight: '700', lineHeight: 17 },
+
+  // Featured rewards
+  rewardCard: { width: 130, borderRadius: 16, overflow: 'hidden', elevation: 2 },
+  rewardCardInner: { padding: 14, minHeight: 110, justifyContent: 'center' },
+  rewardCardEmoji: { fontSize: 26, marginBottom: 8 },
+  rewardCardBrand: { color: 'white', fontSize: 12, fontWeight: '900', marginBottom: 2 },
+  rewardCardLabel: { color: 'rgba(255,255,255,0.75)', fontSize: 10, fontWeight: '600', lineHeight: 13 },
+  firstPickupCta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#15803d', borderRadius: 14, paddingVertical: 14, marginTop: 14 },
+  firstPickupCtaText: { color: 'white', fontSize: 14, fontWeight: '900' },
 });

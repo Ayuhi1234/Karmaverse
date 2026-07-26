@@ -44,7 +44,7 @@ export const TERMS: LegalDoc = {
     {
       heading: 'Account registration',
       bullets: [
-        'Register using a valid email address and phone number, or sign in with your Google or Facebook account',
+        'Register using a valid email address and mobile number, or sign in with your Google or Facebook account',
         'One account per person. Duplicate or fraudulent accounts may be terminated without notice',
         'You are solely responsible for all activity under your account',
         'We may suspend or terminate accounts that violate these terms',
@@ -198,7 +198,7 @@ export const PRIVACY: LegalDoc = {
       heading: 'Information we collect',
       body: ['To provide and improve our services, we collect:'],
       bullets: [
-        'Account details: your name, email address, and phone number. You may also register or sign in using Google Sign-In or Facebook Login',
+        'Account details: your name, email address, and mobile number. You may also register or sign in using Google Sign-In or Facebook Login',
         'Profile details (optional): age, gender, marital status, and employment status, if you choose to complete your profile',
         'Pickup details: your address and the waste categories you schedule',
         'Location data: your device location to assign the nearest available Agent and to show live pickup tracking',
@@ -339,13 +339,13 @@ export const DATA_DELETION: LegalDoc = {
       bullets: [
         'Email: info@0waste.co.in',
         'Subject line: "Delete my account"',
-        'Include the phone number or email address you registered with, so we can locate your account',
+        'Include the mobile number or email address you registered with, so we can locate your account',
       ],
     },
     {
       heading: 'What we delete',
       bullets: [
-        'Your account and profile details (name, email, phone number, and any optional profile fields)',
+        'Your account and profile details (name, email, mobile number, and any optional profile fields)',
         'Pickup history, addresses, and location data associated with your account',
         'Your KarmaCoins XP balance and transaction history',
         'Any data received from third-party sign-in providers (such as your Google or Facebook profile information)',

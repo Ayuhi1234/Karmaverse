@@ -276,7 +276,7 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
             <Field label="Apartment / Building / Society" value={building} onChangeText={setBuilding} placeholder="e.g. Green Valley Apartments" />
             <Field label="Landmark (optional)" value={landmark} onChangeText={setLandmark} placeholder="e.g. near IIT main gate" />
             <Field label="Receiver's name" value={receiverName} onChangeText={setReceiverName} placeholder="Who should the agent ask for?" />
-            <Field label="Receiver's phone" value={receiverPhone} onChangeText={(t) => setReceiverPhone(t.replace(/[^0-9]/g, '').slice(0, 10))} placeholder="10-digit mobile number" keyboardType="phone-pad" />
+            <Field label="Receiver's mobile number" value={receiverPhone} onChangeText={(t) => setReceiverPhone(t.replace(/[^0-9]/g, '').slice(0, 10))} placeholder="10-digit mobile number" keyboardType="phone-pad" />
 
             <Text style={styles.fieldLabel}>Save address as</Text>
             <View style={styles.labelRow}>

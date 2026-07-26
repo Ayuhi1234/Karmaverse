@@ -5,13 +5,24 @@ import { Truck, Gamepad2, Coins, ChevronRight, Package, Users, Gift, BookOpen, S
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { WebFooter } from '../components/shared/WebFooter';
+import { LaunchDayPopup } from '../components/shared/LaunchDayPopup';
 import { profileService } from '../services/profile';
 import { bookingService } from '../services/booking';
 import { getLocalDateStr, getLocalYesterdayStr } from '../utils/quizDate';
 import { REDEEM_INFO_MESSAGE, showRedeemInfoOnce } from '../utils/redeemInfo';
 import { getStableUserSuffix } from '../utils/userId';
+import { isLaunchDay } from '../utils/launchDay';
+import { EARLY_BIRD_COINS } from '../utils/earlyBird';
 
 const MAX = 1200;
+
+const FEATURED_REWARDS = [
+  { emoji: '☕', brand: 'Not Just Chaai', label: 'Café Coupons', gradient: ['#7c2d12', '#c2410c'] as [string, string] },
+  { emoji: '🎁', brand: 'Three Sixty', label: 'Premium Gift Cards', gradient: ['#581c87', '#9333ea'] as [string, string] },
+  { emoji: '📱', brand: 'Cashify', label: 'Refurbished Smartphones', gradient: ['#164e63', '#0891b2'] as [string, string] },
+  { emoji: '📱', brand: 'Grest', label: 'Refurbished Smartphones', gradient: ['#134e4a', '#0f766e'] as [string, string] },
+  { emoji: '🍽️', brand: 'Dining Voucher', label: 'Couple & Family Dining', gradient: ['#831843', '#be185d'] as [string, string] },
+];
 
 const FEATURE_DETAILS = [
   {
@@ -72,7 +83,7 @@ const getGreeting = () => {
   return 'Good evening';
 };
 
-export function DashboardScreen({ navigation }: any) {
+export function DashboardScreen({ navigation, route }: any) {
   const { width } = useWindowDimensions();
   const isMobile = width < 768;
   const isTablet = width >= 768 && width < 1024;
@@ -85,6 +96,18 @@ export function DashboardScreen({ navigation }: any) {
   const [totalPickups, setTotalPickups] = useState(0);
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [selectedFeature, setSelectedFeature] = useState<typeof FEATURE_DETAILS[0] | null>(null);
+  const [showLaunchPopup, setShowLaunchPopup] = useState(false);
+  const [showWelcomeBonusBanner, setShowWelcomeBonusBanner] = useState(false);
+
+  // New signup arriving straight from the Welcome Celebration scratch card —
+  // show the "coins added" banner once, then clear the param so it doesn't
+  // reappear on the next tab focus.
+  useEffect(() => {
+    if (route?.params?.justClaimedWelcomeBonus) {
+      setShowWelcomeBonusBanner(true);
+      navigation.setParams({ justClaimedWelcomeBonus: undefined });
+    }
+  }, [route?.params?.justClaimedWelcomeBonus]);
 
   useEffect(() => {
     const load = async () => {
@@ -130,6 +153,17 @@ export function DashboardScreen({ navigation }: any) {
     (async () => {
       const token = await AsyncStorage.getItem('userToken');
       showRedeemInfoOnce(`firstHomeRedeemInfo_${getStableUserSuffix(token)}`);
+
+      if (isLaunchDay()) {
+        const suffix = getStableUserSuffix(token);
+        const todayStr = getLocalDateStr();
+        const key = `launchDayConfettiSeen_${suffix}`;
+        const lastSeen = await AsyncStorage.getItem(key);
+        if (lastSeen !== todayStr) {
+          setShowLaunchPopup(true);
+          await AsyncStorage.setItem(key, todayStr);
+        }
+      }
     })();
 
     return unsub;
@@ -138,6 +172,7 @@ export function DashboardScreen({ navigation }: any) {
   const nav = (screen: string, p?: any) => navigation.navigate(screen, p);
 
   return (
+    <View style={{ flex: 1 }}>
     <ScrollView style={z.root} showsVerticalScrollIndicator={false}>
 
       {/* ════════ HERO ════════ */}
@@ -211,6 +246,19 @@ export function DashboardScreen({ navigation }: any) {
         </View>
       </LinearGradient>
 
+      {/* Welcome bonus banner — shown once, right after claiming on the scratch card */}
+      {showWelcomeBonusBanner && (
+        <View style={[z.container, { marginTop: 20, paddingHorizontal: pad }]}>
+          <TouchableOpacity activeOpacity={0.9} onPress={() => setShowWelcomeBonusBanner(false)}>
+            <LinearGradient colors={['#166534', '#15803d', '#22c55e']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={z.welcomeBonusBanner}>
+              <KarmaCoin size={30} />
+              <Text style={z.welcomeBonusText}>🎁 Welcome, Early Bird! Your {EARLY_BIRD_COINS.toLocaleString()} Karma Coins have been credited successfully. Schedule your first pickup today and unlock even more rewards, badges, and exclusive partner vouchers.</Text>
+              <X size={16} color="rgba(255,255,255,0.7)" />
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* ════════ TWO ACTION CARDS: Schedule + Quiz ════════ */}
       <View style={[z.container, { marginTop: 24, paddingHorizontal: pad }]}>
         <View style={[z.actionPair, isMobile && { flexDirection: 'column' }]}>
@@ -270,6 +318,34 @@ export function DashboardScreen({ navigation }: any) {
             <Text style={z.referBtnText}>Refer now</Text>
           </TouchableOpacity>
         </LinearGradient>
+      </View>
+
+      {/* ════════ FEATURED REWARDS ════════ */}
+      <View style={[z.container, { marginTop: 28, paddingHorizontal: pad }]}>
+        <View style={z.sectionHead}>
+          <View>
+            <Text style={z.sectionLabel}>REDEEM</Text>
+            <Text style={z.sectionTitle}>Featured rewards</Text>
+          </View>
+        </View>
+
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 14 }}>
+          {FEATURED_REWARDS.map((r, i) => (
+            <View key={i} style={z.rewardCard}>
+              <LinearGradient colors={r.gradient} style={z.rewardCardInner} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+                <Text style={z.rewardCardEmoji}>{r.emoji}</Text>
+                <Text style={z.rewardCardBrand}>{r.brand}</Text>
+                <Text style={z.rewardCardLabel}>{r.label}</Text>
+              </LinearGradient>
+            </View>
+          ))}
+        </ScrollView>
+
+        <TouchableOpacity style={z.firstPickupCta} onPress={() => nav('SchedulePickup')} activeOpacity={0.85}>
+          <Truck size={18} color="white" />
+          <Text style={z.firstPickupCtaText}>Schedule Your First Pickup</Text>
+          <ArrowRight size={16} color="white" />
+        </TouchableOpacity>
       </View>
 
       {/* ════════ DISCOVER FEATURES ════════ */}
@@ -425,6 +501,9 @@ export function DashboardScreen({ navigation }: any) {
         </Modal>
       )}
     </ScrollView>
+
+    {showLaunchPopup && <LaunchDayPopup onClose={() => setShowLaunchPopup(false)} />}
+    </View>
   );
 }
 
@@ -531,4 +610,17 @@ const z = StyleSheet.create({
   modalStepText: { fontSize: 15, fontWeight: '600', color: '#334155', flex: 1 },
   modalBenefit: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 8, padding: 14, borderRadius: 14, borderWidth: 1 },
   modalBenefitText: { fontSize: 14, fontWeight: '800' },
+
+  // Welcome bonus banner
+  welcomeBonusBanner: { flexDirection: 'row', alignItems: 'center', gap: 14, borderRadius: 18, padding: 16 },
+  welcomeBonusText: { flex: 1, color: 'white', fontSize: 13, fontWeight: '700', lineHeight: 19 },
+
+  // Featured rewards
+  rewardCard: { width: 150, borderRadius: 18, overflow: 'hidden', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 10, elevation: 2 },
+  rewardCardInner: { padding: 16, minHeight: 130, justifyContent: 'center' },
+  rewardCardEmoji: { fontSize: 30, marginBottom: 10 },
+  rewardCardBrand: { color: 'white', fontSize: 14, fontWeight: '900', marginBottom: 3 },
+  rewardCardLabel: { color: 'rgba(255,255,255,0.75)', fontSize: 11, fontWeight: '600', lineHeight: 15 },
+  firstPickupCta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: '#15803d', borderRadius: 16, paddingVertical: 16, marginTop: 18 },
+  firstPickupCtaText: { color: 'white', fontSize: 15, fontWeight: '900' },
 });

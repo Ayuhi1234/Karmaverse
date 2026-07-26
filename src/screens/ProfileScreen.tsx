@@ -627,7 +627,7 @@ export function ProfileScreen({ navigation }: any) {
                   <Text style={styles.userPhone}>{userProfile.phone}</Text>
                 ) : (
                   <TouchableOpacity onPress={openEditModal} activeOpacity={0.7}>
-                    <Text style={styles.addPhoneLink}>+ Add phone number</Text>
+                    <Text style={styles.addPhoneLink}>+ Add mobile number</Text>
                   </TouchableOpacity>
                 )}
                 {userProfile?.email ? <Text style={styles.userEmail}>{userProfile.email}</Text> : null}
@@ -869,7 +869,7 @@ export function ProfileScreen({ navigation }: any) {
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Phone Number</Text>
+                  <Text style={styles.inputLabel}>Mobile Number</Text>
                   <View style={styles.inputWrapper}>
                     <Phone size={18} color="#94a3b8" style={styles.inputIcon} />
                     <TextInput 
@@ -921,7 +921,7 @@ export function ProfileScreen({ navigation }: any) {
                 </View>
                 <Text style={{ fontSize: 20, fontWeight: '900', color: '#0f172a', marginBottom: 6, textAlign: 'center' }}>Secure verification</Text>
                 <Text style={{ fontSize: 13, color: '#64748b', fontWeight: '500', marginBottom: 4, textAlign: 'center' }}>
-                  {otpStage === 'phone' ? 'OTP sent to your new phone number' : 'OTP sent to your registered phone'}
+                  {otpStage === 'phone' ? 'OTP sent to your new mobile number' : 'OTP sent to your registered mobile number'}
                 </Text>
                 <Text style={{ fontSize: 14, color: '#15803d', fontWeight: '800', marginBottom: 24, textAlign: 'center' }}>
                   +91 {otpStage === 'phone' ? editForm.phone : userProfile?.phone}

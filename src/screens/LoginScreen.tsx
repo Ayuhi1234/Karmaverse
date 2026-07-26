@@ -1,5 +1,5 @@
 ﻿import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, SafeAreaView, StatusBar, ScrollView, Platform, KeyboardAvoidingView, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, SafeAreaView, StatusBar, ScrollView, Platform, KeyboardAvoidingView, Image, Animated, Easing } from 'react-native';
 import { showAlert } from '../utils/alert';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -11,6 +11,8 @@ import { BACKEND_BASE } from '../services/api';
 import { profileService } from '../services/profile';
 import { referralService } from '../services/referral';
 import { useUserSocket } from '../context/UserSocketContext';
+import { LaunchConfetti } from '../components/shared/LaunchConfetti';
+import { EARLY_BIRD_COINS } from '../utils/earlyBird';
 let GoogleSignin: any = null;
 let isErrorWithCode: any = null;
 let statusCodes: any = {};
@@ -99,7 +101,7 @@ function loadFacebookSdkScript(): Promise<void> {
   return facebookSdkScriptPromise;
 }
 
-type Step = 'entry' | 'checking' | 'login' | 'signup' | 'verify_signup_otp' | 'referral_bonus' | 'demographics' | 'reset_password';
+type Step = 'entry' | 'checking' | 'login' | 'signup' | 'verify_signup_otp' | 'welcome_celebration' | 'referral_bonus' | 'demographics' | 'reset_password';
 
 // Covers the common emoji Unicode blocks — used to reject emojis in email fields.
 // Two copies: EMOJI_REGEX (no 'g') for .test(), EMOJI_REGEX_GLOBAL for .replace() —
@@ -174,6 +176,21 @@ function SelectionPills({ options, selected, onSelect }: { options: string[], se
   );
 }
 
+const JOURNEY_STAGES = ['Register', 'Claim Reward', 'Start Your Eco Journey'] as const;
+
+function SignupJourneyProgress({ stage }: { stage: 0 | 1 | 2 }) {
+  return (
+    <View style={styles.journeyProgress}>
+      {JOURNEY_STAGES.map((label, i) => (
+        <React.Fragment key={label}>
+          <Text style={[styles.journeyStage, i <= stage && styles.journeyStageActive]}>{label}</Text>
+          {i < JOURNEY_STAGES.length - 1 && <Text style={styles.journeyArrow}>→</Text>}
+        </React.Fragment>
+      ))}
+    </View>
+  );
+}
+
 export function LoginScreen({ navigation }: any) {
   const { reconnect } = useUserSocket();
   const [step, setStep] = useState<Step>('entry');
@@ -240,6 +257,10 @@ export function LoginScreen({ navigation }: any) {
   const [resendTimer, setResendTimer] = useState(0);
   // Phone used in forgot password flow
   const [forgotPhone, setForgotPhone] = useState('');
+  // Welcome Celebration scratch card — has the user revealed their signup bonus yet
+  const [scratched, setScratched] = useState(false);
+  const scratchFoilAnim = useRef(new Animated.Value(0)).current;
+  const scratchRevealAnim = useRef(new Animated.Value(0)).current;
   // Set when Google Identity Services fails to load/init on web (e.g. origin not authorized yet)
   const [googleBtnError, setGoogleBtnError] = useState('');
 
@@ -564,7 +585,7 @@ export function LoginScreen({ navigation }: any) {
       });
       try {
         await authService.login(email, password);
-        setStep(referralStatus === 'valid' ? 'referral_bonus' : 'demographics');
+        setStep('welcome_celebration');
       } catch (_) {
         showAlert('Account created!', 'Your account was created. Please log in.', [{ text: 'Login', onPress: () => setStep('login') }]);
       }
@@ -581,6 +602,19 @@ export function LoginScreen({ navigation }: any) {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleScratchCard = () => {
+    if (scratched) return;
+    setScratched(true);
+    Animated.parallel([
+      Animated.timing(scratchFoilAnim, { toValue: 1, duration: 550, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+      Animated.spring(scratchRevealAnim, { toValue: 1, friction: 6, tension: 60, useNativeDriver: true }),
+    ]).start();
+  };
+
+  const continueFromWelcomeCelebration = () => {
+    setStep(referralStatus === 'valid' ? 'referral_bonus' : 'demographics');
   };
 
   const handleOtpChange = (text: string, index: number) => {
@@ -647,7 +681,7 @@ export function LoginScreen({ navigation }: any) {
     try {
       await profileService.updateDemographics({ age: ageNum, gender, sexualOrientation, maritalStatus, employment });
       reconnect();
-      navigation.replace('App');
+      navigation.replace('App', { screen: 'Dashboard', params: { justClaimedWelcomeBonus: true } });
     } catch (error: any) {
       const isNetworkError = !error?.response;
       showAlert(
@@ -657,7 +691,7 @@ export function LoginScreen({ navigation }: any) {
           : 'Failed to save profile details. Please try again.',
         [
           { text: 'Retry', onPress: handleCompleteRegistration },
-          { text: 'Skip', style: 'cancel', onPress: () => { reconnect(); navigation.replace('App'); } }
+          { text: 'Skip', style: 'cancel', onPress: () => { reconnect(); navigation.replace('App', { screen: 'Dashboard', params: { justClaimedWelcomeBonus: true } }); } }
         ]
       );
     } finally {
@@ -862,10 +896,10 @@ export function LoginScreen({ navigation }: any) {
           <View style={styles.stepContent}>
             <View>
               <Text style={styles.title}>Forgot password 🔐</Text>
-              <Text style={styles.subtitle}>Enter your registered phone number</Text>
+              <Text style={styles.subtitle}>Enter your registered mobile number</Text>
             </View>
             <InputField
-              placeholder="Registered phone number (10 digits)"
+              placeholder="Registered mobile number (10 digits)"
               value={forgotPhone}
               onChange={(v: string) => setForgotPhone(v.replace(/[^0-9]/g, ''))}
               keyboardType="number-pad"
@@ -875,7 +909,7 @@ export function LoginScreen({ navigation }: any) {
             />
             <PrimaryButton onPress={async () => {
               if (!/^[6-9]\d{9}$/.test(forgotPhone.trim())) {
-                showAlert('Invalid phone', 'Please enter a valid Indian mobile number (must start with 6, 7, 8 or 9).');
+                showAlert('Invalid mobile number', 'Please enter a valid Indian mobile number (must start with 6, 7, 8 or 9).');
                 return;
               }
               setIsLoading(true);
@@ -1031,6 +1065,7 @@ export function LoginScreen({ navigation }: any) {
               <Text style={styles.offlineBannerText}>⚠️ No internet connection. Please check your network.</Text>
             </View>
           )}
+          <SignupJourneyProgress stage={0} />
             <View>
               <Text style={styles.title}>Create your account 🌱</Text>
               <Text style={styles.subtitle}>Join us and earn KarmaCoins XP!</Text>
@@ -1051,7 +1086,7 @@ export function LoginScreen({ navigation }: any) {
             />
             {signupErrors.name ? <Text style={styles.fieldError}>{signupErrors.name}</Text> : null}
             <InputField
-              placeholder="Phone number (10 digits)"
+              placeholder="Mobile number (10 digits)"
               value={phone}
               onChange={(v: string) => { setPhone(v.replace(/[^0-9]/g, '')); setSignupErrors(e => ({ ...e, phone: undefined })); }}
               keyboardType="number-pad"
@@ -1102,13 +1137,6 @@ export function LoginScreen({ navigation }: any) {
                 {' '}and{' '}
                 <Text style={styles.termsLink} onPress={() => navigation.navigate('Legal', { type: 'privacy' })}>Privacy Policy</Text>
               </Text>
-              <TouchableOpacity
-                style={styles.infoBtn}
-                onPress={() => navigation.navigate('Legal', { type: 'privacy' })}
-                activeOpacity={0.7}
-              >
-                <Info size={16} color="#64748b" />
-              </TouchableOpacity>
             </View>
 
             <PrimaryButton onPress={handleSignupSubmit} disabled={!password || !name || !email || !phone || !agreedToTerms || isLoading} loading={isLoading}>
@@ -1126,10 +1154,11 @@ export function LoginScreen({ navigation }: any) {
       return (
         <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
           <View style={styles.otpContainer}>
+            <SignupJourneyProgress stage={0} />
             <View style={styles.otpIconBg}>
               <Lock size={28} color="#15803d" />
             </View>
-            <Text style={styles.otpTitle}>Verify your phone</Text>
+            <Text style={styles.otpTitle}>Verify your mobile number</Text>
             <Text style={styles.otpSubtitle}>We've sent a 6-digit OTP to</Text>
             <Text style={styles.otpEmail}>+91 {phone}</Text>
 
@@ -1187,9 +1216,69 @@ export function LoginScreen({ navigation }: any) {
       );
     }
 
+    if (step === 'welcome_celebration') {
+      const foilOpacity = scratchFoilAnim.interpolate({ inputRange: [0, 1], outputRange: [1, 0] });
+      const foilScale = scratchFoilAnim.interpolate({ inputRange: [0, 1], outputRange: [1, 1.15] });
+      const revealScale = scratchRevealAnim.interpolate({ inputRange: [0, 1], outputRange: [0.6, 1] });
+
+      return (
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24, paddingVertical: 40 }}>
+          {scratched && <LaunchConfetti />}
+
+          <SignupJourneyProgress stage={1} />
+
+          <Text style={{ fontSize: 26, fontWeight: '900', color: '#064e3b', textAlign: 'center', marginBottom: 8 }}>
+            🎉 Congratulations!{'\n'}You're officially a KarmaVerse Early Bird.
+          </Text>
+          <Text style={{ fontSize: 15, color: '#166534', fontWeight: '600', textAlign: 'center', marginBottom: 32 }}>
+            {scratched
+              ? `✅ ${EARLY_BIRD_COINS.toLocaleString()} Karma Coins Successfully Added!`
+              : `As a welcome reward, you've earned ${EARLY_BIRD_COINS.toLocaleString()} Karma Coins (Worth ₹200). Scratch your reward card to reveal and claim your bonus.`}
+          </Text>
+
+          <View style={{ width: '100%', maxWidth: 300, aspectRatio: 1.4, borderRadius: 24, overflow: 'hidden', marginBottom: 28, elevation: 6, shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.15, shadowRadius: 16 }}>
+            {/* Revealed content, underneath the foil */}
+            <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+              <Animated.View style={{ alignItems: 'center', opacity: scratchRevealAnim, transform: [{ scale: revealScale }] }}>
+                <KarmaCoin size={48} glow />
+                <Text style={{ fontSize: 30, fontWeight: '900', color: 'white', marginTop: 10 }}>+{EARLY_BIRD_COINS.toLocaleString()}</Text>
+                <Text style={{ fontSize: 13, fontWeight: '700', color: '#86efac' }}>KarmaCoins XP</Text>
+              </Animated.View>
+            </LinearGradient>
+
+            {/* Foil cover — tap to scratch */}
+            {!scratched ? (
+              <TouchableOpacity activeOpacity={0.85} onPress={handleScratchCard} style={StyleSheet.absoluteFill}>
+                <LinearGradient colors={['#fde68a', '#fbbf24', '#d97706']} style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  <Text style={{ fontSize: 36 }}>🎁</Text>
+                  <Text style={{ fontSize: 15, fontWeight: '900', color: '#78350f' }}>Scratch & Claim Reward</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            ) : (
+              <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { opacity: foilOpacity, transform: [{ scale: foilScale }] }]}>
+                <LinearGradient colors={['#fde68a', '#fbbf24', '#d97706']} style={{ flex: 1 }} />
+              </Animated.View>
+            )}
+          </View>
+
+          {scratched && (
+            <TouchableOpacity
+              style={{ backgroundColor: '#15803d', width: '100%', maxWidth: 300, paddingVertical: 18, borderRadius: 16, alignItems: 'center', shadowColor: '#16a34a', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 5 }}
+              onPress={continueFromWelcomeCelebration}
+              activeOpacity={0.85}
+            >
+              <Text style={{ color: 'white', fontSize: 16, fontWeight: '900' }}>Continue</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      );
+    }
+
     if (step === 'referral_bonus') {
       return (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24, paddingVertical: 40 }}>
+          <SignupJourneyProgress stage={2} />
+
           <View style={{ width: 96, height: 96, borderRadius: 48, backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center', marginBottom: 24, borderWidth: 2, borderColor: '#bbf7d0' }}>
             <KarmaCoin size={56} glow animated />
           </View>
@@ -1247,6 +1336,7 @@ export function LoginScreen({ navigation }: any) {
 
       return (
         <ScrollView style={{flex: 1, marginHorizontal: 0}} contentContainerStyle={styles.scrollStepContent} showsVerticalScrollIndicator={false}>
+          <SignupJourneyProgress stage={2} />
           <View style={styles.demoHeader}>
             <Text style={styles.demoTitle}>Personalize profile</Text>
             <Text style={styles.demoSubtitle}>Help us tailor the best eco-rewards directly for you.</Text>
@@ -1335,7 +1425,7 @@ export function LoginScreen({ navigation }: any) {
             <Text style={styles.buttonText}>Complete registration</Text>
             <CheckCircle2 size={20} color="#fff" />
           </PrimaryButton>
-          <TouchableOpacity style={{ alignItems: 'center', paddingVertical: 12 }} onPress={() => { reconnect(); navigation.replace('App'); }}>
+          <TouchableOpacity style={{ alignItems: 'center', paddingVertical: 12 }} onPress={() => { reconnect(); navigation.replace('App', { screen: 'Dashboard', params: { justClaimedWelcomeBonus: true } }); }}>
             <Text style={{ color: '#64748b', fontWeight: '700', fontSize: 14 }}>Skip for now</Text>
           </TouchableOpacity>
         </ScrollView>
@@ -1345,7 +1435,7 @@ export function LoginScreen({ navigation }: any) {
 
   return (
     <KeyboardAvoidingView
-      style={[styles.rootContainer, { backgroundColor: (step === 'demographics' || step === 'referral_bonus') ? '#f0fdf4' : '#ffffff' }]}
+      style={[styles.rootContainer, { backgroundColor: (step === 'demographics' || step === 'referral_bonus' || step === 'welcome_celebration') ? '#f0fdf4' : '#ffffff' }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
@@ -1362,7 +1452,7 @@ export function LoginScreen({ navigation }: any) {
           </View>
         </LinearGradient>
 
-        <View style={[styles.body, (step === 'demographics' || step === 'referral_bonus') && { paddingHorizontal: 0, paddingBottom: 0 }]}>
+        <View style={[styles.body, (step === 'demographics' || step === 'referral_bonus' || step === 'welcome_celebration') && { paddingHorizontal: 0, paddingBottom: 0 }]}>
           {renderStep()}
         </View>
       </SafeAreaView>
@@ -1372,6 +1462,10 @@ export function LoginScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   rootContainer: { flex: 1, backgroundColor: '#064e3b' },
+  journeyProgress: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: 6, marginBottom: 20 },
+  journeyStage: { fontSize: 11, fontWeight: '700', color: '#94a3b8' },
+  journeyStageActive: { color: '#15803d' },
+  journeyArrow: { fontSize: 11, fontWeight: '700', color: '#cbd5e1' },
   offlineBanner: { backgroundColor: '#fef2f2', borderWidth: 1, borderColor: '#fecaca', borderRadius: 12, padding: 12, marginBottom: 8 },
   offlineBannerText: { color: '#dc2626', fontSize: 13, fontWeight: '700', textAlign: 'center' },
   fieldError: { color: '#dc2626', fontSize: 12, fontWeight: '600', marginTop: -16, paddingLeft: 4 },
@@ -1396,7 +1490,6 @@ const styles = StyleSheet.create({
   checkboxOn: { backgroundColor: '#16a34a', borderColor: '#16a34a' },
   termsText: { flex: 1, fontSize: 13, color: '#475569', lineHeight: 19, fontWeight: '500' },
   termsLink: { color: '#16a34a', fontWeight: '800' },
-  infoBtn: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#f1f5f9', alignItems: 'center', justifyContent: 'center', marginTop: -2 },
   
   body: { flex: 1, paddingHorizontal: 24, paddingTop: 16, width: '100%', maxWidth: 800, alignSelf: 'center' },
 

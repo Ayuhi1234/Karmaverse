@@ -11,8 +11,15 @@ import {
   Target, GraduationCap,
   HeartHandshake, Home as HomeIcon, Store, Megaphone,
 } from 'lucide-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { MascotPopupBanner } from '../components/shared/MascotPopupBanner';
+import { LaunchDayBanner } from '../components/shared/LaunchDayBanner';
+import { LaunchConfetti } from '../components/shared/LaunchConfetti';
+import { CoinShower } from '../components/shared/CoinShower';
+import { EarlyBirdPopup } from '../components/shared/EarlyBirdPopup';
+import { isLaunchDay } from '../utils/launchDay';
+import { getLocalDateStr } from '../utils/quizDate';
 
 const { width: W } = Dimensions.get('window');
 const isMobile = W < 768;
@@ -77,6 +84,50 @@ export function SplashScreen({ navigation, route }: any) {
   const [typedHeadline, setTypedHeadline] = useState('');
   const sectionY = useRef({ howItWorks: 0, learning: 0, rewards: 0 });
   const [nearFooter, setNearFooter] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [showEarlyBirdPopup, setShowEarlyBirdPopup] = useState(false);
+  const [showHeroConfetti, setShowHeroConfetti] = useState(false);
+  const [showRewardsCoinShower, setShowRewardsCoinShower] = useState(false);
+  const rewardsSectionRef = useRef<any>(null);
+
+  // Launch-day confetti — once per day per browser, guest visitors included.
+  useEffect(() => {
+    if (!isLaunchDay()) return;
+    (async () => {
+      const todayStr = getLocalDateStr();
+      const key = 'launchDayConfettiSeen_default';
+      const lastSeen = await AsyncStorage.getItem(key);
+      if (lastSeen !== todayStr) {
+        setShowConfetti(true);
+        await AsyncStorage.setItem(key, todayStr);
+      }
+    })();
+  }, []);
+
+  // Early Bird signup promo — shown once ever per browser (not daily; a
+  // recurring signup pitch would get old fast for repeat visitors).
+  useEffect(() => {
+    (async () => {
+      const seen = await AsyncStorage.getItem('earlyBirdPromoSeen');
+      if (!seen) setShowEarlyBirdPopup(true);
+    })();
+  }, []);
+
+  const dismissEarlyBirdPopup = () => {
+    setShowEarlyBirdPopup(false);
+    AsyncStorage.setItem('earlyBirdPromoSeen', 'true');
+  };
+
+  // Coin shower once, the first time the Rewards section scrolls into view.
+  useEffect(() => {
+    if (typeof IntersectionObserver === 'undefined' || !rewardsSectionRef.current) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setShowRewardsCoinShower(true); obs.disconnect(); } },
+      { threshold: 0.3 }
+    );
+    obs.observe(rewardsSectionRef.current);
+    return () => obs.disconnect();
+  }, []);
 
   const scrollToSection = (key: 'howItWorks' | 'learning' | 'rewards') => {
     scrollRef.current?.scrollTo({ y: sectionY.current[key], animated: true });
@@ -149,12 +200,16 @@ export function SplashScreen({ navigation, route }: any) {
   const ctaScale = ctaPulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.035] });
 
   // Typewriter: types out the headline once on mount, character by character.
+  // Confetti bursts right as "Smart Sustainability, Real Rewards." finishes typing.
   useEffect(() => {
     let i = 0;
     const interval = setInterval(() => {
       i += 1;
       setTypedHeadline(HEADLINE_TEXT.slice(0, i));
-      if (i >= HEADLINE_TEXT.length) clearInterval(interval);
+      if (i >= HEADLINE_TEXT.length) {
+        clearInterval(interval);
+        setShowHeroConfetti(true);
+      }
     }, 35);
     return () => clearInterval(interval);
   }, []);
@@ -226,6 +281,15 @@ export function SplashScreen({ navigation, route }: any) {
         </View>
       </View>
 
+      {/* Launch Day celebration strip (auto-hides after today) */}
+      {isLaunchDay() && (
+        <View style={{ paddingHorizontal: isMobile ? 16 : 32, paddingTop: 12, backgroundColor: '#052e16' }}>
+          <View style={{ maxWidth: MAX, width: '100%', alignSelf: 'center' }}>
+            <LaunchDayBanner />
+          </View>
+        </View>
+      )}
+
       <ScrollView ref={scrollRef} showsVerticalScrollIndicator={false} style={{ flex: 1 }} onScroll={handleScroll} scrollEventThrottle={32}>
 
         {/* ── HERO ── */}
@@ -234,17 +298,7 @@ export function SplashScreen({ navigation, route }: any) {
           <Animated.View style={[s.heroCircle, { top: -80, right: -60, width: 300, height: 300, opacity: 0.08, transform: [{ translateY: floatA.interpolate({ inputRange: [0, 1], outputRange: [0, -22] }) }] }]} />
           <Animated.View style={[s.heroCircle, { bottom: -40, left: -80, width: 250, height: 250, opacity: 0.06, transform: [{ translateY: floatB.interpolate({ inputRange: [0, 1], outputRange: [0, 18] }) }] }]} />
 
-          {/* SDG wheel — decorative, right side (desktop only). Absolutely positioned
-              so it never reflows the hero text, with a gentle float animation. */}
-          {!isMobile && (
-            <Animated.Image
-              source={require('../../assets/sdg-wheel.png')}
-              resizeMode="contain"
-              style={[s.heroSdg, { transform: [{ translateY: floatA.interpolate({ inputRange: [0, 1], outputRange: [0, -14] }) }] }]}
-            />
-          )}
-
-          <Animated.View style={[s.heroContent, isMobile && { paddingHorizontal: 20 }, { opacity: fadeIn, transform: [{ translateY: slideUp }] }]}>
+<Animated.View style={[s.heroContent, isMobile && { paddingHorizontal: 20 }, { opacity: fadeIn, transform: [{ translateY: slideUp }] }]}>
             {/* Badge */}
             <View style={s.heroBadge}>
               <View style={s.heroBadgeDot} />
@@ -363,7 +417,8 @@ export function SplashScreen({ navigation, route }: any) {
         </View>
 
         {/* ── REWARDS ── */}
-        <View style={s.section} onLayout={(e) => { sectionY.current.rewards = e.nativeEvent.layout.y; }}>
+        <View ref={rewardsSectionRef} style={s.section} onLayout={(e) => { sectionY.current.rewards = e.nativeEvent.layout.y; }}>
+          {showRewardsCoinShower && <CoinShower onDone={() => setShowRewardsCoinShower(false)} />}
           <View style={[s.container, isMobile && { paddingHorizontal: 20 }]}>
             <Text style={s.sectionLabel}>REWARDS</Text>
             <Text style={[s.sectionTitle, isMobile && { fontSize: 28 }]}>Turn good karma into great rewards</Text>
@@ -496,6 +551,15 @@ export function SplashScreen({ navigation, route }: any) {
         </View>
 
       </ScrollView>
+
+      {showConfetti && <LaunchConfetti onDone={() => setShowConfetti(false)} />}
+      {showHeroConfetti && <LaunchConfetti onDone={() => setShowHeroConfetti(false)} />}
+      {showEarlyBirdPopup && (
+        <EarlyBirdPopup
+          onClose={dismissEarlyBirdPopup}
+          onGetStarted={() => { dismissEarlyBirdPopup(); navigation.navigate('Login'); }}
+        />
+      )}
     </View>
   );
 }
@@ -525,7 +589,6 @@ const s = StyleSheet.create({
   // Hero
   hero: { paddingBottom: 60, minHeight: 500 },
   heroCircle: { position: 'absolute', borderRadius: 999, backgroundColor: 'white' },
-  heroSdg: { position: 'absolute', right: 60, top: 120, width: 380, height: 380, opacity: 0.95, pointerEvents: 'none' as any },
   heroContent: { maxWidth: MAX, width: '100%', alignSelf: 'center', paddingHorizontal: 32, paddingTop: 60 },
   heroBadge: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(255,255,255,0.08)', alignSelf: 'flex-start', borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', marginBottom: 24 },
   heroBadgeDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#4ade80' },
