@@ -16,14 +16,6 @@ import { EARLY_BIRD_COINS } from '../utils/earlyBird';
 
 const MAX = 1200;
 
-const FEATURED_REWARDS = [
-  { emoji: '☕', brand: 'Not Just Chaai', label: 'Café Coupons', gradient: ['#7c2d12', '#c2410c'] as [string, string] },
-  { emoji: '🎁', brand: 'Three Sixty', label: 'Premium Gift Cards', gradient: ['#581c87', '#9333ea'] as [string, string] },
-  { emoji: '📱', brand: 'Cashify', label: 'Refurbished Smartphones', gradient: ['#164e63', '#0891b2'] as [string, string] },
-  { emoji: '📱', brand: 'Grest', label: 'Refurbished Smartphones', gradient: ['#134e4a', '#0f766e'] as [string, string] },
-  { emoji: '🍽️', brand: 'Dining Voucher', label: 'Couple & Family Dining', gradient: ['#831843', '#be185d'] as [string, string] },
-];
-
 const FEATURE_DETAILS = [
   {
     id: 'refer', title: 'Refer & earn', emoji: '👥', icon: Gift,
@@ -320,27 +312,8 @@ export function DashboardScreen({ navigation, route }: any) {
         </LinearGradient>
       </View>
 
-      {/* ════════ FEATURED REWARDS ════════ */}
+      {/* ════════ FIRST PICKUP CTA ════════ */}
       <View style={[z.container, { marginTop: 28, paddingHorizontal: pad }]}>
-        <View style={z.sectionHead}>
-          <View>
-            <Text style={z.sectionLabel}>REDEEM</Text>
-            <Text style={z.sectionTitle}>Featured rewards</Text>
-          </View>
-        </View>
-
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 14 }}>
-          {FEATURED_REWARDS.map((r, i) => (
-            <View key={i} style={z.rewardCard}>
-              <LinearGradient colors={r.gradient} style={z.rewardCardInner} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
-                <Text style={z.rewardCardEmoji}>{r.emoji}</Text>
-                <Text style={z.rewardCardBrand}>{r.brand}</Text>
-                <Text style={z.rewardCardLabel}>{r.label}</Text>
-              </LinearGradient>
-            </View>
-          ))}
-        </ScrollView>
-
         <TouchableOpacity style={z.firstPickupCta} onPress={() => nav('SchedulePickup')} activeOpacity={0.85}>
           <Truck size={18} color="white" />
           <Text style={z.firstPickupCtaText}>Schedule Your First Pickup</Text>
