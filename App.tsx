@@ -5,6 +5,7 @@ import { RootNavigator } from './src/navigation/RootNavigator';
 import { UserSocketProvider } from './src/context/UserSocketContext';
 import { NotificationProvider } from './src/context/NotificationContext';
 import { ResponsiveContainer } from './src/components/shared/ResponsiveContainer';
+import { AlertHost } from './src/components/shared/AlertHost';
 import {
   registerForPushNotifications,
   sendTokenToBackend,
@@ -68,6 +69,7 @@ export default function App() {
       <NotificationProvider>
         <UserSocketProvider>
           <RootNavigator />
+          <AlertHost />
         </UserSocketProvider>
       </NotificationProvider>
     </SafeAreaProvider>
