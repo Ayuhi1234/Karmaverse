@@ -1,5 +1,6 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { navigationRef } from '../navigation/navRef';
 
 // Production backend (Render).
 export const BACKEND_BASE = 'https://karmacoin-backend-productionn.onrender.com';
@@ -52,9 +53,16 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response && error.response.status === 401 && !isAuthEndpoint(error.config?.url)) {
-      // Token expired or invalid on a protected route — clear it.
+      // Token expired or invalid on a protected route — clear it and send the
+      // user back to Login so they re-authenticate (e.g. a stale token from a
+      // previous backend). Without this the app sits in a broken logged-in state.
       await AsyncStorage.removeItem('userToken');
-      // Navigation to login should ideally be handled at the router/context level
+      try {
+        const current = navigationRef.current?.getCurrentRoute?.()?.name;
+        if (navigationRef.current && current && !['Login', 'Splash'].includes(current)) {
+          navigationRef.current.reset({ index: 0, routes: [{ name: 'Login' }] });
+        }
+      } catch (_) { /* navigator not ready */ }
     }
     return Promise.reject(error);
   }
