@@ -290,8 +290,19 @@ export function QuizScreen({ navigation }: any) {
 
     try {
       const q = questions[currentQ] as any;
-      const qId = q.questionId || q.id || `q${currentQ}`;
+      // Backends have used different id field names — check all before falling
+      // back to the index, otherwise the server can't match the question and
+      // scores every answer as wrong.
+      const qId = q.questionId || q.id || q._id || q.qId || `q${currentQ}`;
       const result: AnswerResult = await quizService.submit(qId, option);
+      // Safety net: if the server returns the correct answer text and it matches
+      // what the user picked, treat it as correct even if the `correct` flag is
+      // off (guards against a backend flag/normalisation mismatch).
+      const norm = (s: string) => (s || '').trim().toLowerCase();
+      if (!result.correct && result.correctAnswer && norm(result.correctAnswer) === norm(option)) {
+        result.correct = true;
+        if (!result.coinsEarned) result.coinsEarned = 40;
+      }
       setAnswerResult(result);
       if (result.correct) {
         correctCountRef.current += 1;
