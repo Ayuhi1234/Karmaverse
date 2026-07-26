@@ -313,7 +313,25 @@ export function SchedulePickupScreen({ navigation }: any) {
       const added = [...list].reverse().find(a => a.fullAddress === details.area) || list[list.length - 1];
       if (added) setSelectedAddressId(added._id);
     } catch (error: any) {
-      showAlert('Could not save address', error?.response?.data?.message || 'Please try again.');
+      // The saved-addresses endpoint may be unavailable (e.g. not yet deployed
+      // to this backend). Don't block the booking — the pickup payload carries
+      // the full address, not an addressId, so keep it locally and let the user
+      // schedule. It just won't persist across sessions.
+      console.log('Address save failed, using local fallback:', error?.response?.status || error?.message);
+      const localAddr: SavedAddress = {
+        _id: `local-${Date.now()}`,
+        label: (details.label as AddressLabel) || 'Home',
+        fullAddress: details.area,
+        houseNo: details.houseNo,
+        apartment: details.building,
+        landmark: details.landmark,
+        receiverName: details.receiverName || '',
+        receiverPhone: details.receiverPhone || '',
+        location: { type: 'Point', coordinates: details.coordinates },
+        isDefault: savedAddresses.length === 0,
+      };
+      setSavedAddresses(prev => [...prev, localAddr]);
+      setSelectedAddressId(localAddr._id);
     } finally {
       setIsSavingAddress(false);
     }
