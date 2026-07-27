@@ -77,7 +77,9 @@ const getGreeting = () => {
 
 export function DashboardScreen({ navigation, route }: any) {
   const { width } = useWindowDimensions();
-  const isMobile = width < 768;
+  // 900 (not 768) so iPad portrait (~810px) uses the clean stacked layout —
+  // the desktop row squeezes the redeem banner into a tall unreadable sliver.
+  const isMobile = width < 900;
   const isTablet = width >= 768 && width < 1024;
   const pad = isMobile ? 16 : 32;
 
