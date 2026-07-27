@@ -253,7 +253,9 @@ export function OrderTrackingScreen({ route, navigation }: any) {
             <ArrowLeft size={20} color="white" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Booking Cancelled</Text>
-          <View style={styles.helpIconBtn} />
+          {/* Invisible spacer to keep the title centred — no background, so it
+              doesn't render as a stray circle like the styled help button would. */}
+          <View style={{ width: 36 }} />
         </SafeAreaView>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, backgroundColor: '#fff' }}>
           <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: '#fee2e2', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
