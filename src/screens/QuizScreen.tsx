@@ -431,6 +431,11 @@ export function QuizScreen({ navigation }: any) {
               <KarmaCoin size={36} glow />
               <Text style={styles.resultsCoinsValue}>+{totalCoins}</Text>
             </View>
+            {isPerfect && (
+              <View style={styles.bonusBreakdown}>
+                <Text style={styles.bonusBreakdownText}>{correctCount * COINS_PER_QUESTION} base + {PERFECT_BONUS} perfect bonus</Text>
+              </View>
+            )}
             <Text style={styles.resultsCardNote}>
               {totalCoins > 0 ? 'Coins added to your Karma Wallet!' : 'Keep practicing â€” try again tomorrow!'}
             </Text>
@@ -477,7 +482,7 @@ export function QuizScreen({ navigation }: any) {
             <RuleRow icon={<CheckCircle2 size={20} color="#4ade80" />} text="3 questions per day" />
             <RuleRow icon={<Timer size={20} color="#60a5fa" />} text="20 seconds per question" />
             <RuleRow icon={<KarmaCoin size={20} />} text="10 coins per question" />
-            <RuleRow icon={<Trophy size={20} color="#fbbf24" />} text="Max 50 coins per day (30 + 20 bonus for 3/3)" />
+            <RuleRow icon={<Trophy size={20} color="#fbbf24" />} text="Max 50 coins per day" />
           </View>
 
           {isLocked ? (
@@ -712,6 +717,8 @@ const styles = StyleSheet.create({
   resultsCardLabel: { fontSize: 12, fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 },
   resultsCoinsRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 },
   resultsCoinsValue: { fontSize: 44, fontWeight: '900', color: '#d97706' },
+  bonusBreakdown: { backgroundColor: '#fff7ed', paddingHorizontal: 12, paddingVertical: 5, borderRadius: 12, marginBottom: 12 },
+  bonusBreakdownText: { fontSize: 12, fontWeight: '800', color: '#ea580c' },
   resultsCardNote: { fontSize: 13, color: '#64748b', fontWeight: '600', textAlign: 'center', marginBottom: 16 },
   streakPill: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#fff7ed', paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20 },
   streakPillText: { fontSize: 13, fontWeight: '800', color: '#ea580c' },
