@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
   helperText: { fontSize: 12, color: '#16a34a', fontWeight: '600', marginTop: 8, marginLeft: 4 },
   helperTextError: { color: '#dc2626' },
 
-  primaryActionBtn: { backgroundColor: '#15803d', paddingVertical: 18, borderRadius: 16, alignItems: 'center', marginTop: 10, shadowColor: '#16a34a', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 5 },
+  primaryActionBtn: { backgroundColor: '#15803d', paddingVertical: 15, paddingHorizontal: 44, borderRadius: 16, alignItems: 'center', justifyContent: 'center', alignSelf: 'center', minWidth: 240, marginTop: 10, shadowColor: '#16a34a', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 5 },
   primaryActionBtnDisabled: { backgroundColor: '#94a3b8', shadowOpacity: 0, elevation: 0 },
   primaryActionText: { color: 'white', fontSize: 16, fontWeight: '900' },
   securityNote: { textAlign: 'center', color: '#94a3b8', fontSize: 11, fontWeight: '500', marginTop: 12, paddingHorizontal: 8 },
