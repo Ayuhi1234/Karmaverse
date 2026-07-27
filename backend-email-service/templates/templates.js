@@ -9,10 +9,10 @@ const templates = {
   WELCOME: ({ name }) => ({
     subject: `Welcome to KarmaCoins XP, ${name}!`,
     html: wrapEmail({
-      preheader: 'Your account is ready — start earning Karma Coins today.',
+      preheader: 'Your account is ready — start earning KarmaCoins XP today.',
       bodyHtml: `<p>Hi ${name}, welcome aboard!</p>
-        <p>Start scheduling pickups, earn Karma Coins for every recyclable item, and play the daily
-        quiz to grow your streak. Let's make waste management rewarding.</p>`,
+        <p>Schedule a doorstep pickup, earn KarmaCoins XP for every item you give a second life, and
+        play the daily quiz to grow your streak. Small actions, real rewards — kar bhala toh ho bhala.</p>`,
       ctaLabel: 'Get started',
       ctaUrl: 'https://karmaverse.earth/',
     }),
@@ -58,10 +58,10 @@ const templates = {
   }),
 
   BOOKING_PICKED_UP: ({ name, coins, walletBalance }) => ({
-    subject: `You earned ${coins} Karma Coins!`,
+    subject: `You earned ${coins} KarmaCoins XP!`,
     html: wrapEmail({
-      preheader: `${coins} Karma Coins credited to your wallet.`,
-      bodyHtml: `<p>Hi ${name}, your items have been verified and <strong>${coins} Karma Coins</strong>
+      preheader: `${coins} KarmaCoins XP credited to your wallet.`,
+      bodyHtml: `<p>Hi ${name}, your items have been verified and <strong>${coins} KarmaCoins XP</strong>
         have been credited to your wallet.</p>
         <p>Total balance: <strong>${walletBalance}</strong>.</p>`,
     }),
@@ -91,7 +91,7 @@ const templates = {
     subject: `Don't lose your ${streak}-day quiz streak!`,
     html: wrapEmail({
       preheader: `Play today's quiz before it resets.`,
-      bodyHtml: `<p>Hi ${name}, you haven't played today's KarmaCoins quiz yet.</p>
+      bodyHtml: `<p>Hi ${name}, you haven't played today's KarmaCoins XP quiz yet.</p>
         <p>Play now before it resets at 5:30 AM IST.</p>`,
       ctaLabel: 'Play today’s quiz',
       ctaUrl: 'https://karmaverse.earth/',
@@ -99,12 +99,12 @@ const templates = {
   }),
 
   REFERRAL_REWARD: ({ name, friendName, coins }) => ({
-    subject: `You earned ${coins} Karma Coins for referring ${friendName}!`,
+    subject: `You earned ${coins} KarmaCoins XP for referring ${friendName}!`,
     html: wrapEmail({
       preheader: `${friendName} joined using your referral code.`,
       bodyHtml: `<p>Hi ${name}, your friend <strong>${friendName}</strong> just joined KarmaCoins XP
         using your referral code.</p>
-        <p><strong>${coins} Karma Coins</strong> have been added to your wallet.</p>`,
+        <p><strong>${coins} KarmaCoins XP</strong> have been added to your wallet.</p>`,
     }),
   }),
 
