@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
   actionBtnRed: { borderColor: '#fda4af' },
   actionLabel: { fontWeight: '800', fontSize: 13 },
 
-  historySection: { paddingHorizontal: 16, marginTop: 28, maxWidth: 800, width: '100%', alignSelf: 'center' },
+  historySection: { paddingHorizontal: 16, marginTop: 28, marginBottom: 32, maxWidth: 800, width: '100%', alignSelf: 'center' },
   sectionTitle: { fontSize: 18, fontWeight: '800', color: '#0f172a', marginBottom: 16 },
 
   txList: { gap: 10 },
