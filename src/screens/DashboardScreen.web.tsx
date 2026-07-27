@@ -188,7 +188,7 @@ export function DashboardScreen({ navigation, route }: any) {
                   <Text style={z.heroBalLabel}>KarmaCoins XP</Text>
                 </View>
               </View>
-              <View style={[z.redeemBanner, { flexDirection: 'row', alignItems: 'center', gap: 8 }, isMobile && { maxWidth: '100%' }]}>
+              <View style={[z.redeemBanner, { flexDirection: 'row', alignItems: 'flex-start', gap: 8 }, isMobile ? { maxWidth: '100%' } : { maxWidth: 420 }]}>
                 <KarmaCoin size={18} />
                 <Text style={[z.redeemBannerText, { flex: 1 }]}>{REDEEM_INFO_MESSAGE}</Text>
               </View>
