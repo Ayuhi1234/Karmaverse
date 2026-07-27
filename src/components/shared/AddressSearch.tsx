@@ -305,7 +305,7 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
 
           {/* Centered dismissible validation toast (in-app, not a browser alert) */}
           {!!toast && (
-            <View style={styles.toastOverlay} pointerEvents="box-none">
+            <View style={styles.toastOverlay}>
               <View style={styles.toastCard}>
                 <View style={styles.toastIcon}><Text style={styles.toastIconText}>!</Text></View>
                 <Text style={styles.toastText}>{toast}</Text>
@@ -547,7 +547,7 @@ const styles = StyleSheet.create({
   confirmBtnDisabled: { backgroundColor: '#a7d7b8' },
   confirmBtnText: { color: 'white', fontSize: 15, fontWeight: '800' },
 
-  toastOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 },
+  toastOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24, pointerEvents: 'box-none' },
   toastCard: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: 'white', borderRadius: 16, paddingVertical: 16, paddingHorizontal: 18, maxWidth: 420, width: '100%', borderWidth: 1, borderColor: '#fecaca', shadowColor: '#000', shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.18, shadowRadius: 28, elevation: 12 },
   toastIcon: { width: 30, height: 30, borderRadius: 15, backgroundColor: '#fee2e2', alignItems: 'center', justifyContent: 'center' },
   toastIconText: { color: '#dc2626', fontSize: 17, fontWeight: '900' },

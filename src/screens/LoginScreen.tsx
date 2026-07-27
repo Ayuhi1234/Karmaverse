@@ -114,7 +114,7 @@ function InputField({ placeholder, value, onChange, secureTextEntry = false, ico
   const [hidden, setHidden] = useState(secureTextEntry);
   return (
     <View style={styles.inputContainer}>
-      {icon && <View style={styles.iconWrapper} pointerEvents="none">{icon}</View>}
+      {icon && <View style={[styles.iconWrapper, { pointerEvents: 'none' }]}>{icon}</View>}
       <TextInput
         ref={inputRef}
         style={[styles.input, icon ? { paddingLeft: 48 } : {}, showToggle ? { paddingRight: 48 } : {}]}
@@ -801,7 +801,7 @@ export function LoginScreen({ navigation }: any) {
                   </TouchableOpacity>
                 ) : (
                   <View style={styles.socialIconWrap}>
-                    <View style={styles.socialIconBtn} pointerEvents="none">
+                    <View style={[styles.socialIconBtn, { pointerEvents: 'none' }]}>
                       <Svg width="26" height="26" viewBox="0 0 48 48">
                         <Path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.7 17.74 9.5 24 9.5z" />
                         <Path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
@@ -1269,7 +1269,7 @@ export function LoginScreen({ navigation }: any) {
                 </LinearGradient>
               </TouchableOpacity>
             ) : (
-              <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { opacity: foilOpacity, transform: [{ scale: foilScale }] }]}>
+              <Animated.View style={[StyleSheet.absoluteFill, { opacity: foilOpacity, transform: [{ scale: foilScale }], pointerEvents: 'none' }]}>
                 <LinearGradient colors={['#fde68a', '#fbbf24', '#d97706']} style={{ flex: 1 }} />
               </Animated.View>
             )}

@@ -34,7 +34,7 @@ export function LaunchConfetti({ onDone }: { onDone?: () => void }) {
   }, []);
 
   return (
-    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+    <View style={[StyleSheet.absoluteFill, { pointerEvents: 'none' }]}>
       {pieces.map((p, i) => {
         const translateY = p.anim.interpolate({ inputRange: [0, 1], outputRange: [-20, SCREEN_H * 0.65] });
         const translateX = p.anim.interpolate({ inputRange: [0, 1], outputRange: [0, p.driftX] });

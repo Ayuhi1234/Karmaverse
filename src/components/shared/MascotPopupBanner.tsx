@@ -185,7 +185,7 @@ export function MascotPopupBanner({ suppressed = false }: Props) {
   if (!visible) return null;
 
   return (
-    <View style={s.container} pointerEvents={suppressed ? 'none' : 'box-none'}>
+    <View style={[s.container, { pointerEvents: suppressed ? 'none' : 'box-none' }]}>
       <Animated.View style={[s.widget, { opacity: Animated.multiply(opacity, suppressOpacity), transform: [{ scale }] }]}>
         <TouchableOpacity style={s.closeBtn} onPress={dismiss} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
           <X size={14} color="#64748b" />
@@ -246,7 +246,7 @@ const s = StyleSheet.create({
     alignItems: 'flex-end',
     zIndex: 9999,
   },
-  widget: { alignItems: 'center', position: 'relative' },
+  widget: { alignItems: 'center', position: 'relative', pointerEvents: 'auto' },
   closeBtn: {
     position: 'absolute', top: -6, right: -6, width: 22, height: 22, borderRadius: 11, zIndex: 1,
     backgroundColor: 'white', alignItems: 'center', justifyContent: 'center',

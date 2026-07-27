@@ -94,14 +94,14 @@ export function MapPicker({ center, onCenterChange }: MapPickerProps) {
       <div id={containerId.current} style={{ width: '100%', height: '100%' }} />
 
       {status !== 'ready' && (
-        <View style={styles.overlay} pointerEvents="none">
+        <View style={styles.overlay}>
           <Text style={styles.overlayText}>
             {status === 'error' ? 'Map could not load. Check your connection or map key.' : 'Loading map...'}
           </Text>
         </View>
       )}
 
-      <View pointerEvents="none" style={styles.pinWrap}>
+      <View style={styles.pinWrap}>
         <MapPin size={40} color="#dc2626" fill="#dc2626" />
         <View style={styles.pinDot} />
       </View>
@@ -114,6 +114,7 @@ const styles = StyleSheet.create({
   overlay: {
     position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
     alignItems: 'center', justifyContent: 'center', backgroundColor: '#f0fdf4',
+    pointerEvents: 'none',
   },
   overlayText: { fontSize: 13, fontWeight: '600', color: '#15803d', textAlign: 'center', paddingHorizontal: 24 },
   pinWrap: {
@@ -124,6 +125,7 @@ const styles = StyleSheet.create({
     marginTop: -40,
     alignItems: 'center',
     zIndex: 1000,
+    pointerEvents: 'none',
   },
   pinDot: {
     width: 6,

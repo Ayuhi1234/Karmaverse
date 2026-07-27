@@ -47,7 +47,7 @@ function Confetti() {
   }, []);
 
   return (
-    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+    <View style={[StyleSheet.absoluteFill, { pointerEvents: 'none' }]}>
       {pieces.map(p => (
         <Animated.View
           key={p.id}

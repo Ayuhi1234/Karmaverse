@@ -112,8 +112,7 @@ function TopNavbar({ state, navigation }: any) {
                       {/* Glow rising from the underline. Always mounted and faded
                           via opacity so it can transition instead of popping in. */}
                       <View
-                        pointerEvents="none"
-                        style={[StyleSheet.absoluteFill, HOVER_TRANSITION, { opacity: lit ? 1 : 0 }]}
+                        style={[StyleSheet.absoluteFill, HOVER_TRANSITION, { opacity: lit ? 1 : 0, pointerEvents: 'none' }]}
                       >
                         <LinearGradient
                           colors={['transparent', 'rgba(74,222,128,0.16)']}
@@ -135,8 +134,7 @@ function TopNavbar({ state, navigation }: any) {
                       ) : (
                         // Grows out from the centre on hover (default transform origin).
                         <View
-                          pointerEvents="none"
-                          style={[s.navTabIndicatorHover, HOVER_TRANSITION, { transform: [{ scaleX: lit ? 1 : 0 }] }]}
+                          style={[s.navTabIndicatorHover, HOVER_TRANSITION, { transform: [{ scaleX: lit ? 1 : 0 }], pointerEvents: 'none' }]}
                         />
                       )}
                     </>

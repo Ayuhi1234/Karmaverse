@@ -46,7 +46,7 @@ export function MapPicker({ center, onCenterChange }: MapPickerProps) {
       >
         <MapplsGL.Camera ref={cameraRef} defaultSettings={{ centerCoordinate: center, zoomLevel: 16 }} />
       </MapplsGL.MapView>
-      <View pointerEvents="none" style={styles.pinWrap}>
+      <View style={[styles.pinWrap, { pointerEvents: 'none' }]}>
         <MapPin size={40} color="#dc2626" fill="#dc2626" />
         <View style={styles.pinDot} />
       </View>

@@ -35,7 +35,7 @@ export function CoinShower({ onDone }: { onDone?: () => void }) {
   }, []);
 
   return (
-    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+    <View style={[StyleSheet.absoluteFill, { pointerEvents: 'none' }]}>
       {pieces.map((p, i) => {
         const translateY = p.anim.interpolate({ inputRange: [0, 1], outputRange: [-30, FALL_DISTANCE] });
         const translateX = p.anim.interpolate({ inputRange: [0, 1], outputRange: [0, p.driftX] });
