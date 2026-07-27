@@ -6,6 +6,7 @@ import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { redeemService } from '../services/redeem';
 import { profileService } from '../services/profile';
 import { showAlert } from '../utils/alert';
+import { REDEEM_INFO_MESSAGE } from '../utils/redeemInfo';
 
 const MIN_COINS = 10;
 const QUICK_AMOUNTS = [10, 20, 50, 100];
@@ -75,9 +76,11 @@ export function RedeemScreen({ navigation, route }: any) {
           </View>
           <Text style={styles.successTitle}>Request submitted!</Text>
           <Text style={styles.successSub}>
-            Your redeem request for ₹{rupees.toFixed(0)} is pending admin approval. We'll process the bank
-            transfer soon.
+            Your redeem request for ₹{rupees.toFixed(0)} is pending admin approval.
           </Text>
+          <View style={styles.successInfoNote}>
+            <Text style={styles.successInfoText}>{REDEEM_INFO_MESSAGE}</Text>
+          </View>
           <TouchableOpacity
             style={styles.primaryActionBtn}
             onPress={() => navigation.navigate('RedeemHistory')}
@@ -294,5 +297,7 @@ const styles = StyleSheet.create({
   successScreen: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 30 },
   successIconBg: { width: 96, height: 96, borderRadius: 48, backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center', marginBottom: 20, borderWidth: 1.5, borderColor: '#bbf7d0' },
   successTitle: { fontSize: 24, fontWeight: '900', color: '#0f172a', marginBottom: 10 },
-  successSub: { fontSize: 14, color: '#64748b', textAlign: 'center', fontWeight: '500', lineHeight: 20, marginBottom: 28 },
+  successSub: { fontSize: 14, color: '#64748b', textAlign: 'center', fontWeight: '500', lineHeight: 20, marginBottom: 16 },
+  successInfoNote: { backgroundColor: '#f0fdf4', borderWidth: 1, borderColor: '#bbf7d0', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12, marginBottom: 28, maxWidth: 420 },
+  successInfoText: { fontSize: 13, color: '#15803d', textAlign: 'center', fontWeight: '700', lineHeight: 19 },
 });
