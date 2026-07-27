@@ -36,9 +36,10 @@ export function StoreScreen({ navigation }: any) {
             We're curating a premium collection of zero-waste, eco-friendly products. Soon you'll be able to spend your KarmaCoins XP here on sustainable goodies!
           </Text>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.actionBtn}
-            onPress={() => navigation.navigate('Home')}
+            onPress={() => navigation.navigate('SchedulePickup')}
+            activeOpacity={0.85}
           >
             <Text style={styles.actionBtnText}>Keep recycling to earn coins</Text>
             <ArrowRight size={20} color="white" />
