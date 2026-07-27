@@ -1461,8 +1461,24 @@ export function LoginScreen({ navigation }: any) {
           {/* Decorative shapes so the header reads as a designed panel, not a flat block */}
           <View style={[styles.headerCircle, { top: -50, right: -40, width: 160, height: 160, opacity: 0.08 }]} />
           <View style={[styles.headerCircle, { bottom: -60, left: -50, width: 140, height: 140, opacity: 0.06 }]} />
+          {/* Crisp vector lockup (icon + real text) instead of a flat raster —
+              the baked-in tagline in logo-nav.png went blurry at header size.
+              Text renders sharp at every screen density. */}
           <View style={styles.logoCard}>
-            <Image source={require('../../assets/logo-nav.png')} style={styles.logoImg} resizeMode="contain" />
+            <Image source={require('../../assets/logo-icon.png')} style={styles.logoIconImg} resizeMode="contain" />
+            <View>
+              <Text style={styles.logoWordText}>
+                <Text style={{ color: '#ffffff' }}>Karma</Text>
+                <Text style={{ color: '#4ade80' }}>Ver$e</Text>
+              </Text>
+              <Text style={styles.logoTagline}>
+                <Text style={{ color: '#86efac' }}>EARN</Text>
+                <Text style={{ color: 'rgba(255,255,255,0.35)' }}>  •  </Text>
+                <Text style={{ color: '#86efac' }}>IMPACT</Text>
+                <Text style={{ color: 'rgba(255,255,255,0.35)' }}>  •  </Text>
+                <Text style={{ color: '#fbbf24' }}>ELEVATE</Text>
+              </Text>
+            </View>
           </View>
         </LinearGradient>
 
@@ -1497,8 +1513,10 @@ const styles = StyleSheet.create({
   },
   headerCircle: { position: 'absolute', borderRadius: 999, backgroundColor: 'white' },
   headerTitle: { color: '#ffffff', fontSize: 22, fontWeight: '900', marginTop: 12, letterSpacing: 0.5 },
-  logoCard: { alignItems: 'center', justifyContent: 'center' },
-  logoImg: { width: 230, height: 108 },
+  logoCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 },
+  logoIconImg: { width: 58, height: 60 },
+  logoWordText: { fontSize: 30, fontWeight: '900', letterSpacing: -0.5, lineHeight: 34 },
+  logoTagline: { fontSize: 11, fontWeight: '800', letterSpacing: 1, marginTop: 2 },
   termsRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginTop: 4 },
   checkbox: { width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: '#cbd5e1', alignItems: 'center', justifyContent: 'center', marginTop: 1 },
   checkboxOn: { backgroundColor: '#16a34a', borderColor: '#16a34a' },
