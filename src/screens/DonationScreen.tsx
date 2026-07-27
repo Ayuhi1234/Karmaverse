@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, StatusBar, SafeAreaView } from 'react-native';
-import { ChevronLeft, HeartHandshake, TreePine, Monitor, Laptop } from 'lucide-react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, StatusBar, SafeAreaView, Image } from 'react-native';
+import { ChevronLeft, TreePine, Monitor, Laptop } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { profileService } from '../services/profile';
@@ -47,10 +47,17 @@ export function DonationScreen({ navigation, route }: any) {
       .catch(() => {});
   }, []);
 
-  const handleDonate = (option: typeof DONATION_OPTIONS[number]) => {
+  const handleDonate = (option: typeof DONATION_OPTIONS[number], canAfford: boolean, shortfall: number) => {
+    if (!canAfford) {
+      showAlert(
+        'Not enough KarmaCoins XP',
+        `You need ${shortfall.toLocaleString()} more KarmaCoins XP to make the "${option.title}" donation. Keep earning and come back soon.`
+      );
+      return;
+    }
     showAlert(
-      '🌱 Donations opening soon!',
-      `Thanks for wanting to support the 3R Waste Foundation. The "${option.title}" donation will be live shortly — check back soon!`
+      'Donations opening soon',
+      `Thanks for supporting the 3R Waste Foundation. The "${option.title}" donation will be live shortly — check back soon.`
     );
   };
 
@@ -79,10 +86,13 @@ export function DonationScreen({ navigation, route }: any) {
       <ScrollView style={styles.scroll} contentContainerStyle={{ paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
 
-          {/* Foundation branding */}
+          {/* Foundation branding.
+              TODO: swap logo-icon.png for the real 3R Waste Foundation logo once the
+              Founding Engineer supplies the branding asset (drop it in assets/ and
+              point the require() below at it). */}
           <View style={styles.foundationCard}>
-            <View style={styles.foundationIconBg}>
-              <HeartHandshake size={26} color="#15803d" />
+            <View style={styles.foundationLogoWrap}>
+              <Image source={require('../../assets/logo-icon.png')} style={styles.foundationLogo} resizeMode="contain" />
             </View>
             <Text style={styles.foundationLabel}>IN PARTNERSHIP WITH</Text>
             <Text style={styles.foundationName}>3R Waste Foundation</Text>
@@ -97,6 +107,7 @@ export function DonationScreen({ navigation, route }: any) {
           {DONATION_OPTIONS.map((option) => {
             const Icon = option.icon;
             const canAfford = balance >= option.coins;
+            const shortfall = Math.max(0, option.coins - balance);
             return (
               <View key={option.id} style={styles.optionCard}>
                 <View style={[styles.optionIconBg, { backgroundColor: option.bg }]}>
@@ -107,15 +118,18 @@ export function DonationScreen({ navigation, route }: any) {
                   <Text style={styles.optionDesc}>{option.desc}</Text>
                   <View style={styles.optionCoinRow}>
                     <KarmaCoin size={16} />
-                    <Text style={styles.optionCoinText}>{option.coins.toLocaleString()} KC</Text>
+                    <Text style={styles.optionCoinText}>{option.coins.toLocaleString()} KarmaCoins XP</Text>
                   </View>
+                  {!canAfford && (
+                    <Text style={styles.optionShortfall}>Need {shortfall.toLocaleString()} more to unlock</Text>
+                  )}
                 </View>
                 <TouchableOpacity
-                  style={[styles.donateBtn, !canAfford && styles.donateBtnDisabled]}
-                  onPress={() => handleDonate(option)}
-                  activeOpacity={0.8}
+                  style={styles.donateBtn}
+                  onPress={() => handleDonate(option, canAfford, shortfall)}
+                  activeOpacity={0.85}
                 >
-                  <Text style={[styles.donateBtnText, !canAfford && styles.donateBtnTextDisabled]}>Donate</Text>
+                  <Text style={styles.donateBtnText}>Donate</Text>
                 </TouchableOpacity>
               </View>
             );
@@ -148,7 +162,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'white', borderRadius: 20, padding: 22, alignItems: 'center',
     borderWidth: 1, borderColor: '#e2e8f0', marginBottom: 28,
   },
-  foundationIconBg: { width: 52, height: 52, borderRadius: 26, backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
+  foundationLogoWrap: { width: 72, height: 72, borderRadius: 20, backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center', marginBottom: 12, borderWidth: 1, borderColor: '#dcfce7' },
+  foundationLogo: { width: 52, height: 52 },
   foundationLabel: { fontSize: 11, fontWeight: '800', color: '#94a3b8', letterSpacing: 1.2, marginBottom: 4 },
   foundationName: { fontSize: 18, fontWeight: '900', color: '#0f172a', marginBottom: 8 },
   foundationDesc: { fontSize: 13, color: '#64748b', textAlign: 'center', lineHeight: 20, fontWeight: '500' },
@@ -166,9 +181,8 @@ const styles = StyleSheet.create({
   optionDesc: { fontSize: 12, color: '#64748b', fontWeight: '500', marginBottom: 6, lineHeight: 16 },
   optionCoinRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   optionCoinText: { fontSize: 12, fontWeight: '800', color: '#15803d' },
+  optionShortfall: { fontSize: 11, fontWeight: '700', color: '#d97706', marginTop: 4 },
 
   donateBtn: { backgroundColor: '#15803d', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 100 },
-  donateBtnDisabled: { backgroundColor: '#f1f5f9' },
   donateBtnText: { color: 'white', fontWeight: '800', fontSize: 12 },
-  donateBtnTextDisabled: { color: '#94a3b8' },
 });
