@@ -124,6 +124,9 @@ export function QuizScreen({ navigation }: any) {
 
   const timerAnim = useRef(new Animated.Value(1)).current;
   const timerAnimRef = useRef<Animated.CompositeAnimation | null>(null);
+  // Fades the timer out smoothly once an answer is picked, instead of hard-
+  // freezing the bar mid-track (which reads as a lag/stutter).
+  const timerFade = useRef(new Animated.Value(1)).current;
   const correctCountRef = useRef(0);
   const totalCoinsRef = useRef(0);
   const questionsAttemptedRef = useRef(0);
@@ -215,6 +218,18 @@ export function QuizScreen({ navigation }: any) {
     anim.start();
     return () => anim.stop();
   }, [currentQ, screenState, isOffline]);
+
+  // Smoothly fade the timer once an answer is locked in, and snap it back to
+  // full when the next question starts — so selecting an option never looks
+  // like the timer stalled.
+  useEffect(() => {
+    if (screenState !== 'playing') return;
+    if (selectedAnswer !== null) {
+      Animated.timing(timerFade, { toValue: 0, duration: 240, useNativeDriver: false }).start();
+    } else {
+      timerFade.setValue(1);
+    }
+  }, [selectedAnswer, screenState]);
 
   // Countdown integer â€” paused while offline
   useEffect(() => {
@@ -550,17 +565,18 @@ export function QuizScreen({ navigation }: any) {
       <Animated.View style={[styles.timerBar, {
         width: timerAnim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }),
         backgroundColor: timeLeft <= 5 ? '#ef4444' : '#4ade80',
+        opacity: timerFade,
       }]} />
 
       {/* Meta row */}
       <View style={styles.metaRow}>
         <Text style={styles.qCounter}>Question {currentQ + 1} of {questions.length}</Text>
-        <View style={styles.timerChip}>
+        <Animated.View style={[styles.timerChip, { opacity: timerFade }]}>
           <Timer size={13} color={timeLeft <= 3 ? '#ef4444' : 'white'} />
           <Text style={[styles.timerChipText, timeLeft <= 3 && styles.timerDanger]}>
             {timeLeft}s
           </Text>
-        </View>
+        </Animated.View>
       </View>
 
       {/* Question card */}
