@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Modal, TextInput, KeyboardAvoidingView, Platform, Animated, ActivityIndicator } from 'react-native';
 import { WebFooter } from '../components/shared/WebFooter';
 import { showAlert } from '../utils/alert';
@@ -956,8 +956,9 @@ export function ProfileScreen({ navigation }: any) {
                   <Text style={{ color: 'white', fontWeight: '900', fontSize: 15 }}>Verify & save</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => setFlowStep('form')}>
-                  <Text style={{ color: '#64748b', fontWeight: '600', fontSize: 13 }}>â† Back to edit</Text>
+                <TouchableOpacity onPress={() => setFlowStep('form')} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+                  <ChevronLeft size={15} color="#64748b" />
+                  <Text style={{ color: '#64748b', fontWeight: '600', fontSize: 13 }}>Back to edit</Text>
                 </TouchableOpacity>
               </View>
             )}
