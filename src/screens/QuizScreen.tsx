@@ -73,6 +73,8 @@ function Confetti() {
 }
 
 const TIMER_DURATION = 20;
+const COINS_PER_QUESTION = 10;
+const PERFECT_BONUS = 20; // extra coins for a full 3/3 run — 30 base + 20 = 50 max
 
 type ScreenState = 'init' | 'lobby' | 'playing' | 'results';
 
@@ -301,17 +303,25 @@ export function QuizScreen({ navigation }: any) {
       const norm = (s: string) => (s || '').trim().toLowerCase();
       if (!result.correct && result.correctAnswer && norm(result.correctAnswer) === norm(option)) {
         result.correct = true;
-        if (!result.coinsEarned) result.coinsEarned = 40;
+        if (!result.coinsEarned) result.coinsEarned = COINS_PER_QUESTION;
       }
-      setAnswerResult(result);
       if (result.correct) {
         correctCountRef.current += 1;
+        // Perfect-score bonus: a full 3/3 run earns +20 on top (30 base + 20 = 50).
+        // Award it on the final correct answer if the backend didn't include one.
+        const isLastQuestion = currentQ === questions.length - 1;
+        const allCorrect = correctCountRef.current === questions.length;
+        if (isLastQuestion && allCorrect && !result.bonusCoins) {
+          result.bonusCoins = PERFECT_BONUS;
+          result.perfectScore = true;
+        }
         totalCoinsRef.current += result.coinsEarned + (result.bonusCoins || 0);
         setCorrectCount(correctCountRef.current);
         setTotalCoins(totalCoinsRef.current);
         setShowCoinToast(true);
         if (result.perfectScore) setIsPerfectScore(true);
       }
+      setAnswerResult(result);
     } catch (err: any) {
       // "Already answered" means an earlier submission for this question already
       // succeeded (and was already scored/credited) — don't clobber that real result
@@ -467,7 +477,7 @@ export function QuizScreen({ navigation }: any) {
             <RuleRow icon={<CheckCircle2 size={20} color="#4ade80" />} text="3 questions per day" />
             <RuleRow icon={<Timer size={20} color="#60a5fa" />} text="20 seconds per question" />
             <RuleRow icon={<KarmaCoin size={20} />} text="10 coins per question" />
-            <RuleRow icon={<Trophy size={20} color="#fbbf24" />} text="Max 30 coins per day" />
+            <RuleRow icon={<Trophy size={20} color="#fbbf24" />} text="Max 50 coins per day (30 + 20 bonus for 3/3)" />
           </View>
 
           {isLocked ? (
