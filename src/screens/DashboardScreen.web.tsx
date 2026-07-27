@@ -506,7 +506,7 @@ const z = StyleSheet.create({
   // Action pair
   actionPair: { flexDirection: 'row', gap: 20 },
   actionCard: { flex: 1, borderRadius: 18, overflow: 'hidden', shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 6 },
-  actionCardGrad: { padding: 22, minHeight: 160, justifyContent: 'space-between', position: 'relative', overflow: 'hidden' },
+  actionCardGrad: { flex: 1, padding: 22, minHeight: 160, justifyContent: 'space-between', position: 'relative', overflow: 'hidden' },
   actionCardDecor: { position: 'absolute', top: -25, right: -25, width: 90, height: 90, borderRadius: 45, backgroundColor: 'rgba(74,222,128,0.1)' },
   actionCardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 },
   actionCardIconBg: { width: 44, height: 44, borderRadius: 13, backgroundColor: 'rgba(74,222,128,0.15)', alignItems: 'center', justifyContent: 'center' },
