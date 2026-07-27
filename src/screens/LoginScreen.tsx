@@ -517,9 +517,7 @@ export function LoginScreen({ navigation }: any) {
     // check-user now supports both email and phone — route to the password step
     // only if an account actually exists, otherwise send the user to sign up.
     setStep('checking');
-    try {
-      const res = await authService.checkUser(raw);
-
+    const routeByResult = (res: any) => {
       if (res?.data?.isRegistered) {
         setStep('login');
       } else {
@@ -528,14 +526,30 @@ export function LoginScreen({ navigation }: any) {
         else setEmail(raw);
         setStep('signup');
       }
+    };
+    try {
+      routeByResult(await authService.checkUser(raw));
     } catch (error: any) {
-      const isNetworkError = !error?.response;
-      showAlert(
-        isNetworkError ? 'No internet connection' : 'Error',
-        isNetworkError
-          ? 'Please check your network connection and try again.'
-          : (error?.response?.data?.message || 'Failed to check account.')
-      );
+      const browserOffline = typeof navigator !== 'undefined' && navigator.onLine === false;
+      // No response but the browser IS online → the Render free-tier backend is
+      // cold-starting (first request after it sleeps can exceed the timeout).
+      // Retry once; the second call usually lands after the server has woken up.
+      if (!error?.response && !browserOffline) {
+        try {
+          routeByResult(await authService.checkUser(raw));
+          return;
+        } catch (_) { /* fall through to messaging below */ }
+      }
+      if (!error?.response) {
+        showAlert(
+          browserOffline ? 'No internet connection' : 'Server is waking up',
+          browserOffline
+            ? 'Please check your network connection and try again.'
+            : 'Our server takes a few seconds to start on first load. Please tap continue again.',
+        );
+      } else {
+        showAlert('Error', error?.response?.data?.message || 'Failed to check account.');
+      }
       setStep('entry');
     }
   };
