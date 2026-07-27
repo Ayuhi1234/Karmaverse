@@ -565,7 +565,11 @@ export function SplashScreen({ navigation, route }: any) {
 }
 
 const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#ffffff' },
+  // overflow hidden guarantees no horizontal page-scroll at any viewport — decorative
+  // bleed (negative-offset circles) or a slightly-too-wide row can't push the page
+  // sideways. Vertical scroll lives inside the ScrollView, so it's unaffected; the
+  // fixed mascot widget and modal portals aren't clipped by an ancestor's overflow.
+  root: { flex: 1, backgroundColor: '#ffffff', overflow: 'hidden' },
 
   hoverLift: {
     transform: [{ translateY: -3 }],
@@ -587,7 +591,7 @@ const s = StyleSheet.create({
   navTabText: { color: 'rgba(255,255,255,0.75)', fontSize: 14, fontWeight: '700' },
 
   // Hero
-  hero: { paddingBottom: 60, minHeight: 500 },
+  hero: { paddingBottom: 60, minHeight: 500, overflow: 'hidden' },
   heroCircle: { position: 'absolute', borderRadius: 999, backgroundColor: 'white' },
   heroContent: { maxWidth: MAX, width: '100%', alignSelf: 'center', paddingHorizontal: 32, paddingTop: 60 },
   heroBadge: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(255,255,255,0.08)', alignSelf: 'flex-start', borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', marginBottom: 24 },
