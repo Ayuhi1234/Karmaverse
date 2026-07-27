@@ -12,6 +12,14 @@ try {
   Constants = require('expo-constants').default;
 } catch (_) {}
 
+// expo-notifications imports fine on web, but its native methods
+// (getLastNotificationResponseAsync, addNotificationResponseReceivedListener, …)
+// throw "not available on web". Null it out so every `if (!Notifications)` guard
+// below short-circuits and we never call an unsupported API in the browser.
+if (Platform.OS === 'web') {
+  Notifications = null;
+}
+
 // Push tokens from Expo Go are sandbox tokens the backend rejects — skip entirely
 const isExpoGo = Constants?.appOwnership === 'expo';
 
