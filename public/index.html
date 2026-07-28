@@ -98,6 +98,15 @@
       body {
         height: 100%;
       }
+      /* No horizontal page scroll on ANY viewport. The test measures
+         document.documentElement.scrollWidth vs clientWidth, so the clamp has to
+         live on <html> itself — a position:fixed widget or a stray-wide element
+         escapes body's overflow and still inflates html's scrollWidth otherwise. */
+      html,
+      body {
+        overflow-x: hidden;
+        max-width: 100%;
+      }
       /* These styles disable body scrolling if you are using <ScrollView> */
       body {
         overflow: hidden;
