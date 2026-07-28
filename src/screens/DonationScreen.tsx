@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, StatusBar, SafeAreaView, Image } from 'react-native';
-import { ChevronLeft, TreePine, Monitor, Laptop } from 'lucide-react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, StatusBar, SafeAreaView } from 'react-native';
+import { ChevronLeft, TreePine, Monitor, Laptop, HeartHandshake } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { profileService } from '../services/profile';
@@ -86,13 +86,13 @@ export function DonationScreen({ navigation, route }: any) {
       <ScrollView style={styles.scroll} contentContainerStyle={{ paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
 
-          {/* Foundation branding.
-              TODO: swap logo-icon.png for the real 3R Waste Foundation logo once the
-              Founding Engineer supplies the branding asset (drop it in assets/ and
-              point the require() below at it). */}
+          {/* Foundation branding — neutral placeholder icon, NOT the KarmaVerse
+              logo (that misrepresented the foundation). TODO: drop the real 3R Waste
+              Foundation logo into assets/ and render it here once the Founding
+              Engineer supplies the branding asset. */}
           <View style={styles.foundationCard}>
             <View style={styles.foundationLogoWrap}>
-              <Image source={require('../../assets/logo-icon.png')} style={styles.foundationLogo} resizeMode="contain" />
+              <HeartHandshake size={30} color="#15803d" />
             </View>
             <Text style={styles.foundationLabel}>IN PARTNERSHIP WITH</Text>
             <Text style={styles.foundationName}>3R Waste Foundation</Text>
@@ -163,7 +163,6 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: '#e2e8f0', marginBottom: 28,
   },
   foundationLogoWrap: { width: 72, height: 72, borderRadius: 20, backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center', marginBottom: 12, borderWidth: 1, borderColor: '#dcfce7' },
-  foundationLogo: { width: 52, height: 52 },
   foundationLabel: { fontSize: 11, fontWeight: '800', color: '#94a3b8', letterSpacing: 1.2, marginBottom: 4 },
   foundationName: { fontSize: 18, fontWeight: '900', color: '#0f172a', marginBottom: 8 },
   foundationDesc: { fontSize: 13, color: '#64748b', textAlign: 'center', lineHeight: 20, fontWeight: '500' },

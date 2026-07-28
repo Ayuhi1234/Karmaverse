@@ -561,7 +561,7 @@ export function LoginScreen({ navigation }: any) {
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) errs.email = 'Please enter a valid email address.';
     if (!/^[a-zA-Z\s]+$/.test(name.trim())) errs.name = 'Full name should contain only letters.';
     if (!/^[6-9]\d{9}$/.test(phone.trim())) errs.phone = 'Please enter a valid Indian mobile number (must start with 6, 7, 8 or 9).';
-    if (password.length < 6) errs.password = 'Password must be at least 6 characters.';
+    if (password.length < 8 || !/\d/.test(password)) errs.password = 'Password must be at least 8 characters and include a number.';
     if (Object.keys(errs).length > 0) { setSignupErrors(errs); return; }
     setSignupErrors({});
 
@@ -1117,6 +1117,11 @@ export function LoginScreen({ navigation }: any) {
               icon={<Lock size={18} color="#94a3b8" />}
             />
             {signupErrors.password ? <Text style={styles.fieldError}>{signupErrors.password}</Text> : null}
+            {!signupErrors.password && password.length > 0 && (
+              (password.length >= 8 && /\d/.test(password))
+                ? <Text style={[styles.referralHint, { color: '#16a34a' }]}>✓ Password looks good</Text>
+                : <Text style={[styles.referralHint, { color: '#dc2626' }]}>Use at least 8 characters including 1 number</Text>
+            )}
             <InputField
               placeholder="Referral code (optional)"
               value={referralCode}
@@ -1153,7 +1158,7 @@ export function LoginScreen({ navigation }: any) {
               </Text>
             </View>
 
-            <PrimaryButton onPress={handleSignupSubmit} disabled={!password || !name || !email || !phone || !agreedToTerms || isLoading} loading={isLoading}>
+            <PrimaryButton onPress={handleSignupSubmit} disabled={!(password.length >= 8 && /\d/.test(password)) || !name || !email || !phone || !agreedToTerms || isLoading} loading={isLoading}>
               <Text style={styles.buttonText}>Sign up</Text>
               <ArrowRight size={18} color="#fff" />
             </PrimaryButton>

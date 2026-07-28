@@ -6,8 +6,15 @@ import { ArrowDownLeft, ArrowUpRight, Heart, History, Clock } from 'lucide-react
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { profileService } from '../services/profile';
 import { REDEEM_INFO_MESSAGE, showRedeemInfoNow, isRedeemLive } from '../utils/redeemInfo';
+import { showAlert } from '../utils/alert';
 
 const showWithdrawInfo = () => showRedeemInfoNow();
+// Peer transfers aren't built yet — show a clear, dedicated coming-soon message
+// instead of reusing the redeem/cash-out popup (which confused users).
+const showTransferInfo = () => showAlert(
+  'Transfers coming soon',
+  "You'll soon be able to send KarmaCoins XP to friends and family. We're building this — stay tuned!",
+);
 
 export function WalletScreen({ navigation }: any) {
   // balance = current spendable/redeemable coins (used for redeem flow)
@@ -120,7 +127,7 @@ export function WalletScreen({ navigation }: any) {
             <ArrowDownLeft size={18} color="#16a34a" />
             <Text style={[styles.actionLabel, { color: '#16a34a' }]}>Redeem</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.actionBtn, styles.actionBtnAmber]} onPress={showWithdrawInfo} activeOpacity={0.8}>
+          <TouchableOpacity style={[styles.actionBtn, styles.actionBtnAmber]} onPress={showTransferInfo} activeOpacity={0.8}>
             <ArrowUpRight size={18} color="#d97706" />
             <Text style={[styles.actionLabel, { color: '#d97706' }]}>Transfer</Text>
           </TouchableOpacity>
