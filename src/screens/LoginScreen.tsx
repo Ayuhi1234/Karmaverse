@@ -1459,7 +1459,9 @@ export function LoginScreen({ navigation }: any) {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
       <StatusBar barStyle="light-content" backgroundColor="#064e3b" />
-      <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 120, backgroundColor: '#064e3b' }} />
+      {/* Status-bar filler only — 60 (not 120) so it stays behind the rounded
+          header and doesn't bleed a dark-green band below it (matches other screens). */}
+      <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 60, backgroundColor: '#064e3b' }} />
 
       <SafeAreaView style={{ flex: 1 }}>
         <LinearGradient colors={['#064e3b', '#15803d']} style={styles.header}>
