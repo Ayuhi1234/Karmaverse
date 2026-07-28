@@ -293,13 +293,13 @@ export function OrderTrackingScreen({ route, navigation }: any) {
           </Text>
           <Text style={{ fontSize: 13, color: '#94a3b8', fontWeight: '600', marginBottom: 40 }}>{bookingData.id}</Text>
           <TouchableOpacity
-            style={{ backgroundColor: '#15803d', borderRadius: 16, paddingVertical: 16, paddingHorizontal: 32, width: '100%', alignItems: 'center', elevation: 3, shadowColor: '#15803d', shadowOpacity: 0.3, shadowRadius: 8, shadowOffset: { width: 0, height: 3 } }}
+            style={{ backgroundColor: '#15803d', borderRadius: 16, paddingVertical: 16, paddingHorizontal: 32, width: '100%', maxWidth: 420, alignItems: 'center', elevation: 3, shadowColor: '#15803d', shadowOpacity: 0.3, shadowRadius: 8, shadowOffset: { width: 0, height: 3 } }}
             onPress={() => navigation.navigate('SchedulePickup')}
           >
             <Text style={{ color: 'white', fontSize: 15, fontWeight: '800' }}>Schedule New Pickup</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={{ marginTop: 14, borderRadius: 16, paddingVertical: 14, paddingHorizontal: 32, width: '100%', alignItems: 'center', borderWidth: 1.5, borderColor: '#e2e8f0' }}
+            style={{ marginTop: 14, borderRadius: 16, paddingVertical: 14, paddingHorizontal: 32, width: '100%', maxWidth: 420, alignItems: 'center', borderWidth: 1.5, borderColor: '#e2e8f0' }}
             onPress={() => navigation.navigate('Orders')}
           >
             <Text style={{ color: '#475569', fontSize: 15, fontWeight: '700' }}>View All Orders</Text>
