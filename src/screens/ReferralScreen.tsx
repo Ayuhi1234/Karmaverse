@@ -114,7 +114,7 @@ export function ReferralScreen({ navigation }: any) {
           {/* ── Hero ── */}
           <LinearGradient colors={['#7e22ce', '#db2777']} style={styles.heroSection}>
             <View style={styles.header}>
-              <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+              <TouchableOpacity style={styles.backBtn} onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('App')}>
                 <ChevronLeft size={24} color="white" />
               </TouchableOpacity>
               <Text style={styles.headerTitle}>Refer & earn</Text>

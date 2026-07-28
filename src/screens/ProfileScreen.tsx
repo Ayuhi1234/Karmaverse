@@ -570,7 +570,7 @@ export function ProfileScreen({ navigation }: any) {
         <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={styles.backgroundGradient}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('App')}>
             <ChevronLeft size={24} color="white" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>My profile</Text>

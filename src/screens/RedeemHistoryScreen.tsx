@@ -46,7 +46,7 @@ export function RedeemHistoryScreen({ navigation }: any) {
       <LinearGradient colors={['#064e3b', '#15803d']} style={styles.header}>
         <SafeAreaView>
           <View style={styles.headerRow}>
-            <TouchableOpacity style={styles.backBtnInner} onPress={() => navigation.goBack()}>
+            <TouchableOpacity style={styles.backBtnInner} onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('App')}>
               <ChevronLeft size={22} color="white" />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>Redeem requests</Text>

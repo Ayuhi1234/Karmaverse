@@ -76,7 +76,7 @@ export function BookingDetailsScreen({ navigation, route }: any) {
       <SafeAreaView edges={['top']}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <TouchableOpacity onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('App')} style={styles.backBtn}>
             <ArrowLeft size={20} color="#0f172a" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Booking details</Text>

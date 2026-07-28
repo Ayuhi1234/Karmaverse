@@ -88,7 +88,7 @@ export function RedeemScreen({ navigation, route }: any) {
           >
             <Text style={styles.primaryActionText}>View my requests</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.secondaryActionBtn} onPress={() => navigation.goBack()}>
+          <TouchableOpacity style={styles.secondaryActionBtn} onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('App')}>
             <Text style={styles.secondaryActionText}>Back to wallet</Text>
           </TouchableOpacity>
         </View>
@@ -104,7 +104,7 @@ export function RedeemScreen({ navigation, route }: any) {
       <LinearGradient colors={['#064e3b', '#15803d']} style={styles.header}>
         <SafeAreaView>
           <View style={styles.headerRow}>
-            <TouchableOpacity style={styles.backBtnInner} onPress={() => navigation.goBack()}>
+            <TouchableOpacity style={styles.backBtnInner} onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('App')}>
               <ChevronLeft size={22} color="white" />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>Redeem coins</Text>

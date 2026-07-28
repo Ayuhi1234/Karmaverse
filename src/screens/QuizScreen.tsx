@@ -461,7 +461,7 @@ export function QuizScreen({ navigation }: any) {
         <StatusBar barStyle="light-content" backgroundColor="#064e3b" />
         <LinearGradient colors={['#064e3b', '#166534']} style={StyleSheet.absoluteFillObject} />
         <SafeAreaView style={styles.lobbyArea}>
-          <TouchableOpacity style={styles.closeBtn} onPress={() => navigation.goBack()}>
+          <TouchableOpacity style={styles.closeBtn} onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('App')}>
             <X size={22} color="white" />
           </TouchableOpacity>
 
@@ -489,7 +489,7 @@ export function QuizScreen({ navigation }: any) {
             <View style={styles.lockedBox}>
               <Text style={styles.lockedTitle}>Already played today!</Text>
               <Text style={styles.lockedSub}>Next quiz unlocks at 12:00 AM</Text>
-              <TouchableOpacity style={styles.outlineBtn} onPress={() => navigation.goBack()}>
+              <TouchableOpacity style={styles.outlineBtn} onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('App')}>
                 <Text style={styles.outlineBtnText}>Back to home</Text>
               </TouchableOpacity>
             </View>

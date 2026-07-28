@@ -315,7 +315,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
 
       {/* â"€â"€ Header â"€â"€ */}
       <SafeAreaView edges={['top']} style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+        <TouchableOpacity onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('App')} style={styles.backBtn}>
           <ArrowLeft size={20} color="white" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Live tracking</Text>
