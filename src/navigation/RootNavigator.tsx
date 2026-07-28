@@ -19,6 +19,7 @@ import { RedeemScreen } from '../screens/RedeemScreen';
 import { RedeemHistoryScreen } from '../screens/RedeemHistoryScreen';
 import { DonationScreen } from '../screens/DonationScreen';
 import { AboutUsScreen } from '../screens/AboutUsScreen';
+import { NotFoundScreen } from '../screens/NotFoundScreen';
 import { TabNavigator } from './TabNavigator';
 import { navigationRef } from './navRef';
 
@@ -84,12 +85,42 @@ export function RootNavigator() {
   // referral-code deep-link handling in App.tsx (native) is unaffected. The root path
   // ('') must map to whichever screen `initialRouteName` would otherwise pick, or a
   // logged-in user visiting '/' would get bounced to the Splash marketing screen.
+  // Every authenticated screen needs an entry here or a cold load / refresh of its
+  // URL fails to match and React Navigation falls back to the initial route
+  // (Dashboard) — that was KV-016. Tab screens are nested under App; the rest are
+  // top-level stack routes. Paths match the route names so the URLs the nav already
+  // generates (/Wallet, /Quiz, …) round-trip on refresh, bookmarks and shared links.
   const linking = useMemo(() => ({
     prefixes: Platform.OS === 'web' && typeof window !== 'undefined' ? [window.location.origin] : [],
     config: {
       screens: isLoggedIn
-        ? { App: '', Login: 'login', Legal: 'legal/:type' }
-        : { Splash: '', Login: 'login', Legal: 'legal/:type' },
+        ? {
+            App: {
+              path: '',
+              screens: {
+                Dashboard: 'Dashboard',
+                Orders: 'Orders',
+                Wallet: 'Wallet',
+                Store: 'Store',
+              },
+            },
+            Login: 'login',
+            Legal: 'legal/:type',
+            Profile: 'Profile',
+            SchedulePickup: 'SchedulePickup',
+            KnowledgeHub: 'KnowledgeHub',
+            ArticleDetail: 'ArticleDetail',
+            Quiz: 'Quiz',
+            Referral: 'Referral',
+            OrderTracking: 'OrderTracking',
+            BookingDetails: 'BookingDetails',
+            Redeem: 'Redeem',
+            RedeemHistory: 'RedeemHistory',
+            Donation: 'Donation',
+            AboutUs: 'AboutUs',
+            NotFound: '*',
+          }
+        : { Splash: '', Login: 'login', Legal: 'legal/:type', AboutUs: 'AboutUs', NotFound: '*' },
     },
   }), [isLoggedIn]);
 
@@ -135,6 +166,7 @@ export function RootNavigator() {
         <Stack.Screen name="RedeemHistory" component={RedeemHistoryScreen} />
         <Stack.Screen name="Donation" component={DonationScreen} />
         <Stack.Screen name="AboutUs" component={AboutUsScreen} />
+        <Stack.Screen name="NotFound" component={NotFoundScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
