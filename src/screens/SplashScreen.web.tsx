@@ -10,6 +10,7 @@ import {
   Sprout, Trophy, Flame, Brain, Building2,
   Target, GraduationCap,
   HeartHandshake, Home as HomeIcon, Store, Megaphone,
+  Instagram, Facebook, Linkedin, Twitter, Youtube,
 } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
@@ -499,6 +500,15 @@ export function SplashScreen({ navigation, route }: any) {
               <TouchableOpacity onPress={() => Linking.openURL('https://0waste.co.in/')}>
                 <Text style={[s.footerLink, { marginTop: 10, color: '#4ade80', fontWeight: '700' }]}>0waste.co.in ↗</Text>
               </TouchableOpacity>
+              {/* TODO: point these at the real 3RZeroWaste social handles once the
+                  Founding Engineer confirms them — currently the company site. */}
+              <View style={s.footerSocialRow}>
+                {[Instagram, Facebook, Linkedin, Twitter, Youtube].map((Icon, i) => (
+                  <TouchableOpacity key={i} style={s.footerSocialBtn} onPress={() => Linking.openURL('https://0waste.co.in/')} activeOpacity={0.8}>
+                    <Icon size={16} color="#cbd5e1" />
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
 
             <View style={[s.footerLinksRow, isMobile && { flexDirection: 'column', gap: 24 }]}>
@@ -538,10 +548,13 @@ export function SplashScreen({ navigation, route }: any) {
                   <Phone size={14} color="#4ade80" />
                   <Text style={s.footerLink}>+91 70931 98828</Text>
                 </TouchableOpacity>
-                <View style={s.footerContactRow}>
+                <TouchableOpacity
+                  style={s.footerContactRow}
+                  onPress={() => Linking.openURL('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122503'))}
+                >
                   <MapPin size={14} color="#4ade80" style={{ marginTop: 2 }} />
-                  <Text style={[s.footerLink, { flex: 1 }]}>Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122503</Text>
-                </View>
+                  <Text style={[s.footerLink, { flex: 1, textDecorationLine: 'underline' }]}>Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122503</Text>
+                </TouchableOpacity>
               </View>
             </View>
           </View>
@@ -663,6 +676,8 @@ const s = StyleSheet.create({
   footerBrand: { flex: 1.2 },
   footerLogoRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
   footerLogoImg: { width: 220, height: 104 },
+  footerSocialRow: { flexDirection: 'row', gap: 10, marginTop: 16 },
+  footerSocialBtn: { width: 34, height: 34, borderRadius: 10, backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' },
   footerDesc: { color: '#94a3b8', fontSize: 14, fontWeight: '500', lineHeight: 22, maxWidth: 320 },
   footerLinksRow: { flex: 2, flexDirection: 'row', justifyContent: 'space-between' },
   footerLinks: { gap: 12, flex: 1 },

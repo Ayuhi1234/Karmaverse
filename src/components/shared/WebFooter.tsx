@@ -1,24 +1,89 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions, Image } from 'react-native';
-import { Mail, MapPin, Phone } from 'lucide-react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions, Image, Linking, Platform } from 'react-native';
+import { Mail, MapPin, Phone, Instagram, Facebook, Linkedin, Twitter, Youtube } from 'lucide-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 
 const MAX = 1200;
+const ADDRESS = 'Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122503';
+const MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ADDRESS)}`;
+
+// TODO: swap these for the real 3RZeroWaste handles once the Founding Engineer
+// confirms which channels are live. Until then they point at the company site so
+// no icon dead-ends on a 404.
+const SOCIALS = [
+  { key: 'instagram', Icon: Instagram, url: 'https://0waste.co.in/' },
+  { key: 'facebook', Icon: Facebook, url: 'https://0waste.co.in/' },
+  { key: 'linkedin', Icon: Linkedin, url: 'https://0waste.co.in/' },
+  { key: 'twitter', Icon: Twitter, url: 'https://0waste.co.in/' },
+  { key: 'youtube', Icon: Youtube, url: 'https://0waste.co.in/' },
+];
+
+const openExternal = (url: string) => {
+  if (Platform.OS === 'web') window.open(url, '_blank', 'noopener');
+  else Linking.openURL(url).catch(() => {});
+};
 
 export function WebFooter() {
   const { width } = useWindowDimensions();
   const isMobile = width < 640;
   const pad = isMobile ? 16 : 40;
   const navigation = useNavigation<any>();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  useEffect(() => {
+    AsyncStorage.getItem('userToken').then(t => setIsLoggedIn(!!t)).catch(() => {});
+  }, []);
+
+  // Logged-in users must stay inside the authenticated app — sending them to the
+  // Splash/onboarding page (KV-011) feels like a forced logout. Flow → the app
+  // home, Learn & earn → the in-app Knowledge Hub. Guests keep the marketing scroll.
   const QUICK_LINKS = [
-    { label: 'Flow', onPress: () => navigation.navigate('Splash', { scrollTo: 'howItWorks' }) },
-    { label: 'Learn & earn', onPress: () => navigation.navigate('Splash', { scrollTo: 'learning' }) },
+    {
+      label: 'Flow',
+      onPress: () => isLoggedIn
+        ? navigation.navigate('App')
+        : navigation.navigate('Splash', { scrollTo: 'howItWorks' }),
+    },
+    {
+      label: 'Learn & earn',
+      onPress: () => isLoggedIn
+        ? navigation.navigate('KnowledgeHub')
+        : navigation.navigate('Splash', { scrollTo: 'learning' }),
+    },
     { label: 'Daily quiz', onPress: () => navigation.navigate('Quiz') },
     { label: 'Knowledge hub', onPress: () => navigation.navigate('KnowledgeHub') },
     { label: 'Referral program', onPress: () => navigation.navigate('Referral') },
     { label: 'About us', onPress: () => navigation.navigate('AboutUs') },
   ];
+
+  const SocialRow = () => (
+    <View style={s.socialRow}>
+      {SOCIALS.map(({ key, Icon, url }) => (
+        <TouchableOpacity key={key} style={s.socialBtn} onPress={() => openExternal(url)} activeOpacity={0.8}>
+          <Icon size={16} color="#cbd5e1" />
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
+
+  const ContactBlock = ({ small }: { small?: boolean }) => (
+    <>
+      <Text style={s.colTitle}>Contact us</Text>
+      <View style={s.contactRow}>
+        <Mail size={small ? 13 : 14} color="#94a3b8" />
+        <Text style={[s.contactText, small && { fontSize: 12 }]}>info@0waste.co.in</Text>
+      </View>
+      <View style={s.contactRow}>
+        <Phone size={small ? 13 : 14} color="#94a3b8" />
+        <Text style={[s.contactText, small && { fontSize: 12 }]}>+91 70931 98828</Text>
+      </View>
+      <TouchableOpacity style={s.contactRow} onPress={() => openExternal(MAPS_URL)} activeOpacity={0.7}>
+        <MapPin size={small ? 13 : 14} color="#94a3b8" />
+        <Text style={[s.contactText, s.addressLink]}>{ADDRESS}</Text>
+      </TouchableOpacity>
+    </>
+  );
 
   return (
     <View style={s.footer}>
@@ -33,9 +98,10 @@ export function WebFooter() {
             <Text style={s.aboutText}>
               India's rewarding recycling platform. Turn your waste into KarmaCoins XP — schedule free doorstep pickups and earn rewards for every kg recycled.
             </Text>
+            <SocialRow />
           </View>
 
-          {/* Quick Links + Contact in a row on mobile */}
+          {/* Quick Links + Contact */}
           {isMobile ? (
             <View style={{ flexDirection: 'row', gap: 24 }}>
               <View style={{ flex: 1 }}>
@@ -47,19 +113,7 @@ export function WebFooter() {
                 ))}
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={s.colTitle}>Contact us</Text>
-                <View style={s.contactRow}>
-                  <Mail size={13} color="#94a3b8" />
-                  <Text style={[s.contactText, { fontSize: 12 }]}>info@0waste.co.in</Text>
-                </View>
-                <View style={s.contactRow}>
-                  <Phone size={13} color="#94a3b8" />
-                  <Text style={[s.contactText, { fontSize: 12 }]}>+91 70931 98828</Text>
-                </View>
-                <View style={s.contactRow}>
-                  <MapPin size={13} color="#94a3b8" />
-                  <Text style={s.contactText}>PLOT 62, Sector 8, Imt Manesar, Gurugram, Haryana 122503</Text>
-                </View>
+                <ContactBlock small />
               </View>
             </View>
           ) : (
@@ -73,19 +127,7 @@ export function WebFooter() {
                 ))}
               </View>
               <View style={s.col}>
-                <Text style={s.colTitle}>Contact us</Text>
-                <View style={s.contactRow}>
-                  <Mail size={14} color="#94a3b8" />
-                  <Text style={s.contactText}>info@0waste.co.in</Text>
-                </View>
-                <View style={s.contactRow}>
-                  <Phone size={14} color="#94a3b8" />
-                  <Text style={s.contactText}>+91 70931 98828</Text>
-                </View>
-                <View style={s.contactRow}>
-                  <MapPin size={14} color="#94a3b8" />
-                  <Text style={s.contactText}>PLOT 62, Sector 8, Imt Manesar, Gurugram, Haryana 122503</Text>
-                                                                                                                                                                                    </View>
+                <ContactBlock />
               </View>
             </>
           )}
@@ -139,11 +181,15 @@ const s = StyleSheet.create({
   logoText: { color: 'white', fontSize: 16, fontWeight: '900' },
   aboutText: { color: '#94a3b8', fontSize: 13, lineHeight: 21, fontWeight: '500' },
 
+  socialRow: { flexDirection: 'row', gap: 10, marginTop: 16 },
+  socialBtn: { width: 34, height: 34, borderRadius: 10, backgroundColor: '#1e293b', borderWidth: 1, borderColor: '#334155', alignItems: 'center', justifyContent: 'center' },
+
   colTitle: { color: 'white', fontSize: 14, fontWeight: '800', marginBottom: 14 },
   link: { color: '#94a3b8', fontSize: 13, fontWeight: '500', marginBottom: 10 },
 
   contactRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
   contactText: { color: '#94a3b8', fontSize: 13, fontWeight: '500', flex: 1 },
+  addressLink: { textDecorationLine: 'underline' },
 
   storeBtn: { minWidth: 130, backgroundColor: '#1e293b', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 10, marginBottom: 10, borderWidth: 1, borderColor: '#334155' },
   storeBtnDisabled: { opacity: 0.5 },
