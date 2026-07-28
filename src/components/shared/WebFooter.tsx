@@ -40,9 +40,11 @@ export function WebFooter() {
   // home, Learn & earn → the in-app Knowledge Hub. Guests keep the marketing scroll.
   const QUICK_LINKS = [
     {
+      // Logged in → the actual pickup flow (Schedule Pickup). navigate('App') was a
+      // no-op because the footer already lives inside App, so the link did nothing.
       label: 'Flow',
       onPress: () => isLoggedIn
-        ? navigation.navigate('App')
+        ? navigation.navigate('SchedulePickup')
         : navigation.navigate('Splash', { scrollTo: 'howItWorks' }),
     },
     {
