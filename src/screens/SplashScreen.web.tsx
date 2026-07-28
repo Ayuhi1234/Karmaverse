@@ -500,11 +500,15 @@ export function SplashScreen({ navigation, route }: any) {
               <TouchableOpacity onPress={() => Linking.openURL('https://0waste.co.in/')}>
                 <Text style={[s.footerLink, { marginTop: 10, color: '#4ade80', fontWeight: '700' }]}>0waste.co.in ↗</Text>
               </TouchableOpacity>
-              {/* TODO: point these at the real 3RZeroWaste social handles once the
-                  Founding Engineer confirms them — currently the company site. */}
               <View style={s.footerSocialRow}>
-                {[Instagram, Facebook, Linkedin, Twitter, Youtube].map((Icon, i) => (
-                  <TouchableOpacity key={i} style={s.footerSocialBtn} onPress={() => Linking.openURL('https://0waste.co.in/')} activeOpacity={0.8}>
+                {[
+                  { Icon: Instagram, url: 'https://www.instagram.com/mykarmaverse/' },
+                  { Icon: Facebook, url: 'https://www.facebook.com/share/p/17GYy6Qyam/' },
+                  { Icon: Linkedin, url: 'https://www.linkedin.com/showcase/136793967' },
+                  { Icon: Twitter, url: 'https://x.com/mykarmaverse' },
+                  { Icon: Youtube, url: 'https://www.youtube.com/channel/UCJjzqmfLvyFhGRwfjSGE4bw' },
+                ].map(({ Icon, url }, i) => (
+                  <TouchableOpacity key={i} style={s.footerSocialBtn} onPress={() => Linking.openURL(url)} activeOpacity={0.8}>
                     <Icon size={16} color="#cbd5e1" />
                   </TouchableOpacity>
                 ))}

@@ -8,15 +8,12 @@ const MAX = 1200;
 const ADDRESS = 'Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122503';
 const MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ADDRESS)}`;
 
-// TODO: swap these for the real 3RZeroWaste handles once the Founding Engineer
-// confirms which channels are live. Until then they point at the company site so
-// no icon dead-ends on a 404.
 const SOCIALS = [
-  { key: 'instagram', Icon: Instagram, url: 'https://0waste.co.in/' },
-  { key: 'facebook', Icon: Facebook, url: 'https://0waste.co.in/' },
-  { key: 'linkedin', Icon: Linkedin, url: 'https://0waste.co.in/' },
-  { key: 'twitter', Icon: Twitter, url: 'https://0waste.co.in/' },
-  { key: 'youtube', Icon: Youtube, url: 'https://0waste.co.in/' },
+  { key: 'instagram', Icon: Instagram, url: 'https://www.instagram.com/mykarmaverse/' },
+  { key: 'facebook', Icon: Facebook, url: 'https://www.facebook.com/share/p/17GYy6Qyam/' },
+  { key: 'linkedin', Icon: Linkedin, url: 'https://www.linkedin.com/showcase/136793967' },
+  { key: 'twitter', Icon: Twitter, url: 'https://x.com/mykarmaverse' },
+  { key: 'youtube', Icon: Youtube, url: 'https://www.youtube.com/channel/UCJjzqmfLvyFhGRwfjSGE4bw' },
 ];
 
 const openExternal = (url: string) => {
