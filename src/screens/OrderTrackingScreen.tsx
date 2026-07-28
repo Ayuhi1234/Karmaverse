@@ -114,6 +114,32 @@ export function OrderTrackingScreen({ route, navigation }: any) {
     setShowCancelConfirm(true);
   };
 
+  // KV-024: the '?' explains what each tracking stage means.
+  const showStatusHelp = () => {
+    showAlert(
+      'What the tracking stages mean',
+      'Order placed — we’ve received your pickup request.\n\n' +
+      'Agent assigned — a pickup partner is on the way to you.\n\n' +
+      'Agent reached — they’ve arrived at your location.\n\n' +
+      'Verification — items are checked and your KarmaCoins XP are credited.\n\n' +
+      'Completed — pickup done. Thank you for recycling!'
+    );
+  };
+
+  // KV-024: Help routes to support. TODO: point at live support chat/FAQ once the
+  // Founding Engineer confirms the channel; for now offer email and phone.
+  const showSupport = () => {
+    showAlert(
+      'Need help?',
+      'Our support team is here for you — reach us and we’ll sort it out.',
+      [
+        { text: 'Email us', onPress: () => Linking.openURL('mailto:info@0waste.co.in') },
+        { text: 'Call us', onPress: () => Linking.openURL('tel:+917093198828') },
+        { text: 'Close', style: 'cancel' },
+      ]
+    );
+  };
+
   const confirmCancel = async () => {
     setShowCancelConfirm(false);
     setIsCancelling(true);
@@ -293,7 +319,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
           <ArrowLeft size={20} color="white" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Live tracking</Text>
-        <TouchableOpacity style={styles.helpIconBtn}>
+        <TouchableOpacity style={styles.helpIconBtn} onPress={showStatusHelp}>
           <HelpCircle size={20} color="white" />
         </TouchableOpacity>
       </SafeAreaView>
@@ -459,7 +485,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
           <Text style={styles.primaryBtnText}>Contact agent</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.secondaryBtn}>
+        <TouchableOpacity style={styles.secondaryBtn} onPress={showSupport}>
           <HelpCircle size={16} color="#475569" />
           <Text style={styles.secondaryBtnText}>Need help?</Text>
         </TouchableOpacity>

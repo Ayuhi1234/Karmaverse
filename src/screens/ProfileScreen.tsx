@@ -174,6 +174,9 @@ export function ProfileScreen({ navigation }: any) {
   const [mgrLoading, setMgrLoading] = useState(false);
   const [showAddressSearch, setShowAddressSearch] = useState(false);
   const [mgrBusy, setMgrBusy] = useState(false);
+  // Delete confirmation renders INSIDE the address-manager modal (as a second
+  // layer) so it can never sit behind it — the global showAlert modal did (KV-014).
+  const [deleteTarget, setDeleteTarget] = useState<SavedAddress | null>(null);
 
   const openAddrMgr = () => {
     setAddrMgrVisible(true);
@@ -210,25 +213,17 @@ export function ProfileScreen({ navigation }: any) {
     }
   };
 
-  const deleteAddress = (addr: SavedAddress) => {
-    showAlert(
-      'Delete address?',
-      `${addr.label} — ${addr.fullAddress}`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              setMgrAddresses(await addressService.remove(addr._id));
-            } catch {
-              showAlert('Could not delete address', 'Please try again.');
-            }
-          },
-        },
-      ]
-    );
+  const deleteAddress = (addr: SavedAddress) => setDeleteTarget(addr);
+
+  const confirmDeleteAddress = async () => {
+    const target = deleteTarget;
+    if (!target) return;
+    setDeleteTarget(null);
+    try {
+      setMgrAddresses(await addressService.remove(target._id));
+    } catch {
+      showAlert('Could not delete address', 'Please try again.');
+    }
   };
 
   const makeDefault = async (addr: SavedAddress) => {
@@ -1158,6 +1153,27 @@ export function ProfileScreen({ navigation }: any) {
               )
             )}
           </View>
+
+          {/* Second-level delete confirmation — rendered inside the same modal so it
+              always sits above the address list, with its own backdrop (KV-014). */}
+          {deleteTarget && (
+            <View style={styles.deleteConfirmOverlay}>
+              <View style={styles.deleteConfirmCard}>
+                <Text style={styles.deleteConfirmTitle}>Delete address?</Text>
+                <Text style={styles.deleteConfirmMsg} numberOfLines={3}>
+                  {deleteTarget.label} — {[deleteTarget.houseNo, deleteTarget.apartment, deleteTarget.fullAddress].filter(Boolean).join(', ')}
+                </Text>
+                <View style={styles.deleteConfirmRow}>
+                  <TouchableOpacity style={styles.deleteConfirmCancel} onPress={() => setDeleteTarget(null)} activeOpacity={0.85}>
+                    <Text style={styles.deleteConfirmCancelText}>Cancel</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.deleteConfirmDelete} onPress={confirmDeleteAddress} activeOpacity={0.85}>
+                    <Text style={styles.deleteConfirmDeleteText}>Delete</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          )}
         </View>
       </Modal>
 
@@ -1303,6 +1319,17 @@ const styles = StyleSheet.create({
   /* Saved addresses manager */
   addrMgrBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', alignItems: 'center', justifyContent: 'center', padding: 20 },
   addrMgrCard: { backgroundColor: 'white', borderRadius: 24, padding: 20, width: '100%', maxWidth: 480 },
+
+  /* Second-level delete confirmation (renders above the manager) */
+  deleteConfirmOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(15,23,42,0.55)', alignItems: 'center', justifyContent: 'center', padding: 24 },
+  deleteConfirmCard: { backgroundColor: 'white', borderRadius: 20, padding: 22, width: '100%', maxWidth: 380 },
+  deleteConfirmTitle: { fontSize: 17, fontWeight: '800', color: '#0f172a', marginBottom: 8 },
+  deleteConfirmMsg: { fontSize: 14, color: '#475569', fontWeight: '500', lineHeight: 20, marginBottom: 18 },
+  deleteConfirmRow: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10 },
+  deleteConfirmCancel: { backgroundColor: '#f1f5f9', borderRadius: 12, paddingHorizontal: 20, paddingVertical: 11 },
+  deleteConfirmCancelText: { color: '#475569', fontSize: 14, fontWeight: '800' },
+  deleteConfirmDelete: { backgroundColor: '#dc2626', borderRadius: 12, paddingHorizontal: 20, paddingVertical: 11 },
+  deleteConfirmDeleteText: { color: 'white', fontSize: 14, fontWeight: '800' },
   addrMgrHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
   addrMgrTitle: { fontSize: 19, fontWeight: '900', color: '#0f172a' },
   addrMgrClose: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#f1f5f9', alignItems: 'center', justifyContent: 'center' },
