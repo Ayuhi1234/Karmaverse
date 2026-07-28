@@ -1523,7 +1523,10 @@ const styles = StyleSheet.create({
   termsText: { flex: 1, fontSize: 13, color: '#475569', lineHeight: 19, fontWeight: '500' },
   termsLink: { color: '#16a34a', fontWeight: '800' },
   
-  body: { flex: 1, paddingHorizontal: 24, paddingTop: 16, width: '100%', maxWidth: 800, alignSelf: 'center' },
+  // 460 keeps the form a comfortable centred column on desktop — at 800 the
+  // input/button stretched the full width and the page read as sparse. Mobile
+  // (< 460) is unaffected.
+  body: { flex: 1, paddingHorizontal: 24, paddingTop: 24, width: '100%', maxWidth: 460, alignSelf: 'center' },
 
   stepContent: { gap: 14 },
   scrollStepContent: { paddingHorizontal: 24, paddingBottom: 50, gap: 16 },

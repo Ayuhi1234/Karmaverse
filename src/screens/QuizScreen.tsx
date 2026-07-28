@@ -124,9 +124,6 @@ export function QuizScreen({ navigation }: any) {
 
   const timerAnim = useRef(new Animated.Value(1)).current;
   const timerAnimRef = useRef<Animated.CompositeAnimation | null>(null);
-  // Fades the timer out smoothly once an answer is picked, instead of hard-
-  // freezing the bar mid-track (which reads as a lag/stutter).
-  const timerFade = useRef(new Animated.Value(1)).current;
   const correctCountRef = useRef(0);
   const totalCoinsRef = useRef(0);
   const questionsAttemptedRef = useRef(0);
@@ -218,18 +215,6 @@ export function QuizScreen({ navigation }: any) {
     anim.start();
     return () => anim.stop();
   }, [currentQ, screenState, isOffline]);
-
-  // Smoothly fade the timer once an answer is locked in, and snap it back to
-  // full when the next question starts — so selecting an option never looks
-  // like the timer stalled.
-  useEffect(() => {
-    if (screenState !== 'playing') return;
-    if (selectedAnswer !== null) {
-      Animated.timing(timerFade, { toValue: 0, duration: 240, useNativeDriver: false }).start();
-    } else {
-      timerFade.setValue(1);
-    }
-  }, [selectedAnswer, screenState]);
 
   // Countdown integer â€” paused while offline
   useEffect(() => {
@@ -565,20 +550,22 @@ export function QuizScreen({ navigation }: any) {
       <Animated.View style={[styles.timerBar, {
         width: timerAnim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }),
         backgroundColor: timeLeft <= 5 ? '#ef4444' : '#4ade80',
-        opacity: timerFade,
       }]} />
 
       {/* Meta row */}
       <View style={styles.metaRow}>
         <Text style={styles.qCounter}>Question {currentQ + 1} of {questions.length}</Text>
-        <Animated.View style={[styles.timerChip, { opacity: timerFade }]}>
+        <View style={styles.timerChip}>
           <Timer size={13} color={timeLeft <= 3 ? '#ef4444' : 'white'} />
           <Text style={[styles.timerChipText, timeLeft <= 3 && styles.timerDanger]}>
             {timeLeft}s
           </Text>
-        </Animated.View>
+        </View>
       </View>
 
+      {/* Centres the card in the space left below the header so it isn't
+          top-heavy with a big empty gap underneath on tall/desktop viewports. */}
+      <View style={styles.playArea}>
       {/* Question card */}
       <View style={styles.questionCard}>
         <Text style={styles.questionText}>{question?.question}</Text>
@@ -646,6 +633,7 @@ export function QuizScreen({ navigation }: any) {
           </Text>
         </View>
       )}
+      </View>
     </SafeAreaView>
   );
 }
@@ -679,6 +667,9 @@ const styles = StyleSheet.create({
   timerChip: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(255,255,255,0.15)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 20 },
   timerChipText: { fontSize: 13, fontWeight: '800', color: 'white' },
   timerDanger: { color: '#ef4444' },
+
+  // Play area — vertically centres the question card in the remaining space
+  playArea: { flex: 1, justifyContent: 'center', width: '100%' },
 
   // Question card
   questionCard: { marginHorizontal: 16, marginTop: 20, backgroundColor: 'white', borderRadius: 24, padding: 20, elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 16, maxWidth: 600, width: '100%', alignSelf: 'center' },
