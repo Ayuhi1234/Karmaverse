@@ -6,6 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <title>%WEB_TITLE%</title>
 
+    <!-- Referral links land on /register?ref=CODE (backend /r/:code redirect). This
+         app's auth screen lives at /login, so rewrite before the SPA router boots
+         (preserving ?ref=) — otherwise the unknown-route handler shows a 404. -->
+    <script>
+      (function () {
+        if (location.pathname.replace(/\/+$/, '') === '/register') {
+          history.replaceState(null, '', '/login' + location.search + location.hash);
+        }
+      })();
+    </script>
+
     <!-- Google Search Console ownership verification -->
     <meta name="google-site-verification" content="hjZP0SOm9CiCTAiAiNG_4-GoW_5mUQR9h-N4wdxMJng" />
 

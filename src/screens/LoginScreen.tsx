@@ -270,7 +270,9 @@ export function LoginScreen({ navigation }: any) {
   const [referralValidName, setReferralValidName] = useState('');
   const referralTimerRef = useRef<any>(null);
 
-  // Deep link — auto-fill referral code if app was opened via referral link
+  // Deep link — auto-fill referral code if the app/page was opened via a referral
+  // link. Native stores the code (App.tsx); web reads ?ref= from the URL (the
+  // backend /r/:code route redirects to /register?ref=CODE, rewritten to /login).
   React.useEffect(() => {
     AsyncStorage.getItem('pendingReferralCode').then(code => {
       if (code) {
@@ -278,6 +280,12 @@ export function LoginScreen({ navigation }: any) {
         AsyncStorage.removeItem('pendingReferralCode');
       }
     });
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      try {
+        const ref = new URLSearchParams(window.location.search).get('ref');
+        if (ref) setReferralCode(ref.trim().toUpperCase());
+      } catch (_) { /* URL not parseable */ }
+    }
   }, []);
 
   // Demographics State

@@ -6,6 +6,7 @@ import { ChevronLeft, Share2, Copy, Users, Gift, CheckCircle2, Clock, X, Message
 import { LinearGradient } from 'expo-linear-gradient';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { referralService } from '../services/referral';
+import { BACKEND_BASE } from '../services/api';
 
 export function ReferralScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true);
@@ -16,7 +17,9 @@ export function ReferralScreen({ navigation }: any) {
   const [copied, setCopied] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
 
-  const shareUrl = `https://karmaverse.earth/?ref=${referralCode}`;
+  // Backend /r/:code route — validates then 302-redirects to the register screen
+  // with ?ref= prefilled (and is the target for future iOS/Android deep links).
+  const shareUrl = referralCode ? `${BACKEND_BASE}/r/${referralCode}` : 'https://karmaverse.earth/';
   const shareMsg = `Join KarmaVer$e and we both earn 1,000 KarmaCoins XP! 🌱 Use my referral code ${referralCode}`;
 
   const copyLink = () => {
