@@ -9,6 +9,7 @@ import { MapPin, ArrowLeft, Navigation2, Home, Briefcase, MapPinned, Pencil, X }
 import * as Location from 'expo-location';
 import { mapService, MapSuggestion } from '../../services/mapService';
 import { MapPicker } from './MapPicker';
+import { isWithinServiceArea } from '../../utils/serviceArea';
 
 export interface AddressDetails {
   houseNo: string;
@@ -72,6 +73,7 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
   const [resolvedAddress, setResolvedAddress] = useState('');
   const [resolvedCoords, setResolvedCoords] = useState<[number, number] | null>(null);
   const [isGeocoding, setIsGeocoding] = useState(false);
+  const [isOutOfServiceArea, setIsOutOfServiceArea] = useState(false);
 
   // Details form
   const [houseNo, setHouseNo] = useState('');
@@ -95,9 +97,11 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
         const address = result.formattedAddress || [result.locality, result.city, result.state].filter(Boolean).join(', ');
         setResolvedAddress(address);
         setResolvedCoords(coords);
+        setIsOutOfServiceArea(!isWithinServiceArea(coords[1], coords[0]));
       } catch (e) {
         setResolvedAddress('');
         setResolvedCoords(null);
+        setIsOutOfServiceArea(false);
       } finally {
         setIsGeocoding(false);
       }
@@ -112,6 +116,7 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
       setSuggestions([]);
       setError(null);
       setToast(null);
+      setIsOutOfServiceArea(false);
       setHouseNo(initialDetails?.houseNo || '');
       setBuilding(initialDetails?.building || '');
       setLandmark(initialDetails?.landmark || '');
@@ -208,7 +213,7 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
 
   // Map step → go to details form
   const handleConfirmLocation = () => {
-    if (!resolvedCoords || !resolvedAddress) return;
+    if (!resolvedCoords || !resolvedAddress || isOutOfServiceArea) return;
     Keyboard.dismiss();
     setStep('details');
   };
@@ -427,9 +432,16 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
                 {isGeocoding ? 'Locating address...' : (resolvedAddress || 'Move the map to select a location')}
               </Text>
             </View>
+            {isOutOfServiceArea && !isGeocoding && (
+              <View style={styles.outOfAreaBanner}>
+                <Text style={styles.outOfAreaText}>
+                  We're currently only available in Gurugram and nearby areas (within ~25km). This location is outside our service area.
+                </Text>
+              </View>
+            )}
             <TouchableOpacity
-              style={[styles.confirmBtn, (!resolvedCoords || isGeocoding) && styles.confirmBtnDisabled]}
-              disabled={!resolvedCoords || isGeocoding}
+              style={[styles.confirmBtn, (!resolvedCoords || isGeocoding || isOutOfServiceArea) && styles.confirmBtnDisabled]}
+              disabled={!resolvedCoords || isGeocoding || isOutOfServiceArea}
               onPress={handleConfirmLocation}
               activeOpacity={0.85}
             >
@@ -543,6 +555,8 @@ const styles = StyleSheet.create({
   },
   addressRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 14 },
   addressText: { flex: 1, fontSize: 14, fontWeight: '600', color: '#0f172a', lineHeight: 20 },
+  outOfAreaBanner: { backgroundColor: '#fef2f2', borderWidth: 1, borderColor: '#fecaca', borderRadius: 12, padding: 12, marginBottom: 14 },
+  outOfAreaText: { fontSize: 13, fontWeight: '600', color: '#dc2626', lineHeight: 18 },
   confirmBtn: { backgroundColor: '#16a34a', borderRadius: 14, paddingVertical: 15, alignItems: 'center' },
   confirmBtnDisabled: { backgroundColor: '#a7d7b8' },
   confirmBtnText: { color: 'white', fontSize: 15, fontWeight: '800' },
