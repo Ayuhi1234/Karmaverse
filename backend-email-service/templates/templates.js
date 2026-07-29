@@ -1,134 +1,171 @@
-const { wrapEmail } = require('./layout');
+const { wrapEmail, detailTable, rewardsCard, shortId, safe, escapeHtml, BRAND } = require('./layout');
 
-// One function per template, mirroring communication_template_mail.md 1:1.
-// Only events that doc marks with an **Email** section are included — the
-// rest (AGENT_REACHED, BOOKING_IN_POOL, NEW_BOOKING_AVAILABLE, BOOKING_TAKEN,
-// STREAK_UPDATED, NEW_RATING_RECEIVED per-event) stay push/in-app only.
+// One function per template. Keys and their variable sets are a FIXED contract with
+// the backend — do not rename or add variables. Every value is run through a
+// fallback so a missing field never renders "undefined". Booking ids are shown as
+// KC-XXXXX (never the raw Mongo _id); names are Proper-Cased in the greeting.
+const SITE = BRAND.site;
 
 const templates = {
   WELCOME: ({ name }) => ({
-    subject: `Welcome to KarmaCoins XP, ${name}!`,
+    subject: `Welcome to ${BRAND.namePlain} — start earning ${BRAND.currency}`,
     html: wrapEmail({
-      preheader: 'Your account is ready — start earning KarmaCoins XP today.',
-      bodyHtml: `<p>Hi ${name}, welcome aboard!</p>
-        <p>Schedule a doorstep pickup, earn KarmaCoins XP for every item you give a second life, and
-        play the daily quiz to grow your streak. Small actions, real rewards — kar bhala toh ho bhala.</p>`,
+      preheader: 'Your account is ready — schedule a pickup and start earning.',
+      heading: 'Welcome aboard',
+      greetingName: name,
+      bodyHtml: `<p style="margin:0 0 12px;">You're all set to turn everyday sustainable actions into rewards.</p>
+        <p style="margin:0;">Schedule a doorstep pickup, earn <strong>${BRAND.currency}</strong> for every item you give a second life, and play the daily quiz to grow your streak. Small actions, real rewards — kar bhala toh ho bhala.</p>`,
       ctaLabel: 'Get started',
-      ctaUrl: 'https://karmaverse.earth/',
+      ctaUrl: `${SITE}/`,
     }),
   }),
 
   OTP: ({ otp }) => ({
-    subject: 'Your KarmaCoins XP verification code',
+    subject: `Your ${BRAND.namePlain} verification code`,
     html: wrapEmail({
-      preheader: `Your verification code is ${otp}`,
-      bodyHtml: `<p>Your OTP is:</p>
-        <p style="font-size:28px;font-weight:800;letter-spacing:4px;color:#052e16;margin:16px 0;">${otp}</p>
-        <p>It is valid for 10 minutes. Do not share this code with anyone.</p>`,
+      preheader: `Your verification code${otp ? ` is ${escapeHtml(otp)}` : ''}`,
+      heading: 'Verify your email',
+      bodyHtml: `<p style="margin:0 0 4px;">Use this code to continue:</p>
+        <p style="font-size:34px;font-weight:800;letter-spacing:10px;color:${BRAND.colors.deep};margin:18px 0;text-align:center;">${safe(otp, '------')}</p>
+        <p style="margin:0;color:${BRAND.colors.muted};">It's valid for 10 minutes. Never share this code with anyone — our team will never ask for it.</p>`,
     }),
   }),
 
   PASSWORD_RESET_CONFIRM: ({ name }) => ({
-    subject: 'Your password has been changed',
+    subject: `Your ${BRAND.namePlain} password was changed`,
     html: wrapEmail({
-      preheader: 'Your KarmaCoins XP password was updated.',
-      bodyHtml: `<p>Hi ${name}, your KarmaCoins XP password was successfully updated.</p>
-        <p>If you didn't make this change, please contact support immediately.</p>`,
+      preheader: `Your ${BRAND.namePlain} password was updated.`,
+      heading: 'Password updated',
+      greetingName: name,
+      bodyHtml: `<p style="margin:0 0 12px;">Your ${BRAND.name} password was successfully updated.</p>
+        <p style="margin:0;">If you didn't make this change, please <a href="mailto:${BRAND.supportEmail}" style="color:${BRAND.colors.green};font-weight:700;">contact support</a> immediately.</p>`,
     }),
   }),
 
   BOOKING_PLACED: ({ name, bookingId, date, timeSlot, address }) => ({
-    subject: `Pickup request received — #${bookingId}`,
+    subject: `Pickup request received — ${shortId(bookingId) || 'confirmed'}`,
     html: wrapEmail({
-      preheader: `Your pickup for ${date}, ${timeSlot} has been received.`,
-      bodyHtml: `<p>Hi ${name}, we've received your pickup request for <strong>${date}, ${timeSlot}</strong>
-        at ${address}.</p>
-        <p>We'll notify you once an agent is assigned.</p>`,
+      preheader: `Your pickup for ${safe(date, 'your selected date')} has been received.`,
+      heading: 'Pickup request received',
+      greetingName: name,
+      bodyHtml: `<p style="margin:0 0 4px;">Thanks — we've received your pickup request. Here are the details:</p>
+        ${detailTable([
+          ['Booking ID', shortId(bookingId) || '—'],
+          ['Date', safe(date, 'To be confirmed')],
+          ['Time slot', safe(timeSlot, 'To be confirmed')],
+          ['Pickup address', safe(address, '—')],
+        ])}
+        <p style="margin:14px 0 0;">We'll notify you as soon as a pickup partner is assigned.</p>`,
+      ctaLabel: 'Track pickup',
+      ctaUrl: `${SITE}/OrderTracking`,
     }),
   }),
 
   BOOKING_ACCEPTED: ({ name, agentName, bookingId, eta }) => ({
-    subject: 'An agent is on the way!',
+    subject: 'Your pickup partner is on the way',
     html: wrapEmail({
-      preheader: `${agentName} has been assigned to your pickup.`,
-      bodyHtml: `<p>Hi ${name}, <strong>${agentName}</strong> has been assigned to your pickup
-        #${bookingId}.</p>
-        <p>They'll reach your location around ${eta}.</p>`,
+      preheader: `${safe(agentName, 'Your pickup partner')} has been assigned to your pickup.`,
+      heading: 'A partner is on the way',
+      greetingName: name,
+      bodyHtml: `<p style="margin:0 0 6px;"><strong>${safe(agentName, 'Your pickup partner')}</strong> has been assigned to your pickup${shortId(bookingId) ? ` <strong>${shortId(bookingId)}</strong>` : ''}.</p>
+        <p style="margin:0;">They'll reach your location around <strong>${safe(eta, 'shortly')}</strong>. You can follow their progress live.</p>`,
+      ctaLabel: 'Track pickup',
+      ctaUrl: `${SITE}/OrderTracking`,
     }),
   }),
 
   BOOKING_PICKED_UP: ({ name, coins, walletBalance }) => ({
-    subject: `You earned ${coins} KarmaCoins XP!`,
+    subject: `You earned ${safe(coins, 'your')} ${BRAND.currency}!`,
     html: wrapEmail({
-      preheader: `${coins} KarmaCoins XP credited to your wallet.`,
-      bodyHtml: `<p>Hi ${name}, your items have been verified and <strong>${coins} KarmaCoins XP</strong>
-        have been credited to your wallet.</p>
-        <p>Total balance: <strong>${walletBalance}</strong>.</p>`,
+      preheader: `${safe(coins, 'Your')} ${BRAND.currency} credited to your wallet.`,
+      heading: 'Coins credited',
+      greetingName: name,
+      bodyHtml: `<p style="margin:0 0 2px;">Your items have been verified and your reward is in.</p>
+        ${rewardsCard(safe(coins, '0'), walletBalance == null ? null : safe(walletBalance, ''))}`,
+      ctaLabel: 'View wallet',
+      ctaUrl: `${SITE}/Wallet`,
     }),
   }),
 
   BOOKING_COMPLETED: ({ name, bookingId }) => ({
-    subject: `Pickup #${bookingId} completed — thank you!`,
+    subject: `Pickup ${shortId(bookingId) || ''} completed — thank you!`.replace('  ', ' '),
     html: wrapEmail({
-      preheader: 'Thanks for recycling with KarmaCoins XP.',
-      bodyHtml: `<p>Hi ${name}, your pickup is complete. Thanks for recycling with KarmaCoins XP.</p>
-        <p>Don't forget to rate your agent!</p>`,
+      preheader: `Thanks for recycling with ${BRAND.namePlain}.`,
+      heading: 'Pickup complete',
+      greetingName: name,
+      bodyHtml: `<p style="margin:0 0 12px;">Your pickup${shortId(bookingId) ? ` <strong>${shortId(bookingId)}</strong>` : ''} is complete. Thank you for recycling with ${BRAND.name} and making a real impact.</p>
+        <p style="margin:0;">Loved your experience? Don't forget to rate your pickup partner in the app.</p>`,
     }),
   }),
 
   BOOKING_CANCELLED: ({ name, bookingId, date }) => ({
-    subject: `Your pickup #${bookingId} was cancelled`,
+    subject: `Your pickup ${shortId(bookingId) || ''} was cancelled`.replace('  ', ' '),
     html: wrapEmail({
-      preheader: `Your pickup scheduled for ${date} has been cancelled.`,
-      bodyHtml: `<p>Hi ${name}, your pickup scheduled for ${date} has been cancelled.</p>
-        <p>You can schedule a new pickup anytime from the app.</p>`,
+      preheader: `Your pickup scheduled for ${safe(date, 'your selected date')} was cancelled.`,
+      heading: 'Booking cancelled',
+      greetingName: name,
+      bodyHtml: `<p style="margin:0 0 12px;">Your pickup${shortId(bookingId) ? ` <strong>${shortId(bookingId)}</strong>` : ''} scheduled for <strong>${safe(date, 'your selected date')}</strong> has been cancelled.</p>
+        <p style="margin:0;">Changed your mind? You can schedule a new pickup anytime.</p>`,
       ctaLabel: 'Schedule a new pickup',
-      ctaUrl: 'https://karmaverse.earth/',
+      ctaUrl: `${SITE}/SchedulePickup`,
     }),
   }),
 
-  QUIZ_STREAK_REMINDER: ({ name, streak }) => ({
-    subject: `Don't lose your ${streak}-day quiz streak!`,
-    html: wrapEmail({
-      preheader: `Play today's quiz before it resets.`,
-      bodyHtml: `<p>Hi ${name}, you haven't played today's KarmaCoins XP quiz yet.</p>
-        <p>Play now before it resets at 5:30 AM IST.</p>`,
-      ctaLabel: 'Play today’s quiz',
-      ctaUrl: 'https://karmaverse.earth/',
-    }),
-  }),
+  QUIZ_STREAK_REMINDER: ({ name, streak }) => {
+    const s = streak == null || String(streak).trim() === '' ? null : escapeHtml(streak);
+    return {
+      subject: s ? `Don't lose your ${s}-day quiz streak!` : `Play today's quiz on ${BRAND.namePlain}`,
+      html: wrapEmail({
+        preheader: "Play today's quiz before it resets.",
+        heading: 'Your quiz is waiting',
+        greetingName: name,
+        bodyHtml: `<p style="margin:0 0 8px;">You haven't played today's ${BRAND.currency} quiz yet.</p>
+          ${s ? `<p style="margin:0 0 8px;">You're on a <strong>${s}-day</strong> streak — keep it alive!</p>` : ''}
+          <p style="margin:0;">Play now before it resets at 5:30 AM IST.</p>`,
+        ctaLabel: "Play today's quiz",
+        ctaUrl: `${SITE}/Quiz`,
+      }),
+    };
+  },
 
   REFERRAL_REWARD: ({ name, friendName, coins }) => ({
-    subject: `You earned ${coins} KarmaCoins XP for referring ${friendName}!`,
+    subject: `You earned ${safe(coins, '')} ${BRAND.currency} for referring ${safe(friendName, 'a friend')}!`,
     html: wrapEmail({
-      preheader: `${friendName} joined using your referral code.`,
-      bodyHtml: `<p>Hi ${name}, your friend <strong>${friendName}</strong> just joined KarmaCoins XP
-        using your referral code.</p>
-        <p><strong>${coins} KarmaCoins XP</strong> have been added to your wallet.</p>`,
+      preheader: `${safe(friendName, 'A friend')} joined using your referral code.`,
+      heading: 'Referral reward credited',
+      greetingName: name,
+      bodyHtml: `<p style="margin:0 0 2px;">Your friend <strong>${safe(friendName, 'a friend')}</strong> just joined ${BRAND.name} using your referral code.</p>
+        ${rewardsCard(safe(coins, '0'), null)}
+        <p style="margin:0;">Invite more friends and you both keep earning.</p>`,
+      ctaLabel: 'Invite more friends',
+      ctaUrl: `${SITE}/Referral`,
     }),
   }),
 
-  // Agent app
+  // ── Agent app ──
   AGENT_WELCOME: ({ name }) => ({
-    subject: `Welcome to the KarmaCoins XP Agent team, ${name}!`,
+    subject: `Welcome to the ${BRAND.namePlain} partner team!`,
     html: wrapEmail({
-      preheader: 'Your agent account is active.',
-      bodyHtml: `<p>Hi ${name}, your agent account is active.</p>
-        <p>Go online from the dashboard to start receiving pickup requests near you.</p>`,
+      preheader: 'Your partner account is active.',
+      heading: 'Welcome aboard',
+      greetingName: name,
+      bodyHtml: `<p style="margin:0;">Your pickup-partner account is active. Go online from the dashboard to start receiving pickup requests near you.</p>`,
     }),
   }),
 
   AGENT_WEEKLY_SUMMARY: ({ name, totalPickups, rating, currentStreak }) => ({
-    subject: `Your week on KarmaCoins XP — ${totalPickups} pickups completed`,
+    subject: `Your week on ${BRAND.namePlain} — ${safe(totalPickups, '0')} pickups completed`,
     html: wrapEmail({
-      preheader: `${totalPickups} pickups, ${rating} avg rating this week.`,
-      bodyHtml: `<p>Hi ${name}, here's your weekly summary:</p>
-        <ul style="padding-left:18px;margin:12px 0;">
-          <li>${totalPickups} pickups completed</li>
-          <li>Average rating: ${rating}</li>
-          <li>Current streak: ${currentStreak} days</li>
-        </ul>
-        <p>Keep up the great work!</p>`,
+      preheader: `${safe(totalPickups, '0')} pickups this week.`,
+      heading: 'Your weekly summary',
+      greetingName: name,
+      bodyHtml: `<p style="margin:0 0 4px;">Here's how your week went:</p>
+        ${detailTable([
+          ['Pickups completed', safe(totalPickups, '0')],
+          ['Average rating', safe(rating, '—')],
+          ['Current streak', `${safe(currentStreak, '0')} days`],
+        ])}
+        <p style="margin:14px 0 0;">Keep up the great work!</p>`,
     }),
   }),
 };

@@ -1,35 +1,131 @@
-// Shared HTML wrapper so every template gets the same header/footer without
-// repeating markup. Keep this simple — a single-column transactional layout
-// renders reliably across Gmail/Outlook/Apple Mail without an MJML build step.
-function wrapEmail({ preheader = '', bodyHtml, ctaLabel, ctaUrl }) {
-  const cta = ctaLabel && ctaUrl
-    ? `<tr><td align="center" style="padding: 28px 0 8px;">
-         <a href="${ctaUrl}" style="background:#4ade80;color:#052e16;font-weight:700;font-size:15px;
-            text-decoration:none;padding:14px 28px;border-radius:12px;display:inline-block;">
-           ${ctaLabel}
-         </a>
-       </td></tr>`
-    : '';
+// Shared brand tokens + HTML building blocks for every transactional email.
+// Single source of truth so all 12 templates stay visually consistent and every
+// header/footer/button/card lives in ONE place (no duplicated markup).
+
+const BRAND = {
+  name: 'KarmaVer$e',            // display wordmark (body/logo)
+  namePlain: 'KarmaVerse',       // subject-safe (avoids "$" spam signals)
+  currency: 'KarmaCoins XP',     // in-app currency — exact spelling everywhere
+  company: '3RZeroWaste',
+  site: 'https://karmaverse.earth',
+  logo: 'https://karmaverse.earth/email-logo.png', // public HTTPS (served by Netlify)
+  supportEmail: 'info@0waste.co.in',
+  phone: '+91 70931 98828',
+  address: 'Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122503',
+  colors: {
+    deep: '#052e16', green: '#15803d', mint: '#4ade80', mintText: '#052e16',
+    page: '#f1f5f9', card: '#ffffff', text: '#0f172a', body: '#334155',
+    muted: '#64748b', faint: '#94a3b8', line: '#e2e8f0',
+  },
+  social: [
+    ['Instagram', 'https://www.instagram.com/mykarmaverse/'],
+    ['Facebook', 'https://www.facebook.com/share/p/17GYy6Qyam/'],
+    ['LinkedIn', 'https://www.linkedin.com/showcase/136793967'],
+    ['X', 'https://x.com/mykarmaverse'],
+    ['YouTube', 'https://www.youtube.com/channel/UCJjzqmfLvyFhGRwfjSGE4bw'],
+  ],
+};
+
+// ── Data-safety helpers (every template runs values through these) ──
+function escapeHtml(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+// Non-empty escaped value, else the fallback (prevents "undefined" from ever rendering).
+function safe(v, fallback = '') {
+  const s = v == null ? '' : String(v).trim();
+  return s ? escapeHtml(s) : fallback;
+}
+// "shashi shekhar" → "Shashi Shekhar"; empty → "there".
+function properCase(name) {
+  const s = String(name == null ? '' : name).trim();
+  if (!s) return 'there';
+  return s.toLowerCase().replace(/\b([a-z])/g, (_, c) => c.toUpperCase());
+}
+// Raw Mongo _id → customer-facing "KC-XXXXX" (never expose the raw id).
+function shortId(id) {
+  const s = String(id == null ? '' : id).replace(/[^a-zA-Z0-9]/g, '');
+  if (!s) return '';
+  return 'KC-' + s.slice(-5).toUpperCase();
+}
+const mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(BRAND.address);
+
+// ── Reusable components ──
+function button(label, url) {
+  const bg = BRAND.colors.mint, color = BRAND.colors.mintText;
+  return `<table role="presentation" cellpadding="0" cellspacing="0" align="center" style="margin:26px auto 4px;">
+    <tr><td align="center" bgcolor="${bg}" style="border-radius:12px;">
+      <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${url}" style="height:46px;v-text-anchor:middle;width:250px;" arcsize="26%" strokecolor="${bg}" fillcolor="${bg}"><w:anchorlock/><center style="color:${color};font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">${escapeHtml(label)}</center></v:roundrect><![endif]-->
+      <!--[if !mso]><!-- --><a href="${url}" style="background:${bg};color:${color};display:inline-block;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-size:15px;font-weight:700;line-height:46px;text-align:center;text-decoration:none;width:250px;border-radius:12px;">${escapeHtml(label)}</a><!--<![endif]-->
+    </td></tr>
+  </table>`;
+}
+
+// rows: [[label, value], ...] — values must already be escaped/safe().
+function detailTable(rows) {
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:10px 0 4px;border:1px solid ${BRAND.colors.line};border-radius:12px;">
+    ${rows.map(([l, v], i) => `<tr>
+      <td style="padding:12px 16px;${i ? `border-top:1px solid ${BRAND.colors.line};` : ''}font-size:12px;color:${BRAND.colors.muted};font-weight:600;width:42%;">${l}</td>
+      <td style="padding:12px 16px;${i ? `border-top:1px solid ${BRAND.colors.line};` : ''}font-size:14px;color:${BRAND.colors.text};font-weight:700;">${v}</td>
+    </tr>`).join('')}
+  </table>`;
+}
+
+// coins/balance already safe(); balance null → hidden.
+function rewardsCard(coins, balance) {
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:14px 0;border-radius:16px;background:#f0fdf4;border:1px solid #bbf7d0;">
+    <tr><td align="center" style="padding:22px;">
+      <div style="font-size:12px;color:${BRAND.colors.green};font-weight:800;text-transform:uppercase;letter-spacing:1px;">Coins credited</div>
+      <div style="font-size:36px;line-height:1.1;color:${BRAND.colors.green};font-weight:900;margin:8px 0;">+${coins} ${BRAND.currency}</div>
+      ${balance != null ? `<div style="font-size:13px;color:${BRAND.colors.muted};font-weight:600;">Wallet balance: <strong style="color:${BRAND.colors.text};">${balance} ${BRAND.currency}</strong></div>` : ''}
+    </td></tr>
+  </table>`;
+}
+
+// ── Full email shell ──
+function wrapEmail({ preheader = '', heading = '', greetingName, bodyHtml = '', ctaLabel, ctaUrl }) {
+  const c = BRAND.colors;
+  const greeting = greetingName !== undefined
+    ? `<p style="margin:0 0 14px;font-size:16px;color:${c.text};font-weight:700;">Hi ${properCase(greetingName)},</p>` : '';
+  const cta = (ctaLabel && ctaUrl) ? button(ctaLabel, ctaUrl) : '';
+  const socialRow = BRAND.social
+    .map(([n, u]) => `<a href="${u}" style="color:${c.faint};text-decoration:none;font-weight:700;">${n}</a>`)
+    .join(`<span style="color:#cbd5e1;"> &middot; </span>`);
 
   return `<!doctype html>
-<html>
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#f1f5f9;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;">
-  <span style="display:none;max-height:0;overflow:hidden;">${preheader}</span>
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:32px 0;">
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <!--[if mso]><style>body,table,td,a{font-family:Arial,Helvetica,sans-serif !important;}</style><![endif]-->
+</head>
+<body style="margin:0;padding:0;background:${c.page};">
+  <span style="display:none;max-height:0;overflow:hidden;opacity:0;">${escapeHtml(preheader)}</span>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${c.page};padding:24px 12px;">
     <tr><td align="center">
-      <table role="presentation" width="480" cellpadding="0" cellspacing="0"
-             style="background:#ffffff;border-radius:20px;overflow:hidden;max-width:480px;width:100%;">
-        <tr><td style="background:#052e16;padding:24px 32px;">
-          <span style="color:#ffffff;font-size:18px;font-weight:800;letter-spacing:-0.3px;">KarmaVer$e</span>
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;background:${c.card};border-radius:20px;overflow:hidden;">
+        <tr><td align="center" style="background:${c.deep};padding:26px 32px;">
+          <img src="${BRAND.logo}" width="180" alt="${BRAND.name}" style="display:block;border:0;outline:none;text-decoration:none;max-width:180px;height:auto;">
         </td></tr>
-        <tr><td style="padding:32px;color:#0f172a;font-size:15px;line-height:1.6;">
-          ${bodyHtml}
+        <tr><td style="padding:32px;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;">
+          ${heading ? `<h1 style="margin:0 0 12px;font-size:20px;line-height:1.3;color:${c.text};font-weight:800;">${heading}</h1>` : ''}
+          ${greeting}
+          <div style="font-size:15px;line-height:1.6;color:${c.body};">${bodyHtml}</div>
+          ${cta}
         </td></tr>
-        ${cta}
-        <tr><td style="padding:20px 32px;border-top:1px solid #f1f5f9;">
-          <p style="margin:0;color:#94a3b8;font-size:12px;">
-            A 3R Zero Waste initiative &middot; <a href="https://0waste.co.in/" style="color:#16a34a;">0waste.co.in</a>
+        <tr><td style="padding:22px 32px;background:#f8fafc;border-top:1px solid ${c.line};font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;">
+          <p style="margin:0 0 10px;font-size:13px;color:${c.faint};font-weight:600;">${socialRow}</p>
+          <p style="margin:0 0 4px;font-size:12px;color:${c.faint};">
+            <a href="mailto:${BRAND.supportEmail}" style="color:${c.green};text-decoration:none;">${BRAND.supportEmail}</a> &middot; ${BRAND.phone}
+          </p>
+          <p style="margin:0 0 10px;font-size:12px;color:${c.faint};">
+            <a href="${mapsUrl}" style="color:${c.faint};text-decoration:underline;">${BRAND.address}</a>
+          </p>
+          <p style="margin:0;font-size:11px;color:#cbd5e1;">
+            &copy; ${new Date().getFullYear()} ${BRAND.company}. All rights reserved.
+            &middot; <a href="${BRAND.site}/" style="color:#cbd5e1;text-decoration:underline;">Manage preferences</a>
           </p>
         </td></tr>
       </table>
@@ -39,4 +135,4 @@ function wrapEmail({ preheader = '', bodyHtml, ctaLabel, ctaUrl }) {
 </html>`;
 }
 
-module.exports = { wrapEmail };
+module.exports = { BRAND, wrapEmail, button, detailTable, rewardsCard, properCase, shortId, safe, escapeHtml };
