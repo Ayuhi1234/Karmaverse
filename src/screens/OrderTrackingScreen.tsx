@@ -64,7 +64,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
   // Coins come from the backend, which computes them at verify time from the
   // live rate card. Until then, fall back to the schedule screen's estimate
   // passed via navigation (route.params.estimatedCoins).
-  const estimatedCoins = passedBooking?.totalKarmaCoins || route?.params?.estimatedCoins || 0;
+  const estimatedCoins = passedBooking?.totalKarmaCoins || passedBooking?.estimatedKarmaCoins || route?.params?.estimatedCoins || 0;
 
   const bookingData = {
     id: rawBookingId.length > 10 ? `#${rawBookingId.substring(0, 8).toUpperCase()}` : rawBookingId,

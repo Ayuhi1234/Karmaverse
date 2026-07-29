@@ -2,7 +2,7 @@ import api from './api';
 
 export const bookingService = {
   createBooking: async (data: {
-    categories: { category: string; subCategory: string }[];
+    categories: { category: string; subCategory: string; condition?: string; quantity: number }[];
     pickupDate: string;
     timeSlot: string;
     address: {

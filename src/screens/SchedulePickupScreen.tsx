@@ -137,6 +137,9 @@ const ALL_ITEMS: CatalogueItem[] = [
 
 const unitLabel = (unit: string) => (unit === 'kg' ? 'per kg' : 'per piece');
 
+// Backend rejects bookings under this estimated value, regardless of item count.
+const MIN_ORDER_VALUE = 1000;
+
 // Working / Not Working switch. Tapping anywhere flips it; the thumb slides to
 // the active side so the current condition is readable at a glance.
 function ConditionToggle({ value, onChange }: { value: Condition; onChange: (c: Condition) => void }) {
@@ -313,6 +316,12 @@ export function SchedulePickupScreen({ navigation }: any) {
       const added = [...list].reverse().find(a => a.fullAddress === details.area) || list[list.length - 1];
       if (added) setSelectedAddressId(added._id);
     } catch (error: any) {
+      if (error?.response?.status === 400) {
+        // Authoritative rejection (e.g. outside the 25km Gurugram service area) —
+        // don't fall back locally, that would let the user book anyway.
+        showAlert('Address not saved', error.response.data?.message || 'This address could not be saved.');
+        return;
+      }
       // The saved-addresses endpoint may be unavailable (e.g. not yet deployed
       // to this backend). Don't block the booking — the pickup payload carries
       // the full address, not an addressId, so keep it locally and let the user
@@ -417,7 +426,7 @@ export function SchedulePickupScreen({ navigation }: any) {
       if (!item) return;
       const categoryObj = CATEGORIES.find(c => c.id === item.catId);
       if (!categoryObj) return;
-      const entry: any = { category: categoryObj.backendName, subCategory: item.subCategory };
+      const entry: any = { category: categoryObj.backendName, subCategory: item.subCategory, quantity: cart[key] };
       if (item.hasCondition && condition) entry.condition = condition;
       payloadCategories.push(entry);
     });
@@ -452,7 +461,10 @@ export function SchedulePickupScreen({ navigation }: any) {
       setIsSubmitted(true);
       const token = await AsyncStorage.getItem('userToken');
       showRedeemInfoOnce(`firstBookingRedeemInfo_${getStableUserSuffix(token)}`);
-      setTimeout(() => navigation.replace('OrderTracking', { booking: createdBooking, estimatedCoins: cartCalculations.totalCoins }), 2500);
+      setTimeout(() => navigation.replace('OrderTracking', {
+        booking: createdBooking,
+        estimatedCoins: createdBooking?.estimatedKarmaCoins ?? cartCalculations.totalCoins,
+      }), 2500);
     } catch (error: any) {
       // Surface the real reason so scheduling failures aren't a dead end.
       const data = error?.response?.data;
@@ -559,10 +571,21 @@ export function SchedulePickupScreen({ navigation }: any) {
                       <Text style={styles.addBtnText}>ADD</Text>
                     </TouchableOpacity>
                   ) : (
-                    <TouchableOpacity style={styles.addedBtn} onPress={() => updateQuantity(key, -qty)}>
-                      <CheckCircle2 size={16} color="#16a34a" />
-                      <Text style={styles.addedBtnText}>ADDED</Text>
-                    </TouchableOpacity>
+                    <View style={styles.stepperRow}>
+                      <TouchableOpacity
+                        style={styles.stepperBtn}
+                        onPress={() => updateQuantity(key, item.unit === 'kg' ? -0.5 : -1)}
+                      >
+                        <Text style={styles.stepperBtnText}>−</Text>
+                      </TouchableOpacity>
+                      <Text style={styles.stepperValue} numberOfLines={1}>{qty}</Text>
+                      <TouchableOpacity
+                        style={styles.stepperBtn}
+                        onPress={() => updateQuantity(key, item.unit === 'kg' ? 0.5 : 1)}
+                      >
+                        <Text style={styles.stepperBtnText}>+</Text>
+                      </TouchableOpacity>
+                    </View>
                   )}
                 </View>
               </View>
@@ -580,8 +603,17 @@ export function SchedulePickupScreen({ navigation }: any) {
               <Text style={styles.cartRewardText}>Est. Reward: +{cartCalculations.totalCoins}</Text>
               <KarmaCoin size={12} />
             </View>
+            {cartCalculations.totalCoins < MIN_ORDER_VALUE && (
+              <Text style={styles.minOrderHint}>
+                Add {MIN_ORDER_VALUE - cartCalculations.totalCoins} more KC worth of items to schedule pickup
+              </Text>
+            )}
           </View>
-          <TouchableOpacity style={styles.checkoutBtn} onPress={() => setCurrentStep(2)}>
+          <TouchableOpacity
+            style={[styles.checkoutBtn, cartCalculations.totalCoins < MIN_ORDER_VALUE && styles.checkoutBtnDisabled]}
+            onPress={() => setCurrentStep(2)}
+            disabled={cartCalculations.totalCoins < MIN_ORDER_VALUE}
+          >
             <Text style={styles.checkoutBtnText}>Continue</Text>
           </TouchableOpacity>
         </View>
@@ -820,12 +852,18 @@ const styles = StyleSheet.create({
   addBtnText: { color: 'white', fontSize: 11, fontWeight: '800' },
   addedBtn: { marginTop: 'auto', backgroundColor: '#dcfce7', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', height: 32, borderRadius: 10, gap: 4, borderWidth: 1, borderColor: '#16a34a' },
   addedBtnText: { color: '#16a34a', fontSize: 12, fontWeight: '800' },
+  stepperRow: { marginTop: 'auto', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', height: 32, borderRadius: 10, backgroundColor: '#f0fdf4', borderWidth: 1, borderColor: '#16a34a', paddingHorizontal: 4 },
+  stepperBtn: { width: 26, height: 26, borderRadius: 8, backgroundColor: '#16a34a', alignItems: 'center', justifyContent: 'center' },
+  stepperBtnText: { color: 'white', fontSize: 16, fontWeight: '900', lineHeight: 18 },
+  stepperValue: { flex: 1, textAlign: 'center', fontSize: 13, fontWeight: '800', color: '#166534' },
 
   floatingCart: { position: 'absolute', bottom: 30, left: 20, right: 20, maxWidth: 860, marginHorizontal: 'auto', backgroundColor: '#1e293b', borderRadius: 24, padding: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', elevation: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10 },
   cartInfo: { flex: 1 },
   cartItemText: { color: 'white', fontSize: 15, fontWeight: '800', marginBottom: 2 },
   cartRewardText: { color: '#fbbf24', fontSize: 12, fontWeight: '700' },
+  minOrderHint: { color: '#fca5a5', fontSize: 11, fontWeight: '700', marginTop: 4 },
   checkoutBtn: { backgroundColor: '#16a34a', paddingHorizontal: 20, paddingVertical: 12, borderRadius: 16 },
+  checkoutBtnDisabled: { backgroundColor: '#3f6f52' },
   checkoutBtnText: { color: 'white', fontWeight: '800', fontSize: 14 },
 
   /* Step 2 Details Styles */
