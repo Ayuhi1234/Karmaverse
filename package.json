@@ -7,7 +7,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "build:web": "npx expo export --platform web && node scripts/generate-seo-pages.js",
+    "build:web": "npx expo export --platform web && node scripts/generate-seo-pages.js && node scripts/spa-fallback.js",
     "start:mem": "cross-env NODE_OPTIONS=--max_old_space_size=4096 expo start"
   },
   "dependencies": {
