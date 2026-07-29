@@ -55,7 +55,9 @@ export function BookingDetailsScreen({ navigation, route }: any) {
     address: addressText,
     wasteType,
     estCoins: passed?.totalKarmaCoins || FALLBACK.estCoins,
-    agent: agentData || FALLBACK.agent,
+    // Real agent only — never the mock, or a booking cancelled before assignment
+    // would show a fake "Ravi Kumar".
+    agent: agentData || passed?.agent || null,
     specialInstruction: passed?.specialInstruction || null,
     agentLocation: agentData?.location || passed?.agent?.location || FALLBACK.agentLocation,
     userLocation: passed?.address?.location?.coordinates
@@ -145,7 +147,11 @@ export function BookingDetailsScreen({ navigation, route }: any) {
           ) : null}
         </View>
 
-        {/* Agent Details */}
+        {/* Agent Details — show a real agent always; show "not yet assigned" only
+            while the booking is still active; hide entirely once cancelled/completed
+            with no agent (no point showing an empty agent card there). */}
+        {(booking.agent || (booking.status !== 'CANCELLED' && booking.status !== 'COMPLETED')) && (
+        <>
         <Text style={styles.sectionTitle}>Agent Details</Text>
         <View style={styles.card}>
           {booking.agent ? (
@@ -177,6 +183,8 @@ export function BookingDetailsScreen({ navigation, route }: any) {
             <Text style={{ color: '#94a3b8', fontWeight: '600' }}>Agent not yet assigned</Text>
           )}
         </View>
+        </>
+        )}
 
         {/* Live Location — only shown for active/in-progress bookings */}
         {booking.status !== 'COMPLETED' && booking.status !== 'CANCELLED' && passed?.agent?.location ? (
@@ -206,18 +214,20 @@ export function BookingDetailsScreen({ navigation, route }: any) {
           </>
         ) : null}
 
-        {/* CTA Button */}
-        <View style={styles.ctaContainer}>
-          <TouchableOpacity
-            style={styles.trackBtn}
-            onPress={() => navigation.navigate('OrderTracking', { booking: passed })}
-          >
-            <Navigation size={16} color="white" />
-            <Text style={styles.trackBtnText}>
-              {passed?.status === 'COMPLETED' ? 'View booking progress' : 'View live tracking'}
-            </Text>
-          </TouchableOpacity>
-        </View>
+        {/* CTA Button — nothing to track on a cancelled booking, so hide it. */}
+        {booking.status !== 'CANCELLED' && (
+          <View style={styles.ctaContainer}>
+            <TouchableOpacity
+              style={styles.trackBtn}
+              onPress={() => navigation.navigate('OrderTracking', { booking: passed })}
+            >
+              <Navigation size={16} color="white" />
+              <Text style={styles.trackBtnText}>
+                {passed?.status === 'COMPLETED' ? 'View booking progress' : 'View live tracking'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         <View style={{ height: 32 }} />
       </ScrollView>
