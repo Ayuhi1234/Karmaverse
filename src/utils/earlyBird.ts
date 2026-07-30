@@ -3,4 +3,4 @@
 // the backend must actually credit this amount during POST /api/v1/auth/register
 // (same pattern the existing referral-bonus screen already relies on) or the
 // real wallet balance shown afterwards won't match what the user was promised.
-export const EARLY_BIRD_COINS = 2000;
+export const EARLY_BIRD_COINS = 500;

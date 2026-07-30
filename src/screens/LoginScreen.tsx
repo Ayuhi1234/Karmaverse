@@ -1260,7 +1260,7 @@ export function LoginScreen({ navigation }: any) {
           <Text style={{ fontSize: 15, color: '#166534', fontWeight: '600', textAlign: 'center', marginBottom: 32 }}>
             {scratched
               ? `✅ ${EARLY_BIRD_COINS.toLocaleString()} Karma Coins Successfully Added!`
-              : `As a welcome reward, you've earned ${EARLY_BIRD_COINS.toLocaleString()} Karma Coins (Worth ₹200). Scratch your reward card to reveal and claim your bonus.`}
+              : `As a welcome reward, you've earned ${EARLY_BIRD_COINS.toLocaleString()} Karma Coins (Worth ₹50). Scratch your reward card to reveal and claim your bonus.`}
           </Text>
 
           <View style={{ width: '100%', maxWidth: 300, aspectRatio: 1.4, borderRadius: 24, overflow: 'hidden', marginBottom: 28, elevation: 6, shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.15, shadowRadius: 16 }}>

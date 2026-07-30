@@ -31,7 +31,7 @@ export function EarlyBirdPopup({ onGetStarted, onClose }: { onGetStarted: () => 
             </View>
             <Text style={s.title}>🎉 Welcome to KarmaVerse!</Text>
             <Text style={s.sub}>
-              Become an Early Bird today and receive {EARLY_BIRD_COINS.toLocaleString()} Karma Coins (Worth ₹200) instantly after registration.
+              Become an Early Bird today and receive {EARLY_BIRD_COINS.toLocaleString()} Karma Coins (Worth ₹50) instantly after registration.
               {'\n\n'}Complete your first eco action to unlock exclusive rewards and premium brand vouchers.
             </Text>
 
