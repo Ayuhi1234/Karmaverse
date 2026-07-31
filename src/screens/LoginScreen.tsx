@@ -1,5 +1,5 @@
 ﻿import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, SafeAreaView, StatusBar, ScrollView, Platform, KeyboardAvoidingView, Image, Animated, Easing } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, SafeAreaView, StatusBar, ScrollView, Platform, KeyboardAvoidingView, Image, Animated, Easing, PanResponder } from 'react-native';
 import { showAlert } from '../utils/alert';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -263,6 +263,8 @@ export function LoginScreen({ navigation }: any) {
   const [forgotPhone, setForgotPhone] = useState('');
   // Welcome Celebration scratch card — has the user revealed their signup bonus yet
   const [scratched, setScratched] = useState(false);
+  const scratchedRef = useRef(false);
+  const scratchDist = useRef(0);
   const scratchFoilAnim = useRef(new Animated.Value(0)).current;
   const scratchRevealAnim = useRef(new Animated.Value(0)).current;
   // Set when Google Identity Services fails to load/init on web (e.g. origin not authorized yet)
@@ -639,13 +641,28 @@ export function LoginScreen({ navigation }: any) {
   };
 
   const handleScratchCard = () => {
-    if (scratched) return;
+    if (scratchedRef.current) return;
+    scratchedRef.current = true;
     setScratched(true);
     Animated.parallel([
       Animated.timing(scratchFoilAnim, { toValue: 1, duration: 550, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
       Animated.spring(scratchRevealAnim, { toValue: 1, friction: 6, tension: 60, useNativeDriver: true }),
     ]).start();
   };
+
+  // Real scratch gesture: reveal only after the finger/mouse is dragged across the
+  // foil (a plain tap won't do it) — matches the "Scratch to reveal" label.
+  const scratchPan = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => !scratchedRef.current,
+      onMoveShouldSetPanResponder: () => !scratchedRef.current,
+      onPanResponderGrant: () => { scratchDist.current = 0; },
+      onPanResponderMove: (_e, g) => {
+        scratchDist.current += Math.abs(g.dx) + Math.abs(g.dy);
+        if (scratchDist.current > 45) handleScratchCard();
+      },
+    })
+  ).current;
 
   const continueFromWelcomeCelebration = () => {
     setStep(referralStatus === 'valid' ? 'referral_bonus' : 'demographics');
@@ -1269,7 +1286,7 @@ export function LoginScreen({ navigation }: any) {
       const revealScale = scratchRevealAnim.interpolate({ inputRange: [0, 1], outputRange: [0.6, 1] });
 
       return (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24, paddingVertical: 40 }}>
+        <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={{ flexGrow: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24, paddingVertical: 40 }}>
           {scratched && <LaunchConfetti />}
 
           <SignupJourneyProgress stage={1} />
@@ -1295,12 +1312,13 @@ export function LoginScreen({ navigation }: any) {
 
             {/* Foil cover — tap to scratch */}
             {!scratched ? (
-              <TouchableOpacity activeOpacity={0.85} onPress={handleScratchCard} style={StyleSheet.absoluteFill}>
-                <LinearGradient colors={['#fde68a', '#fbbf24', '#d97706']} style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              <View {...scratchPan.panHandlers} style={StyleSheet.absoluteFill}>
+                <LinearGradient colors={['#fde68a', '#fbbf24', '#d97706']} style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                   <Text style={{ fontSize: 36 }}>🎁</Text>
-                  <Text style={{ fontSize: 15, fontWeight: '900', color: '#78350f' }}>Scratch & Claim Reward</Text>
+                  <Text style={{ fontSize: 15, fontWeight: '900', color: '#78350f' }}>Scratch to reveal</Text>
+                  <Text style={{ fontSize: 11, fontWeight: '700', color: '#92400e' }}>Swipe across the card</Text>
                 </LinearGradient>
-              </TouchableOpacity>
+              </View>
             ) : (
               <Animated.View style={[StyleSheet.absoluteFill, { opacity: foilOpacity, transform: [{ scale: foilScale }], pointerEvents: 'none' }]}>
                 <LinearGradient colors={['#fde68a', '#fbbf24', '#d97706']} style={{ flex: 1 }} />
@@ -1317,7 +1335,7 @@ export function LoginScreen({ navigation }: any) {
               <Text style={{ color: 'white', fontSize: 16, fontWeight: '900' }}>Continue</Text>
             </TouchableOpacity>
           )}
-        </View>
+        </ScrollView>
       );
     }
 
