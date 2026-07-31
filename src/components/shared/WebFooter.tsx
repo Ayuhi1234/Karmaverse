@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 
 const MAX = 1200;
-const ADDRESS = 'Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122503';
+const ADDRESS = 'Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051';
 const MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ADDRESS)}`;
 
 const SOCIALS = [

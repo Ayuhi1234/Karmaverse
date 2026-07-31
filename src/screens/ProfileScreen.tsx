@@ -702,7 +702,7 @@ export function ProfileScreen({ navigation }: any) {
                   title="Help & support"
                   onPress={() => showAlert(
                     'Help & support',
-                    'Reach out to us anytime:\n\nEmail: cto.team@0waste.co.in\nAddress: PLOT 62, Sector 8, Imt Manesar, Gurugram, Haryana 122503'
+                    'Reach out to us anytime:\n\nEmail: cto.team@0waste.co.in\nAddress: Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051'
                   )}
                 />
                 <View style={styles.divider} />

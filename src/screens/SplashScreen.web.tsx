@@ -554,10 +554,10 @@ export function SplashScreen({ navigation, route }: any) {
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={s.footerContactRow}
-                  onPress={() => Linking.openURL('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122503'))}
+                  onPress={() => Linking.openURL('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051'))}
                 >
                   <MapPin size={14} color="#4ade80" style={{ marginTop: 2 }} />
-                  <Text style={[s.footerLink, { flex: 1, textDecorationLine: 'underline' }]}>Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122503</Text>
+                  <Text style={[s.footerLink, { flex: 1, textDecorationLine: 'underline' }]}>Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051</Text>
                 </TouchableOpacity>
               </View>
             </View>
