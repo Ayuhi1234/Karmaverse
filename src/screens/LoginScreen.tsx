@@ -407,13 +407,15 @@ export function LoginScreen({ navigation }: any) {
       showAlert('Not available', 'Google Sign-In requires a native build. Use APK to test.');
       return;
     }
+    setGoogleLoading(true);
     try {
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
       const response = await GoogleSignin.signIn();
       const idToken = response.data?.idToken;
       if (!idToken) throw new Error('No ID token received from Google');
-      await finishGoogleLogin(idToken);
+      await finishGoogleLogin(idToken); // clears googleLoading in its finally
     } catch (error: any) {
+      setGoogleLoading(false);
       if (isErrorWithCode(error)) {
         if (error.code === statusCodes.SIGN_IN_CANCELLED) return;
         if (error.code === statusCodes.IN_PROGRESS) return;
@@ -451,26 +453,31 @@ export function LoginScreen({ navigation }: any) {
       showAlert('Not available', 'Facebook Sign-In requires a native build. Use APK to test.');
       return;
     }
+    setFacebookLoading(true);
     try {
       const result = await FBLoginManager.logInWithPermissions(['public_profile']);
-      if (result.isCancelled) return;
+      if (result.isCancelled) { setFacebookLoading(false); return; }
       const data = await FBAccessToken.getCurrentAccessToken();
       if (!data?.accessToken) throw new Error('No access token received from Facebook');
-      await finishFacebookLogin(data.accessToken);
+      await finishFacebookLogin(data.accessToken); // clears facebookLoading in its finally
     } catch (error: any) {
+      setFacebookLoading(false);
       showAlert('Facebook sign-in failed', error?.response?.data?.message || 'Please try again.');
     }
   };
 
   const handleFacebookSignInWeb = async () => {
+    setFacebookLoading(true);
     try {
       await loadFacebookSdkScript();
     } catch (error: any) {
+      setFacebookLoading(false);
       showAlert('Facebook sign-in failed', error?.message || 'Could not load Facebook Sign-In. Check your connection.');
       return;
     }
     const FB = (window as any).FB;
     if (!FB) {
+      setFacebookLoading(false);
       showAlert('Facebook sign-in failed', 'Facebook Sign-In is unavailable right now. It may be blocked by an ad blocker or browser extension.');
       return;
     }
@@ -478,16 +485,17 @@ export function LoginScreen({ navigation }: any) {
       FB.login((response: any) => {
         const accessToken = response?.authResponse?.accessToken;
         if (accessToken) {
-          finishFacebookLogin(accessToken);
+          finishFacebookLogin(accessToken); // clears facebookLoading in its finally
           return;
         }
-        // status 'unknown' with no authResponse means the user closed the popup/dialog
-        // without acting — treat as a silent cancel, same as native's result.isCancelled.
+        // User closed/cancelled the popup — stop the spinner.
+        setFacebookLoading(false);
         if (response?.status === 'not_authorized') {
           showAlert('Facebook sign-in failed', 'Permission was not granted. Please try again.');
         }
       }, { scope: 'public_profile' });
     } catch (error: any) {
+      setFacebookLoading(false);
       // FB.login throws synchronously if the login popup is blocked by the browser.
       showAlert('Facebook sign-in failed', 'The Facebook login popup was blocked. Please allow popups for this site and try again.');
     }
@@ -814,14 +822,18 @@ export function LoginScreen({ navigation }: any) {
                 ) : (
                   <View style={styles.socialIconWrap}>
                     <View style={[styles.socialIconBtn, { pointerEvents: 'none' }]}>
-                      <Svg width="26" height="26" viewBox="0 0 48 48">
-                        <Path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.7 17.74 9.5 24 9.5z" />
-                        <Path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
-                        <Path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
-                        <Path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
-                      </Svg>
+                      {googleLoading ? (
+                        <ActivityIndicator color="#4285F4" size="small" />
+                      ) : (
+                        <Svg width="26" height="26" viewBox="0 0 48 48">
+                          <Path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.7 17.74 9.5 24 9.5z" />
+                          <Path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+                          <Path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+                          <Path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+                        </Svg>
+                      )}
                     </View>
-                    <View ref={mountGoogleButton} style={styles.googleOverlayMount} />
+                    <View ref={mountGoogleButton} style={[styles.googleOverlayMount, googleLoading && { display: 'none' }]} />
                   </View>
                 )
               ) : (
