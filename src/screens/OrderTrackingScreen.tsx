@@ -18,6 +18,17 @@ const { height } = Dimensions.get('window');
 
 // Status ordering — used to calculate which steps are done
 const STATUS_ORDER = ['ORDER_PLACED', 'AGENT_ASSIGNED', 'AGENT_REACHED', 'VERIFICATION', 'COMPLETED'];
+const statusRank = (s: string) => STATUS_ORDER.indexOf(s);
+
+// Map a backend booking status string → internal STATUS_ORDER key.
+function mapBackendStatus(s?: string): string {
+  if (!s) return 'ORDER_PLACED';
+  if (s === 'COMPLETED' || s === 'WAREHOUSE_REACHED') return 'COMPLETED';
+  if (s === 'VERIFICATION' || s === 'PICKED_UP' || s === 'VERIFIED') return 'VERIFICATION';
+  if (s === 'REACHED' || s === 'AGENT_REACHED') return 'AGENT_REACHED';
+  if (s === 'ASSIGNED' || s === 'ACCEPTED') return 'AGENT_ASSIGNED';
+  return 'ORDER_PLACED';
+}
 
 const EVENT_TO_STATUS: Record<string, string> = {
   BOOKING_ACCEPTED: 'AGENT_ASSIGNED',
@@ -71,18 +82,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
     estimatedCoins,
   };
 
-  // Map backend booking status → internal STATUS_ORDER key
-  const resolveInitialStatus = () => {
-    const s = passedBooking?.status;
-    if (!s) return 'ORDER_PLACED';
-    if (s === 'COMPLETED' || s === 'WAREHOUSE_REACHED') return 'COMPLETED';
-    if (s === 'VERIFICATION' || s === 'PICKED_UP')      return 'VERIFICATION';
-    if (s === 'REACHED' || s === 'AGENT_REACHED')       return 'AGENT_REACHED';
-    if (s === 'ASSIGNED' || s === 'ACCEPTED')           return 'AGENT_ASSIGNED';
-    return 'ORDER_PLACED';
-  };
-
-  const initialStatus = resolveInitialStatus();
+  const initialStatus = mapBackendStatus(passedBooking?.status);
 
   const passedAgent = passedBooking?.agent;
   const [activeAgent, setActiveAgent] = useState<any>(
@@ -200,7 +200,8 @@ export function OrderTrackingScreen({ route, navigation }: any) {
       }
     } else if (mappedStatus) {
       setIsPool(false);
-      setCurrentStatus(mappedStatus);
+      // Only ever advance — a late/duplicate event must not drag the tracker back.
+      setCurrentStatus((prev) => (statusRank(mappedStatus) > statusRank(prev) ? mappedStatus : prev));
       setLiveMessage(latestUpdate.message || STATUS_MESSAGES[mappedStatus]);
       if (latestUpdate.event === 'BOOKING_PICKED_UP' && latestUpdate.totalKarmaCoins) {
         setEarnedCoins(latestUpdate.totalKarmaCoins);
@@ -209,6 +210,28 @@ export function OrderTrackingScreen({ route, navigation }: any) {
 
     clearLatestUpdate();
   }, [latestUpdate]);
+
+  // Self-heal: while the tracker is open, poll the real booking status so a missed
+  // or late socket event (e.g. AGENT_REACHED never reaching this device) can't leave
+  // the UI stuck at "Agent assigned" or skip a step. Status only ever advances.
+  useEffect(() => {
+    if (!hasRealBooking) return;
+    let active = true;
+    const sync = async () => {
+      try {
+        const b = await bookingService.getBookingById(rawBookingId);
+        if (!active || !b) return;
+        if (b.status === 'CANCELLED') { setIsCancelled(true); return; }
+        const st = mapBackendStatus(b.status);
+        setCurrentStatus((prev) => (statusRank(st) > statusRank(prev) ? st : prev));
+        if (b.agent && typeof b.agent === 'object' && b.agent.name) setActiveAgent(b.agent);
+        if (st === 'VERIFICATION' && (b.totalKarmaCoins || b.totalKarmaCoins === 0)) setEarnedCoins(b.totalKarmaCoins);
+      } catch (_) { /* transient — next tick retries */ }
+    };
+    sync(); // correct a stale initial status immediately on open
+    const iv = setInterval(sync, 12000);
+    return () => { active = false; clearInterval(iv); };
+  }, [hasRealBooking, rawBookingId]);
 
   useEffect(() => {
     if (!rawBookingId) return;
