@@ -428,8 +428,8 @@ export function QuizScreen({ navigation }: any) {
           <View style={styles.resultsCard}>
             <Text style={styles.resultsCardLabel}>Total earned today</Text>
             <View style={styles.resultsCoinsRow}>
-              <KarmaCoin size={36} glow />
               <Text style={styles.resultsCoinsValue}>+{totalCoins}</Text>
+              <KarmaCoin size={36} glow />
             </View>
             {isPerfect && (
               <View style={styles.bonusBreakdown}>
@@ -437,7 +437,7 @@ export function QuizScreen({ navigation }: any) {
               </View>
             )}
             <Text style={styles.resultsCardNote}>
-              {totalCoins > 0 ? 'Coins added to your Karma Wallet!' : 'Keep practicing â€” try again tomorrow!'}
+              {totalCoins > 0 ? 'Coins added to your Karma Coin Wallet!' : 'Keep practicing — try again tomorrow!'}
             </Text>
             <View style={styles.streakPill}>
               <Flame size={16} color="#f97316" fill="#f97316" />
@@ -721,7 +721,7 @@ const styles = StyleSheet.create({
   resultsSub: { fontSize: 16, fontWeight: '600', color: 'rgba(255,255,255,0.8)' },
 
   resultsCard: { backgroundColor: 'white', width: '100%', borderRadius: 24, padding: 28, alignItems: 'center', marginBottom: 32, elevation: 10, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 20, shadowOffset: { width: 0, height: 8 } },
-  resultsCardLabel: { fontSize: 12, fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 },
+  resultsCardLabel: { fontSize: 12, fontWeight: '700', color: '#94a3b8', letterSpacing: 0.5, marginBottom: 12 },
   resultsCoinsRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 },
   resultsCoinsValue: { fontSize: 44, fontWeight: '900', color: '#d97706' },
   bonusBreakdown: { backgroundColor: '#fff7ed', paddingHorizontal: 12, paddingVertical: 5, borderRadius: 12, marginBottom: 12 },
