@@ -82,7 +82,7 @@ export function WebFooter() {
         <View style={[s.grid, isMobile && { flexDirection: 'column', gap: 28, paddingTop: 32, paddingBottom: 28 }]}>
 
           {/* About */}
-          <View style={[s.col, isMobile && { flex: undefined }]}>
+          <View style={[s.col, isMobile && { flex: 0 }]}>
             <View style={s.logoRow}>
               <Image source={require('../../../assets/logo-nav.png')} style={{ height: 68, width: 144, resizeMode: 'contain' }} />
             </View>
@@ -124,7 +124,7 @@ export function WebFooter() {
           )}
 
           {/* Download App */}
-          <View style={[s.col, isMobile && { flex: undefined }]}>
+          <View style={[s.col, isMobile && { flex: 0 }]}>
             <Text style={s.colTitle}>Get the app</Text>
             <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap' }}>
               <View style={[s.storeBtn, s.storeBtnDisabled, { flexGrow: 1 }]}>
