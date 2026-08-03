@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { Phone, ShieldCheck, X } from 'lucide-react-native';
 import { authService } from '../../services/auth';
@@ -24,6 +24,11 @@ export function PhoneVerificationModal({
   const [phone, setPhone] = useState(initialPhone);
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
+  // True once the user has dismissed the modal — used to swallow the result of an
+  // in-flight OTP verify so a request that resolves AFTER close (e.g. they hit X
+  // while it was verifying) can't pop a stray "Verification failed" alert.
+  const dismissedRef = useRef(false);
+  useEffect(() => { if (visible) dismissedRef.current = false; }, [visible]);
 
   const reset = () => {
     setStep('phone');
@@ -33,6 +38,7 @@ export function PhoneVerificationModal({
   };
 
   const close = () => {
+    dismissedRef.current = true;
     reset();
     onClose();
   };
@@ -45,9 +51,11 @@ export function PhoneVerificationModal({
     setLoading(true);
     try {
       await authService.sendOtp(phone.trim(), 'change-phone');
+      if (dismissedRef.current) return;
       setOtp('');
       setStep('otp');
     } catch (error: any) {
+      if (dismissedRef.current) return;
       showAlert('Could not send OTP', error?.response?.data?.message || 'Please try again.');
     } finally {
       setLoading(false);
@@ -65,9 +73,11 @@ export function PhoneVerificationModal({
       const otpToken = verifyRes?.data?.otpToken;
       if (!otpToken) throw new Error('Verification failed. Please try again.');
       await profileService.changePhone(phone.trim(), otpToken);
+      if (dismissedRef.current) return; // user closed while verifying — stay silent
       reset();
       onVerified();
     } catch (error: any) {
+      if (dismissedRef.current) return; // closed mid-flight — don't pop a stray alert
       showAlert('Verification failed', error?.response?.data?.message || error?.message || 'Please try again.');
     } finally {
       setLoading(false);
