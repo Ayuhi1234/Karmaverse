@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Modal, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { X } from 'lucide-react-native';
 import { registerAlertHandler, AlertPayload } from '../../utils/alert';
 
@@ -17,8 +17,15 @@ export function AlertHost() {
   const close = () => setPayload(null);
   const buttons = payload?.buttons && payload.buttons.length ? payload.buttons : [{ text: 'OK' }];
 
+  // Native uses the OS Alert.alert (see utils/alert), so this host only renders
+  // on web. Use a fixed, max-z-index overlay instead of <Modal>: two RNW modals
+  // are position:fixed siblings that stack by DOM order, so an alert opened from
+  // inside another modal (e.g. Edit profile) rendered BEHIND it. A top-most fixed
+  // overlay guarantees the alert is always visible above any open modal.
+  if (Platform.OS !== 'web' || !payload) return null;
+
   return (
-    <Modal visible={!!payload} transparent animationType="fade" onRequestClose={close}>
+    <View style={s.overlay}>
       <View style={s.backdrop}>
         <View style={s.card}>
           <View style={s.header}>
@@ -46,11 +53,13 @@ export function AlertHost() {
           </View>
         </View>
       </View>
-    </Modal>
+    </View>
   );
 }
 
 const s = StyleSheet.create({
+  // position:fixed + max z-index keeps the alert above every RNW <Modal> on the page.
+  overlay: { position: 'fixed' as any, top: 0, left: 0, right: 0, bottom: 0, zIndex: 2147483647 },
   backdrop: { flex: 1, backgroundColor: 'rgba(15,23,42,0.5)', alignItems: 'center', justifyContent: 'center', padding: 24 },
   card: { backgroundColor: 'white', borderRadius: 20, padding: 22, width: '100%', maxWidth: 420, shadowColor: '#000', shadowOffset: { width: 0, height: 14 }, shadowOpacity: 0.22, shadowRadius: 32, elevation: 14 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 8 },

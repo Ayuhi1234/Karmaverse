@@ -480,6 +480,17 @@ export function ProfileScreen({ navigation }: any) {
   const handleSaveProfile = async () => {
     if (!editForm.name || !editForm.email || !editForm.phone) return;
 
+    // Validate a changed phone up front so we never fire an OTP to a malformed
+    // number — must be a 10-digit Indian mobile.
+    if (phoneChanged && !/^[6-9]\d{9}$/.test(editForm.phone.trim())) {
+      showAlert('Invalid mobile number', 'Please enter a valid 10-digit mobile number.');
+      return;
+    }
+    if (emailChanged && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editForm.email.trim())) {
+      showAlert('Invalid email', 'Please enter a valid email address.');
+      return;
+    }
+
     if (emailChanged) {
       await startEmailOtp();
     } else if (phoneChanged) {
@@ -889,11 +900,12 @@ export function ProfileScreen({ navigation }: any) {
                   <Text style={styles.inputLabel}>Mobile Number</Text>
                   <View style={styles.inputWrapper}>
                     <Phone size={18} color="#94a3b8" style={styles.inputIcon} />
-                    <TextInput 
-                      style={styles.input} 
-                      value={editForm.phone} 
-                      onChangeText={(t) => setEditForm({...editForm, phone: t})}
+                    <TextInput
+                      style={styles.input}
+                      value={editForm.phone}
+                      onChangeText={(t) => setEditForm({...editForm, phone: t.replace(/[^0-9]/g, '')})}
                       keyboardType="phone-pad"
+                      maxLength={10}
                     />
                   </View>
                 </View>
