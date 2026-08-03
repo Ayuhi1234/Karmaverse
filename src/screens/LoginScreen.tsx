@@ -128,12 +128,19 @@ function InputField({ placeholder, value, onChange, secureTextEntry = false, ico
       {icon && <View style={[styles.iconWrapper, { pointerEvents: 'none' }]}>{icon}</View>}
       <TextInput
         ref={inputRef}
-        style={[styles.input, icon ? { paddingLeft: 48 } : {}, showToggle ? { paddingRight: 48 } : {}]}
+        style={[
+          styles.input,
+          icon ? { paddingLeft: 48 } : {},
+          showToggle ? { paddingRight: 48 } : {},
+          // Force characters to render as plain text on web — overrides any
+          // password-style masking (CSS text-security) an extension/UA applies.
+          (guardAutofill && Platform.OS === 'web') ? ({ WebkitTextSecurity: 'none' } as any) : {},
+        ]}
         placeholder={placeholder}
         placeholderTextColor="#94a3b8"
         value={value}
         onChangeText={onChange}
-        secureTextEntry={hidden}
+        secureTextEntry={guardAutofill ? false : hidden}
         autoFocus={autoFocus}
         keyboardType={keyboardType}
         maxLength={maxLength}
