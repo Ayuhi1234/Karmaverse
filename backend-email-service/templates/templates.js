@@ -10,11 +10,12 @@ const templates = {
   WELCOME: ({ name }) => ({
     subject: `Welcome to ${BRAND.namePlain} — start earning ${BRAND.currency}`,
     html: wrapEmail({
-      preheader: 'Your account is ready — schedule a pickup and start earning.',
-      heading: 'Welcome aboard',
+      preheader: 'Where everyday actions create measurable environmental impact.',
+      heading: `Welcome to ${BRAND.name}`,
       greetingName: name,
-      bodyHtml: `<p style="margin:0 0 12px;">You're all set to turn everyday sustainable actions into rewards.</p>
-        <p style="margin:0;">Schedule a doorstep pickup, earn <strong>${BRAND.currency}</strong> for every item you give a second life, and play the daily quiz to grow your streak. Small actions, real rewards — kar bhala toh ho bhala.</p>`,
+      bodyHtml: `<p style="margin:0 0 12px;font-weight:700;color:${BRAND.colors.text};">Where everyday actions create measurable environmental impact.</p>
+        <p style="margin:0 0 12px;">Book a verified resource recovery service, engage with sustainability initiatives, and earn <strong>${BRAND.currency}</strong> as you contribute to a more circular and resource-efficient future.</p>
+        <p style="margin:0;color:${BRAND.colors.muted};font-style:italic;">Sustainability begins with action. Impact follows.</p>`,
       ctaLabel: 'Get started',
       ctaUrl: `${SITE}/`,
     }),
