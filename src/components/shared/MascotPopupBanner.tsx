@@ -242,7 +242,11 @@ const s = StyleSheet.create({
     }),
     bottom: 20,
     right: 20,
-    left: 20,
+    // No `left` — the widget must only occupy its own content box in the
+    // bottom-right corner. Spanning full width (left:20 + right:20) made the
+    // invisible container capture clicks across the whole page, blocking buttons
+    // like "Start your journey" on the left, because RNW can't map the RN-only
+    // pointerEvents 'box-none' to a valid CSS value (it falls back to auto).
     alignItems: 'flex-end',
     zIndex: 9999,
   },
