@@ -940,7 +940,7 @@ export function LoginScreen({ navigation }: any) {
             <TouchableOpacity onPress={() => { setStep('entry'); setIdentifier(''); }}>
                <Text style={{ color: '#64748b', fontWeight: 'bold' }}>Change account</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => { setResetSubStep('send_otp'); setOtpValue(''); setNewPassword(''); setConfirmPassword(''); setStep('reset_password'); }}>
+            <TouchableOpacity onPress={() => { setForgotPhone(/^[6-9]\d{9}$/.test(identifier.trim()) ? identifier.trim() : ''); setResetSubStep('send_otp'); setOtpValue(''); setNewPassword(''); setConfirmPassword(''); setStep('reset_password'); }}>
                <Text style={{ color: '#16a34a', fontWeight: 'bold' }}>Forgot password?</Text>
             </TouchableOpacity>
           </View>
