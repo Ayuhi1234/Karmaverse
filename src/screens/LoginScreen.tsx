@@ -116,6 +116,13 @@ function InputField({ placeholder, value, onChange, secureTextEntry = false, ico
   // password manager can't dump (and mask) a saved password into it on load. It
   // becomes editable the moment the user focuses it, so typing is unaffected.
   const [autofillLocked, setAutofillLocked] = useState(guardAutofill && Platform.OS === 'web');
+  // Tell password-manager extensions (LastPass / 1Password / Bitwarden / Dashlane)
+  // to leave this field alone — they overlay and MASK fields they think are
+  // passwords, even a plain text input, which was turning the typed mobile number
+  // into dots. Web-only, and only for fields that opt in via guardAutofill.
+  const ignoreProps: any = (guardAutofill && Platform.OS === 'web')
+    ? { 'data-lpignore': 'true', 'data-1p-ignore': 'true', 'data-bwignore': 'true', 'data-form-type': 'other', name: 'kv-mobile', nativeID: 'kv-mobile' }
+    : {};
   return (
     <View style={styles.inputContainer}>
       {icon && <View style={[styles.iconWrapper, { pointerEvents: 'none' }]}>{icon}</View>}
@@ -138,6 +145,7 @@ function InputField({ placeholder, value, onChange, secureTextEntry = false, ico
         onFocus={() => { if (autofillLocked) setAutofillLocked(false); }}
         autoCorrect={false}
         autoCapitalize="none"
+        {...ignoreProps}
       />
       {showToggle && (
         <TouchableOpacity style={{ position: 'absolute', right: 16, zIndex: 1 }} onPress={() => setHidden((h: boolean) => !h)} activeOpacity={0.7}>
