@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Modal, TextInput, KeyboardAvoidingView, Platform, Animated, ActivityIndicator } from 'react-native';
 import { WebFooter } from '../components/shared/WebFooter';
 import { showAlert } from '../utils/alert';
@@ -59,7 +60,10 @@ export function ProfileScreen({ navigation }: any) {
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
 
   // Fetch Profile on Mount
-  useEffect(() => {
+  // Refetch on every focus (not just mount) so a phone verified elsewhere — e.g.
+  // during the booking flow's phone-verification modal — is reflected here as soon
+  // as the user opens Profile, instead of showing a stale "Add mobile number".
+  useFocusEffect(useCallback(() => {
     const fetchProfile = async () => {
       try {
         const data = await profileService.getProfile();
@@ -106,7 +110,7 @@ export function ProfileScreen({ navigation }: any) {
       }
     };
     fetchProfile();
-  }, []);
+  }, []));
 
   // Modal State
   const [modalVisible, setModalVisible] = useState(false);

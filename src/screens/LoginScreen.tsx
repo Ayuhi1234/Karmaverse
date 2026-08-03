@@ -964,6 +964,8 @@ export function LoginScreen({ navigation }: any) {
               keyboardType="number-pad"
               maxLength={10}
               icon={<User size={18} color="#94a3b8" />}
+              textContentType="telephoneNumber"
+              autoComplete="tel"
               autoFocus
             />
             <PrimaryButton onPress={async () => {
