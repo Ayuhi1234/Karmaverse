@@ -9,6 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { ChevronLeft, MapPin, CheckCircle2, PackageOpen, Plus, FileText, Magnet, Droplets, Wine, Smartphone } from 'lucide-react-native';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
+import { PhoneVerificationModal } from '../components/shared/PhoneVerificationModal';
 import { LinearGradient } from 'expo-linear-gradient';
 import { CupSoda, ShoppingBag, Archive, Newspaper as NewsIcon, BookOpen, Database, Cog, Utensils, Activity, Laptop, Cable, Tv, Battery, Shirt, Fan, AirVent, WashingMachine, Refrigerator, Flame, Home as HomeIcon, Briefcase } from 'lucide-react-native';
 import { addressService, SavedAddress, AddressLabel } from '../services/address';
@@ -253,6 +254,9 @@ export function SchedulePickupScreen({ navigation }: any) {
   const [selectedTime, setSelectedTime] = useState('');
   const [instructions, setInstructions] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  // Shown when booking creation is blocked because the (OAuth) user hasn't verified
+  // a phone number yet — backend returns 403 on POST /bookings in that case.
+  const [showPhoneVerify, setShowPhoneVerify] = useState(false);
   const [userCoordinates, setUserCoordinates] = useState<[number, number] | null>(null); // GPS — map centering only
 
   // Saved addresses (multi-address backend). Booking sends the SELECTED address,
@@ -466,6 +470,14 @@ export function SchedulePickupScreen({ navigation }: any) {
         estimatedCoins: createdBooking?.estimatedKarmaCoins ?? cartCalculations.totalCoins,
       }), 2500);
     } catch (error: any) {
+      // OAuth users with no verified phone are blocked with a 403 before any other
+      // validation. Route them to phone verification instead of a dead-end error;
+      // once verified they can retry and the booking goes through.
+      if (error?.response?.status === 403) {
+        setShowPhoneVerify(true);
+        setIsLoading(false);
+        return;
+      }
       // Surface the real reason so scheduling failures aren't a dead end.
       const data = error?.response?.data;
       const validationMsg = Array.isArray(data?.errors)
@@ -797,6 +809,14 @@ export function SchedulePickupScreen({ navigation }: any) {
       {/* Main Content Router */}
       {currentStep === 1 ? renderCatalogStep() : renderDetailsStep()}
 
+      <PhoneVerificationModal
+        visible={showPhoneVerify}
+        onClose={() => setShowPhoneVerify(false)}
+        onVerified={() => {
+          setShowPhoneVerify(false);
+          handleConfirmPickup();
+        }}
+      />
     </View>
   );
 }
