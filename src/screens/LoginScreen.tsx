@@ -110,8 +110,12 @@ const EMOJI_REGEX = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F1E0}-\u{1F1FF}]/u
 const EMOJI_REGEX_GLOBAL = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F1E0}-\u{1F1FF}]/gu;
 
 // Reusable Components
-function InputField({ placeholder, value, onChange, secureTextEntry = false, icon, autoFocus = false, keyboardType = 'default', maxLength, showToggle = false, onSubmitEditing, returnKeyType, inputRef, textContentType, autoComplete }: any) {
+function InputField({ placeholder, value, onChange, secureTextEntry = false, icon, autoFocus = false, keyboardType = 'default', maxLength, showToggle = false, onSubmitEditing, returnKeyType, inputRef, textContentType, autoComplete, guardAutofill = false }: any) {
   const [hidden, setHidden] = useState(secureTextEntry);
+  // Bulletproof anti-autofill: on web the field starts read-only so the browser's
+  // password manager can't dump (and mask) a saved password into it on load. It
+  // becomes editable the moment the user focuses it, so typing is unaffected.
+  const [autofillLocked, setAutofillLocked] = useState(guardAutofill && Platform.OS === 'web');
   return (
     <View style={styles.inputContainer}>
       {icon && <View style={[styles.iconWrapper, { pointerEvents: 'none' }]}>{icon}</View>}
@@ -130,6 +134,8 @@ function InputField({ placeholder, value, onChange, secureTextEntry = false, ico
         returnKeyType={returnKeyType}
         textContentType={textContentType}
         autoComplete={autoComplete}
+        editable={autofillLocked ? false : undefined}
+        onFocus={() => { if (autofillLocked) setAutofillLocked(false); }}
         autoCorrect={false}
         autoCapitalize="none"
       />
@@ -966,7 +972,7 @@ export function LoginScreen({ navigation }: any) {
               icon={<User size={18} color="#94a3b8" />}
               textContentType="telephoneNumber"
               autoComplete="tel"
-              autoFocus
+              guardAutofill
             />
             <PrimaryButton onPress={async () => {
               if (!/^[6-9]\d{9}$/.test(forgotPhone.trim())) {
