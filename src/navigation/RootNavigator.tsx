@@ -22,6 +22,12 @@ import { AboutUsScreen } from '../screens/AboutUsScreen';
 import { NotFoundScreen } from '../screens/NotFoundScreen';
 import { TabNavigator } from './TabNavigator';
 import { navigationRef } from './navRef';
+import { capturePendingDeepLink, clearPendingDeepLink, hasPendingDeepLink } from '../utils/deepLink';
+
+// Runs at import, before the NavigationContainer resolves the URL — remembers a
+// protected deep link (e.g. an email "Track pickup" link) opened while logged out,
+// so we can return the user to it after they log in.
+capturePendingDeepLink();
 
 const Stack = createNativeStackNavigator();
 
@@ -57,6 +63,9 @@ export function RootNavigator() {
       try {
         const token = await AsyncStorage.getItem('userToken');
         const isValid = !!token && token !== 'undefined' && token !== 'null';
+        // Already logged in — the router resolves the deep link directly, so drop
+        // any captured URL to avoid a stale redirect on a later in-session login.
+        if (isValid) clearPendingDeepLink();
         setIsLoggedIn(isValid);
       } catch (error) {
         console.error('Auth check failed:', error);
@@ -134,6 +143,12 @@ export function RootNavigator() {
       linking={linking}
       documentTitle={{ enabled: false }}
       onReady={() => {
+        // A logged-out user who opened a protected email/share link resolves to
+        // NotFound (that path isn't in the logged-out link map). Send them to
+        // Login instead — after login, consumePendingDeepLink returns them to it.
+        if (!isLoggedIn && hasPendingDeepLink()) {
+          navRef.current?.reset({ index: 0, routes: [{ name: 'Login' }] });
+        }
         routeNameRef.current = navRef.current?.getCurrentRoute()?.name;
         trackPageView(routeNameRef.current);
       }}

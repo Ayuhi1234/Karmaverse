@@ -1,6 +1,7 @@
 ﻿import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, SafeAreaView, StatusBar, ScrollView, Platform, KeyboardAvoidingView, Image, Animated, Easing, PanResponder } from 'react-native';
 import { showAlert } from '../utils/alert';
+import { consumePendingDeepLink } from '../utils/deepLink';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path } from 'react-native-svg';
@@ -378,6 +379,9 @@ export function LoginScreen({ navigation }: any) {
       await authService.googleLogin(idToken);
       reconnect();
       navigation.replace('App');
+      // If they arrived from a protected email/share link while logged out, send
+      // them on to it now (e.g. the specific booking's tracking page).
+      consumePendingDeepLink(navigation);
     } catch (error: any) {
       showAlert('Google sign-in failed', error?.response?.data?.message || 'Please try again.');
     } finally {
@@ -458,6 +462,9 @@ export function LoginScreen({ navigation }: any) {
       await authService.facebookLogin(accessToken);
       reconnect();
       navigation.replace('App');
+      // If they arrived from a protected email/share link while logged out, send
+      // them on to it now (e.g. the specific booking's tracking page).
+      consumePendingDeepLink(navigation);
     } catch (error: any) {
       const isNetworkError = !error?.response;
       showAlert(
@@ -711,6 +718,9 @@ export function LoginScreen({ navigation }: any) {
       await authService.login(identifier, password);
       reconnect();
       navigation.replace('App');
+      // If they arrived from a protected email/share link while logged out, send
+      // them on to it now (e.g. the specific booking's tracking page).
+      consumePendingDeepLink(navigation);
     } catch (error: any) {
       const status = error?.response?.status;
       const isNetworkError = !error?.response;
