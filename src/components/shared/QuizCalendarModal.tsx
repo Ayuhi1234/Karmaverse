@@ -11,7 +11,11 @@ interface Props {
 }
 
 const WEEKS = 26; // 6 months of history
-const CELL = Math.floor((SCREEN_WIDTH - 80) / WEEKS); // dynamic cell size
+// Cell size is derived from the card's content width, not the raw window — on a
+// laptop/iPad the card is capped at 460, so basing this on SCREEN_WIDTH made the
+// cells balloon. Clamp to the card width so cells stay compact on every device.
+const CARD_MAX = 460;
+const CELL = Math.floor((Math.min(SCREEN_WIDTH, CARD_MAX) - 80) / WEEKS);
 const DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
@@ -195,6 +199,8 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: 20,
     width: '100%',
+    maxWidth: CARD_MAX,
+    alignSelf: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.15,

@@ -164,6 +164,8 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     padding: 28,
     width: '100%',
+    maxWidth: 420,
+    alignSelf: 'center',
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
