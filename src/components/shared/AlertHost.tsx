@@ -3,6 +3,15 @@ import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native
 import { X } from 'lucide-react-native';
 import { registerAlertHandler, AlertPayload } from '../../utils/alert';
 
+// react-dom is only present on web (react-native-web renders through it). Used to
+// portal the alert into document.body so it's a top-level sibling of any RNW
+// <Modal> portal — a fixed overlay left inside #root gets trapped in a stacking
+// context and still renders behind modals, so its z-index alone isn't enough.
+let createPortal: ((node: React.ReactNode, container: Element) => any) | null = null;
+if (Platform.OS === 'web') {
+  try { createPortal = require('react-dom').createPortal; } catch (_) { /* no-op */ }
+}
+
 // Renders showAlert() calls as an in-app modal on web (instead of the browser's
 // native window.alert). Mounted once at the app root. Native keeps Alert.alert.
 export function AlertHost() {
@@ -24,7 +33,7 @@ export function AlertHost() {
   // overlay guarantees the alert is always visible above any open modal.
   if (Platform.OS !== 'web' || !payload) return null;
 
-  return (
+  const overlay = (
     <View style={s.overlay}>
       <View style={s.backdrop}>
         <View style={s.card}>
@@ -55,6 +64,13 @@ export function AlertHost() {
       </View>
     </View>
   );
+
+  // Portal to <body> so the alert escapes any modal's stacking context and its
+  // max z-index actually wins. Fall back to inline render if the portal is
+  // unavailable for any reason.
+  return (createPortal && typeof document !== 'undefined')
+    ? createPortal(overlay, document.body)
+    : overlay;
 }
 
 const s = StyleSheet.create({
