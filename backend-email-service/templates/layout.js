@@ -85,12 +85,20 @@ function rewardsCard(coins, balance) {
 // ── Full email shell ──
 function wrapEmail({ preheader = '', heading = '', greetingName, bodyHtml = '', ctaLabel, ctaUrl }) {
   const c = BRAND.colors;
+  // Greet with the first name only (e.g. "Shashi Shekhar" -> "Shashi").
+  const firstName = properCase(String(greetingName ?? '').trim().split(/\s+/)[0] || '');
   const greeting = greetingName !== undefined
-    ? `<p style="margin:0 0 14px;font-size:16px;color:${c.text};font-weight:700;">Hi ${properCase(greetingName)},</p>` : '';
+    ? `<p style="margin:0 0 14px;font-size:16px;color:${c.text};font-weight:700;">Hi ${firstName},</p>` : '';
   const cta = (ctaLabel && ctaUrl) ? button(ctaLabel, ctaUrl) : '';
-  const socialRow = BRAND.social
-    .map(([n, u]) => `<a href="${u}" style="color:${c.faint};text-decoration:none;font-weight:700;">${n}</a>`)
-    .join(`<span style="color:#cbd5e1;"> &middot; </span>`);
+  // Hosted PNG icons (email clients strip SVG/icon fonts) — a centered row of
+  // round brand icons, each linking to the real profile. Served from the public
+  // site next to email-logo.png.
+  const socialRow = `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;"><tr>${
+    BRAND.social.map(([n, u]) => {
+      const slug = n.toLowerCase();
+      return `<td style="padding:0 5px;"><a href="${u}" target="_blank" style="text-decoration:none;"><img src="${BRAND.site}/email/social/${slug}.png" width="28" height="28" alt="${n}" title="${n}" style="display:block;border:0;outline:none;" /></a></td>`;
+    }).join('')
+  }</tr></table>`;
 
   return `<!doctype html>
 <html lang="en">
@@ -116,9 +124,11 @@ function wrapEmail({ preheader = '', heading = '', greetingName, bodyHtml = '', 
           ${cta}
         </td></tr>
         <tr><td style="padding:22px 32px;background:#f8fafc;border-top:1px solid ${c.line};font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;">
-          <p style="margin:0 0 10px;font-size:13px;color:${c.faint};font-weight:600;">${socialRow}</p>
+          <div style="margin:0 0 14px;">${socialRow}</div>
           <p style="margin:0 0 4px;font-size:12px;color:${c.faint};">
-            <a href="mailto:${BRAND.supportEmail}" style="color:${c.green};text-decoration:none;">${BRAND.supportEmail}</a> &middot; ${BRAND.phone}
+            <a href="mailto:${BRAND.supportEmail}" style="color:${c.green};text-decoration:none;font-weight:700;">Contact us</a>
+            &middot; <a href="mailto:${BRAND.supportEmail}" style="color:${c.green};text-decoration:none;">${BRAND.supportEmail}</a>
+            &middot; ${BRAND.phone}
           </p>
           <p style="margin:0 0 10px;font-size:12px;color:${c.faint};">
             <a href="${mapsUrl}" style="color:${c.faint};text-decoration:underline;">${BRAND.address}</a>
