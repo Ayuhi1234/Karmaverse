@@ -70,7 +70,11 @@ export function OrderTrackingScreen({ route, navigation }: any) {
   
   // Resolve passed parameters or fallback to mock data
   const passedBooking = route?.params?.booking;
-  const rawBookingId = passedBooking?._id || passedBooking?.id || mockBooking.id;
+  // `bookingId` (query param) is how the email "Track pickup" link deep-links to a
+  // specific booking — no full booking object is passed then, so fall back to it
+  // and let the poll below hydrate the live status/agent from the backend.
+  const deepLinkBookingId = route?.params?.bookingId;
+  const rawBookingId = passedBooking?._id || passedBooking?.id || deepLinkBookingId || mockBooking.id;
 
   // Coins come from the backend, which computes them at verify time from the
   // live rate card. Until then, fall back to the schedule screen's estimate
@@ -106,7 +110,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
   const [isRated, setIsRated] = useState(passedBooking?.isRated ?? openedFromHistory);
 
   // Cancel allowed only when real booking exists and before agent reaches
-  const hasRealBooking = !!(passedBooking?._id || passedBooking?.id);
+  const hasRealBooking = !!(passedBooking?._id || passedBooking?.id || deepLinkBookingId);
   const CANCELLABLE_STATUSES = ['ORDER_PLACED', 'AGENT_ASSIGNED', 'PENDING', 'SCHEDULED'];
   const canCancel = hasRealBooking && CANCELLABLE_STATUSES.includes(currentStatus) && !isCancelled;
 

@@ -58,20 +58,20 @@ const templates = {
         ])}
         <p style="margin:14px 0 0;">We'll notify you as soon as a pickup partner is assigned.</p>`,
       ctaLabel: 'Track pickup',
-      ctaUrl: `${SITE}/OrderTracking`,
+      ctaUrl: `${SITE}/OrderTracking${bookingId ? `?bookingId=${encodeURIComponent(bookingId)}` : ''}`,
     }),
   }),
 
-  BOOKING_ACCEPTED: ({ name, agentName, bookingId, eta }) => ({
+  BOOKING_ACCEPTED: ({ name, agentName, bookingId }) => ({
     subject: 'Your pickup partner is on the way',
     html: wrapEmail({
       preheader: `${safe(agentName, 'Your pickup partner')} has been assigned to your pickup.`,
       heading: 'A partner is on the way',
       greetingName: name,
       bodyHtml: `<p style="margin:0 0 6px;"><strong>${safe(agentName, 'Your pickup partner')}</strong> has been assigned to your pickup${shortId(bookingId) ? ` <strong>${shortId(bookingId)}</strong>` : ''}.</p>
-        <p style="margin:0;">They'll reach your location around <strong>${safe(eta, 'shortly')}</strong>. You can follow their progress live.</p>`,
+        <p style="margin:0;">They're on their way to your location now. Tap <strong>Track pickup</strong> below to see their live location and estimated arrival time.</p>`,
       ctaLabel: 'Track pickup',
-      ctaUrl: `${SITE}/OrderTracking`,
+      ctaUrl: `${SITE}/OrderTracking${bookingId ? `?bookingId=${encodeURIComponent(bookingId)}` : ''}`,
     }),
   }),
 
