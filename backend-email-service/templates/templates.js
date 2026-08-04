@@ -25,10 +25,10 @@ const templates = {
     subject: `Your ${BRAND.namePlain} verification code`,
     html: wrapEmail({
       preheader: `Your verification code${otp ? ` is ${escapeHtml(otp)}` : ''}`,
-      heading: 'Verify your email',
-      bodyHtml: `<p style="margin:0 0 4px;">Use this code to continue:</p>
+      heading: 'Verify your email address',
+      bodyHtml: `<p style="margin:0 0 4px;">Enter this 6-digit code in the ${BRAND.name} app to verify your email and continue:</p>
         <p style="font-size:34px;font-weight:800;letter-spacing:10px;color:${BRAND.colors.deep};margin:18px 0;text-align:center;">${safe(otp, '------')}</p>
-        <p style="margin:0;color:${BRAND.colors.muted};">It's valid for 10 minutes. Never share this code with anyone — our team will never ask for it.</p>`,
+        <p style="margin:0;color:${BRAND.colors.muted};">This code is valid for 10 minutes. Never share it with anyone — our team will never ask for it.</p>`,
     }),
   }),
 
@@ -140,33 +140,6 @@ const templates = {
         <p style="margin:0;">Invite more friends and you both keep earning.</p>`,
       ctaLabel: 'Invite more friends',
       ctaUrl: `${SITE}/Referral`,
-    }),
-  }),
-
-  // ── Agent app ──
-  AGENT_WELCOME: ({ name }) => ({
-    subject: `Welcome to the ${BRAND.namePlain} partner team!`,
-    html: wrapEmail({
-      preheader: 'Your partner account is active.',
-      heading: 'Welcome aboard',
-      greetingName: name,
-      bodyHtml: `<p style="margin:0;">Your pickup-partner account is active. Go online from the dashboard to start receiving pickup requests near you.</p>`,
-    }),
-  }),
-
-  AGENT_WEEKLY_SUMMARY: ({ name, totalPickups, rating, currentStreak }) => ({
-    subject: `Your week on ${BRAND.namePlain} — ${safe(totalPickups, '0')} pickups completed`,
-    html: wrapEmail({
-      preheader: `${safe(totalPickups, '0')} pickups this week.`,
-      heading: 'Your weekly summary',
-      greetingName: name,
-      bodyHtml: `<p style="margin:0 0 4px;">Here's how your week went:</p>
-        ${detailTable([
-          ['Pickups completed', safe(totalPickups, '0')],
-          ['Average rating', safe(rating, '—')],
-          ['Current streak', `${safe(currentStreak, '0')} days`],
-        ])}
-        <p style="margin:14px 0 0;">Keep up the great work!</p>`,
     }),
   }),
 };
