@@ -136,6 +136,17 @@ export const authService = {
     return response.data;
   },
 
+  // Forgot-password only: the user can supply EITHER a phone OR an email. When an
+  // email is given the backend resolves the linked phone, sends the OTP there, and
+  // returns that phone in data.phone — read it and use it for the rest of the flow.
+  sendForgotOtp: async (identifier: { phone?: string; email?: string }) => {
+    const body: any = { purpose: 'forgot-password' };
+    if (identifier.email) body.email = identifier.email.trim();
+    else body.phone = (identifier.phone || '').trim();
+    const response = await api.post('/api/v1/auth/send-otp', body);
+    return response.data;
+  },
+
   verifyOtp: async (phone: string, otp: string, purpose: string) => {
     const response = await api.post('/api/v1/auth/verify-otp', { phone, otp, purpose });
     return response.data;

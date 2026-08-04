@@ -961,7 +961,7 @@ export function LoginScreen({ navigation }: any) {
             <TouchableOpacity onPress={() => { setStep('entry'); setIdentifier(''); }}>
                <Text style={{ color: '#64748b', fontWeight: 'bold' }}>Change account</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => { setForgotPhone(/^[6-9]\d{9}$/.test(identifier.trim()) ? identifier.trim() : ''); setResetSubStep('send_otp'); setOtpValue(''); setNewPassword(''); setConfirmPassword(''); setStep('reset_password'); }}>
+            <TouchableOpacity onPress={() => { const id = identifier.trim(); setForgotPhone((/^[6-9]\d{9}$/.test(id) || id.includes('@')) ? id : ''); setResetSubStep('send_otp'); setOtpValue(''); setNewPassword(''); setConfirmPassword(''); setStep('reset_password'); }}>
                <Text style={{ color: '#16a34a', fontWeight: 'bold' }}>Forgot password?</Text>
             </TouchableOpacity>
           </View>
@@ -976,38 +976,56 @@ export function LoginScreen({ navigation }: any) {
           <View style={styles.stepContent}>
             <View>
               <Text style={styles.title}>Forgot password 🔐</Text>
-              <Text style={styles.subtitle}>Enter your registered mobile number</Text>
+              <Text style={styles.subtitle}>Enter your registered mobile number or email</Text>
             </View>
             <InputField
-              placeholder="Registered mobile number (10 digits)"
+              placeholder="Mobile number or email"
               value={forgotPhone}
-              onChange={(v: string) => setForgotPhone(v.replace(/[^0-9]/g, ''))}
-              keyboardType="number-pad"
-              maxLength={10}
+              onChange={(v: string) => setForgotPhone(v.replace(/\s/g, ''))}
+              keyboardType="email-address"
+              maxLength={254}
               icon={<User size={18} color="#94a3b8" />}
-              textContentType="telephoneNumber"
-              autoComplete="tel"
+              autoComplete="username"
               guardAutofill
             />
             <PrimaryButton onPress={async () => {
-              if (!/^[6-9]\d{9}$/.test(forgotPhone.trim())) {
-                showAlert('Invalid mobile number', 'Please enter a valid Indian mobile number (must start with 6, 7, 8 or 9).');
+              const raw = forgotPhone.trim();
+              const isEmail = raw.includes('@');
+              if (isEmail) {
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw)) {
+                  showAlert('Invalid email', 'Please enter a valid email address.');
+                  return;
+                }
+              } else if (!/^[6-9]\d{9}$/.test(raw)) {
+                showAlert('Invalid mobile number', 'Please enter a valid Indian mobile number (must start with 6, 7, 8 or 9), or use your email.');
                 return;
               }
               setIsLoading(true);
               try {
-                const res = await authService.sendOtp(forgotPhone.trim(), 'forgot-password');
+                const res = await authService.sendForgotOtp(isEmail ? { email: raw } : { phone: raw });
+                // The backend echoes/resolves the phone the OTP was sent to — this
+                // becomes the canonical phone for verify-otp and reset-password.
+                const resolvedPhone = res?.data?.phone || res?.phone || (isEmail ? '' : raw);
+                if (!resolvedPhone) throw new Error('Could not resolve the phone number for this account.');
+                setForgotPhone(resolvedPhone);
                 setResendTimer(res?.data?.retryAfter || res?.retryAfter || 60);
                 setOtpValue('');
                 setResetSubStep('verify_otp');
               } catch (error: any) {
+                const status = error?.response?.status;
                 const d = error?.response?.data;
                 const msg = d?.message || d?.error || d?.msg || (typeof d === 'string' ? d : null);
-                showAlert('Could not send OTP', msg || 'Please try again.');
+                if (status === 404) {
+                  showAlert('No account found', 'No account found with this email. Please check the address or sign up.');
+                } else if (status === 400 && /no phone number is linked/i.test(msg || '')) {
+                  showAlert('No phone number linked', 'This account has no phone number on file. Please add and verify a phone number from your profile first, or contact support.');
+                } else {
+                  showAlert('Could not send OTP', msg || 'Please try again.');
+                }
               } finally {
                 setIsLoading(false);
               }
-            }} disabled={!/^[6-9]\d{9}$/.test(forgotPhone.trim())} loading={isLoading}>
+            }} disabled={!forgotPhone.trim()} loading={isLoading}>
               <Text style={styles.buttonText}>Send OTP</Text>
               <ArrowRight size={18} color="#fff" />
             </PrimaryButton>
