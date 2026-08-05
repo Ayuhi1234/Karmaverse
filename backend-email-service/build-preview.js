@@ -11,14 +11,12 @@ const samples = {
   OTP: { otp: '482913' },
   PASSWORD_RESET_CONFIRM: { name: N },
   BOOKING_PLACED: { name: N, bookingId: bid, date: '12 Aug 2026', timeSlot: '12:00 PM - 3:00 PM', address: 'Shaheed Hawaldar Padam Singh Dhama Marg, Mamura, Noida, Uttar Pradesh 201301' },
-  BOOKING_ACCEPTED: { name: N, agentName: 'Ravi Kumar', bookingId: bid, eta: '3:20 PM' },
+  BOOKING_ACCEPTED: { name: N, agentName: 'Ravi Kumar', bookingId: bid },
   BOOKING_PICKED_UP: { name: N, coins: 45, walletBalance: 4055 },
   BOOKING_COMPLETED: { name: N, bookingId: bid },
   BOOKING_CANCELLED: { name: N, bookingId: bid, date: '12 Aug 2026' },
   QUIZ_STREAK_REMINDER: { name: N, streak: 2 },
   REFERRAL_REWARD: { name: N, friendName: 'Amit', coins: 1000 },
-  AGENT_WELCOME: { name: 'ravi kumar' },
-  AGENT_WEEKLY_SUMMARY: { name: 'ravi kumar', totalPickups: 14, rating: 4.8, currentStreak: 5 },
 };
 
 // For LOCAL preview only, point the logo at the committed public file so it renders

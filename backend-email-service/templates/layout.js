@@ -11,7 +11,7 @@ const BRAND = {
   logo: 'https://karmaverse.earth/email-logo.png', // public HTTPS (served by Netlify)
   supportEmail: 'info@0waste.co.in',
   phone: '+91 70931 98828',
-  address: 'Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122503',
+  address: 'Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051',
   colors: {
     deep: '#052e16', green: '#15803d', mint: '#4ade80', mintText: '#052e16',
     page: '#f1f5f9', card: '#ffffff', text: '#0f172a', body: '#334155',
