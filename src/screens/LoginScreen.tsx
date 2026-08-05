@@ -1626,10 +1626,12 @@ const styles = StyleSheet.create({
   },
   headerCircle: { position: 'absolute', borderRadius: 999, backgroundColor: 'white' },
   headerTitle: { color: '#ffffff', fontSize: 22, fontWeight: '900', marginTop: 12, letterSpacing: 0.5 },
+  // Matched 1:1 to the home-page navbar lockup so the login logo reads identically
+  // crisp (same icon crop + real text, same sizes).
   logoCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 },
-  logoIconImg: { width: 58, height: 60 },
-  logoWordText: { fontSize: 30, fontWeight: '900', letterSpacing: -0.5, lineHeight: 34 },
-  logoTagline: { fontSize: 11, fontWeight: '800', letterSpacing: 1, marginTop: 2 },
+  logoIconImg: { width: 70, height: 73 },
+  logoWordText: { fontSize: 28, fontWeight: '900', letterSpacing: -0.5, lineHeight: 32 },
+  logoTagline: { fontSize: 9.5, fontWeight: '800', letterSpacing: 0.9, marginTop: 3 },
   termsRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginTop: 4 },
   checkbox: { width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: '#cbd5e1', alignItems: 'center', justifyContent: 'center', marginTop: 1 },
   checkboxOn: { backgroundColor: '#16a34a', borderColor: '#16a34a' },
