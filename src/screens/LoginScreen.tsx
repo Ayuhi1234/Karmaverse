@@ -256,6 +256,10 @@ export function LoginScreen({ navigation }: any) {
   }, [navigation, step]);
 
   const [identifier, setIdentifier] = useState('');
+  // Phone linked to the account, captured from check-user during login detection —
+  // lets "Forgot password" pre-fill the user's mobile number (where the OTP is sent)
+  // instead of the email they logged in with.
+  const [linkedPhone, setLinkedPhone] = useState('');
   const [password, setPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -569,6 +573,11 @@ export function LoginScreen({ navigation }: any) {
     setStep('checking');
     const routeByResult = (res: any) => {
       if (res?.data?.isRegistered) {
+        // Remember the account's linked mobile number (any field the backend uses),
+        // but only a real 10-digit one — a masked value can't be used to send OTP.
+        const d = res?.data || {};
+        const lp = d.phone || d.mobile || d.user?.phone || d.user?.mobile || '';
+        setLinkedPhone(/^[6-9]\d{9}$/.test(String(lp)) ? String(lp) : '');
         setStep('login');
       } else {
         // Pre-fill the right field on the sign-up form based on what they typed
@@ -971,7 +980,7 @@ export function LoginScreen({ navigation }: any) {
             <TouchableOpacity onPress={() => { setStep('entry'); setIdentifier(''); }}>
                <Text style={{ color: '#64748b', fontWeight: 'bold' }}>Change account</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => { const id = identifier.trim(); setForgotPhone((/^[6-9]\d{9}$/.test(id) || id.includes('@')) ? id : ''); setResetSubStep('send_otp'); setOtpValue(''); setNewPassword(''); setConfirmPassword(''); setStep('reset_password'); }}>
+            <TouchableOpacity onPress={() => { const id = identifier.trim(); const prefill = linkedPhone || (/^[6-9]\d{9}$/.test(id) ? id : (id.includes('@') ? id : '')); setForgotPhone(prefill); setResetSubStep('send_otp'); setOtpValue(''); setNewPassword(''); setConfirmPassword(''); setStep('reset_password'); }}>
                <Text style={{ color: '#16a34a', fontWeight: 'bold' }}>Forgot password?</Text>
             </TouchableOpacity>
           </View>
