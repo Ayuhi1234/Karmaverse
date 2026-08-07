@@ -232,6 +232,85 @@ export const ARTICLES: Article[] = [
       },
     ],
   },
+  {
+    id: 'indian-sustainability-leaders',
+    title: 'India’s sustainability changemakers you should know',
+    category: 'PEOPLE',
+    categoryColor: '#0891b2',
+    source: 'KarmaVerse editorial',
+    readTime: '5 min read',
+    date: '6 Aug 2026',
+    image:
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Photograph_of_public-waste_segregation_bins%2C_Amritsar%2C_Punjab%2C_India%2C_8_April_2023.jpg/960px-Photograph_of_public-waste_segregation_bins%2C_Amritsar%2C_Punjab%2C_India%2C_8_April_2023.jpg',
+    intro:
+      'Long before “sustainability” was a buzzword, Indians were hugging trees to save forests and turning barren land green. Meet the people whose work still shapes how the country recycles, farms, and protects nature.',
+    sections: [
+      {
+        heading: 'Sunderlal Bahuguna — the Chipko movement',
+        paragraphs: [
+          'In the 1970s Himalayas, villagers led by Sunderlal Bahuguna literally wrapped their arms around trees to stop them being felled — the Chipko movement. It forced a 15-year ban on green felling above 1,000m and made “ecology is permanent economy” a rallying cry for a generation.',
+        ],
+      },
+      {
+        heading: 'Vandana Shiva — seeds and food sovereignty',
+        paragraphs: [
+          'Physicist-turned-activist Vandana Shiva founded Navdanya, a movement that has saved thousands of native seed varieties and trained farmers in chemical-free agriculture. Her core idea — that protecting biodiversity is protecting people — underpins the circular, low-waste thinking KarmaVerse is built on.',
+        ],
+      },
+      {
+        heading: 'Sunita Narain — clean air and water policy',
+        paragraphs: [
+          'As head of the Centre for Science and Environment, Sunita Narain turned research into real policy — from India’s vehicle emission standards to exposing pesticide contamination. She is a reminder that data, not just goodwill, drives lasting environmental change.',
+        ],
+      },
+      {
+        heading: 'Afroz Shah — the world’s largest beach clean-up',
+        paragraphs: [
+          'A Mumbai lawyer, Afroz Shah began picking up litter on Versova beach in 2015. What started solo grew into a volunteer movement that removed thousands of tonnes of plastic and brought nesting turtles back to the shore — proof that one person’s weekend habit can move a city.',
+          'Every pickup you schedule on KarmaVerse is that same idea, scaled: small, repeatable actions that add up to measurable impact.',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'global-sustainability-leaders',
+    title: 'Global sustainability leaders shaping the planet’s future',
+    category: 'PEOPLE',
+    categoryColor: '#0891b2',
+    source: 'KarmaVerse editorial',
+    readTime: '5 min read',
+    date: '6 Aug 2026',
+    image:
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Recycling_symbol.svg/512px-Recycling_symbol.svg.png',
+    intro:
+      'From a Kenyan biologist who planted 50 million trees to a teenager who moved world leaders, these voices turned environmental science into a global movement.',
+    sections: [
+      {
+        heading: 'Wangari Maathai — the Green Belt Movement',
+        paragraphs: [
+          'Kenyan biologist Wangari Maathai founded the Green Belt Movement, which has planted more than 50 million trees across Africa while giving rural women income and independence. In 2004 she became the first environmentalist to win the Nobel Peace Prize — linking a healthy planet directly to peace.',
+        ],
+      },
+      {
+        heading: 'David Attenborough — nature’s storyteller',
+        paragraphs: [
+          'For over 70 years, David Attenborough has brought the natural world into living rooms worldwide. In recent years his documentaries have shifted from wonder to warning, making the climate and plastics crisis impossible for mainstream audiences to ignore.',
+        ],
+      },
+      {
+        heading: 'Greta Thunberg — the youth climate strike',
+        paragraphs: [
+          'A single teenager’s school strike outside Sweden’s parliament in 2018 grew into “Fridays for Future”, mobilising millions of young people across the globe. Her blunt message — listen to the science and act now — reframed climate as a question of intergenerational fairness.',
+        ],
+      },
+      {
+        heading: 'Ellen MacArthur — the circular economy',
+        paragraphs: [
+          'After a record-breaking solo sail around the world, Ellen MacArthur realised our economy runs on finite resources the way a boat runs on finite supplies. Her foundation popularised the “circular economy” — design out waste, keep materials in use, regenerate nature — the exact model KarmaVerse turns into everyday rewards.',
+        ],
+      },
+    ],
+  },
 ];
 
 export const getArticleById = (id?: string): Article =>

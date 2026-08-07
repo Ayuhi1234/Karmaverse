@@ -33,10 +33,10 @@ const CATEGORIES = [
   { id: '9', name: 'Plastic', backendName: 'Plastic', color: '#3b82f6', icon: Droplets },
   { id: '4', name: 'Paper', backendName: 'Paper', color: '#84cc16', icon: FileText },
   { id: '8', name: 'Metal', backendName: 'Metals', color: '#64748b', icon: Magnet },
-  { id: '3', name: 'Glass', backendName: 'Glass', color: '#10b981', icon: Wine },
+  { id: '3', name: 'Glass', backendName: 'Glass', color: '#dc2626', icon: Wine },
   { id: '6', name: 'Batteries', backendName: 'Batteries', color: '#ef4444', icon: Battery },
   { id: '7', name: 'Shoes', backendName: 'Footwear', color: '#f59e0b', icon: ShoppingBag },
-  { id: '10', name: 'Textile Waste', backendName: 'Textile Waste', color: '#ec4899', icon: Shirt },
+  { id: '10', name: 'Textiles', backendName: 'Textile Waste', color: '#ec4899', icon: Shirt },
 ];
 
 const ADDRESS_LABEL_ICONS: Record<string, any> = { Home: HomeIcon, Work: Briefcase, Other: MapPin };
