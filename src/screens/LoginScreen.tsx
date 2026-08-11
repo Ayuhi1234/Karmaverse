@@ -591,20 +591,25 @@ export function LoginScreen({ navigation }: any) {
     } catch (error: any) {
       const browserOffline = typeof navigator !== 'undefined' && navigator.onLine === false;
       // No response but the browser IS online → the Render free-tier backend is
-      // cold-starting (first request after it sleeps can exceed the timeout).
-      // Retry once; the second call usually lands after the server has woken up.
+      // cold-starting (first request after it sleeps can exceed the timeout). Keep
+      // retrying in the background — the screen stays on the "Waking up the server…"
+      // loader — instead of asking the user to tap Continue again. It resolves on its
+      // own the moment the server is awake (usually within ~30–60s).
       if (!error?.response && !browserOffline) {
-        try {
-          routeByResult(await authService.checkUser(raw));
-          return;
-        } catch (_) { /* fall through to messaging below */ }
+        for (let attempt = 0; attempt < 2; attempt++) {
+          await new Promise((r) => setTimeout(r, 2500)); // brief pause between tries
+          try {
+            routeByResult(await authService.checkUser(raw));
+            return;
+          } catch (_) { /* still waking — keep trying */ }
+        }
       }
       if (!error?.response) {
         showAlert(
-          browserOffline ? 'No internet connection' : 'Server is waking up',
+          browserOffline ? 'No internet connection' : "Couldn't reach the server",
           browserOffline
             ? 'Please check your network connection and try again.'
-            : 'Our server takes a few seconds to start on first load. Please tap continue again.',
+            : 'The server is taking longer than usual to respond. Please try again in a moment.',
         );
       } else {
         showAlert('Error', error?.response?.data?.message || 'Failed to check account.');
