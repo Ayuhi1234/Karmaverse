@@ -17,13 +17,6 @@ import { getStableUserSuffix } from '../utils/userId';
 import { isLaunchDay } from '../utils/launchDay';
 import { EARLY_BIRD_COINS } from '../utils/earlyBird';
 
-const FEATURED_REWARDS = [
-  { emoji: '☕', brand: 'Not Just Chaai', label: 'Café Coupons', gradient: ['#7c2d12', '#c2410c'] as [string, string] },
-  { emoji: '🎁', brand: 'Three Sixty', label: 'Premium Gift Cards', gradient: ['#581c87', '#9333ea'] as [string, string] },
-  { emoji: '📱', brand: 'Cashify', label: 'Refurbished Smartphones', gradient: ['#164e63', '#0891b2'] as [string, string] },
-  { emoji: '📱', brand: 'Grest', label: 'Refurbished Smartphones', gradient: ['#134e4a', '#0f766e'] as [string, string] },
-  { emoji: '🍽️', brand: 'Dining Voucher', label: 'Couple & Family Dining', gradient: ['#831843', '#be185d'] as [string, string] },
-];
 
 const STATUS_COLOR: any = {
   Completed: { bg: "rgba(22,163,74,0.1)", text: "#16a34a", dot: "#16a34a" },
@@ -395,21 +388,9 @@ export function DashboardScreen({ navigation, route }: any) {
         </View>
       )}
 
-      {/* Featured Rewards */}
+      {/* Schedule pickup CTA (Featured-rewards partner cards removed to match web) */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Featured rewards 🎁</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12 }}>
-          {FEATURED_REWARDS.map((r, i) => (
-            <View key={i} style={styles.rewardCard}>
-              <LinearGradient colors={r.gradient} style={styles.rewardCardInner} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
-                <Text style={styles.rewardCardEmoji}>{r.emoji}</Text>
-                <Text style={styles.rewardCardBrand}>{r.brand}</Text>
-                <Text style={styles.rewardCardLabel}>{r.label}</Text>
-              </LinearGradient>
-            </View>
-          ))}
-        </ScrollView>
-        <TouchableOpacity style={styles.firstPickupCta} onPress={() => navigation.navigate('SchedulePickup')} activeOpacity={0.85}>
+        <TouchableOpacity style={[styles.firstPickupCta, { marginTop: 0 }]} onPress={() => navigation.navigate('SchedulePickup')} activeOpacity={0.85}>
           <Truck size={18} color="white" />
           <Text style={styles.firstPickupCtaText}>Schedule Your First Pickup</Text>
           <ArrowRight size={16} color="white" />
