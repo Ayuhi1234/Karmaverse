@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, Dimensions, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Bell, ChevronRight, Truck, Camera, Clock, Users, Package, Flame, Gamepad2, Gift, Star, ShieldCheck, Coins, BadgeCheck, ArrowRight, BookOpen, X, WifiOff, RefreshCw } from 'lucide-react-native';
+import { Bell, ChevronRight, Truck, Camera, Clock, Users, Package, Flame, Gamepad2, Gift, Star, ShieldCheck, Coins, BadgeCheck, ArrowRight, BookOpen, X, WifiOff, RefreshCw, Trophy } from 'lucide-react-native';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { QuizCalendarModal } from '../components/shared/QuizCalendarModal';
 import { NotificationPanel } from '../components/shared/NotificationPanel';
@@ -153,6 +153,7 @@ export function DashboardScreen({ navigation, route }: any) {
   const [showNotifications, setShowNotifications] = useState(false);
   const { notifications, unreadCount, markRead, markAllRead, clearAll } = useNotifications();
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  const [totalPickups, setTotalPickups] = useState(0);
   const [selectedFeature, setSelectedFeature] = useState<typeof FEATURES[0] | null>(null);
   const [quizPlayedToday, setQuizPlayedToday] = useState(false);
   const [showLaunchPopup, setShowLaunchPopup] = useState(false);
@@ -205,6 +206,7 @@ export function DashboardScreen({ navigation, route }: any) {
             };
           });
           setRecentOrders(formattedOrders);
+          setTotalPickups(ordersData.filter((o: any) => o.status === 'COMPLETED').length);
         }
       } catch (error) {
         console.error("Failed to load dashboard data", error);
@@ -372,6 +374,26 @@ export function DashboardScreen({ navigation, route }: any) {
             <KarmaCoin size={18} />
             <Text style={[styles.redeemBannerText, { flex: 1 }]}>{REDEEM_INFO_MESSAGE}</Text>
           </View>
+        </View>
+
+        {/* Stats grid — mirrors the web dashboard (Total Karma Coins / Day streak / Eco Quiz Streak / Sustainability Actions) */}
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 14 }}>
+          {[
+            { Icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total Karma Coins' },
+            { Icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Day streak' },
+            { Icon: Trophy, color: '#c084fc', val: `${quizStreak}`, label: 'Eco Quiz Streak' },
+            { Icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Sustainability Actions' },
+          ].map((st, i) => (
+            <View key={i} style={styles.statTile}>
+              <View style={styles.statTileTop}>
+                <View style={[styles.statTileIcon, { backgroundColor: st.color + '22' }]}>
+                  <st.Icon size={14} color={st.color} />
+                </View>
+                <Text style={styles.statTileLabel} numberOfLines={1}>{st.label}</Text>
+              </View>
+              <Text style={[styles.statTileVal, { color: st.color }]}>{st.val}</Text>
+            </View>
+          ))}
         </View>
       </LinearGradient>
 
@@ -649,6 +671,11 @@ const styles = StyleSheet.create({
   balanceText: { fontSize: 42, color: 'white', fontWeight: '800' },
   redeemBanner: { marginTop: 14, padding: 12, borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.08)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)' },
   redeemBannerText: { color: 'rgba(255,255,255,0.75)', fontSize: 11.5, fontWeight: '600', lineHeight: 16 },
+  statTile: { flexGrow: 1, flexBasis: '46%', backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 14, padding: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+  statTileTop: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 },
+  statTileIcon: { width: 26, height: 26, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  statTileLabel: { flex: 1, fontSize: 10, color: 'rgba(255,255,255,0.55)', fontWeight: '600' },
+  statTileVal: { fontSize: 20, fontWeight: '900' },
   section: { paddingHorizontal: 20, marginTop: 24 },
   sectionTitle: { fontSize: 16, fontWeight: '700', color: '#111827', marginBottom: 12 },
   sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
