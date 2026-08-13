@@ -3,6 +3,10 @@
 const fs = require('fs');
 const path = require('path');
 const { templates } = require('./templates/templates');
+const { setAssetMode } = require('./templates/layout');
+
+// Browsers can't resolve cid: — render logo + icons from the bundled asset files.
+setAssetMode('local');
 
 const N = 'shashi shekhar';
 const bid = '6a6873bffedd2c05ac2de281';
@@ -19,11 +23,7 @@ const samples = {
   REFERRAL_REWARD: { name: N, friendName: 'Amit', coins: 1000 },
 };
 
-// For LOCAL preview only, point the logo at the committed public file so it renders
-// without a Netlify deploy. The real templates keep the absolute HTTPS URL.
-const localLogo = 'file:///' + path.resolve(__dirname, '../public/email-logo.png').split(path.sep).join('/');
-
-let out = '<!doctype html><html><head><meta charset="utf-8"><title>KarmaVerse email preview</title>'
+let out ='<!doctype html><html><head><meta charset="utf-8"><title>KarmaVerse email preview</title>'
   + '<style>body{font-family:system-ui,Arial;background:#0f172a;margin:0;padding:24px;color:#e2e8f0}'
   + 'h1{font-size:18px}h2{font-size:14px;margin:26px 0 4px}.sub{color:#94a3b8;font-size:12px;margin:0 0 8px}'
   + 'iframe{width:100%;max-width:640px;height:560px;border:0;border-radius:12px;background:#fff;display:block}</style>'
@@ -32,7 +32,6 @@ let out = '<!doctype html><html><head><meta charset="utf-8"><title>KarmaVerse em
 const missing = [];
 for (const key of Object.keys(samples)) {
   let { subject, html } = templates[key](samples[key]);
-  html = html.split('https://karmaverse.earth/email-logo.png').join(localLogo);
   if (/undefined/.test(html) || /undefined/.test(String(subject))) missing.push(key);
   out += '<h2>' + key + '</h2><p class="sub">Subject: ' + String(subject).replace(/</g, '&lt;') + '</p>'
     + '<iframe srcdoc="' + html.replace(/"/g, '&quot;') + '"></iframe>';

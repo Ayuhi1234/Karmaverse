@@ -13,6 +13,7 @@ templates and sends via its own mailer.
 |------|-----------|
 | `templates/layout.js` | Brand tokens (name, colours, logo, address, socials) + shared HTML shell (`wrapEmail`, buttons, detail tables, social icon row, footer). Every email is built through this. |
 | `templates/templates.js` | The **10 email templates**. Each is a function `(data) => ({ subject, html })`. |
+| `assets/` | The **6 brand images** (`email-logo.png` + `social/*.png`) embedded inline in every email — see §3. |
 | `preview.html` | Open in a browser to **see all 10 emails rendered** with sample data. Regenerate with `node build-preview.js`. |
 
 There are **10 templates** (agent-side emails were removed — user app only).
@@ -44,16 +45,63 @@ Each template is `templates.NAME(data)` → returns `{ subject, html }`.
 
 ---
 
-## 3. Assets you must make sure are live
+## 3. Brand images — now embedded INLINE (cid), not hosted URLs
 
-The emails reference **hosted images on `https://karmaverse.earth`** (email clients
-strip inline SVG/icon fonts, so these must be real HTTPS PNGs):
+**Important change.** Emails no longer depend on `karmaverse.earth` for the logo /
+social icons. The images (logo was breaking in real inboxes because the URL wasn't
+reachable / was blocked as an external image) are now **embedded as CID inline
+attachments** — the bytes ride inside the message, so they render:
 
-- `https://karmaverse.earth/email-logo.png` — header logo
-- `https://karmaverse.earth/email/social/{instagram,facebook,linkedin,x,youtube}.png` — footer social icons
+- even when the client **blocks external images** (very common), and
+- **regardless of whether the website is deployed / reachable.**
 
-These files live in the frontend `public/` folder and ship with the normal
-Netlify deploy — **just confirm the site is deployed** and these URLs resolve.
+The 6 image files are bundled here in **`assets/`** (`email-logo.png` +
+`assets/social/*.png`) — self-contained, nothing to host.
+
+**When you send, attach these 6 files as inline attachments with the exact content IDs
+the HTML references.** `templates/layout.js` → `inlineAttachments()` returns the list;
+the HTML uses these `cid:` values:
+
+| Content ID (`cid`) | File |
+|--------------------|------|
+| `kv-logo` | `assets/email-logo.png` |
+| `kv-social-instagram` | `assets/social/instagram.png` |
+| `kv-social-facebook` | `assets/social/facebook.png` |
+| `kv-social-linkedin` | `assets/social/linkedin.png` |
+| `kv-social-x` | `assets/social/x.png` |
+| `kv-social-youtube` | `assets/social/youtube.png` |
+
+**Node / nodemailer** (already wired in `emailService.js`):
+```js
+const { inlineAttachments } = require('./templates/layout');
+transporter.sendMail({ to, from, subject, html, text, attachments: inlineAttachments() });
+```
+
+**Python / Resend** (production sender) — attach each file with a matching `content_id`:
+```python
+import base64, pathlib
+ASSETS = {
+  "kv-logo": "assets/email-logo.png",
+  "kv-social-instagram": "assets/social/instagram.png",
+  "kv-social-facebook":  "assets/social/facebook.png",
+  "kv-social-linkedin":  "assets/social/linkedin.png",
+  "kv-social-x":         "assets/social/x.png",
+  "kv-social-youtube":   "assets/social/youtube.png",
+}
+attachments = [{
+  "filename": pathlib.Path(p).name,
+  "content": base64.b64encode(pathlib.Path(p).read_bytes()).decode(),
+  "content_id": cid,          # must match the cid: in the HTML
+  "content_type": "image/png",
+} for cid, p in ASSETS.items()]
+resend.Emails.send({ "from": ..., "to": ..., "subject": subject, "html": html, "attachments": attachments })
+```
+> The HTML already contains `src="cid:kv-logo"` etc. — do **not** rewrite those to URLs.
+
+**Optional fallback:** if a mailer can't do inline attachments, call
+`setAssetMode('url')` (exported from `layout.js`) before rendering to switch every image
+back to the public `https://karmaverse.earth/...` URL. Only use this if inline is
+impossible — inline is strictly more reliable.
 
 ---
 
@@ -95,6 +143,6 @@ EMAIL_FROM_NAME=KarmaVerse
 
 - [ ] Wire each of the 10 triggers above to send the matching template
 - [ ] Pass the exact `data` fields listed per template
-- [ ] Confirm `karmaverse.earth/email-logo.png` + `/email/social/*.png` resolve (site deployed)
+- [ ] **Attach the 6 `assets/` images as inline attachments with the matching `content_id`s (see §3)** — this is what makes the logo + icons show
 - [ ] Set `GMAIL_USER` / `GMAIL_APP_PASSWORD` / `EMAIL_FROM_NAME` env vars
 - [ ] Send yourself one of each and compare against `preview.html`

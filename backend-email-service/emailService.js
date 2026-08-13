@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer');
 const { templates } = require('./templates/templates');
+const { inlineAttachments } = require('./templates/layout');
 
 // Sends through your existing Gmail/Google Workspace account via SMTP —
 // no third-party email service. See README for the App Password setup and
@@ -49,6 +50,9 @@ async function sendTemplatedEmail(to, templateKey, data) {
     subject,
     html,
     text: htmlToText(html),
+    // Logo + social icons ride inline (cid:) so they render without depending on
+    // karmaverse.earth and even when the client blocks external images.
+    attachments: inlineAttachments(),
   });
 }
 

@@ -2,6 +2,8 @@
 // Single source of truth so all 12 templates stay visually consistent and every
 // header/footer/button/card lives in ONE place (no duplicated markup).
 
+const path = require('path');
+
 const BRAND = {
   name: 'KarmaVer$e',            // display wordmark (body/logo)
   namePlain: 'KarmaVerse',       // subject-safe (avoids "$" spam signals)
@@ -50,6 +52,44 @@ function shortId(id) {
 }
 const mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(BRAND.address);
 
+// ── Brand images (logo + social icons) ──
+// Emails embed these as CID INLINE ATTACHMENTS by default: the image bytes ride
+// inside the message, so they render even when the client blocks external images
+// AND never depend on karmaverse.earth being deployed/reachable. Files are bundled
+// in ../assets so this module is fully self-contained.
+const ASSET_DIR = path.join(__dirname, '..', 'assets');
+const IMAGES = {
+  logo:      { cid: 'kv-logo',            file: 'email-logo.png',       url: BRAND.site + '/email-logo.png' },
+  instagram: { cid: 'kv-social-instagram', file: 'social/instagram.png', url: BRAND.site + '/email/social/instagram.png' },
+  facebook:  { cid: 'kv-social-facebook',  file: 'social/facebook.png',  url: BRAND.site + '/email/social/facebook.png' },
+  linkedin:  { cid: 'kv-social-linkedin',  file: 'social/linkedin.png',  url: BRAND.site + '/email/social/linkedin.png' },
+  x:         { cid: 'kv-social-x',         file: 'social/x.png',         url: BRAND.site + '/email/social/x.png' },
+  youtube:   { cid: 'kv-social-youtube',   file: 'social/youtube.png',   url: BRAND.site + '/email/social/youtube.png' },
+};
+
+// 'cid'   → cid:<id>  (real sends — inline attachments; the default)
+// 'url'   → public HTTPS on karmaverse.earth (if a client can't do inline)
+// 'local' → file:// path to the bundled asset (browser preview only)
+let ASSET_MODE = 'cid';
+function setAssetMode(mode) { ASSET_MODE = mode; }
+function imgSrc(key) {
+  const a = IMAGES[key];
+  if (!a) return '';
+  if (ASSET_MODE === 'url') return a.url;
+  if (ASSET_MODE === 'local') return 'file:///' + path.join(ASSET_DIR, a.file).split(path.sep).join('/');
+  return 'cid:' + a.cid;
+}
+// nodemailer-shaped inline attachments for every brand image (attach on every
+// send so the cid: references in the HTML always resolve).
+function inlineAttachments() {
+  return Object.values(IMAGES).map(a => ({
+    filename: path.basename(a.file),
+    path: path.join(ASSET_DIR, a.file),
+    cid: a.cid,
+    contentDisposition: 'inline',
+  }));
+}
+
 // ── Reusable components ──
 function button(label, url) {
   const bg = BRAND.colors.mint, color = BRAND.colors.mintText;
@@ -90,13 +130,12 @@ function wrapEmail({ preheader = '', heading = '', greetingName, bodyHtml = '', 
   const greeting = greetingName !== undefined
     ? `<p style="margin:0 0 14px;font-size:16px;color:${c.text};font-weight:700;">Hi ${firstName},</p>` : '';
   const cta = (ctaLabel && ctaUrl) ? button(ctaLabel, ctaUrl) : '';
-  // Hosted PNG icons (email clients strip SVG/icon fonts) — a centered row of
-  // round brand icons, each linking to the real profile. Served from the public
-  // site next to email-logo.png.
+  // PNG icons (email clients strip SVG/icon fonts) — a centered row of round brand
+  // icons, each linking to the real profile. Embedded inline via cid: (see IMAGES).
   const socialRow = `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;"><tr>${
     BRAND.social.map(([n, u]) => {
       const slug = n.toLowerCase();
-      return `<td style="padding:0 5px;"><a href="${u}" target="_blank" style="text-decoration:none;"><img src="${BRAND.site}/email/social/${slug}.png" width="28" height="28" alt="${n}" title="${n}" style="display:block;border:0;outline:none;" /></a></td>`;
+      return `<td style="padding:0 5px;"><a href="${u}" target="_blank" style="text-decoration:none;"><img src="${imgSrc(slug)}" width="28" height="28" alt="${n}" title="${n}" style="display:block;border:0;outline:none;" /></a></td>`;
     }).join('')
   }</tr></table>`;
 
@@ -115,7 +154,7 @@ function wrapEmail({ preheader = '', heading = '', greetingName, bodyHtml = '', 
     <tr><td align="center">
       <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;background:${c.card};border-radius:20px;overflow:hidden;">
         <tr><td align="center" style="background:${c.deep};padding:26px 32px;">
-          <img src="${BRAND.logo}" width="180" alt="${BRAND.name}" style="display:block;border:0;outline:none;text-decoration:none;max-width:180px;height:auto;">
+          <img src="${imgSrc('logo')}" width="180" alt="${BRAND.name}" style="display:block;border:0;outline:none;text-decoration:none;max-width:180px;height:auto;">
         </td></tr>
         <tr><td style="padding:32px;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;">
           ${heading ? `<h1 style="margin:0 0 12px;font-size:20px;line-height:1.3;color:${c.text};font-weight:800;">${heading}</h1>` : ''}
@@ -145,4 +184,4 @@ function wrapEmail({ preheader = '', heading = '', greetingName, bodyHtml = '', 
 </html>`;
 }
 
-module.exports = { BRAND, wrapEmail, button, detailTable, rewardsCard, properCase, shortId, safe, escapeHtml };
+module.exports = { BRAND, wrapEmail, button, detailTable, rewardsCard, properCase, shortId, safe, escapeHtml, inlineAttachments, setAssetMode };
