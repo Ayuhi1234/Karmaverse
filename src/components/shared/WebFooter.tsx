@@ -82,7 +82,7 @@ export function WebFooter() {
         <View style={[s.grid, isMobile && { flexDirection: 'column', gap: 28, paddingTop: 32, paddingBottom: 28 }]}>
 
           {/* About */}
-          <View style={[s.col, isMobile && { flex: 0 }]}>
+          <View style={[s.col, isMobile && s.colMobile]}>
             <View style={s.logoRow}>
               <Image source={require('../../../assets/logo-nav.png')} style={{ height: 68, width: 144, resizeMode: 'contain' }} />
             </View>
@@ -94,7 +94,7 @@ export function WebFooter() {
 
           {/* Quick Links + Contact */}
           {isMobile ? (
-            <View style={{ flexDirection: 'row', gap: 24 }}>
+            <View style={[s.colMobile, { flexDirection: 'row', gap: 24 }]}>
               <View style={{ flex: 1 }}>
                 <Text style={s.colTitle}>Quick links</Text>
                 {QUICK_LINKS.map(link => (
@@ -124,7 +124,7 @@ export function WebFooter() {
           )}
 
           {/* Download App */}
-          <View style={[s.col, isMobile && { flex: 0 }]}>
+          <View style={[s.col, isMobile && s.colMobile]}>
             <Text style={s.colTitle}>Get the app</Text>
             <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap' }}>
               <View style={[s.storeBtn, s.storeBtnDisabled, { flexGrow: 1 }]}>
@@ -167,6 +167,10 @@ const s = StyleSheet.create({
   grid: { flexDirection: 'row', paddingTop: 50, paddingBottom: 40, gap: 40 },
 
   col: { flex: 1 },
+  // On react-native-web `flex: 0` compiles to `flex: 0 0 0%`, which collapses a
+  // column child to height 0 and makes the sections overlap. Use explicit
+  // longhands so each column keeps its content height and full width on mobile.
+  colMobile: { flexGrow: 0, flexShrink: 0, flexBasis: 'auto', width: '100%' },
   logoRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 14 },
   logoIcon: { width: 28, height: 28, borderRadius: 7, backgroundColor: '#4ade80', alignItems: 'center', justifyContent: 'center' },
   logoText: { color: 'white', fontSize: 16, fontWeight: '900' },
