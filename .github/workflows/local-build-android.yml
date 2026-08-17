@@ -45,6 +45,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Write Mappls license files
+        run: |
+          echo "${{ secrets.MAPPLS_CONF_B64 }}" | base64 -d > assets/app1783680288842i30702550.a.conf
+          echo "${{ secrets.MAPPLS_OLF_B64 }}" | base64 -d > assets/app1783680288842i30702550.a.olf
+
       - name: Generate native Android project
         run: npx expo prebuild --platform android --no-install
 
