@@ -21,6 +21,13 @@ const samples = {
   BOOKING_CANCELLED: { name: N, bookingId: bid, date: '12 Aug 2026' },
   QUIZ_STREAK_REMINDER: { name: N, streak: 2 },
   REFERRAL_REWARD: { name: N, friendName: 'Amit', coins: 1000 },
+  // Non-transactional (engagement / marketing)
+  IMPACT_REPORT: { name: N, month: 'August', kg: 12, pickups: 4, coins: 850 },
+  ECO_TIP: { name: N, tipTitle: 'Rinse before you recycle', tipBody: 'A quick rinse of containers keeps a whole batch recyclable — food residue can send the lot to landfill.', readUrl: '' },
+  REDEMPTION_LIVE: { name: N, balance: 4055 },
+  FEATURE_ANNOUNCEMENT: { name: N, title: 'Two wallets, better rewards', body: 'Your coins are now split into Pickup and Reward wallets, and a daily streak boosts what your reward coins are worth.', ctaLabel: 'See my wallet', ctaUrl: '' },
+  WIN_BACK: { name: N },
+  SEASONAL_GREETING: { name: N, occasion: 'Happy Diwali', message: '' },
 };
 
 let out ='<!doctype html><html><head><meta charset="utf-8"><title>KarmaVerse email preview</title>'

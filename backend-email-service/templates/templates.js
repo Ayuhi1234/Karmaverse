@@ -142,6 +142,103 @@ const templates = {
       ctaUrl: `${SITE}/Referral`,
     }),
   }),
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // NON-TRANSACTIONAL (engagement / marketing)
+  // These are NOT triggered by a single transaction — the backend sends them on a
+  // schedule or to a targeted segment. They REQUIRE the user to be opted in to
+  // marketing emails and must honour unsubscribe (footer "Manage preferences").
+  // Send only to opted-in users, and respect a frequency cap.
+  // ─────────────────────────────────────────────────────────────────────────
+
+  // Monthly recap of the user's recycling impact. Send once a month to actives.
+  IMPACT_REPORT: ({ name, month, kg, pickups, coins }) => ({
+    subject: `Your ${safe(month, 'monthly')} impact with ${BRAND.namePlain}`,
+    html: wrapEmail({
+      preheader: `See what you recycled${kg != null && String(kg).trim() !== '' ? ` — ${escapeHtml(String(kg))} kg` : ''} this month.`,
+      heading: `Your ${safe(month, 'monthly')} impact`,
+      greetingName: name,
+      bodyHtml: `<p style="margin:0 0 4px;">Here's the difference you made this month:</p>
+        ${detailTable([
+          ['Waste recycled', kg != null && String(kg).trim() !== '' ? `${escapeHtml(String(kg))} kg` : '—'],
+          ['Pickups completed', safe(pickups, '—')],
+          [`${BRAND.currency} earned`, safe(coins, '—')],
+        ])}
+        <p style="margin:14px 0 0;">Every kg counts. Keep the momentum going!</p>`,
+      ctaLabel: 'Schedule a pickup',
+      ctaUrl: `${SITE}/SchedulePickup`,
+    }),
+  }),
+
+  // Weekly educational nudge. `tipTitle`/`tipBody` are the week's content; both
+  // fall back to generic copy so a missing field never breaks the send.
+  ECO_TIP: ({ name, tipTitle, tipBody, readUrl }) => ({
+    subject: safe(tipTitle, `Your weekly eco-tip from ${BRAND.namePlain}`),
+    html: wrapEmail({
+      preheader: safe(tipTitle, 'A quick, practical way to waste less this week.'),
+      heading: safe(tipTitle, "This week's eco-tip"),
+      greetingName: name,
+      bodyHtml: `<p style="margin:0 0 12px;">${safe(tipBody, "Small changes add up. Here's one simple habit to try this week toward a more circular lifestyle.")}</p>`,
+      ctaLabel: 'Read more on Knowledge Hub',
+      ctaUrl: safe(readUrl, `${SITE}/KnowledgeHub`),
+    }),
+  }),
+
+  // One-time campaign: announce that redemption/cash-out is live.
+  REDEMPTION_LIVE: ({ name, balance }) => ({
+    subject: `Cash out your ${BRAND.currency} — redemption is live`,
+    html: wrapEmail({
+      preheader: `Turn your ${BRAND.currency} into real rewards.`,
+      heading: 'Redemption is live',
+      greetingName: name,
+      bodyHtml: `<p style="margin:0 0 12px;">Good news — you can now redeem your ${BRAND.currency} for real rewards.</p>
+        ${balance != null && String(balance).trim() !== '' ? `<p style="margin:0 0 12px;">You have <strong>${escapeHtml(String(balance))} ${BRAND.currency}</strong> ready to cash out.</p>` : ''}
+        <p style="margin:0;">Keep recycling to earn even more.</p>`,
+      ctaLabel: 'Open my wallet',
+      ctaUrl: `${SITE}/Wallet`,
+    }),
+  }),
+
+  // Generic product/feature announcement. `title`/`body`/`ctaLabel`/`ctaUrl` are
+  // filled per campaign; all fall back so the shell always renders.
+  FEATURE_ANNOUNCEMENT: ({ name, title, body, ctaLabel, ctaUrl }) => ({
+    subject: safe(title, `What's new on ${BRAND.namePlain}`),
+    html: wrapEmail({
+      preheader: safe(title, `A new update just landed on ${BRAND.namePlain}.`),
+      heading: safe(title, "What's new"),
+      greetingName: name,
+      bodyHtml: `<p style="margin:0 0 12px;">${safe(body, `We've just rolled out an update to make ${BRAND.name} even better. Open the app to check it out.`)}</p>`,
+      ctaLabel: safe(ctaLabel, 'Open the app'),
+      ctaUrl: safe(ctaUrl, `${SITE}/`),
+    }),
+  }),
+
+  // Re-engagement / win-back for lapsed users.
+  WIN_BACK: ({ name }) => ({
+    subject: `We miss you at ${BRAND.namePlain}`,
+    html: wrapEmail({
+      preheader: 'Your next pickup is one tap away.',
+      heading: 'We miss you',
+      greetingName: name,
+      bodyHtml: `<p style="margin:0 0 12px;">It's been a while! Your waste can still become ${BRAND.currency} — and a cleaner planet.</p>
+        <p style="margin:0;">Schedule a free doorstep pickup whenever you're ready.</p>`,
+      ctaLabel: 'Schedule a pickup',
+      ctaUrl: `${SITE}/SchedulePickup`,
+    }),
+  }),
+
+  // Seasonal / festival greeting. `occasion` e.g. "Happy Diwali"; `message` optional.
+  SEASONAL_GREETING: ({ name, occasion, message }) => ({
+    subject: safe(occasion, `Warm wishes from ${BRAND.namePlain}`),
+    html: wrapEmail({
+      preheader: safe(occasion, `Season's greetings from the ${BRAND.namePlain} team.`),
+      heading: safe(occasion, 'Warm wishes'),
+      greetingName: name,
+      bodyHtml: `<p style="margin:0 0 12px;">${safe(message, `Wishing you and your family a joyful ${safe(occasion, 'celebration')}. Thank you for recycling with us and making a real difference.`)}</p>`,
+      ctaLabel: 'Open the app',
+      ctaUrl: `${SITE}/`,
+    }),
+  }),
 };
 
 module.exports = { templates };

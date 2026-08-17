@@ -12,11 +12,12 @@ templates and sends via its own mailer.
 | File | What it is |
 |------|-----------|
 | `templates/layout.js` | Brand tokens (name, colours, logo, address, socials) + shared HTML shell (`wrapEmail`, buttons, detail tables, social icon row, footer). Every email is built through this. |
-| `templates/templates.js` | The **10 email templates**. Each is a function `(data) => ({ subject, html })`. |
+| `templates/templates.js` | The **16 email templates** (10 transactional + 6 non-transactional). Each is a function `(data) => ({ subject, html })`. |
+| `templates/pushTemplates.js` | The **6 non-transactional push templates** (FCM). Each is `(data) => ({ title, body, data })` — see §8. |
 | `assets/` | The **6 brand images** (`email-logo.png` + `social/*.png`) embedded inline in every email — see §3. |
 | `preview.html` | Open in a browser to **see all 10 emails rendered** with sample data. Regenerate with `node build-preview.js`. |
 
-There are **10 templates** (agent-side emails were removed — user app only).
+There are **16 templates** — 10 transactional (below) + 6 non-transactional (§7). Agent-side emails were removed — user app only.
 
 ---
 
@@ -146,3 +147,53 @@ EMAIL_FROM_NAME=KarmaVerse
 - [ ] **Attach the 6 `assets/` images as inline attachments with the matching `content_id`s (see §3)** — this is what makes the logo + icons show
 - [ ] Set `GMAIL_USER` / `GMAIL_APP_PASSWORD` / `EMAIL_FROM_NAME` env vars
 - [ ] Send yourself one of each and compare against `preview.html`
+
+---
+
+## 7. Non-transactional mailers (engagement / marketing)
+
+Same `templates.NAME(data)` shape, but these are **NOT** triggered by a single
+transaction — you send them on a **schedule** or to a **targeted segment**.
+
+| Template | Send when | `data` |
+|----------|-----------|--------|
+| `IMPACT_REPORT` | Monthly recap (cron) to active users | `{ name, month, kg, pickups, coins }` |
+| `ECO_TIP` | Weekly educational nudge | `{ name, tipTitle, tipBody, readUrl }` |
+| `REDEMPTION_LIVE` | One-time campaign when cash-out opens | `{ name, balance }` |
+| `FEATURE_ANNOUNCEMENT` | Ad-hoc product/feature launches | `{ name, title, body, ctaLabel, ctaUrl }` |
+| `WIN_BACK` | Lapsed users (e.g. inactive 30d) | `{ name }` |
+| `SEASONAL_GREETING` | Festivals / seasonal | `{ name, occasion, message }` |
+
+> ⚠️ **These require consent.** Send **only** to users opted in to marketing
+> emails, honour **unsubscribe**, and apply a **frequency cap** (e.g. ≤ 1–2/week).
+> The shared footer has a "Manage preferences" link — replace it with a real
+> per-user unsubscribe URL before these go live (compliance decision).
+
+---
+
+## 8. Non-transactional push notifications — `templates/pushTemplates.js`
+
+`pushTemplates.NAME(data)` → `{ title, body, data }`. Send the `title`/`body` as the
+FCM notification; pass `data` through as the FCM `data` payload. `data.route` is the
+in-app screen to open on tap (Wallet / Quiz / Referral / SchedulePickup) — the app
+already deep-links these.
+
+| Template | Send when | `data` |
+|----------|-----------|--------|
+| `STREAK_AT_RISK` | User's reward streak is in its at-risk window | `{ tier }` |
+| `DAILY_QUIZ_REMINDER` | Daily, if today's quiz not played | `{}` |
+| `REDEMPTION_READY` | User has a redeemable balance sitting idle | `{ balance }` |
+| `TIER_UPGRADE` | User moves up a streak tier | `{ tier }` |
+| `WIN_BACK` | Lapsed users (e.g. inactive 14d) | `{ name }` |
+| `REFERRAL_NUDGE` | User who has never referred anyone | `{}` |
+
+```js
+const { pushTemplates } = require('./templates/pushTemplates');
+const { title, body, data } = pushTemplates.STREAK_AT_RISK({ tier: 'Gold' });
+// send via FCM: { notification: { title, body }, data }  → to the user's device token
+```
+
+> Same consent/frequency rules as §7 — these are marketing pushes. Send only to
+> users opted in to non-transactional notifications, and cap frequency (e.g. ≤ 1/day).
+> Transactional pushes (booking accepted, coins credited, etc.) are separate and
+> always sent.
