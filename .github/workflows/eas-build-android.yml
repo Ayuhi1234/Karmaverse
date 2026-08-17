@@ -1,0 +1,59 @@
+name: Build Android APK (EAS)
+
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: "EAS build profile"
+        required: true
+        default: preview
+        type: choice
+        options:
+          - development
+          - preview
+          - production
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Read .node-version
+        id: node_version
+        run: echo "version=$(cat .node-version)" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ steps.node_version.outputs.version }}
+          cache: npm
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build APK on EAS
+        run: eas build --platform android --profile ${{ inputs.profile }} --non-interactive --wait
+
+      - name: Fetch build artifact URL
+        id: build_info
+        run: |
+          eas build:list --platform android --status finished --limit 1 --non-interactive --json > build.json
+          url=$(node -e "console.log(JSON.parse(require('fs').readFileSync('build.json')).[0].artifacts.buildUrl)")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      - name: Download APK
+        run: curl -L -o app.apk "${{ steps.build_info.outputs.url }}"
+
+      - name: Upload APK as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-${{ inputs.profile }}.apk
+          path: app.apk
