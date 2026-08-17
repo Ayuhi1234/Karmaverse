@@ -16,8 +16,12 @@ export const streakService = {
     try {
       const response = await api.get('/api/v1/streak/status');
       return response.data.data || response.data;
-    } catch (error) {
-      console.error('Get Streak Status Error:', error);
+    } catch (error: any) {
+      // 404 = this backend doesn't have the streak feature yet (e.g. production).
+      // Expected — the UI falls back to Bronze — so don't spam the console for it.
+      if (error?.response?.status !== 404) {
+        console.error('Get Streak Status Error:', error);
+      }
       return null;
     }
   },
