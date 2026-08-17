@@ -3,6 +3,7 @@
 // header/footer/button/card lives in ONE place (no duplicated markup).
 
 const path = require('path');
+const fs = require('fs');
 
 const BRAND = {
   name: 'KarmaVer$e',            // display wordmark (body/logo)
@@ -77,6 +78,12 @@ function imgSrc(key) {
   if (!a) return '';
   if (ASSET_MODE === 'url') return a.url;
   if (ASSET_MODE === 'local') return 'file:///' + path.join(ASSET_DIR, a.file).split(path.sep).join('/');
+  // Self-contained preview (e.g. a shared HTML page under a strict CSP that blocks
+  // external hosts) — inline the bundled PNG bytes as a data URI.
+  if (ASSET_MODE === 'datauri') {
+    const b64 = fs.readFileSync(path.join(ASSET_DIR, a.file)).toString('base64');
+    return 'data:image/png;base64,' + b64;
+  }
   return 'cid:' + a.cid;
 }
 // nodemailer-shaped inline attachments for every brand image (attach on every

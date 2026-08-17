@@ -220,8 +220,8 @@ const templates = {
       preheader: 'Your next pickup is one tap away.',
       heading: 'We miss you',
       greetingName: name,
-      bodyHtml: `<p style="margin:0 0 12px;">It's been a while! Your waste can still become ${BRAND.currency} — and a cleaner planet.</p>
-        <p style="margin:0;">Schedule a free doorstep pickup whenever you're ready.</p>`,
+      bodyHtml: `<p style="margin:0 0 12px;">It's been a while! Your recyclables can still become ${BRAND.currency} — and real environmental impact.</p>
+        <p style="margin:0;">Book a free pickup whenever you're ready and keep valuable resources in the loop.</p>`,
       ctaLabel: 'Schedule a pickup',
       ctaUrl: `${SITE}/SchedulePickup`,
     }),
