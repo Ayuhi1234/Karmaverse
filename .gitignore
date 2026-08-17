@@ -19,7 +19,8 @@ expo-env.d.ts
 *.mobileprovision
 
 # Firebase / secrets
-google-services.json
+# google-services.json is committed so cloud EAS builds pick it up for FCM push.
+# (Its values are client config, not secrets — they ship inside the APK regardless.)
 GoogleService-Info.plist
 
 # Metro
