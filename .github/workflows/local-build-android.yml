@@ -53,6 +53,11 @@ jobs:
       - name: Generate native Android project
         run: npx expo prebuild --platform android --no-install
 
+      - name: Place Mappls license files in android/app
+        run: |
+          cp assets/app1783680288842i30702550.a.conf android/app/
+          cp assets/app1783680288842i30702550.a.olf android/app/
+
       - name: Accept Android SDK licenses
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
 
