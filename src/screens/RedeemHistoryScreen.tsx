@@ -38,6 +38,13 @@ export function RedeemHistoryScreen({ navigation }: any) {
   const formatDate = (dateStr?: string) =>
     dateStr ? new Date(dateStr).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
 
+  // "Pickup · 10:1" or "Reward · Diamond (20:1)" — from the fields captured at submit time.
+  const ledgerLabel = (req: any): string | null => {
+    if (!req.ledger) return null;
+    if (req.ledger === 'pickup') return `Pickup · ${req.rateApplied || 10}:1`;
+    return `Reward · ${req.streakTier ? req.streakTier + ' ' : ''}${req.rateApplied}:1`;
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#064e3b" />
@@ -83,6 +90,12 @@ export function RedeemHistoryScreen({ navigation }: any) {
                   </View>
                 </View>
 
+                {ledgerLabel(req) && (
+                  <View style={styles.ledgerBadge}>
+                    <Text style={styles.ledgerBadgeText}>{ledgerLabel(req)}</Text>
+                  </View>
+                )}
+
                 <Text style={styles.dateText}>Requested {formatDate(req.createdAt)}</Text>
 
                 {req.status === 'PAID' && req.processedAt && (
@@ -125,6 +138,9 @@ const styles = StyleSheet.create({
   rupeesText: { fontSize: 12, fontWeight: '700', color: '#64748b', marginLeft: 4 },
   statusBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 100, gap: 6 },
   statusText: { fontSize: 11, fontWeight: '800' },
+
+  ledgerBadge: { alignSelf: 'flex-start', backgroundColor: '#f1f5f9', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3, marginTop: 8 },
+  ledgerBadgeText: { fontSize: 11, fontWeight: '800', color: '#475569' },
 
   dateText: { fontSize: 12, color: '#94a3b8', fontWeight: '500', marginTop: 8 },
   paidText: { fontSize: 12, color: '#16a34a', fontWeight: '700', marginTop: 4 },

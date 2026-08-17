@@ -1,12 +1,14 @@
 import api from './api';
 
 export const redeemService = {
-  // Submit a redeem request — deducts coins from the wallet immediately, status starts PENDING
+  // Submit a redeem request — deducts coins from the chosen wallet immediately, status starts PENDING.
+  // `ledger` ('pickup' | 'reward') is REQUIRED by the backend — a missing/invalid value 400s.
   create: async (data: {
     accountHolderName: string;
     accountNumber: string;
     ifscCode: string;
     branchName: string;
+    ledger: 'pickup' | 'reward';
     coinsToRedeem: number;
   }) => {
     try {

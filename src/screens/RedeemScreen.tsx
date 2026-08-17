@@ -5,8 +5,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { redeemService } from '../services/redeem';
 import { profileService } from '../services/profile';
+import { streakService } from '../services/streak';
 import { showAlert } from '../utils/alert';
 import { REDEEM_INFO_MESSAGE } from '../utils/redeemInfo';
+import { LedgerType, PICKUP_RATE, rupeesFor, formatRupees } from '../utils/streakTiers';
 
 const MIN_COINS = 10;
 const QUICK_AMOUNTS = [10, 20, 50, 100];
@@ -15,7 +17,14 @@ const IFSC_REGEX = /^[A-Za-z]{4}0[A-Za-z0-9]{6}$/;
 const ACCOUNT_NUMBER_REGEX = /^\d{9,18}$/;
 
 export function RedeemScreen({ navigation, route }: any) {
+  // Which wallet is being redeemed — 'pickup' (fixed 10:1) or 'reward' (streak tier rate).
+  const ledger: LedgerType = route?.params?.ledger === 'reward' ? 'reward' : 'pickup';
+  const isPickup = ledger === 'pickup';
+
   const [balance, setBalance] = useState<number>(route?.params?.balance || 0);
+  // Rate = coins per ₹1. Pickup is always fixed; reward comes from the live streak tier.
+  const [rate, setRate] = useState<number>(isPickup ? PICKUP_RATE : (route?.params?.rewardRate || 100));
+  const [tier, setTier] = useState<string>(route?.params?.tier || '');
   const [isBalanceLoading, setIsBalanceLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -28,13 +37,24 @@ export function RedeemScreen({ navigation, route }: any) {
 
   useEffect(() => {
     profileService.getProfile()
-      .then((profile) => setBalance(profile.karmaCoins || profile.coins || 0))
+      .then((profile) => {
+        const b = isPickup
+          ? (profile.pickupCoins ?? 0)
+          : (profile.rewardCoins ?? profile.coins ?? 0);
+        setBalance(b);
+      })
       .catch(() => {})
       .finally(() => setIsBalanceLoading(false));
-  }, []);
+    // Reward Wallet rate is live — always confirm it against /streak/status at submit time.
+    if (!isPickup) {
+      streakService.getStatus().then((s) => {
+        if (s) { setRate(s.rewardRate); setTier(s.tier); }
+      });
+    }
+  }, [isPickup]);
 
   const coinsToRedeem = parseInt(coinsInput, 10) || 0;
-  const rupees = coinsToRedeem / 10;
+  const rupees = rupeesFor(coinsToRedeem, rate);
 
   const isFormValid =
     accountHolderName.trim().length >= 2 &&
@@ -42,7 +62,6 @@ export function RedeemScreen({ navigation, route }: any) {
     IFSC_REGEX.test(ifscCode.trim()) &&
     branchName.trim().length >= 2 &&
     coinsToRedeem >= MIN_COINS &&
-    coinsToRedeem % 10 === 0 &&
     coinsToRedeem <= balance;
 
   const handleSubmit = async () => {
@@ -54,6 +73,7 @@ export function RedeemScreen({ navigation, route }: any) {
         accountNumber: accountNumber.trim(),
         ifscCode: ifscCode.trim().toUpperCase(),
         branchName: branchName.trim(),
+        ledger,
         coinsToRedeem,
       });
       setBalance((prev) => prev - coinsToRedeem);
@@ -76,7 +96,7 @@ export function RedeemScreen({ navigation, route }: any) {
           </View>
           <Text style={styles.successTitle}>Request submitted!</Text>
           <Text style={styles.successSub}>
-            Your redeem request for ₹{rupees.toFixed(0)} is pending admin approval.
+            Your redeem request for {formatRupees(rupees)} is pending admin approval.
           </Text>
           <View style={styles.successInfoNote}>
             <Text style={styles.successInfoText}>{REDEEM_INFO_MESSAGE}</Text>
@@ -107,7 +127,7 @@ export function RedeemScreen({ navigation, route }: any) {
             <TouchableOpacity style={styles.backBtnInner} onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('App')}>
               <ChevronLeft size={22} color="white" />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Redeem coins</Text>
+            <Text style={styles.headerTitle}>Redeem {isPickup ? 'pickup' : 'reward'} coins</Text>
             <View style={{ width: 36 }} />
           </View>
 
@@ -117,6 +137,11 @@ export function RedeemScreen({ navigation, route }: any) {
               {isBalanceLoading ? '...' : balance.toLocaleString()} available
             </Text>
           </View>
+          <Text style={styles.rateNote}>
+            {isPickup
+              ? `Fixed rate · ${PICKUP_RATE} coins = ₹1`
+              : `${tier ? tier + ' tier · ' : ''}${rate} coins = ₹1`}
+          </Text>
         </SafeAreaView>
       </LinearGradient>
 
@@ -149,11 +174,11 @@ export function RedeemScreen({ navigation, route }: any) {
                 </TouchableOpacity>
               ))}
               <TouchableOpacity
-                style={[styles.quickChip, coinsToRedeem === balance - (balance % 10) && styles.quickChipActive]}
-                onPress={() => setCoinsInput(String(balance - (balance % 10)))}
+                style={[styles.quickChip, coinsToRedeem === balance && styles.quickChipActive]}
+                onPress={() => setCoinsInput(String(balance))}
                 disabled={balance < MIN_COINS}
               >
-                <Text style={[styles.quickChipText, coinsToRedeem === balance - (balance % 10) && styles.quickChipTextActive]}>
+                <Text style={[styles.quickChipText, coinsToRedeem === balance && styles.quickChipTextActive]}>
                   Max
                 </Text>
               </TouchableOpacity>
@@ -161,10 +186,10 @@ export function RedeemScreen({ navigation, route }: any) {
             {coinsToRedeem > 0 && (
               <Text style={[styles.helperText, coinsToRedeem > balance && styles.helperTextError]}>
                 {coinsToRedeem > balance
-                  ? 'Not enough coins for this amount'
-                  : coinsToRedeem % 10 !== 0
-                  ? 'Enter a multiple of 10'
-                  : `≈ ₹${rupees.toFixed(0)} will be sent to your bank account`}
+                  ? 'Not enough coins in this wallet'
+                  : coinsToRedeem < MIN_COINS
+                  ? `Minimum ${MIN_COINS} coins`
+                  : `≈ ${formatRupees(rupees)} will be sent to your bank account`}
               </Text>
             )}
           </View>
@@ -267,6 +292,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.12)', borderRadius: 100, paddingHorizontal: 16, paddingVertical: 8, marginTop: 16,
   },
   balanceText: { color: 'white', fontWeight: '800', fontSize: 13 },
+  rateNote: { color: 'rgba(255,255,255,0.8)', fontWeight: '700', fontSize: 12, textAlign: 'center', marginTop: 8 },
 
   formContainer: { padding: 20, maxWidth: 800, width: '100%', alignSelf: 'center' },
   sectionTitle: { fontSize: 15, fontWeight: '800', color: '#0f172a', marginTop: 8, marginBottom: 12 },
