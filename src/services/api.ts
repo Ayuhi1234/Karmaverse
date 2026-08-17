@@ -2,8 +2,12 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { navigationRef } from '../navigation/navRef';
 
-// Production backend (Render).
-export const BACKEND_BASE = 'https://karmacoin-backend-productionn.onrender.com';
+// Backend base URL. Defaults to PRODUCTION so the web/site build (Netlify) and the
+// production APK always hit production. QA/preview APK builds override this via the
+// EXPO_PUBLIC_API_URL env set in eas.json's `preview` profile (points to testing,
+// where in-progress features like the streak two-wallet system are deployed first).
+export const BACKEND_BASE =
+  process.env.EXPO_PUBLIC_API_URL || 'https://karmacoin-backend-productionn.onrender.com';
 const BASE_URL = BACKEND_BASE;
 
 const api = axios.create({
