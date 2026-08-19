@@ -6,6 +6,11 @@ const { wrapEmail, detailTable, rewardsCard, shortId, safe, escapeHtml, BRAND } 
 // KC-XXXXX (never the raw Mongo _id); names are Proper-Cased in the greeting.
 const SITE = BRAND.site;
 
+// Unsubscribe link for NON-TRANSACTIONAL (marketing) emails only. The backend should
+// pass a per-recipient tokenised URL; falls back to a generic preferences page.
+// Transactional emails (OTP, booking, password) must NOT include this — they're exempt.
+const unsub = (u) => u || `${SITE}/unsubscribe`;
+
 const templates = {
   WELCOME: ({ name }) => ({
     subject: `Welcome to ${BRAND.namePlain} — start earning ${BRAND.currency}`,
@@ -152,9 +157,10 @@ const templates = {
   // ─────────────────────────────────────────────────────────────────────────
 
   // Monthly recap of the user's recycling impact. Send once a month to actives.
-  IMPACT_REPORT: ({ name, month, kg, pickups, coins }) => ({
+  IMPACT_REPORT: ({ name, month, kg, pickups, coins, unsubscribeUrl }) => ({
     subject: `Your ${safe(month, 'monthly')} Impact with ${BRAND.namePlain}`,
     html: wrapEmail({
+      unsubscribeUrl: unsub(unsubscribeUrl),
       preheader: `See what you recycled${kg != null && String(kg).trim() !== '' ? ` — ${escapeHtml(String(kg))} kg` : ''} this month.`,
       heading: `Your ${safe(month, 'monthly')} Impact`,
       greetingName: name,
@@ -172,9 +178,10 @@ const templates = {
 
   // Weekly educational nudge. `tipTitle`/`tipBody` are the week's content; both
   // fall back to generic copy so a missing field never breaks the send.
-  ECO_TIP: ({ name, tipTitle, tipBody, readUrl }) => ({
+  ECO_TIP: ({ name, tipTitle, tipBody, readUrl, unsubscribeUrl }) => ({
     subject: safe(tipTitle, `Your weekly eco-tip from ${BRAND.namePlain}`),
     html: wrapEmail({
+      unsubscribeUrl: unsub(unsubscribeUrl),
       preheader: safe(tipTitle, 'A quick, practical way to waste less this week.'),
       heading: safe(tipTitle, "This week's eco-tip"),
       greetingName: name,
@@ -185,9 +192,10 @@ const templates = {
   }),
 
   // One-time campaign: announce that redemption/cash-out is live.
-  REDEMPTION_LIVE: ({ name, balance }) => ({
+  REDEMPTION_LIVE: ({ name, balance, unsubscribeUrl }) => ({
     subject: `Your rewards are ready — redeem your ${BRAND.currency}`,
     html: wrapEmail({
+      unsubscribeUrl: unsub(unsubscribeUrl),
       preheader: `Turn your ${BRAND.currency} into real rewards.`,
       heading: 'Your Rewards Are Ready',
       greetingName: name,
@@ -201,9 +209,10 @@ const templates = {
 
   // Generic product/feature announcement. `title`/`body`/`ctaLabel`/`ctaUrl` are
   // filled per campaign; all fall back so the shell always renders.
-  FEATURE_ANNOUNCEMENT: ({ name, title, body, ctaLabel, ctaUrl }) => ({
+  FEATURE_ANNOUNCEMENT: ({ name, title, body, ctaLabel, ctaUrl, unsubscribeUrl }) => ({
     subject: safe(title, `What's new on ${BRAND.namePlain}`),
     html: wrapEmail({
+      unsubscribeUrl: unsub(unsubscribeUrl),
       preheader: safe(title, `A new update just landed on ${BRAND.namePlain}.`),
       heading: safe(title, "What's new"),
       greetingName: name,
@@ -214,9 +223,10 @@ const templates = {
   }),
 
   // Re-engagement / win-back for lapsed users.
-  WIN_BACK: ({ name }) => ({
+  WIN_BACK: ({ name, unsubscribeUrl }) => ({
     subject: `Ready for your next pickup?`,
     html: wrapEmail({
+      unsubscribeUrl: unsub(unsubscribeUrl),
       preheader: 'Your next pickup is one tap away.',
       heading: 'Ready for Your Next Pickup?',
       greetingName: name,
@@ -228,9 +238,10 @@ const templates = {
   }),
 
   // Seasonal / festival greeting. `occasion` e.g. "Happy Diwali"; `message` optional.
-  SEASONAL_GREETING: ({ name, occasion, message }) => ({
+  SEASONAL_GREETING: ({ name, occasion, message, unsubscribeUrl }) => ({
     subject: safe(occasion, `Warm wishes from ${BRAND.namePlain}`),
     html: wrapEmail({
+      unsubscribeUrl: unsub(unsubscribeUrl),
       preheader: safe(occasion, `Season's greetings from the ${BRAND.namePlain} team.`),
       heading: safe(occasion, 'Warm wishes'),
       greetingName: name,

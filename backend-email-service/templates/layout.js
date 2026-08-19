@@ -130,7 +130,7 @@ function rewardsCard(coins, balance) {
 }
 
 // ── Full email shell ──
-function wrapEmail({ preheader = '', heading = '', greetingName, bodyHtml = '', ctaLabel, ctaUrl }) {
+function wrapEmail({ preheader = '', heading = '', greetingName, bodyHtml = '', ctaLabel, ctaUrl, unsubscribeUrl }) {
   const c = BRAND.colors;
   // Greet with the first name only (e.g. "Shashi Shekhar" -> "Shashi").
   const firstName = properCase(String(greetingName ?? '').trim().split(/\s+/)[0] || '');
@@ -179,6 +179,10 @@ function wrapEmail({ preheader = '', heading = '', greetingName, bodyHtml = '', 
           <p style="margin:0 0 10px;font-size:12px;color:${c.faint};">
             <a href="${mapsUrl}" style="color:${c.faint};text-decoration:underline;">${BRAND.address}</a>
           </p>
+          ${unsubscribeUrl ? `<p style="margin:0 0 8px;font-size:11px;color:${c.faint};">
+            You're receiving this because you opted in to ${BRAND.name} updates.
+            <a href="${unsubscribeUrl}" style="color:${c.green};text-decoration:underline;font-weight:700;">Unsubscribe</a>
+          </p>` : ''}
           <p style="margin:0;font-size:11px;color:#cbd5e1;">
             &copy; ${new Date().getFullYear()} ${BRAND.company}. All rights reserved.
             &middot; <a href="${BRAND.site}/" style="color:#cbd5e1;text-decoration:underline;">Manage preferences</a>

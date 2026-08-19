@@ -164,10 +164,16 @@ transaction — you send them on a **schedule** or to a **targeted segment**.
 | `WIN_BACK` | Lapsed users (e.g. inactive 30d) | `{ name }` |
 | `SEASONAL_GREETING` | Festivals / seasonal | `{ name, occasion, message }` |
 
-> ⚠️ **These require consent.** Send **only** to users opted in to marketing
-> emails, honour **unsubscribe**, and apply a **frequency cap** (e.g. ≤ 1–2/week).
-> The shared footer has a "Manage preferences" link — replace it with a real
-> per-user unsubscribe URL before these go live (compliance decision).
+> ⚠️ **These require consent + unsubscribe.** Send **only** to users opted in to
+> marketing emails, and apply a **frequency cap** (≈ 1–2/week).
+>
+> Each of these 6 templates now accepts an **`unsubscribeUrl`** field — pass a
+> **per-recipient, tokenised** URL (e.g. `https://karmaverse.earth/unsubscribe?token=…`)
+> so a single click unsubscribes that exact user. It renders an "Unsubscribe" link +
+> an opt-in line in the footer. If omitted, it falls back to `/unsubscribe` (generic).
+> Also set the **`List-Unsubscribe`** and **`List-Unsubscribe-Post`** headers at send
+> time so Gmail/Outlook show their own one-click unsubscribe. **Transactional emails
+> must NOT include unsubscribe** — they don't accept the field (they're legally exempt).
 
 ---
 
