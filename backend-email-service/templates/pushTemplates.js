@@ -22,21 +22,21 @@ const pushTemplates = {
   // Streak about to reset — the single most important retention nudge. Pair with
   // the reward-streak "at risk" window (see the two-wallet streak feature).
   STREAK_AT_RISK: ({ tier }) => ({
-    title: 'Your streak is at risk!',
+    title: `Don't Break Your ${s(tier, '')} Streak!`.replace('  ', ' '),
     body: `Do a pickup, quiz, or referral today to keep your ${s(tier, '')} streak — and your reward rate.`.replace('  ', ' '),
     data: { route: 'Wallet', type: 'STREAK_AT_RISK' },
   }),
 
   // Daily reminder to play the quiz (only if not played today).
   DAILY_QUIZ_REMINDER: () => ({
-    title: "Today's eco quiz is live",
+    title: "Today's Eco Quiz Is Live!",
     body: `Answer 5 quick questions and earn ${CURRENCY} before it resets at 5:30 AM.`,
     data: { route: 'Quiz', type: 'DAILY_QUIZ_REMINDER' },
   }),
 
-  // Re-activation: remind users sitting on a balance to cash out.
+  // Re-activation: remind users sitting on a balance to redeem.
   REDEMPTION_READY: ({ balance }) => ({
-    title: 'Your coins are ready to cash out',
+    title: 'Your Rewards Are Ready!',
     body: balance != null && String(balance).trim() !== ''
       ? `You have ${s(balance)} ${CURRENCY} ready to redeem for real rewards.`
       : `Redeem your ${CURRENCY} for real rewards.`,
@@ -45,21 +45,21 @@ const pushTemplates = {
 
   // Celebration when the user moves up a streak tier (better reward rate).
   TIER_UPGRADE: ({ tier }) => ({
-    title: `You reached ${s(tier, 'a new')} tier!`,
+    title: `You've Reached ${s(tier, 'a New Tier')}! 💎`,
     body: 'Your reward coins now convert at a better rate. Keep your streak going!',
     data: { route: 'Wallet', type: 'TIER_UPGRADE' },
   }),
 
   // Win-back for lapsed users (e.g. inactive 14+ days).
-  WIN_BACK: ({ name }) => ({
-    title: `We miss you${name && String(name).trim() ? ', ' + s(name) : ''}!`,
+  WIN_BACK: () => ({
+    title: 'Your Next Pickup Is Waiting!',
     body: `Your next pickup is one tap away — turn waste into ${CURRENCY}.`,
     data: { route: 'SchedulePickup', type: 'WIN_BACK' },
   }),
 
   // Growth nudge for users who've never referred anyone.
   REFERRAL_NUDGE: () => ({
-    title: 'Invite a friend, both earn',
+    title: 'Invite a Friend. Earn Together.',
     body: `Share your referral code — you both get 1,000 ${CURRENCY}.`,
     data: { route: 'Referral', type: 'REFERRAL_NUDGE' },
   }),

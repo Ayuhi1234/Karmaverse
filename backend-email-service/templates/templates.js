@@ -153,12 +153,12 @@ const templates = {
 
   // Monthly recap of the user's recycling impact. Send once a month to actives.
   IMPACT_REPORT: ({ name, month, kg, pickups, coins }) => ({
-    subject: `Your ${safe(month, 'monthly')} impact with ${BRAND.namePlain}`,
+    subject: `Your ${safe(month, 'monthly')} Impact with ${BRAND.namePlain}`,
     html: wrapEmail({
       preheader: `See what you recycled${kg != null && String(kg).trim() !== '' ? ` — ${escapeHtml(String(kg))} kg` : ''} this month.`,
-      heading: `Your ${safe(month, 'monthly')} impact`,
+      heading: `Your ${safe(month, 'monthly')} Impact`,
       greetingName: name,
-      bodyHtml: `<p style="margin:0 0 4px;">Here's the difference you made this month:</p>
+      bodyHtml: `<p style="margin:0 0 4px;">Here's what your sustainable gestures achieved this month.</p>
         ${detailTable([
           ['Waste recycled', kg != null && String(kg).trim() !== '' ? `${escapeHtml(String(kg))} kg` : '—'],
           ['Pickups completed', safe(pickups, '—')],
@@ -186,14 +186,14 @@ const templates = {
 
   // One-time campaign: announce that redemption/cash-out is live.
   REDEMPTION_LIVE: ({ name, balance }) => ({
-    subject: `Cash out your ${BRAND.currency} — redemption is live`,
+    subject: `Your rewards are ready — redeem your ${BRAND.currency}`,
     html: wrapEmail({
       preheader: `Turn your ${BRAND.currency} into real rewards.`,
-      heading: 'Redemption is live',
+      heading: 'Your Rewards Are Ready',
       greetingName: name,
       bodyHtml: `<p style="margin:0 0 12px;">Good news — you can now redeem your ${BRAND.currency} for real rewards.</p>
-        ${balance != null && String(balance).trim() !== '' ? `<p style="margin:0 0 12px;">You have <strong>${escapeHtml(String(balance))} ${BRAND.currency}</strong> ready to cash out.</p>` : ''}
-        <p style="margin:0;">Keep recycling to earn even more.</p>`,
+        ${balance != null && String(balance).trim() !== '' ? `<p style="margin:0 0 12px;">You have <strong>${escapeHtml(String(balance))} ${BRAND.currency}</strong> ready to redeem.</p>` : ''}
+        <p style="margin:0;">Keep up your sustainable gestures and earn even more.</p>`,
       ctaLabel: 'Open my wallet',
       ctaUrl: `${SITE}/Wallet`,
     }),
@@ -215,12 +215,12 @@ const templates = {
 
   // Re-engagement / win-back for lapsed users.
   WIN_BACK: ({ name }) => ({
-    subject: `We miss you at ${BRAND.namePlain}`,
+    subject: `Ready for your next pickup?`,
     html: wrapEmail({
       preheader: 'Your next pickup is one tap away.',
-      heading: 'We miss you',
+      heading: 'Ready for Your Next Pickup?',
       greetingName: name,
-      bodyHtml: `<p style="margin:0 0 12px;">It's been a while! Your recyclables can still become ${BRAND.currency} — and real environmental impact.</p>
+      bodyHtml: `<p style="margin:0 0 12px;">It's been a while! Your recyclables can still become ${BRAND.currency} — and positive environmental impact.</p>
         <p style="margin:0;">Book a free pickup whenever you're ready and keep valuable resources in the loop.</p>`,
       ctaLabel: 'Schedule a pickup',
       ctaUrl: `${SITE}/SchedulePickup`,
@@ -234,7 +234,7 @@ const templates = {
       preheader: safe(occasion, `Season's greetings from the ${BRAND.namePlain} team.`),
       heading: safe(occasion, 'Warm wishes'),
       greetingName: name,
-      bodyHtml: `<p style="margin:0 0 12px;">${safe(message, `Wishing you and your family a joyful ${safe(occasion, 'celebration')}. Thank you for recycling with us and making a real difference.`)}</p>`,
+      bodyHtml: `<p style="margin:0 0 12px;">${safe(message, `Wishing you and your family a bright, joyful and sustainable ${safe(occasion, 'celebration')}. Thank you for recycling with us and making a real difference.`)}</p>`,
       ctaLabel: 'Open the app',
       ctaUrl: `${SITE}/`,
     }),
