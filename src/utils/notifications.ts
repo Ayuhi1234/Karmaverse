@@ -85,6 +85,19 @@ export async function removeTokenFromBackend(): Promise<void> {
   }
 }
 
+// Report that the user tapped/opened a push. Fire-and-forget — the backend only
+// knows a push was "sent" until the app reports "opened" on tap. A failed call
+// (offline, timeout) only affects an analytics number, never the user's flow, so
+// swallow errors and never block navigation on it. Idempotent server-side.
+export async function markNotificationOpened(notificationId?: string): Promise<void> {
+  if (!notificationId) return;
+  try {
+    await api.patch(`/api/v1/notifications/${notificationId}/opened`);
+  } catch (_) {
+    // intentionally ignored — see above
+  }
+}
+
 export function addPushTokenRefreshListener(callback: (token: string) => void) {
   if (!Notifications) return { remove: () => {} };
   return Notifications.addPushTokenListener(({ data }: { data: string }) => {

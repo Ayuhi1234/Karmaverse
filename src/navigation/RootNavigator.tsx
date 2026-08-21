@@ -3,7 +3,7 @@ import { View, ActivityIndicator, StyleSheet, Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { addNotificationResponseListener, getLastNotificationResponse } from '../utils/notifications';
+import { addNotificationResponseListener, getLastNotificationResponse, markNotificationOpened } from '../utils/notifications';
 import { SplashScreen } from '../screens/SplashScreen';
 import { LoginScreen } from '../screens/LoginScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
@@ -77,6 +77,10 @@ export function RootNavigator() {
 
   useEffect(() => {
     const handleNotificationData = (data: any) => {
+      // Report the open for EVERY tapped push (not just booking ones), before any
+      // navigation guard. Fire-and-forget — never await, never block navigation.
+      if (data?.notificationId) markNotificationOpened(data.notificationId);
+
       if (!data?.bookingId || !navRef.current) return;
       navRef.current.navigate('BookingDetails', { booking: { _id: data.bookingId } });
     };
