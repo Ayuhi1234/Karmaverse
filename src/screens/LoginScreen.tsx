@@ -442,6 +442,10 @@ export function LoginScreen({ navigation }: any) {
     try {
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
       const response = await GoogleSignin.signIn();
+      // v13+ no longer throws SIGN_IN_CANCELLED on cancel — it returns
+      // { type: 'cancelled' }. Treat that as a quiet no-op (user backed out),
+      // not an error, so no "Google sign-in failed" dialog appears.
+      if (response?.type === 'cancelled') { setGoogleLoading(false); return; }
       const idToken = response.data?.idToken;
       if (!idToken) throw new Error('No ID token received from Google');
       await finishGoogleLogin(idToken); // clears googleLoading in its finally
