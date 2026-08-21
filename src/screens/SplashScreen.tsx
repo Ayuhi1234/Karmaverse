@@ -70,6 +70,20 @@ const EARN_WORDS = [
   { word: 'giving back',     color: '#60a5fa' },
 ];
 
+// WCAG-readable label color for a button of a given background. White fails AA on
+// the light accents (the yellow rewards slide, #fcd34d) — pick whichever of white
+// or the brand deep-green gives the higher contrast so every slide meets AA.
+function readableTextOn(hex: string): string {
+  const h = hex.replace('#', '');
+  const toLin = (c: number) => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+  const r = toLin(parseInt(h.slice(0, 2), 16) / 255);
+  const g = toLin(parseInt(h.slice(2, 4), 16) / 255);
+  const b = toLin(parseInt(h.slice(4, 6), 16) / 255);
+  const L = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  const ratio = (a: number, c: number) => (Math.max(a, c) + 0.05) / (Math.min(a, c) + 0.05);
+  return ratio(L, 1) >= ratio(L, 0.02) ? '#ffffff' : '#052e16'; // 0.02 ≈ luminance of #052e16
+}
+
 export function SplashScreen({ navigation }: any) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollRef = useRef<ScrollView>(null);
@@ -316,8 +330,8 @@ export function SplashScreen({ navigation }: any) {
                 onPress={handleNext}
                 activeOpacity={0.8}
               >
-                <Text style={styles.buttonText}>{slide.buttonText}</Text>
-                <ArrowRight size={20} color="white" />
+                <Text style={[styles.buttonText, { color: readableTextOn(slide.accent) }]}>{slide.buttonText}</Text>
+                <ArrowRight size={20} color={readableTextOn(slide.accent)} />
               </TouchableOpacity>
             </View>
           </View>
