@@ -5,7 +5,7 @@ import { showAlert } from '../utils/alert';
 import { showRedeemInfoOnce } from '../utils/redeemInfo';
 import { getStableUserSuffix } from '../utils/userId';
 import { AddressSearch, AddressDetails } from '../components/shared/AddressSearch';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { ChevronLeft, MapPin, CheckCircle2, PackageOpen, Plus, FileText, Magnet, Droplets, Wine, Smartphone } from 'lucide-react-native';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
@@ -239,6 +239,7 @@ function ItemImage({ image, Icon, color }: { image?: any; Icon: any; color: stri
 }
 
 export function SchedulePickupScreen({ navigation }: any) {
+  const insets = useSafeAreaInsets(); // bottom inset so the cart bar / Confirm button clear the Android gesture pill
   // Step Management
   const [currentStep, setCurrentStep] = useState<1 | 2>(1);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -533,7 +534,7 @@ export function SchedulePickupScreen({ navigation }: any) {
         </ScrollView>
       </View>
 
-      <ScrollView contentContainerStyle={styles.gridContent}>
+      <ScrollView contentContainerStyle={[styles.gridContent, cartCalculations.totalItems > 0 && { paddingBottom: insets.bottom + 170 }]}>
         {activeCategory === '3' && (
           <View style={styles.glassNote}>
             <Text style={styles.glassNoteText}>Please note: broken or shattered glass is not accepted for safety reasons. Only intact bottles and jars.</Text>
@@ -608,7 +609,7 @@ export function SchedulePickupScreen({ navigation }: any) {
 
       {/* Floating Cart Summary directly over the view */}
       {cartCalculations.totalItems > 0 && (
-        <View style={styles.floatingCart}>
+        <View style={[styles.floatingCart, { bottom: insets.bottom + 16 }]}>
           <View style={styles.cartInfo}>
             <Text style={styles.cartItemText}>{cartCalculations.totalItems} {cartCalculations.totalItems === 1 ? 'item' : 'items'} added</Text>
             <View style={{flexDirection: 'row', alignItems: 'center', gap: 4}}>
@@ -636,7 +637,7 @@ export function SchedulePickupScreen({ navigation }: any) {
   // --- Render Step 2: Date & Details ---
   const renderDetailsStep = () => (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-    <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+    <ScrollView contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 90 }]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
       {/* Date */}
       <View style={styles.sectionHeader}>
         <View style={styles.sectionNum}><Text style={styles.sectionNumText}>2</Text></View>

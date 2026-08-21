@@ -4,6 +4,7 @@ import { showAlert } from '../utils/alert';
 import { consumePendingDeepLink } from '../utils/deepLink';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { ArrowRight, Lock, User, CheckCircle2, CalendarDays, Heart, Briefcase, Eye, EyeOff, Gift, Info, Check } from 'lucide-react-native';
@@ -214,6 +215,7 @@ function SignupJourneyProgress({ stage }: { stage: 0 | 1 | 2 }) {
 }
 
 export function LoginScreen({ navigation }: any) {
+  const insets = useSafeAreaInsets(); // bottom inset so "Skip for now" clears the Android gesture pill
   const { reconnect } = useUserSocket();
   const [step, setStep] = useState<Step>('entry');
   const [checkingSlow, setCheckingSlow] = useState(false);
@@ -1366,7 +1368,7 @@ export function LoginScreen({ navigation }: any) {
           <Text style={{ fontSize: 15, color: '#166534', fontWeight: '600', textAlign: 'center', marginBottom: 32 }}>
             {scratched
               ? `✅ ${EARLY_BIRD_COINS.toLocaleString()} Karma Coins Successfully Added!`
-              : `As a welcome reward, you've earned ${EARLY_BIRD_COINS.toLocaleString()} Karma Coins (Worth ₹50). Scratch your reward card to reveal and claim your bonus.`}
+              : `As a welcome reward, you've earned ${EARLY_BIRD_COINS.toLocaleString()} Karma Coins. Scratch your reward card to reveal and claim your bonus.`}
           </Text>
 
           <View style={{ width: '100%', maxWidth: 300, aspectRatio: 1.4, borderRadius: 24, overflow: 'hidden', marginBottom: 28, elevation: 6, shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.15, shadowRadius: 16 }}>
@@ -1466,10 +1468,12 @@ export function LoginScreen({ navigation }: any) {
     }
 
     if (step === 'demographics') {
-      const isComplete = age && gender && sexualOrientation && maritalStatus && employment;
+      // Only age is required (13+ compliance) — gender/orientation/marital/employment
+      // are optional. A recycling signup must never be blocked on sexual orientation.
+      const isComplete = !!age;
 
       return (
-        <ScrollView style={{flex: 1, marginHorizontal: 0}} contentContainerStyle={styles.scrollStepContent} showsVerticalScrollIndicator={false}>
+        <ScrollView style={{flex: 1, marginHorizontal: 0}} contentContainerStyle={[styles.scrollStepContent, { paddingBottom: insets.bottom + 40 }]} showsVerticalScrollIndicator={false}>
           <SignupJourneyProgress stage={2} />
           <View style={styles.demoHeader}>
             <Text style={styles.demoTitle}>Personalize profile</Text>

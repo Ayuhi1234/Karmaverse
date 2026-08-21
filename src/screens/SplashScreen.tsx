@@ -206,7 +206,7 @@ export function SplashScreen({ navigation }: any) {
               <Text style={styles.impactDesc}>Circular economy network across Delhi NCR</Text>
             </View>
           </View>
-          <Text style={{ textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: 11, marginTop: 10 }}>3RZeroWaste • Haryana, India • 2026</Text>
+          <Text style={{ textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: 11, marginTop: 10 }}>3RZeroWaste • Haryana, India • Est. 2024</Text>
         </View>
       );
     }
