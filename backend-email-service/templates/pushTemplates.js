@@ -53,7 +53,7 @@ const pushTemplates = {
   // Win-back for lapsed users (e.g. inactive 14+ days).
   WIN_BACK: () => ({
     title: 'Your Next Pickup Is Waiting!',
-    body: `Your next pickup is one tap away — turn waste into ${CURRENCY}.`,
+    body: `Your next pickup is one tap away — turn everyday materials into ${CURRENCY}.`,
     data: { route: 'SchedulePickup', type: 'WIN_BACK' },
   }),
 

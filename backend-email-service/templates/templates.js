@@ -49,7 +49,7 @@ const templates = {
   }),
 
   BOOKING_PLACED: ({ name, bookingId, date, timeSlot, address }) => ({
-    subject: `Pickup request received — ${shortId(bookingId) || 'confirmed'}`,
+    subject: `Your ${BRAND.namePlain} pickup is booked — ${shortId(bookingId) || 'confirmed'}`,
     html: wrapEmail({
       preheader: `Your pickup for ${safe(date, 'your selected date')} has been received.`,
       heading: 'Pickup request received',
@@ -68,7 +68,7 @@ const templates = {
   }),
 
   BOOKING_ACCEPTED: ({ name, agentName, bookingId }) => ({
-    subject: 'Your pickup partner is on the way',
+    subject: `Your ${BRAND.namePlain} pickup partner is on the way`,
     html: wrapEmail({
       preheader: `${safe(agentName, 'Your pickup partner')} has been assigned to your pickup.`,
       heading: 'A partner is on the way',
@@ -94,18 +94,18 @@ const templates = {
   }),
 
   BOOKING_COMPLETED: ({ name, bookingId }) => ({
-    subject: `Pickup ${shortId(bookingId) || ''} completed — thank you!`.replace('  ', ' '),
+    subject: `Your ${BRAND.namePlain} pickup is complete — thank you!`,
     html: wrapEmail({
-      preheader: `Thanks for recycling with ${BRAND.namePlain}.`,
+      preheader: `Thanks for keeping resources in the loop with ${BRAND.namePlain}.`,
       heading: 'Pickup complete',
       greetingName: name,
-      bodyHtml: `<p style="margin:0 0 12px;">Your pickup${shortId(bookingId) ? ` <strong>${shortId(bookingId)}</strong>` : ''} is complete. Thank you for recycling with ${BRAND.name} and making a real impact.</p>
+      bodyHtml: `<p style="margin:0 0 12px;">Your pickup${shortId(bookingId) ? ` <strong>${shortId(bookingId)}</strong>` : ''} is complete. Thank you for keeping valuable resources in the loop with ${BRAND.name} and making a real impact.</p>
         <p style="margin:0;">Loved your experience? Don't forget to rate your pickup partner in the app.</p>`,
     }),
   }),
 
   BOOKING_CANCELLED: ({ name, bookingId, date }) => ({
-    subject: `Your pickup ${shortId(bookingId) || ''} was cancelled`.replace('  ', ' '),
+    subject: `Your ${BRAND.namePlain} pickup was cancelled`,
     html: wrapEmail({
       preheader: `Your pickup scheduled for ${safe(date, 'your selected date')} was cancelled.`,
       heading: 'Booking cancelled',
@@ -157,43 +157,68 @@ const templates = {
   // ─────────────────────────────────────────────────────────────────────────
 
   // Monthly recap of the user's recycling impact. Send once a month to actives.
-  IMPACT_REPORT: ({ name, month, kg, pickups, coins, unsubscribeUrl }) => ({
-    subject: `Your ${safe(month, 'monthly')} Impact with ${BRAND.namePlain}`,
-    html: wrapEmail({
-      unsubscribeUrl: unsub(unsubscribeUrl),
-      preheader: `See what you recycled${kg != null && String(kg).trim() !== '' ? ` — ${escapeHtml(String(kg))} kg` : ''} this month.`,
-      heading: `Your ${safe(month, 'monthly')} Impact`,
-      greetingName: name,
-      bodyHtml: `<p style="margin:0 0 4px;">Here's what your sustainable gestures achieved this month.</p>
-        ${detailTable([
-          ['Waste recycled', kg != null && String(kg).trim() !== '' ? `${escapeHtml(String(kg))} kg` : '—'],
-          ['Pickups completed', safe(pickups, '—')],
-          [`${BRAND.currency} earned`, safe(coins, '—')],
-        ])}
-        <p style="margin:14px 0 0;">Every kg counts. Keep the momentum going!</p>`,
-      ctaLabel: 'Schedule a pickup',
-      ctaUrl: `${SITE}/SchedulePickup`,
-    }),
-  }),
+  IMPACT_REPORT: ({ name, month, kg, pickups, coins, xp, unsubscribeUrl }) => {
+    const num = (v) => (v != null && String(v).trim() !== '' ? Number(v) || 0 : 0);
+    const hasKg = num(kg) > 0;
+    const didNothing = !hasKg && num(pickups) === 0 && num(coins) === 0; // registered but inactive this month
+    return {
+      subject: `Your ${safe(month, 'monthly')} Impact with ${BRAND.namePlain}`,
+      html: wrapEmail({
+        unsubscribeUrl: unsub(unsubscribeUrl),
+        preheader: didNothing
+          ? `Your everyday materials are waiting — turn them into ${BRAND.currency}.`
+          : `See the impact you made${hasKg ? ` — ${escapeHtml(String(kg))} kg recovered` : ''} this month.`,
+        heading: `Your ${safe(month, 'monthly')} Impact`,
+        greetingName: name,
+        bodyHtml: didNothing
+          ? `<p style="margin:0 0 12px;">No pickups this month — but it's never too late to start. Your everyday materials can still become ${BRAND.currency} — and a healthier planet.</p>
+             <p style="margin:0;">Book a free pickup and make next month count.</p>`
+          : `<p style="margin:0 0 4px;">Here's what your sustainable gestures achieved this month.</p>
+             ${detailTable([
+               ['Resources recovered', hasKg ? `${escapeHtml(String(kg))} kg` : '—'],
+               ['Pickups completed', safe(pickups, '0')],
+               [`${BRAND.currency} earned`, safe(coins, '0')],
+               ...(xp != null && String(xp).trim() !== '' ? [['XP earned', safe(xp)]] : []),
+             ])}
+             <p style="margin:14px 0 0;">Every kg counts. Keep the momentum going!</p>`,
+        ctaLabel: didNothing ? 'Book a free pickup' : 'Schedule your next pickup',
+        ctaUrl: `${SITE}/SchedulePickup`,
+      }),
+    };
+  },
 
-  // Weekly educational nudge. `tipTitle`/`tipBody` are the week's content; both
-  // fall back to generic copy so a missing field never breaks the send.
-  ECO_TIP: ({ name, tipTitle, tipBody, readUrl, unsubscribeUrl }) => ({
-    subject: safe(tipTitle, `Your weekly eco-tip from ${BRAND.namePlain}`),
-    html: wrapEmail({
-      unsubscribeUrl: unsub(unsubscribeUrl),
-      preheader: safe(tipTitle, 'A quick, practical way to waste less this week.'),
-      heading: safe(tipTitle, "This week's eco-tip"),
-      greetingName: name,
-      bodyHtml: `<p style="margin:0 0 12px;">${safe(tipBody, "Small changes add up. Here's one simple habit to try this week toward a more circular lifestyle.")}</p>`,
-      ctaLabel: 'Read more on Knowledge Hub',
-      ctaUrl: safe(readUrl, `${SITE}/KnowledgeHub`),
-    }),
-  }),
+  // Monthly sustainability NEWSLETTER (replaces the weekly eco-tip). `articles` is an
+  // array of { title, excerpt, image, url }. Only previews are included — never the
+  // full article — and each card links out to the app/site. Keeps the HTML light.
+  NEWSLETTER: ({ name, month, articles, unsubscribeUrl }) => {
+    const list = Array.isArray(articles) ? articles.slice(0, 5) : [];
+    const cards = list.map((a) => `
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 18px;border:1px solid ${BRAND.colors.line};border-radius:14px;overflow:hidden;">
+        ${a && a.image ? `<tr><td><a href="${(a && a.url) || `${SITE}/KnowledgeHub`}" target="_blank"><img src="${a.image}" width="536" alt="${safe(a.title, 'Article')}" style="display:block;width:100%;max-width:536px;height:auto;border:0;" /></a></td></tr>` : ''}
+        <tr><td style="padding:16px 18px;">
+          <h3 style="margin:0 0 6px;font-size:16px;line-height:1.3;color:${BRAND.colors.text};font-weight:800;">${safe(a && a.title, 'Untitled')}</h3>
+          <p style="margin:0 0 12px;font-size:13.5px;line-height:1.55;color:${BRAND.colors.body};">${safe(a && a.excerpt, '')}</p>
+          <a href="${(a && a.url) || `${SITE}/KnowledgeHub`}" style="font-size:13px;font-weight:800;color:${BRAND.colors.green};text-decoration:none;">Read the full article &rarr;</a>
+        </td></tr>
+      </table>`).join('');
+    return {
+      subject: `Your ${safe(month, 'monthly')} sustainability update from ${BRAND.namePlain}`,
+      html: wrapEmail({
+        unsubscribeUrl: unsub(unsubscribeUrl),
+        preheader: `Sustainability tips and stories from ${BRAND.namePlain}.`,
+        heading: `${safe(month, 'This month')}'s sustainability update`,
+        greetingName: name,
+        bodyHtml: `<p style="margin:0 0 14px;">A few things worth knowing this month, straight from the ${BRAND.name} Knowledge Hub:</p>
+          ${cards || `<p style="margin:0 0 12px;color:${BRAND.colors.muted};">Fresh sustainability stories are on the way — explore the Knowledge Hub in the meantime.</p>`}`,
+        ctaLabel: 'Explore the Knowledge Hub',
+        ctaUrl: `${SITE}/KnowledgeHub`,
+      }),
+    };
+  },
 
   // One-time campaign: announce that redemption/cash-out is live.
   REDEMPTION_LIVE: ({ name, balance, unsubscribeUrl }) => ({
-    subject: `Your rewards are ready — redeem your ${BRAND.currency}`,
+    subject: `Your ${BRAND.namePlain} rewards are ready to redeem`,
     html: wrapEmail({
       unsubscribeUrl: unsub(unsubscribeUrl),
       preheader: `Turn your ${BRAND.currency} into real rewards.`,
@@ -224,28 +249,28 @@ const templates = {
 
   // Re-engagement / win-back for lapsed users.
   WIN_BACK: ({ name, unsubscribeUrl }) => ({
-    subject: `Ready for your next pickup?`,
+    subject: `Ready for your next ${BRAND.namePlain} pickup?`,
     html: wrapEmail({
       unsubscribeUrl: unsub(unsubscribeUrl),
-      preheader: 'Your next pickup is one tap away.',
+      preheader: `Your next ${BRAND.namePlain} pickup is one tap away.`,
       heading: 'Ready for Your Next Pickup?',
       greetingName: name,
-      bodyHtml: `<p style="margin:0 0 12px;">It's been a while! Your recyclables can still become ${BRAND.currency} — and positive environmental impact.</p>
+      bodyHtml: `<p style="margin:0 0 12px;">It's been a while! Your everyday materials can still become ${BRAND.currency} — and positive environmental impact.</p>
         <p style="margin:0;">Book a free pickup whenever you're ready and keep valuable resources in the loop.</p>`,
-      ctaLabel: 'Schedule a pickup',
+      ctaLabel: 'Book a free pickup',
       ctaUrl: `${SITE}/SchedulePickup`,
     }),
   }),
 
   // Seasonal / festival greeting. `occasion` e.g. "Happy Diwali"; `message` optional.
   SEASONAL_GREETING: ({ name, occasion, message, unsubscribeUrl }) => ({
-    subject: safe(occasion, `Warm wishes from ${BRAND.namePlain}`),
+    subject: occasion ? `${safe(occasion)} from ${BRAND.namePlain}` : `Warm wishes from ${BRAND.namePlain}`,
     html: wrapEmail({
       unsubscribeUrl: unsub(unsubscribeUrl),
       preheader: safe(occasion, `Season's greetings from the ${BRAND.namePlain} team.`),
       heading: safe(occasion, 'Warm wishes'),
       greetingName: name,
-      bodyHtml: `<p style="margin:0 0 12px;">${safe(message, `Wishing you and your family a bright, joyful and sustainable ${safe(occasion, 'celebration')}. Thank you for recycling with us and making a real difference.`)}</p>`,
+      bodyHtml: `<p style="margin:0 0 12px;">${safe(message, `Wishing you and your family a bright, joyful and sustainable ${safe(occasion, 'celebration')}. Thank you for keeping resources in the loop with us and making a real difference.`)}</p>`,
       ctaLabel: 'Open the app',
       ctaUrl: `${SITE}/`,
     }),
