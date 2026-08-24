@@ -70,7 +70,7 @@ export const authService = {
   },
 
   // Signup / Register — otpToken from verifyOtp required; referralCode optional (omit if blank)
-  register: async (data: { name: string, email: string, phone: string, password: string, otpToken: string, referralCode?: string }) => {
+  register: async (data: { name: string, email: string, phone: string, password: string, otpToken: string, referralCode?: string, state?: string, city?: string }) => {
     try {
       const payload: any = { ...data };
       if (!payload.referralCode) delete payload.referralCode;
