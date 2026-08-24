@@ -7,6 +7,7 @@ import { ChevronLeft, User, MapPin, Flame, Settings, HeartHandshake, LogOut, Fil
 import { addressService, SavedAddress, AddressLabel } from '../services/address';
 import { LinearGradient } from 'expo-linear-gradient';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
+import { StateCityFields } from '../components/shared/StateCityFields';
 import { profileService } from '../services/profile';
 import { AddressSearch, AddressDetails } from '../components/shared/AddressSearch';
 import { getLocalDateStr, getLocalYesterdayStr } from '../utils/quizDate';
@@ -95,7 +96,9 @@ export function ProfileScreen({ navigation }: any) {
             gender: data.demographics?.gender || data.gender || 'Not Specified',
             sexualOrientation: data.demographics?.sexualOrientation || data.sexualOrientation || 'Not Specified',
             maritalStatus: data.demographics?.maritalStatus || data.maritalStatus || 'Not Specified',
-            employment: data.demographics?.employment || data.employment || 'Not Specified'
+            employment: data.demographics?.employment || data.employment || 'Not Specified',
+            city: data.demographics?.city || data.city || '',
+            state: data.demographics?.state || data.state || ''
           }
         });
         setEditForm({
@@ -124,7 +127,9 @@ export function ProfileScreen({ navigation }: any) {
     gender: 'Male',
     sexualOrientation: '',
     maritalStatus: 'Single',
-    employment: 'Employed'
+    employment: 'Employed',
+    state: '',
+    city: ''
   });
   const demoSlideAnim = useRef(new Animated.Value(0)).current;
 
@@ -333,7 +338,9 @@ export function ProfileScreen({ navigation }: any) {
         ? userProfile.demographics.sexualOrientation
         : '',
       maritalStatus: userProfile?.demographics?.maritalStatus || 'Not Specified',
-      employment: userProfile?.demographics?.employment || 'Not Specified'
+      employment: userProfile?.demographics?.employment || 'Not Specified',
+      state: userProfile?.demographics?.state || userProfile?.state || '',
+      city: userProfile?.demographics?.city || userProfile?.city || ''
     });
     setIsDemoEditing(false);
     setDemoModalVisible(true);
@@ -806,6 +813,14 @@ export function ProfileScreen({ navigation }: any) {
                     </View>
                   </View>
 
+                  <View style={styles.demoListRow}>
+                    <View style={[styles.demoListIconBg, { backgroundColor: '#f0fdf4' }]}><MapPin size={20} color="#16a34a" /></View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.demoListLabel}>Location</Text>
+                      <Text style={styles.demoListValue}>{[userProfile?.demographics?.city || userProfile?.city, userProfile?.demographics?.state || userProfile?.state].filter(Boolean).join(', ') || '--'}</Text>
+                    </View>
+                  </View>
+
                   <TouchableOpacity style={styles.editBtnOutline} onPress={() => setIsDemoEditing(true)}>
                     <Text style={styles.editBtnOutlineText}>Modify Details</Text>
                   </TouchableOpacity>
@@ -835,16 +850,26 @@ export function ProfileScreen({ navigation }: any) {
                     <Text style={styles.fieldLabel}>Employment</Text>
                     <SelectionPills options={['Student', 'Employed', 'Business', 'Unemployed', 'Retired']} selected={demoEditForm.employment} onSelect={(t) => setDemoEditForm({...demoEditForm, employment: t})} />
                   </View>
+                  <StateCityFields
+                    state={demoEditForm.state}
+                    city={demoEditForm.city}
+                    setState={(v) => setDemoEditForm(f => ({ ...f, state: v }))}
+                    setCity={(v) => setDemoEditForm(f => ({ ...f, city: v }))}
+                  />
                   <TouchableOpacity style={[styles.primaryActionBtn, { marginTop: 12 }]} onPress={async () => {
                       const parsedAge = parseInt(demoEditForm.age);
                       if (!demoEditForm.age || isNaN(parsedAge) || parsedAge < 13 || parsedAge > 100) {
                         showAlert('Invalid age', 'You must be at least 13 years old to use KarmaVerse.');
                         return;
                       }
+                      if (!demoEditForm.state?.trim() || !demoEditForm.city?.trim()) {
+                        showAlert('State and city required', 'Please select or enter your state and city.');
+                        return;
+                      }
                       try {
                         // Omit an empty sexualOrientation — the backend rejects '' (it
                         // must be one of the allowed values); no selection = don't send it.
-                        const payload: any = { ...demoEditForm, age: parsedAge };
+                        const payload: any = { ...demoEditForm, age: parsedAge, state: demoEditForm.state.trim(), city: demoEditForm.city.trim() };
                         if (!payload.sexualOrientation) delete payload.sexualOrientation;
                         await profileService.updateDemographics(payload);
                         setUserProfile({...userProfile, demographics: { ...demoEditForm, age: parsedAge }});

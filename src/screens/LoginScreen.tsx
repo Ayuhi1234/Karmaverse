@@ -7,6 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
+import { StateCityFields } from '../components/shared/StateCityFields';
 import { ArrowRight, Lock, User, CheckCircle2, CalendarDays, Heart, Briefcase, Eye, EyeOff, Gift, Info, Check } from 'lucide-react-native';
 import { authService } from '../services/auth';
 import { BACKEND_BASE } from '../services/api';
@@ -328,6 +329,8 @@ export function LoginScreen({ navigation }: any) {
   const [sexualOrientation, setSexualOrientation] = useState('');
   const [maritalStatus, setMaritalStatus] = useState('');
   const [employment, setEmployment] = useState('');
+  const [stateName, setStateName] = useState(''); // required
+  const [city, setCity] = useState('');           // required
 
   // BUG-002: Check connectivity immediately when signup step opens
   React.useEffect(() => {
@@ -781,7 +784,7 @@ export function LoginScreen({ navigation }: any) {
     }
     setIsLoading(true);
     try {
-      await profileService.updateDemographics({ age: ageNum, gender, sexualOrientation, maritalStatus, employment });
+      await profileService.updateDemographics({ age: ageNum, gender, sexualOrientation, maritalStatus, employment, state: stateName.trim(), city: city.trim() });
       reconnect();
       navigation.replace('App', { screen: 'Dashboard', params: { justClaimedWelcomeBonus: true } });
     } catch (error: any) {
@@ -1468,9 +1471,10 @@ export function LoginScreen({ navigation }: any) {
     }
 
     if (step === 'demographics') {
-      // Only age is required (13+ compliance) — gender/orientation/marital/employment
-      // are optional. A recycling signup must never be blocked on sexual orientation.
-      const isComplete = !!age;
+      // age + state + city are required (state/city mandatory on the backend);
+      // gender/orientation/marital/employment stay optional. A recycling signup must
+      // never be blocked on sexual orientation.
+      const isComplete = !!age && !!stateName.trim() && !!city.trim();
 
       return (
         <ScrollView style={{flex: 1, marginHorizontal: 0}} contentContainerStyle={[styles.scrollStepContent, { paddingBottom: insets.bottom + 40 }]} showsVerticalScrollIndicator={false}>
@@ -1545,12 +1549,16 @@ export function LoginScreen({ navigation }: any) {
                 <Briefcase size={18} color="#0f172a" />
                 <Text style={styles.fieldLabel}>Employment</Text>
               </View>
-              <SelectionPills 
-                options={['Student', 'Employed', 'Business', 'Unemployed']} 
-                selected={employment} 
-                onSelect={setEmployment} 
+              <SelectionPills
+                options={['Student', 'Employed', 'Business', 'Unemployed']}
+                selected={employment}
+                onSelect={setEmployment}
               />
             </View>
+
+            <View style={styles.fieldDivider} />
+
+            <StateCityFields state={stateName} city={city} setState={setStateName} setCity={setCity} />
 
           </View>
 

@@ -1,0 +1,45 @@
+// Static India state -> cities map that drives the State/City dropdowns on the
+// profile-details step. Free-text on the backend, so this is only to give most
+// users a clean pick-list; both dropdowns also offer "Other" for manual entry,
+// which covers any town/village not listed here.
+
+export const INDIA_STATES_CITIES: Record<string, string[]> = {
+  'Andhra Pradesh': ['Visakhapatnam', 'Vijayawada', 'Guntur', 'Nellore', 'Tirupati', 'Kurnool'],
+  'Arunachal Pradesh': ['Itanagar', 'Naharlagun', 'Pasighat'],
+  'Assam': ['Guwahati', 'Silchar', 'Dibrugarh', 'Jorhat'],
+  'Bihar': ['Patna', 'Gaya', 'Bhagalpur', 'Muzaffarpur'],
+  'Chhattisgarh': ['Raipur', 'Bhilai', 'Bilaspur', 'Durg'],
+  'Goa': ['Panaji', 'Margao', 'Vasco da Gama'],
+  'Gujarat': ['Ahmedabad', 'Surat', 'Vadodara', 'Rajkot', 'Gandhinagar'],
+  'Haryana': ['Gurugram', 'Faridabad', 'Panipat', 'Ambala', 'Hisar'],
+  'Himachal Pradesh': ['Shimla', 'Manali', 'Dharamshala', 'Solan'],
+  'Jharkhand': ['Ranchi', 'Jamshedpur', 'Dhanbad', 'Bokaro'],
+  'Karnataka': ['Bengaluru', 'Mysuru', 'Mangaluru', 'Hubballi', 'Belagavi'],
+  'Kerala': ['Thiruvananthapuram', 'Kochi', 'Kozhikode', 'Thrissur'],
+  'Madhya Pradesh': ['Bhopal', 'Indore', 'Gwalior', 'Jabalpur', 'Ujjain'],
+  'Maharashtra': ['Mumbai', 'Pune', 'Nagpur', 'Nashik', 'Thane', 'Aurangabad'],
+  'Manipur': ['Imphal'],
+  'Meghalaya': ['Shillong'],
+  'Mizoram': ['Aizawl'],
+  'Nagaland': ['Kohima', 'Dimapur'],
+  'Odisha': ['Bhubaneswar', 'Cuttack', 'Rourkela', 'Puri'],
+  'Punjab': ['Chandigarh', 'Ludhiana', 'Amritsar', 'Jalandhar', 'Patiala'],
+  'Rajasthan': ['Jaipur', 'Jodhpur', 'Udaipur', 'Kota', 'Ajmer'],
+  'Sikkim': ['Gangtok'],
+  'Tamil Nadu': ['Chennai', 'Coimbatore', 'Madurai', 'Tiruchirappalli', 'Salem'],
+  'Telangana': ['Hyderabad', 'Warangal', 'Nizamabad'],
+  'Tripura': ['Agartala'],
+  'Uttar Pradesh': ['Lucknow', 'Noida', 'Ghaziabad', 'Kanpur', 'Agra', 'Varanasi', 'Prayagraj'],
+  'Uttarakhand': ['Dehradun', 'Haridwar', 'Rishikesh', 'Nainital'],
+  'West Bengal': ['Kolkata', 'Howrah', 'Durgapur', 'Siliguri'],
+  'Delhi': ['New Delhi', 'Delhi'],
+  'Jammu and Kashmir': ['Srinagar', 'Jammu'],
+  'Ladakh': ['Leh', 'Kargil'],
+  'Puducherry': ['Puducherry'],
+  'Chandigarh': ['Chandigarh'],
+  'Andaman and Nicobar Islands': ['Port Blair'],
+  'Dadra and Nagar Haveli and Daman and Diu': ['Daman', 'Silvassa'],
+  'Lakshadweep': ['Kavaratti'],
+};
+
+export const INDIA_STATES = Object.keys(INDIA_STATES_CITIES);
