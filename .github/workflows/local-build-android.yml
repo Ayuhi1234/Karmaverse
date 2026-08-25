@@ -47,20 +47,20 @@ jobs:
 
       - name: Write Mappls license files
         run: |
-          echo "${{ secrets.MAPPLS_CONF_B64 }}" | base64 -d > assets/app1783680288842i30702550.a.conf
-          echo "${{ secrets.MAPPLS_OLF_B64 }}" | base64 -d > assets/app1783680288842i30702550.a.olf
+          echo "${{ secrets.MAPPLS_CONF_B64 }}" | base64 -d > assets/app1785268079427i1121383093.a.conf
+          echo "${{ secrets.MAPPLS_OLF_B64 }}" | base64 -d > assets/app1785268079427i1121383093.a.olf
           echo "--- assets/ after write (size in bytes) ---"
-          ls -la assets/app1783680288842i30702550.a.*
+          ls -la assets/app1785268079427i1121383093.a.*
 
       - name: Generate native Android project
         run: npx expo prebuild --platform android --no-install
 
       - name: Place Mappls license files in android/app
         run: |
-          cp assets/app1783680288842i30702550.a.conf android/app/
-          cp assets/app1783680288842i30702550.a.olf android/app/
+          cp assets/app1785268079427i1121383093.a.conf android/app/
+          cp assets/app1785268079427i1121383093.a.olf android/app/
           echo "--- android/app/ after copy ---"
-          ls -la android/app/app1783680288842i30702550.a.*
+          ls -la android/app/app1785268079427i1121383093.a.*
           echo "--- app module path Gradle will see ---"
           find android -maxdepth 2 -iname "settings.gradle*" -exec cat {} \;
 
