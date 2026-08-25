@@ -23,12 +23,6 @@ expo-env.d.ts
 # (Its values are client config, not secrets — they ship inside the APK regardless.)
 GoogleService-Info.plist
 
-# Mappls native SDK license — proprietary, tied to this app's package name.
-# CI decodes it from the MAPPLS_CONF_B64/MAPPLS_OLF_B64 secrets instead (see
-# .github/workflows/local-build-android.yml); keep it out of git history.
-assets/*.conf
-assets/*.olf
-
 # Metro
 .metro-health-check*
 

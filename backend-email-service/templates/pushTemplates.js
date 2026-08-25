@@ -17,50 +17,54 @@
 
 const CURRENCY = 'KarmaCoins XP';
 const s = (v, f = '') => (v == null || String(v).trim() === '' ? f : String(v));
+// Big numbers scan faster with a thousands separator (4055 -> 4,055); '' if none.
+const fmt = (v) => { const n = Number(String(v).replace(/[^\d.]/g, '')); return Number.isFinite(n) && n > 0 ? n.toLocaleString('en-US') : ''; };
 
 const pushTemplates = {
-  // Streak about to reset — the single most important retention nudge. Pair with
-  // the reward-streak "at risk" window (see the two-wallet streak feature).
+  // Streak about to reset — the single most important retention nudge.
   STREAK_AT_RISK: ({ tier }) => ({
-    title: `Don't Break Your ${s(tier, '')} Streak!`.replace('  ', ' '),
-    body: `Do a pickup, quiz, or referral today to keep your ${s(tier, '')} streak — and your reward rate.`.replace('  ', ' '),
+    title: 'Your streak is at risk!',
+    body: `A pickup, quiz, or referral today keeps your ${s(tier, '')} streak — and your reward rate.`.replace('  ', ' '),
     data: { route: 'Wallet', type: 'STREAK_AT_RISK' },
   }),
 
-  // Daily reminder to play the quiz (only if not played today).
+  // Daily reminder to play the quiz. "Resets tonight" (not "5:30 AM" — that IST
+  // time is midnight UTC leaking through, and it reads like there's all night left).
   DAILY_QUIZ_REMINDER: () => ({
-    title: "Today's Eco Quiz Is Live!",
-    body: `Answer 5 quick questions and earn ${CURRENCY} before it resets at 5:30 AM.`,
+    title: "Today's eco quiz is live",
+    body: `5 quick questions, instant ${CURRENCY}. Resets tonight.`,
     data: { route: 'Quiz', type: 'DAILY_QUIZ_REMINDER' },
   }),
 
   // Re-activation: remind users sitting on a balance to redeem.
-  REDEMPTION_READY: ({ balance }) => ({
-    title: 'Your Rewards Are Ready!',
-    body: balance != null && String(balance).trim() !== ''
-      ? `You have ${s(balance)} ${CURRENCY} ready to redeem for real rewards.`
-      : `Redeem your ${CURRENCY} for real rewards.`,
-    data: { route: 'Wallet', type: 'REDEMPTION_READY' },
-  }),
+  REDEMPTION_READY: ({ balance }) => {
+    const b = fmt(balance);
+    return {
+      title: 'Your coins are ready to cash out',
+      body: b ? `${b} ${CURRENCY} waiting to become real rewards.` : `Redeem your ${CURRENCY} for real rewards.`,
+      data: { route: 'Wallet', type: 'REDEMPTION_READY' },
+    };
+  },
 
   // Celebration when the user moves up a streak tier (better reward rate).
   TIER_UPGRADE: ({ tier }) => ({
-    title: `You've Reached ${s(tier, 'a New Tier')}! 💎`,
-    body: 'Your reward coins now convert at a better rate. Keep your streak going!',
+    title: `You reached ${s(tier, 'a new')} tier!`,
+    body: 'Your coins now convert at a better rate. Keep the streak alive!',
     data: { route: 'Wallet', type: 'TIER_UPGRADE' },
   }),
 
   // Win-back for lapsed users (e.g. inactive 14+ days).
-  WIN_BACK: () => ({
-    title: 'Your Next Pickup Is Waiting!',
+  WIN_BACK: ({ name }) => ({
+    title: `We miss you${name && String(name).trim() ? ', ' + s(name) : ''}!`,
     body: `Your next pickup is one tap away — turn everyday materials into ${CURRENCY}.`,
     data: { route: 'SchedulePickup', type: 'WIN_BACK' },
   }),
 
-  // Growth nudge for users who've never referred anyone.
+  // Growth nudge for users who've never referred anyone. "each" (not "both") is
+  // unambiguous that every party gets 1,000.
   REFERRAL_NUDGE: () => ({
-    title: 'Invite a Friend. Earn Together.',
-    body: `Share your referral code — you both get 1,000 ${CURRENCY}.`,
+    title: 'Invite a friend, both earn',
+    body: `Share your code — you each get 1,000 ${CURRENCY}.`,
     data: { route: 'Referral', type: 'REFERRAL_NUDGE' },
   }),
 };

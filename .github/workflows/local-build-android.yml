@@ -45,24 +45,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Write Mappls license files
-        run: |
-          echo "${{ secrets.MAPPLS_CONF_B64 }}" | base64 -d > assets/app1785268079427i1121383093.a.conf
-          echo "${{ secrets.MAPPLS_OLF_B64 }}" | base64 -d > assets/app1785268079427i1121383093.a.olf
-          echo "--- assets/ after write (size in bytes) ---"
-          ls -la assets/app1785268079427i1121383093.a.*
-
+      # Mappls .olf/.conf are now committed in assets/ (withMappls copies them into
+      # app/src/main/assets during prebuild) — no secret needed. This also mirrors
+      # them into android/app/ as a belt-and-suspenders for the SDK's lookup path.
       - name: Generate native Android project
         run: npx expo prebuild --platform android --no-install
 
-      - name: Place Mappls license files in android/app
+      - name: Mirror Mappls license into android/app
         run: |
-          cp assets/app1785268079427i1121383093.a.conf android/app/
-          cp assets/app1785268079427i1121383093.a.olf android/app/
-          echo "--- android/app/ after copy ---"
-          ls -la android/app/app1785268079427i1121383093.a.*
-          echo "--- app module path Gradle will see ---"
-          find android -maxdepth 2 -iname "settings.gradle*" -exec cat {} \;
+          cp assets/app1787047825370i1056581628.a.conf android/app/
+          cp assets/app1787047825370i1056581628.a.olf android/app/
+          echo "--- android/app/ Mappls files ---"
+          ls -la android/app/app1787047825370i1056581628.a.*
+          echo "--- app/src/main/assets Mappls files (from withMappls) ---"
+          ls -la android/app/src/main/assets/app1787047825370i1056581628.a.* || true
 
       - name: Accept Android SDK licenses
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true

@@ -635,7 +635,6 @@ export function LoginScreen({ navigation }: any) {
     if (!/^[a-zA-Z\s]+$/.test(name.trim())) errs.name = 'Full name should contain only letters.';
     if (!/^[6-9]\d{9}$/.test(phone.trim())) errs.phone = 'Please enter a valid Indian mobile number (must start with 6, 7, 8 or 9).';
     if (password.length < 8 || !/\d/.test(password)) errs.password = 'Password must be at least 8 characters and include a number.';
-    if (!stateName.trim() || !city.trim()) errs.general = 'Please select your state and city.';
     if (Object.keys(errs).length > 0) { setSignupErrors(errs); return; }
     setSignupErrors({});
 
@@ -669,7 +668,6 @@ export function LoginScreen({ navigation }: any) {
       if (!token) throw new Error('OTP verification failed — no token received.');
       await authService.register({
         name, email, phone: phone.trim(), password, otpToken: token,
-        state: stateName.trim(), city: city.trim(),
         ...(referralStatus === 'valid' && referralCode.trim() ? { referralCode: referralCode.trim().toUpperCase() } : {}),
       });
       try {
@@ -786,7 +784,7 @@ export function LoginScreen({ navigation }: any) {
     }
     setIsLoading(true);
     try {
-      await profileService.updateDemographics({ age: ageNum, gender, sexualOrientation, maritalStatus, employment });
+      await profileService.updateDemographics({ age: ageNum, gender, sexualOrientation, maritalStatus, employment, state: stateName.trim(), city: city.trim() });
       reconnect();
       navigation.replace('App', { screen: 'Dashboard', params: { justClaimedWelcomeBonus: true } });
     } catch (error: any) {
@@ -1261,9 +1259,6 @@ export function LoginScreen({ navigation }: any) {
             {referralStatus === 'invalid' && (
               <Text style={[styles.referralHint, { color: '#dc2626' }]}>Invalid referral code</Text>
             )}
-
-            <StateCityFields state={stateName} city={city} setState={setStateName} setCity={setCity} />
-
             {signupErrors.general ? <Text style={styles.fieldError}>{signupErrors.general}</Text> : null}
 
             <View style={styles.termsRow}>
@@ -1282,7 +1277,7 @@ export function LoginScreen({ navigation }: any) {
               </Text>
             </View>
 
-            <PrimaryButton onPress={handleSignupSubmit} disabled={!(password.length >= 8 && /\d/.test(password)) || !name || !email || !phone || !stateName.trim() || !city.trim() || !agreedToTerms || isLoading} loading={isLoading}>
+            <PrimaryButton onPress={handleSignupSubmit} disabled={!(password.length >= 8 && /\d/.test(password)) || !name || !email || !phone || !agreedToTerms || isLoading} loading={isLoading}>
               <Text style={styles.buttonText}>Sign up</Text>
               <ArrowRight size={18} color="#fff" />
             </PrimaryButton>
@@ -1476,10 +1471,10 @@ export function LoginScreen({ navigation }: any) {
     }
 
     if (step === 'demographics') {
-      // Only age is required here — state/city are collected at signup (the backend
-      // requires them at account creation); gender/orientation/marital/employment stay
-      // optional. A recycling signup must never be blocked on sexual orientation.
-      const isComplete = !!age;
+      // age + state + city are required on this onboarding PATCH (backend requires
+      // state/city here, not at account creation); gender/orientation/marital/employment
+      // stay optional. A recycling signup must never be blocked on sexual orientation.
+      const isComplete = !!age && !!stateName.trim() && !!city.trim();
 
       return (
         <ScrollView style={{flex: 1, marginHorizontal: 0}} contentContainerStyle={[styles.scrollStepContent, { paddingBottom: insets.bottom + 40 }]} showsVerticalScrollIndicator={false}>
@@ -1560,6 +1555,10 @@ export function LoginScreen({ navigation }: any) {
                 onSelect={setEmployment}
               />
             </View>
+
+            <View style={styles.fieldDivider} />
+
+            <StateCityFields state={stateName} city={city} setState={setStateName} setCity={setCity} />
 
           </View>
 

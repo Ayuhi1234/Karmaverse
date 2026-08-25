@@ -10,6 +10,8 @@ const SITE = BRAND.site;
 // pass a per-recipient tokenised URL; falls back to a generic preferences page.
 // Transactional emails (OTP, booking, password) must NOT include this — they're exempt.
 const unsub = (u) => u || `${SITE}/unsubscribe`;
+// Thousands separator for big numbers (4055 -> 4,055) — falls back to the raw value.
+const comma = (v) => { const n = Number(String(v).replace(/[^\d.]/g, '')); return Number.isFinite(n) ? n.toLocaleString('en-US') : String(v); };
 
 const templates = {
   WELCOME: ({ name }) => ({
@@ -173,14 +175,14 @@ const templates = {
         bodyHtml: didNothing
           ? `<p style="margin:0 0 12px;">No pickups this month — but it's never too late to start. Your everyday materials can still become ${BRAND.currency} — and a healthier planet.</p>
              <p style="margin:0;">Book a free pickup and make next month count.</p>`
-          : `<p style="margin:0 0 4px;">Here's what your sustainable gestures achieved this month.</p>
+          : `<p style="margin:0 0 4px;">Here's the difference your everyday green gestures made this month:</p>
              ${detailTable([
-               ['Resources recovered', hasKg ? `${escapeHtml(String(kg))} kg` : '—'],
-               ['Pickups completed', safe(pickups, '0')],
+               ['Resources given a second life', hasKg ? `${escapeHtml(String(kg))} kg` : '—'],
+               ['Green pickups completed', safe(pickups, '0')],
                [`${BRAND.currency} earned`, safe(coins, '0')],
                ...(xp != null && String(xp).trim() !== '' ? [['XP earned', safe(xp)]] : []),
              ])}
-             <p style="margin:14px 0 0;">Every kg counts. Keep the momentum going!</p>`,
+             <p style="margin:14px 0 0;">Every kilogram keeps our shared ecosystem lighter. Keep the momentum going!</p>`,
         ctaLabel: didNothing ? 'Book a free pickup' : 'Schedule your next pickup',
         ctaUrl: `${SITE}/SchedulePickup`,
       }),
@@ -198,7 +200,7 @@ const templates = {
         <tr><td style="padding:16px 18px;">
           <h3 style="margin:0 0 6px;font-size:16px;line-height:1.3;color:${BRAND.colors.text};font-weight:800;">${safe(a && a.title, 'Untitled')}</h3>
           <p style="margin:0 0 12px;font-size:13.5px;line-height:1.55;color:${BRAND.colors.body};">${safe(a && a.excerpt, '')}</p>
-          <a href="${(a && a.url) || `${SITE}/KnowledgeHub`}" style="font-size:13px;font-weight:800;color:${BRAND.colors.green};text-decoration:none;">Read the full article &rarr;</a>
+          <a href="${(a && a.url) || `${SITE}/KnowledgeHub`}" style="font-size:13px;font-weight:800;color:${BRAND.colors.green};text-decoration:none;">Learn how &rarr;</a>
         </td></tr>
       </table>`).join('');
     return {
@@ -225,8 +227,8 @@ const templates = {
       heading: 'Your Rewards Are Ready',
       greetingName: name,
       bodyHtml: `<p style="margin:0 0 12px;">Good news — you can now redeem your ${BRAND.currency} for real rewards.</p>
-        ${balance != null && String(balance).trim() !== '' ? `<p style="margin:0 0 12px;">You have <strong>${escapeHtml(String(balance))} ${BRAND.currency}</strong> ready to redeem.</p>` : ''}
-        <p style="margin:0;">Keep up your sustainable gestures and earn even more.</p>`,
+        ${balance != null && String(balance).trim() !== '' ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:6px 0 16px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:14px;"><tr><td align="center" style="padding:18px;"><div style="font-size:34px;line-height:1.1;font-weight:900;color:${BRAND.colors.green};">${escapeHtml(comma(balance))}</div><div style="font-size:13px;font-weight:700;color:${BRAND.colors.muted};margin-top:2px;">${BRAND.currency} ready to cash out</div></td></tr></table>` : ''}
+        <p style="margin:0;">Every gesture you've made for the ecosystem brought you here. Keep going, and keep earning.</p>`,
       ctaLabel: 'Open my wallet',
       ctaUrl: `${SITE}/Wallet`,
     }),
@@ -249,15 +251,15 @@ const templates = {
 
   // Re-engagement / win-back for lapsed users.
   WIN_BACK: ({ name, unsubscribeUrl }) => ({
-    subject: `Ready for your next ${BRAND.namePlain} pickup?`,
+    subject: `We miss you at ${BRAND.namePlain}`,
     html: wrapEmail({
       unsubscribeUrl: unsub(unsubscribeUrl),
-      preheader: `Your next ${BRAND.namePlain} pickup is one tap away.`,
-      heading: 'Ready for Your Next Pickup?',
+      preheader: 'Your next green gesture is just one pickup away.',
+      heading: 'We miss you',
       greetingName: name,
-      bodyHtml: `<p style="margin:0 0 12px;">It's been a while! Your everyday materials can still become ${BRAND.currency} — and positive environmental impact.</p>
-        <p style="margin:0;">Book a free pickup whenever you're ready and keep valuable resources in the loop.</p>`,
-      ctaLabel: 'Book a free pickup',
+      bodyHtml: `<p style="margin:0 0 12px;">It's been a while! Your everyday materials can still become ${BRAND.currency} — and real impact for the ecosystem.</p>
+        <p style="margin:0;">Book a free pickup whenever you're ready and keep valuable resources moving in the loop.</p>`,
+      ctaLabel: 'Schedule a pickup',
       ctaUrl: `${SITE}/SchedulePickup`,
     }),
   }),
@@ -273,6 +275,40 @@ const templates = {
       bodyHtml: `<p style="margin:0 0 12px;">${safe(message, `Wishing you and your family a bright, joyful and sustainable ${safe(occasion, 'celebration')}. Thank you for keeping resources in the loop with us and making a real difference.`)}</p>`,
       ctaLabel: 'Open the app',
       ctaUrl: `${SITE}/`,
+    }),
+  }),
+
+  // Daily eco-quiz nudge (email version of the push). Play to earn coins; resets nightly.
+  DAILY_QUIZ: ({ name, streak, unsubscribeUrl }) => {
+    const st = streak != null && String(streak).trim() !== '' && Number(streak) > 0 ? escapeHtml(String(streak)) : null;
+    return {
+      subject: `Today's eco quiz is live on ${BRAND.namePlain}`,
+      html: wrapEmail({
+        unsubscribeUrl: unsub(unsubscribeUrl),
+        preheader: `5 quick questions, instant ${BRAND.currency}.`,
+        heading: "Today's eco quiz is live",
+        greetingName: name,
+        bodyHtml: `<p style="margin:0 0 8px;">Answer 5 quick questions on sustainability and earn ${BRAND.currency} — it resets tonight.</p>
+          ${st ? `<p style="margin:0 0 8px;">You're on a <strong>${st}-day</strong> streak — keep it alive!</p>` : ''}
+          <p style="margin:0;">A few minutes, a little knowledge, real rewards.</p>`,
+        ctaLabel: "Play today's quiz",
+        ctaUrl: `${SITE}/Quiz`,
+      }),
+    };
+  },
+
+  // Streak-tier upgrade celebration (email version of the push). `tier` = tier name.
+  TIER_UPGRADE: ({ name, tier, unsubscribeUrl }) => ({
+    subject: `You've reached ${safe(tier, 'a new')} tier on ${BRAND.namePlain}`,
+    html: wrapEmail({
+      unsubscribeUrl: unsub(unsubscribeUrl),
+      preheader: 'Your reward coins now convert at a better rate.',
+      heading: `You've reached ${safe(tier, 'a new tier')}!`,
+      greetingName: name,
+      bodyHtml: `<p style="margin:0 0 12px;">Your consistency is paying off — you've reached <strong>${safe(tier, 'a new')} tier</strong>. Your reward coins now convert at a better rate.</p>
+        <p style="margin:0;">Keep the streak alive with a pickup, quiz, or referral to hold on to it.</p>`,
+      ctaLabel: 'See my wallet',
+      ctaUrl: `${SITE}/Wallet`,
     }),
   }),
 };
