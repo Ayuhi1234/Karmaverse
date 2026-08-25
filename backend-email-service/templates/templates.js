@@ -277,6 +277,40 @@ const templates = {
       ctaUrl: `${SITE}/`,
     }),
   }),
+
+  // Daily eco-quiz nudge (email version of the push). Play to earn coins; resets nightly.
+  DAILY_QUIZ: ({ name, streak, unsubscribeUrl }) => {
+    const st = streak != null && String(streak).trim() !== '' && Number(streak) > 0 ? escapeHtml(String(streak)) : null;
+    return {
+      subject: `Today's eco quiz is live on ${BRAND.namePlain}`,
+      html: wrapEmail({
+        unsubscribeUrl: unsub(unsubscribeUrl),
+        preheader: `5 quick questions, instant ${BRAND.currency}.`,
+        heading: "Today's eco quiz is live",
+        greetingName: name,
+        bodyHtml: `<p style="margin:0 0 8px;">Answer 5 quick questions on sustainability and earn ${BRAND.currency} — it resets tonight.</p>
+          ${st ? `<p style="margin:0 0 8px;">You're on a <strong>${st}-day</strong> streak — keep it alive!</p>` : ''}
+          <p style="margin:0;">A few minutes, a little knowledge, real rewards.</p>`,
+        ctaLabel: "Play today's quiz",
+        ctaUrl: `${SITE}/Quiz`,
+      }),
+    };
+  },
+
+  // Streak-tier upgrade celebration (email version of the push). `tier` = tier name.
+  TIER_UPGRADE: ({ name, tier, unsubscribeUrl }) => ({
+    subject: `You've reached ${safe(tier, 'a new')} tier on ${BRAND.namePlain}`,
+    html: wrapEmail({
+      unsubscribeUrl: unsub(unsubscribeUrl),
+      preheader: 'Your reward coins now convert at a better rate.',
+      heading: `You've reached ${safe(tier, 'a new tier')}!`,
+      greetingName: name,
+      bodyHtml: `<p style="margin:0 0 12px;">Your consistency is paying off — you've reached <strong>${safe(tier, 'a new')} tier</strong>. Your reward coins now convert at a better rate.</p>
+        <p style="margin:0;">Keep the streak alive with a pickup, quiz, or referral to hold on to it.</p>`,
+      ctaLabel: 'See my wallet',
+      ctaUrl: `${SITE}/Wallet`,
+    }),
+  }),
 };
 
 module.exports = { templates };
