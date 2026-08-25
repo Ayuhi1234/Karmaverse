@@ -14,10 +14,21 @@ function withMapplsMavenRepo(config) {
 
       // Only add if not already present
       if (!content.includes('maven.mappls.com')) {
-        content = content.replace(
-          "    maven { url 'https://www.jitpack.io' }",
-          "    maven { url 'https://www.jitpack.io' }\n" + mapplsMaven
-        );
+        const anchor = "    maven { url 'https://www.jitpack.io' }";
+        const allprojectsAnchor = /allprojects\s*{\s*repositories\s*{/;
+
+        if (content.includes(anchor)) {
+          content = content.replace(anchor, anchor + '\n' + mapplsMaven);
+        } else if (allprojectsAnchor.test(content)) {
+          content = content.replace(allprojectsAnchor, (m) => m + '\n' + mapplsMaven);
+        } else {
+          throw new Error(
+            '[withMappls] Could not find a repositories block in android/build.gradle to insert the Mappls maven repo into. ' +
+            'The Mappls native SDK will fail to resolve at build time — add ' +
+            "\"maven { url 'https://maven.mappls.com/repository/mappls/' }\" to allprojects.repositories manually."
+          );
+        }
+
         fs.writeFileSync(buildGradlePath, content, 'utf8');
         console.log('[withMappls] Added Mappls Maven repo to build.gradle');
       }
@@ -39,6 +50,13 @@ function withMapplsAssets(config) {
       const licenseFiles = fs.readdirSync(sourceDir).filter(
         (f) => f.endsWith('.conf') || f.endsWith('.olf')
       );
+
+      if (licenseFiles.length === 0) {
+        throw new Error(
+          `[withMappls] No .conf/.olf Mappls license files found in ${sourceDir}. ` +
+          'The native Mappls SDK has no license to load and will fail to initialize at runtime.'
+        );
+      }
 
       for (const file of licenseFiles) {
         fs.copyFileSync(path.join(sourceDir, file), path.join(assetsDir, file));
