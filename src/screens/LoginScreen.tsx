@@ -498,7 +498,7 @@ export function LoginScreen({ navigation }: any) {
     }
     setFacebookLoading(true);
     try {
-      const result = await FBLoginManager.logInWithPermissions(['public_profile']);
+      const result = await FBLoginManager.logInWithPermissions(['public_profile', 'email']);
       if (result.isCancelled) { setFacebookLoading(false); return; }
       const data = await FBAccessToken.getCurrentAccessToken();
       if (!data?.accessToken) throw new Error('No access token received from Facebook');
@@ -536,7 +536,7 @@ export function LoginScreen({ navigation }: any) {
         if (response?.status === 'not_authorized') {
           showAlert('Facebook sign-in failed', 'Permission was not granted. Please try again.');
         }
-      }, { scope: 'public_profile' });
+      }, { scope: 'public_profile,email' });
     } catch (error: any) {
       setFacebookLoading(false);
       // FB.login throws synchronously if the login popup is blocked by the browser.
