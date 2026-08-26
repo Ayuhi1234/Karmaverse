@@ -60,6 +60,13 @@ jobs:
           echo "--- app/src/main/assets Mappls files (from withMappls) ---"
           ls -la android/app/src/main/assets/app1787047825370i1056581628.a.* || true
 
+      # `assembleDebug` doesn't work for a standalone test APK — the debug build
+      # variant is hardcoded to connect to a live Metro server ("Unable to load
+      # script"). We build `release` (the RN gradle plugin bundles JS into it) AND
+      # sign it with the real KarmaVerse upload keystore below — so the APK's
+      # fingerprint matches the SHA-1 registered for Mappls and the Google/Facebook
+      # OAuth clients, instead of the throwaway debug key Expo would otherwise use.
+
       - name: Accept Android SDK licenses
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
 
@@ -73,6 +80,14 @@ jobs:
 
       - name: Inject release signing config
         run: node scripts/android-release-signing.js
+
+      # Print the fingerprint we actually sign with, so it can be matched in the
+      # Mappls / Google / Facebook consoles. Expect SHA1 59:AB:B7:81:68:DA:8B:...
+      - name: Show signing certificate fingerprint
+        env:
+          KV_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KV_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: keytool -list -v -keystore "$RUNNER_TEMP/karmaverse-upload.keystore" -storepass "$KV_KEYSTORE_PASSWORD" -alias "$KV_KEY_ALIAS" | grep -E "SHA1|SHA256"
 
       - name: Build release APK
         working-directory: android
