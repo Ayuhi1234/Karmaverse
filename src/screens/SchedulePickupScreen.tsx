@@ -864,7 +864,7 @@ const styles = StyleSheet.create({
   cardInfo: { padding: 10, flex: 1 },
   // Fixed two-line block so a one-line name and a wrapping one push the toggle,
   // rate and button down by the same amount — cards stay aligned across the grid.
-  itemName: { fontSize: 15, fontWeight: '800', color: '#0f172a', marginBottom: 2, lineHeight: 19, height: 38 },
+  itemName: { fontSize: 15, fontWeight: '800', color: '#0f172a', marginBottom: 2, lineHeight: 19, minHeight: 38 },
   itemUnit: { fontSize: 12, color: '#71717a', fontWeight: '500', marginBottom: 8 },
   coinPill: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', backgroundColor: '#fef3c7', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8, gap: 4, marginBottom: 16 },
   coinValue: { fontSize: 12, fontWeight: '800', color: '#d97706' },

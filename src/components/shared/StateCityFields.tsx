@@ -5,13 +5,23 @@ import { INDIA_STATES, INDIA_STATES_CITIES } from '../../data/indiaStatesCities'
 
 const OTHER = 'Other';
 
+// "delhi" / "NEW delhi" -> "Delhi" / "New Delhi"
+const titleCase = (s: string) =>
+  s.trim().toLowerCase().replace(/\b([a-z])/g, (_, c) => c.toUpperCase());
+
 // A pick-list field that opens a searchable modal. Used for both State and City.
 function Dropdown({ value, placeholder, options, onSelect, disabled }: {
   value: string; placeholder: string; options: string[]; onSelect: (v: string) => void; disabled?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const filtered = query ? options.filter((o) => o.toLowerCase().includes(query.toLowerCase())) : options;
+  const q = query.trim();
+  // Case-insensitive contains-match; "Other" is never shown while searching (the
+  // "Use ..." row below replaces it so the user can always enter a value not in the list).
+  const filtered = q
+    ? options.filter((o) => o !== OTHER && o.toLowerCase().includes(q.toLowerCase()))
+    : options;
+  const hasExact = options.some((o) => o.toLowerCase() === q.toLowerCase());
   return (
     <>
       <TouchableOpacity
@@ -51,7 +61,14 @@ function Dropdown({ value, placeholder, options, onSelect, disabled }: {
                   <Text style={[s.optionText, value === o && s.optionActive]}>{o}</Text>
                 </TouchableOpacity>
               ))}
-              {filtered.length === 0 && <Text style={s.empty}>No matches</Text>}
+              {/* Let the user commit whatever they typed when it isn't in the list
+                  (e.g. a city we don't have) — no dead end. */}
+              {q.length > 0 && !hasExact && (
+                <TouchableOpacity style={s.option} onPress={() => { onSelect(titleCase(q)); setOpen(false); }}>
+                  <Text style={[s.optionText, s.optionActive]}>Use "{titleCase(q)}"</Text>
+                </TouchableOpacity>
+              )}
+              {filtered.length === 0 && q.length === 0 && <Text style={s.empty}>No matches</Text>}
             </ScrollView>
           </TouchableOpacity>
         </TouchableOpacity>
