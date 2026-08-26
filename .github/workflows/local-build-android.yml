@@ -60,31 +60,26 @@ jobs:
           echo "--- app/src/main/assets Mappls files (from withMappls) ---"
           ls -la android/app/src/main/assets/app1787047825370i1056581628.a.* || true
 
-      # A plain `assembleDebug` doesn't embed the JS bundle — it expects a live Metro
-      # server reachable over USB/WiFi, which this CI-built APK will never have. Embed
-      # the bundle manually so the APK runs standalone on a test device, same as a
-      # release build would.
-      - name: Bundle JS into the debug APK
-        run: |
-          mkdir -p android/app/src/main/assets
-          npx expo export:embed \
-            --platform android \
-            --dev false \
-            --entry-file index.ts \
-            --bundle-output android/app/src/main/assets/index.android.bundle \
-            --assets-dest android/app/src/main/res
+      # `assembleDebug` doesn't work for a standalone test APK — the debug build
+      # variant is hardcoded to try connecting to a live Metro server over USB/WiFi
+      # regardless of whether a JS bundle file is present ("Unable to load script").
+      # Build `release` instead: the RN gradle plugin bundles JS into it automatically,
+      # and Expo's default template signs `release` with the debug keystore unless a
+      # real release keystore is configured, so it stays installable without extra setup.
+      - name: Show release signingConfig (diagnostic)
+        run: sed -n '/buildTypes/,/^    }/p' android/app/build.gradle
 
       - name: Accept Android SDK licenses
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
 
-      - name: Build debug APK
+      - name: Build release APK
         working-directory: android
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleRelease --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug.apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: app-release.apk
+          path: android/app/build/outputs/apk/release/app-release.apk
