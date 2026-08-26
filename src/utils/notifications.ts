@@ -1,4 +1,4 @@
-import { Platform } from 'react-native';
+import { Platform, Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../services/api';
 
@@ -58,6 +58,57 @@ export async function registerForPushNotifications(): Promise<string | null> {
 
   const tokenData = await Notifications.getDevicePushTokenAsync();
   return tokenData.data;
+}
+
+// Whether OS push notifications are usable at all on this build (native, not web,
+// not Expo Go where tokens are rejected). The re-enable UI only makes sense here.
+export function isPushSupported(): boolean {
+  return !!Notifications && !!Device?.isDevice && Platform.OS !== 'web' && !isExpoGo;
+}
+
+export interface PushPermissionState {
+  granted: boolean;
+  canAskAgain: boolean; // false → OS won't prompt again; must deep-link to Settings
+  undetermined: boolean; // never asked yet
+}
+
+// Read the current OS permission without prompting. Safe on web/Expo Go (returns not-granted).
+export async function getPushPermission(): Promise<PushPermissionState> {
+  if (!Notifications || Platform.OS === 'web') {
+    return { granted: false, canAskAgain: false, undetermined: false };
+  }
+  try {
+    const res = await Notifications.getPermissionsAsync();
+    const granted = res.status === 'granted' || res.granted === true;
+    return {
+      granted,
+      canAskAgain: res.canAskAgain !== false,
+      undetermined: res.status === 'undetermined',
+    };
+  } catch {
+    return { granted: false, canAskAgain: false, undetermined: false };
+  }
+}
+
+// Fire the OS permission prompt (only meaningful when canAskAgain). Returns granted.
+export async function requestPushPermission(): Promise<boolean> {
+  if (!Notifications) return false;
+  try {
+    const { status } = await Notifications.requestPermissionsAsync();
+    return status === 'granted';
+  } catch {
+    return false;
+  }
+}
+
+// Deep-link to this app's OS settings so the user can flip notifications back on
+// after a permanent denial (the OS dialog can't be shown again at that point).
+export async function openNotificationSettings(): Promise<void> {
+  try {
+    await Linking.openSettings();
+  } catch {
+    // openSettings is unavailable on some platforms — nothing else we can do.
+  }
 }
 
 export async function sendTokenToBackend(fcmToken: string): Promise<void> {

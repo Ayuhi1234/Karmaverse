@@ -3,7 +3,9 @@ import { useFocusEffect } from '@react-navigation/native';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Modal, TextInput, KeyboardAvoidingView, Platform, Animated, ActivityIndicator } from 'react-native';
 import { WebFooter } from '../components/shared/WebFooter';
 import { showAlert } from '../utils/alert';
-import { ChevronLeft, User, MapPin, Flame, Settings, HeartHandshake, LogOut, FileText, Trophy, X, Mail, Phone, ShieldCheck, CheckCircle, CalendarDays, UserSquare2, Heart, Briefcase, Users, ArrowRight, Gift, Trash2 } from 'lucide-react-native';
+import { ChevronLeft, User, MapPin, Flame, Settings, HeartHandshake, LogOut, FileText, Trophy, X, Mail, Phone, ShieldCheck, CheckCircle, CalendarDays, UserSquare2, Heart, Briefcase, Users, ArrowRight, Gift, Trash2, Bell, BellOff } from 'lucide-react-native';
+import { useNotifications } from '../context/NotificationContext';
+import { openNotificationSettings } from '../utils/notifications';
 import { addressService, SavedAddress, AddressLabel } from '../services/address';
 import { LinearGradient } from 'expo-linear-gradient';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
@@ -56,6 +58,7 @@ const cleanPhone = (p?: string) => String(p || '').replace(/\D/g, '').replace(/^
 const isRealPhone = (p?: string) => /^[6-9]\d{9}$/.test(cleanPhone(p));
 
 export function ProfileScreen({ navigation }: any) {
+  const { pushEnabled, enablePush } = useNotifications();
   // Main Profile State
   const [userProfile, setUserProfile] = useState<any>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
@@ -715,6 +718,18 @@ export function ProfileScreen({ navigation }: any) {
                 {Platform.OS !== 'web' && (
                   <>
                     <OptionRow icon={<Settings size={18} color="#475569" />} bg="#f8fafc" title="App settings" />
+                    <View style={styles.divider} />
+                  </>
+                )}
+                {pushEnabled !== null && (
+                  <>
+                    <OptionRow
+                      icon={pushEnabled ? <Bell size={18} color="#16a34a" /> : <BellOff size={18} color="#b45309" />}
+                      bg={pushEnabled ? '#f0fdf4' : '#fffbeb'}
+                      title="Notifications"
+                      sub={pushEnabled ? 'On' : 'Off — tap to turn on'}
+                      onPress={() => (pushEnabled ? openNotificationSettings() : enablePush())}
+                    />
                     <View style={styles.divider} />
                   </>
                 )}

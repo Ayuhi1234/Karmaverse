@@ -6,6 +6,7 @@ import { Bell, ChevronRight, Truck, Camera, Clock, Users, Package, Flame, Gamepa
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { QuizCalendarModal } from '../components/shared/QuizCalendarModal';
 import { NotificationPanel } from '../components/shared/NotificationPanel';
+import NotificationPermissionBanner from '../components/shared/NotificationPermissionBanner';
 import { LaunchDayPopup } from '../components/shared/LaunchDayPopup';
 import { useNotifications } from '../context/NotificationContext';
 import { profileService } from '../services/profile';
@@ -396,6 +397,9 @@ export function DashboardScreen({ navigation, route }: any) {
           ))}
         </View>
       </LinearGradient>
+
+      {/* Notifications-off nudge — links to OS settings when the user turned push off */}
+      <NotificationPermissionBanner />
 
       {/* Welcome bonus banner — shown once, right after claiming on the scratch card */}
       {showWelcomeBonusBanner && (

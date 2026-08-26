@@ -1,6 +1,15 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
+import { AppState, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getStableUserSuffix } from '../utils/userId';
+import {
+  isPushSupported,
+  getPushPermission,
+  requestPushPermission,
+  openNotificationSettings,
+  registerForPushNotifications,
+  sendTokenToBackend,
+} from '../utils/notifications';
 
 export interface AppNotification {
   id: string;
@@ -19,6 +28,12 @@ interface NotificationContextType {
   markRead: (id: string) => void;
   markAllRead: () => void;
   clearAll: () => void;
+  // OS push permission. null = unknown/loading or push not supported on this build.
+  pushEnabled: boolean | null;
+  // Turn push on: prompts the OS if it still can, else opens app settings.
+  enablePush: () => Promise<void>;
+  // Re-read the OS permission (called on app foreground).
+  refreshPushPermission: () => Promise<void>;
 }
 
 const NotificationContext = createContext<NotificationContextType>({
@@ -28,6 +43,9 @@ const NotificationContext = createContext<NotificationContextType>({
   markRead: () => {},
   markAllRead: () => {},
   clearAll: () => {},
+  pushEnabled: null,
+  enablePush: async () => {},
+  refreshPushPermission: async () => {},
 });
 
 // Notifications are stored per user. This used to be one shared key, so a new
@@ -121,8 +139,54 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
+  // ── OS push permission (re-enable flow) ──────────────────────────────────
+  // null until the first read; stays null on builds where push isn't supported
+  // (web / Expo Go), so the re-enable banner never shows there.
+  const [pushEnabled, setPushEnabled] = useState<boolean | null>(null);
+  const canAskAgainRef = useRef(true);
+
+  const refreshPushPermission = useCallback(async () => {
+    if (!isPushSupported()) { setPushEnabled(null); return; }
+    const p = await getPushPermission();
+    canAskAgainRef.current = p.canAskAgain;
+    setPushEnabled(p.granted);
+    // Granted but the backend may not have a live token yet (first grant, a
+    // silent registration failure, a reinstall) — re-register, it's idempotent.
+    if (p.granted) {
+      registerForPushNotifications()
+        .then(t => { if (t) sendTokenToBackend(t); })
+        .catch(() => {});
+    }
+  }, []);
+
+  const enablePush = useCallback(async () => {
+    if (!isPushSupported()) return;
+    if (canAskAgainRef.current) {
+      const granted = await requestPushPermission();
+      if (granted) {
+        const t = await registerForPushNotifications();
+        if (t) sendTokenToBackend(t);
+      }
+    } else {
+      // OS won't prompt again — hand the user to app settings. State refreshes
+      // on their return via the AppState listener below.
+      await openNotificationSettings();
+    }
+    await refreshPushPermission();
+  }, [refreshPushPermission]);
+
+  // Check on mount and every time the app comes to the foreground (catches a
+  // permission the user revoked — or granted — in Settings while backgrounded).
+  useEffect(() => {
+    refreshPushPermission();
+    const sub = AppState.addEventListener('change', s => {
+      if (s === 'active') refreshPushPermission();
+    });
+    return () => sub.remove();
+  }, [refreshPushPermission]);
+
   return (
-    <NotificationContext.Provider value={{ notifications, unreadCount, addNotification, markRead, markAllRead, clearAll }}>
+    <NotificationContext.Provider value={{ notifications, unreadCount, addNotification, markRead, markAllRead, clearAll, pushEnabled, enablePush, refreshPushPermission }}>
       {children}
     </NotificationContext.Provider>
   );
