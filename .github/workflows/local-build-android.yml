@@ -74,20 +74,39 @@ jobs:
       # is decoded to a temp file, and the signing config is injected into the
       # prebuild-generated build.gradle. Credentials are read from env at build time.
       - name: Decode release keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KV_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KV_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
         run: |
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/karmaverse-upload.keystore"
-          echo "Keystore size: $(wc -c < "$RUNNER_TEMP/karmaverse-upload.keystore") bytes"
+          set -e
+          if [ -z "$ANDROID_KEYSTORE_BASE64" ]; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 secret is empty — add it in repo Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/karmaverse-upload.keystore"
+          SIZE=$(wc -c < "$RUNNER_TEMP/karmaverse-upload.keystore")
+          echo "Keystore size: $SIZE bytes"
+          if [ "$SIZE" -lt 1000 ]; then
+            echo "::error::Decoded keystore is too small ($SIZE bytes) — the ANDROID_KEYSTORE_BASE64 secret is likely corrupted or truncated."
+            exit 1
+          fi
+          # Fail early (with a clear message) if the password/alias don't open the keystore.
+          keytool -list -keystore "$RUNNER_TEMP/karmaverse-upload.keystore" -storepass "$KV_KEYSTORE_PASSWORD" -alias "$KV_KEY_ALIAS" >/dev/null \
+            || { echo "::error::keytool could not open the keystore with the given password/alias — check ANDROID_KEYSTORE_PASSWORD / ANDROID_KEY_ALIAS."; exit 1; }
 
       - name: Inject release signing config
         run: node scripts/android-release-signing.js
 
       # Print the fingerprint we actually sign with, so it can be matched in the
       # Mappls / Google / Facebook consoles. Expect SHA1 59:AB:B7:81:68:DA:8B:...
+      # Diagnostic only — never fail the build on it.
       - name: Show signing certificate fingerprint
+        continue-on-error: true
         env:
           KV_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           KV_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-        run: keytool -list -v -keystore "$RUNNER_TEMP/karmaverse-upload.keystore" -storepass "$KV_KEYSTORE_PASSWORD" -alias "$KV_KEY_ALIAS" | grep -E "SHA1|SHA256"
+        run: keytool -list -v -keystore "$RUNNER_TEMP/karmaverse-upload.keystore" -storepass "$KV_KEYSTORE_PASSWORD" -alias "$KV_KEY_ALIAS" 2>&1 | grep -E "SHA1|SHA256" || true
 
       - name: Build release APK
         working-directory: android
