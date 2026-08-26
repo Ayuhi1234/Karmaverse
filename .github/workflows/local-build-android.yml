@@ -69,6 +69,17 @@ jobs:
       - name: Show release signingConfig (diagnostic)
         run: sed -n '/buildTypes/,/^    }/p' android/app/build.gradle
 
+      # Mappls' license (and the Google/Facebook OAuth clients registered earlier)
+      # are bound to a specific signing certificate. Print this pipeline's actual
+      # fingerprint so it can be registered in every console this build needs to
+      # match, instead of assuming which keystore Expo's template ends up using.
+      - name: Show signing certificate fingerprint (diagnostic)
+        run: |
+          KEYSTORE=android/app/debug.keystore
+          if [ ! -f "$KEYSTORE" ]; then KEYSTORE=$HOME/.android/debug.keystore; fi
+          echo "Using keystore: $KEYSTORE"
+          keytool -list -v -keystore "$KEYSTORE" -storepass android -alias androiddebugkey | grep -E "SHA1|SHA256"
+
       - name: Accept Android SDK licenses
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
 
