@@ -49,7 +49,7 @@ const pushTemplates = {
   // Celebration when the user moves up a streak tier (better reward rate).
   TIER_UPGRADE: ({ tier }) => ({
     title: `You reached ${s(tier, 'a new')} tier!`,
-    body: 'Your coins now convert at a better rate. Keep the streak alive!',
+    body: 'Each of your reward coins is now worth more. Keep the streak alive!',
     data: { route: 'Wallet', type: 'TIER_UPGRADE' },
   }),
 

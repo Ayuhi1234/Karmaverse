@@ -1,4 +1,4 @@
-const { wrapEmail, detailTable, rewardsCard, shortId, safe, escapeHtml, BRAND } = require('./layout');
+const { wrapEmail, detailTable, rewardsCard, shortId, safe, escapeHtml, properCase, BRAND } = require('./layout');
 
 // One function per template. Keys and their variable sets are a FIXED contract with
 // the backend — do not rename or add variables. Every value is run through a
@@ -12,6 +12,8 @@ const SITE = BRAND.site;
 const unsub = (u) => u || `${SITE}/unsubscribe`;
 // Thousands separator for big numbers (4055 -> 4,055) — falls back to the raw value.
 const comma = (v) => { const n = Number(String(v).replace(/[^\d.]/g, '')); return Number.isFinite(n) ? n.toLocaleString('en-US') : String(v); };
+// True when a value is present and non-empty (used to conditionally render optional fields).
+const has0 = (v) => v != null && String(v).trim() !== '';
 
 const templates = {
   WELCOME: ({ name }) => ({
@@ -83,9 +85,9 @@ const templates = {
   }),
 
   BOOKING_PICKED_UP: ({ name, coins, walletBalance }) => ({
-    subject: `You earned ${safe(coins, 'your')} ${BRAND.currency}!`,
+    subject: `You earned ${safe(coins, 'your')} ${BRAND.currency} on ${BRAND.namePlain}!`,
     html: wrapEmail({
-      preheader: `${safe(coins, 'Your')} ${BRAND.currency} credited to your wallet.`,
+      preheader: `${safe(coins, 'Your')} ${BRAND.currency} credited to your ${BRAND.namePlain} wallet.`,
       heading: 'Coins credited',
       greetingName: name,
       bodyHtml: `<p style="margin:0 0 2px;">Your items have been verified and your reward is in.</p>
@@ -119,17 +121,20 @@ const templates = {
     }),
   }),
 
-  QUIZ_STREAK_REMINDER: ({ name, streak }) => {
+  // ENGAGEMENT (scheduled nudge) — requires marketing opt-in + unsubscribe, same as
+  // DAILY_QUIZ below. Sent daily to opted-in users who haven't played yet.
+  QUIZ_STREAK_REMINDER: ({ name, streak, unsubscribeUrl }) => {
     const s = streak == null || String(streak).trim() === '' ? null : escapeHtml(streak);
     return {
-      subject: s ? `Don't lose your ${s}-day quiz streak!` : `Play today's quiz on ${BRAND.namePlain}`,
+      subject: s ? `Don't lose your ${s}-day quiz streak on ${BRAND.namePlain}!` : `Play today's quiz on ${BRAND.namePlain}`,
       html: wrapEmail({
+        unsubscribeUrl: unsub(unsubscribeUrl),
         preheader: "Play today's quiz before it resets.",
         heading: 'Your quiz is waiting',
         greetingName: name,
         bodyHtml: `<p style="margin:0 0 8px;">You haven't played today's ${BRAND.currency} quiz yet.</p>
           ${s ? `<p style="margin:0 0 8px;">You're on a <strong>${s}-day</strong> streak — keep it alive!</p>` : ''}
-          <p style="margin:0;">Play now before it resets at 5:30 AM IST.</p>`,
+          <p style="margin:0;">Play now before it resets tonight.</p>`,
         ctaLabel: "Play today's quiz",
         ctaUrl: `${SITE}/Quiz`,
       }),
@@ -137,7 +142,7 @@ const templates = {
   },
 
   REFERRAL_REWARD: ({ name, friendName, coins }) => ({
-    subject: `You earned ${safe(coins, '')} ${BRAND.currency} for referring ${safe(friendName, 'a friend')}!`,
+    subject: `You earned ${safe(coins, '')} ${BRAND.currency} on ${BRAND.namePlain} — referral bonus!`,
     html: wrapEmail({
       preheader: `${safe(friendName, 'A friend')} joined using your referral code.`,
       heading: 'Referral reward credited',
@@ -159,28 +164,35 @@ const templates = {
   // ─────────────────────────────────────────────────────────────────────────
 
   // Monthly recap of the user's recycling impact. Send once a month to actives.
-  IMPACT_REPORT: ({ name, month, kg, pickups, coins, xp, unsubscribeUrl }) => {
+  // `coins` = coins earned THIS month, `coinsSpent` = coins redeemed this month,
+  // `balance` = current available balance. `joinedThisMonth` flags a user who
+  // registered mid/late-month so the recap reads as a partial snapshot, not a full one.
+  IMPACT_REPORT: ({ name, month, kg, pickups, coins, coinsSpent, balance, xp, joinedThisMonth, unsubscribeUrl }) => {
     const num = (v) => (v != null && String(v).trim() !== '' ? Number(v) || 0 : 0);
+    const has = (v) => v != null && String(v).trim() !== '';
     const hasKg = num(kg) > 0;
     const didNothing = !hasKg && num(pickups) === 0 && num(coins) === 0; // registered but inactive this month
+    const newThisMonth = joinedThisMonth === true || String(joinedThisMonth) === 'true';
     return {
-      subject: `Your ${safe(month, 'monthly')} Impact with ${BRAND.namePlain}`,
+      subject: `Your ${safe(month, 'monthly')} impact with ${BRAND.namePlain}`,
       html: wrapEmail({
         unsubscribeUrl: unsub(unsubscribeUrl),
         preheader: didNothing
           ? `Your everyday materials are waiting — turn them into ${BRAND.currency}.`
           : `See the impact you made${hasKg ? ` — ${escapeHtml(String(kg))} kg recovered` : ''} this month.`,
-        heading: `Your ${safe(month, 'monthly')} Impact`,
+        heading: `Your ${safe(month, 'monthly')} impact`,
         greetingName: name,
         bodyHtml: didNothing
-          ? `<p style="margin:0 0 12px;">No pickups this month — but it's never too late to start. Your everyday materials can still become ${BRAND.currency} — and a healthier planet.</p>
+          ? `<p style="margin:0 0 12px;">${newThisMonth ? `Welcome to ${BRAND.name}! You joined partway through ${safe(month, 'this month')}, so there's nothing to report just yet — but your first pickup is all it takes to change that.` : `No pickups this month — but it's never too late to start. Your everyday materials can still become ${BRAND.currency} — and a healthier planet.`}</p>
              <p style="margin:0;">Book a free pickup and make next month count.</p>`
-          : `<p style="margin:0 0 4px;">Here's the difference your everyday green gestures made this month:</p>
+          : `<p style="margin:0 0 4px;">${newThisMonth ? `Welcome aboard! Since you joined partway through ${safe(month, 'this month')}, here's your partial snapshot so far:` : `Here's the difference your everyday green gestures made this month:`}</p>
              ${detailTable([
                ['Resources given a second life', hasKg ? `${escapeHtml(String(kg))} kg` : '—'],
                ['Green pickups completed', safe(pickups, '0')],
-               [`${BRAND.currency} earned`, safe(coins, '0')],
-               ...(xp != null && String(xp).trim() !== '' ? [['XP earned', safe(xp)]] : []),
+               [`${BRAND.currency} earned this month`, safe(coins, '0')],
+               ...(has(coinsSpent) ? [[`${BRAND.currency} redeemed this month`, safe(coinsSpent, '0')]] : []),
+               ...(has(balance) ? [[`Available balance`, `${escapeHtml(comma(balance))} ${BRAND.currency}`]] : []),
+               ...(has(xp) ? [['XP earned', safe(xp)]] : []),
              ])}
              <p style="margin:14px 0 0;">Every kilogram keeps our shared ecosystem lighter. Keep the momentum going!</p>`,
         ctaLabel: didNothing ? 'Book a free pickup' : 'Schedule your next pickup',
@@ -200,7 +212,7 @@ const templates = {
         <tr><td style="padding:16px 18px;">
           <h3 style="margin:0 0 6px;font-size:16px;line-height:1.3;color:${BRAND.colors.text};font-weight:800;">${safe(a && a.title, 'Untitled')}</h3>
           <p style="margin:0 0 12px;font-size:13.5px;line-height:1.55;color:${BRAND.colors.body};">${safe(a && a.excerpt, '')}</p>
-          <a href="${(a && a.url) || `${SITE}/KnowledgeHub`}" style="font-size:13px;font-weight:800;color:${BRAND.colors.green};text-decoration:none;">Learn how &rarr;</a>
+          <a href="${(a && a.url) || `${SITE}/KnowledgeHub`}" style="font-size:13px;font-weight:800;color:${BRAND.colors.green};text-decoration:none;">Read more &rarr;</a>
         </td></tr>
       </table>`).join('');
     return {
@@ -218,36 +230,99 @@ const templates = {
     };
   },
 
-  // One-time campaign: announce that redemption/cash-out is live.
-  REDEMPTION_LIVE: ({ name, balance, unsubscribeUrl }) => ({
-    subject: `Your ${BRAND.namePlain} rewards are ready to redeem`,
-    html: wrapEmail({
-      unsubscribeUrl: unsub(unsubscribeUrl),
-      preheader: `Turn your ${BRAND.currency} into real rewards.`,
-      heading: 'Your Rewards Are Ready',
-      greetingName: name,
-      bodyHtml: `<p style="margin:0 0 12px;">Good news — you can now redeem your ${BRAND.currency} for real rewards.</p>
-        ${balance != null && String(balance).trim() !== '' ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:6px 0 16px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:14px;"><tr><td align="center" style="padding:18px;"><div style="font-size:34px;line-height:1.1;font-weight:900;color:${BRAND.colors.green};">${escapeHtml(comma(balance))}</div><div style="font-size:13px;font-weight:700;color:${BRAND.colors.muted};margin-top:2px;">${BRAND.currency} ready to cash out</div></td></tr></table>` : ''}
-        <p style="margin:0;">Every gesture you've made for the ecosystem brought you here. Keep going, and keep earning.</p>`,
-      ctaLabel: 'Open my wallet',
-      ctaUrl: `${SITE}/Wallet`,
-    }),
-  }),
+  // Rewards / redemption email — three states driven by the recipient's data so we
+  // never tell a zero-balance user to "redeem now":
+  //   A) has a redeemable balance (eligible)     → "ready to redeem", CTA Redeem now
+  //   B) zero balance                             → "start earning", CTA Schedule a pickup
+  //   C) has balance but not yet eligible         → "almost there", CTA View rewards
+  // `balance` = redeemable coins, `xp` optional, `eligible` (default true) gates C,
+  // `minRedeem` optional threshold shown in state C.
+  REDEMPTION_LIVE: ({ name, balance, xp, eligible, minRedeem, unsubscribeUrl }) => {
+    const num = (v) => (v != null && String(v).trim() !== '' ? Number(String(v).replace(/[^\d.]/g, '')) || 0 : 0);
+    const has = (v) => v != null && String(v).trim() !== '';
+    const hasBalance = num(balance) > 0;
+    const notEligible = eligible === false || String(eligible) === 'false';
+    const state = !hasBalance ? 'earn' : (notEligible ? 'soon' : 'ready');
 
-  // Generic product/feature announcement. `title`/`body`/`ctaLabel`/`ctaUrl` are
-  // filled per campaign; all fall back so the shell always renders.
-  FEATURE_ANNOUNCEMENT: ({ name, title, body, ctaLabel, ctaUrl, unsubscribeUrl }) => ({
-    subject: safe(title, `What's new on ${BRAND.namePlain}`),
-    html: wrapEmail({
-      unsubscribeUrl: unsub(unsubscribeUrl),
-      preheader: safe(title, `A new update just landed on ${BRAND.namePlain}.`),
-      heading: safe(title, "What's new"),
-      greetingName: name,
-      bodyHtml: `<p style="margin:0 0 12px;">${safe(body, `We've just rolled out an update to make ${BRAND.name} even better. Open the app to check it out.`)}</p>`,
-      ctaLabel: safe(ctaLabel, 'Open the app'),
-      ctaUrl: safe(ctaUrl, `${SITE}/`),
-    }),
-  }),
+    const balanceCard = (labelText) => `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:6px 0 16px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:14px;"><tr><td align="center" style="padding:18px;">
+        <div style="font-size:34px;line-height:1.1;font-weight:900;color:${BRAND.colors.green};">${escapeHtml(comma(balance))}</div>
+        <div style="font-size:13px;font-weight:700;color:${BRAND.colors.muted};margin-top:2px;">${labelText}</div>
+        ${has(xp) ? `<div style="font-size:13px;font-weight:700;color:${BRAND.colors.muted};margin-top:6px;">${escapeHtml(comma(xp))} XP earned</div>` : ''}
+      </td></tr></table>`;
+
+    const copy = {
+      ready: {
+        subject: `Your ${BRAND.currency} are ready to redeem on ${BRAND.namePlain}`,
+        preheader: `Turn your ${BRAND.currency} into real rewards.`,
+        heading: 'Your rewards are ready',
+        body: `<p style="margin:0 0 12px;">Good news — your ${BRAND.currency} can now be redeemed for real rewards.</p>
+          ${balanceCard(`${BRAND.currency} ready to redeem`)}
+          <p style="margin:0;">Every gesture you've made for the ecosystem brought you here. Keep going, and keep earning.</p>`,
+        ctaLabel: 'Redeem now',
+        ctaUrl: `${SITE}/Wallet`,
+      },
+      soon: {
+        subject: `Your ${BRAND.namePlain} rewards are almost ready`,
+        preheader: `You're close — a little more and your ${BRAND.currency} unlock.`,
+        heading: 'Almost there',
+        body: `<p style="margin:0 0 12px;">You're building a great balance${has(minRedeem) ? ` — you need <strong>${escapeHtml(comma(minRedeem))} ${BRAND.currency}</strong> to start redeeming` : ''}. Keep it going and your rewards will unlock soon.</p>
+          ${balanceCard(`${BRAND.currency} so far`)}
+          <p style="margin:0;">A pickup, quiz, or referral gets you there faster.</p>`,
+        ctaLabel: 'View rewards',
+        ctaUrl: `${SITE}/Wallet`,
+      },
+      earn: {
+        subject: `Start earning redeemable ${BRAND.currency} with ${BRAND.namePlain}`,
+        preheader: `Your everyday materials can become real rewards.`,
+        heading: 'Start earning rewards',
+        body: `<p style="margin:0 0 12px;">You can now redeem ${BRAND.currency} for real rewards — you just need a balance to begin. Your everyday materials are the easiest way to start.</p>
+          <p style="margin:0;">Book a free pickup and watch your rewards grow.</p>`,
+        ctaLabel: 'Schedule a pickup',
+        ctaUrl: `${SITE}/SchedulePickup`,
+      },
+    }[state];
+
+    return {
+      subject: copy.subject,
+      html: wrapEmail({
+        unsubscribeUrl: unsub(unsubscribeUrl),
+        preheader: copy.preheader,
+        heading: copy.heading,
+        greetingName: name,
+        bodyHtml: copy.body,
+        ctaLabel: copy.ctaLabel,
+        ctaUrl: copy.ctaUrl,
+      }),
+    };
+  },
+
+  // Generic product/feature announcement. Flexible per campaign:
+  //   `title`   — feature name (subject always carries the brand)
+  //   `image`   — screenshot/hero URL (optional)
+  //   `body`    — short description
+  //   `benefits`— array of key user benefits (optional; rendered as a checklist)
+  //   `ctaLabel`/`ctaUrl` — link straight to the feature, not the homepage
+  FEATURE_ANNOUNCEMENT: ({ name, title, image, body, benefits, ctaLabel, ctaUrl, unsubscribeUrl }) => {
+    const list = Array.isArray(benefits) ? benefits.filter((b) => has0(b)) : [];
+    const benefitsHtml = list.length
+      ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:6px 0 14px;">${list.map((b) => `<tr><td style="padding:4px 0;font-size:14px;color:${BRAND.colors.body};"><span style="color:${BRAND.colors.green};font-weight:800;">&#10003;</span>&nbsp;&nbsp;${safe(b, '')}</td></tr>`).join('')}</table>`
+      : '';
+    const imgHtml = has0(image)
+      ? `<img src="${image}" width="536" alt="${safe(title, 'New feature')}" style="display:block;width:100%;max-width:536px;height:auto;border:1px solid ${BRAND.colors.line};border-radius:14px;margin:0 0 16px;" />`
+      : '';
+    return {
+      subject: has0(title) ? `${safe(title)} — ${BRAND.namePlain}` : `What's new on ${BRAND.namePlain}`,
+      html: wrapEmail({
+        unsubscribeUrl: unsub(unsubscribeUrl),
+        preheader: safe(title, `A new update just landed on ${BRAND.namePlain}.`),
+        heading: safe(title, "What's new"),
+        greetingName: name,
+        bodyHtml: `${imgHtml}<p style="margin:0 0 12px;">${safe(body, `We've just rolled out an update to make ${BRAND.name} even better. Open the app to check it out.`)}</p>${benefitsHtml}`,
+        ctaLabel: safe(ctaLabel, 'Open the app'),
+        ctaUrl: safe(ctaUrl, `${SITE}/`),
+      }),
+    };
+  },
 
   // Re-engagement / win-back for lapsed users.
   WIN_BACK: ({ name, unsubscribeUrl }) => ({
@@ -259,24 +334,28 @@ const templates = {
       greetingName: name,
       bodyHtml: `<p style="margin:0 0 12px;">It's been a while! Your everyday materials can still become ${BRAND.currency} — and real impact for the ecosystem.</p>
         <p style="margin:0;">Book a free pickup whenever you're ready and keep valuable resources moving in the loop.</p>`,
-      ctaLabel: 'Schedule a pickup',
+      ctaLabel: 'Book a free pickup',
       ctaUrl: `${SITE}/SchedulePickup`,
     }),
   }),
 
-  // Seasonal / festival greeting. `occasion` e.g. "Happy Diwali"; `message` optional.
-  SEASONAL_GREETING: ({ name, occasion, message, unsubscribeUrl }) => ({
-    subject: occasion ? `${safe(occasion)} from ${BRAND.namePlain}` : `Warm wishes from ${BRAND.namePlain}`,
-    html: wrapEmail({
-      unsubscribeUrl: unsub(unsubscribeUrl),
-      preheader: safe(occasion, `Season's greetings from the ${BRAND.namePlain} team.`),
-      heading: safe(occasion, 'Warm wishes'),
-      greetingName: name,
-      bodyHtml: `<p style="margin:0 0 12px;">${safe(message, `Wishing you and your family a bright, joyful and sustainable ${safe(occasion, 'celebration')}. Thank you for keeping resources in the loop with us and making a real difference.`)}</p>`,
-      ctaLabel: 'Open the app',
-      ctaUrl: `${SITE}/`,
-    }),
-  }),
+  // Seasonal / festival greeting. `occasion` e.g. "happy diwali" (auto title-cased so
+  // festival names always render correctly: "Happy Diwali", "Eid Mubarak"); `message` optional.
+  SEASONAL_GREETING: ({ name, occasion, message, unsubscribeUrl }) => {
+    const occ = has0(occasion) ? escapeHtml(properCase(occasion)) : '';
+    return {
+      subject: occ ? `${occ} from ${BRAND.namePlain}` : `Warm wishes from ${BRAND.namePlain}`,
+      html: wrapEmail({
+        unsubscribeUrl: unsub(unsubscribeUrl),
+        preheader: occ || `Season's greetings from the ${BRAND.namePlain} team.`,
+        heading: occ || 'Warm wishes',
+        greetingName: name,
+        bodyHtml: `<p style="margin:0 0 12px;">${safe(message, `Wishing you and your family a bright, joyful and sustainable ${occ || 'celebration'}. Thank you for keeping resources in the loop with us and making a real difference.`)}</p>`,
+        ctaLabel: 'Open the app',
+        ctaUrl: `${SITE}/`,
+      }),
+    };
+  },
 
   // Daily eco-quiz nudge (email version of the push). Play to earn coins; resets nightly.
   DAILY_QUIZ: ({ name, streak, unsubscribeUrl }) => {
@@ -297,16 +376,35 @@ const templates = {
     };
   },
 
+  // Birthday greeting (reusable). Optional `bonus` = birthday KarmaCoins XP the backend
+  // credited — when present the CTA points at the wallet, otherwise a soft app nudge.
+  BIRTHDAY: ({ name, bonus, unsubscribeUrl }) => {
+    const gift = has0(bonus) && Number(String(bonus).replace(/[^\d.]/g, '')) > 0;
+    return {
+      subject: `Happy birthday from ${BRAND.namePlain}!`,
+      html: wrapEmail({
+        unsubscribeUrl: unsub(unsubscribeUrl),
+        preheader: gift ? `A little birthday gift is waiting in your wallet.` : `Wishing you a wonderful day from all of us.`,
+        heading: 'Happy birthday!',
+        greetingName: name,
+        bodyHtml: `<p style="margin:0 0 12px;">From everyone at ${BRAND.name}, we hope your day is bright, joyful and kind to the planet.</p>
+          ${gift ? `${rewardsCard(escapeHtml(comma(bonus)), null)}<p style="margin:0;">Consider it our way of saying thanks for being part of a more sustainable future. Enjoy!</p>` : `<p style="margin:0;">Here's to another year of small gestures that keep our shared ecosystem lighter.</p>`}`,
+        ctaLabel: gift ? 'See my wallet' : 'Open the app',
+        ctaUrl: gift ? `${SITE}/Wallet` : `${SITE}/`,
+      }),
+    };
+  },
+
   // Streak-tier upgrade celebration (email version of the push). `tier` = tier name.
   TIER_UPGRADE: ({ name, tier, unsubscribeUrl }) => ({
     subject: `You've reached ${safe(tier, 'a new')} tier on ${BRAND.namePlain}`,
     html: wrapEmail({
       unsubscribeUrl: unsub(unsubscribeUrl),
-      preheader: 'Your reward coins now convert at a better rate.',
+      preheader: 'Each reward coin is now worth more.',
       heading: `You've reached ${safe(tier, 'a new tier')}!`,
       greetingName: name,
-      bodyHtml: `<p style="margin:0 0 12px;">Your consistency is paying off — you've reached <strong>${safe(tier, 'a new')} tier</strong>. Your reward coins now convert at a better rate.</p>
-        <p style="margin:0;">Keep the streak alive with a pickup, quiz, or referral to hold on to it.</p>`,
+      bodyHtml: `<p style="margin:0 0 12px;">Your consistency is paying off — you've reached <strong>${safe(tier, 'a new')} tier</strong>. Each of your reward coins is now worth more than it was at your previous tier.</p>
+        <p style="margin:0;">Keep the streak alive with a pickup, quiz, or referral to hold your tier — and climb higher for even more value.</p>`,
       ctaLabel: 'See my wallet',
       ctaUrl: `${SITE}/Wallet`,
     }),
