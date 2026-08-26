@@ -63,14 +63,30 @@ jobs:
       - name: Accept Android SDK licenses
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
 
-      - name: Build debug APK
+      # Release signing — the keystore rides in as a base64 secret (never committed),
+      # is decoded to a temp file, and the signing config is injected into the
+      # prebuild-generated build.gradle. Credentials are read from env at build time.
+      - name: Decode release keystore
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/karmaverse-upload.keystore"
+          echo "Keystore size: $(wc -c < "$RUNNER_TEMP/karmaverse-upload.keystore") bytes"
+
+      - name: Inject release signing config
+        run: node scripts/android-release-signing.js
+
+      - name: Build release APK
         working-directory: android
+        env:
+          KV_KEYSTORE_FILE: ${{ runner.temp }}/karmaverse-upload.keystore
+          KV_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KV_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KV_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleRelease --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug.apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: app-release.apk
+          path: android/app/build/outputs/apk/release/app-release.apk
