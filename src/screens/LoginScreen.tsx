@@ -1,10 +1,10 @@
 ﻿import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, SafeAreaView, StatusBar, ScrollView, Platform, KeyboardAvoidingView, Image, Animated, Easing, PanResponder } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, StatusBar, ScrollView, Platform, KeyboardAvoidingView, Image, Animated, Easing, PanResponder } from 'react-native';
 import { showAlert } from '../utils/alert';
 import { consumePendingDeepLink } from '../utils/deepLink';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets, SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { StateCityFields } from '../components/shared/StateCityFields';
