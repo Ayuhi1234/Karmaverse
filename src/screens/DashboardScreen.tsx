@@ -479,15 +479,7 @@ export function DashboardScreen({ navigation, route }: any) {
               <Gamepad2 size={24} color="#fbbf24" />
             </View>
             <View style={{ flex: 1 }}>
-              <View style={styles.quizTitleRow}>
-                <Text style={styles.quizTitle}>Daily eco-quiz</Text>
-                {quizStreak > 0 && (
-                  <View style={styles.quizStreakPill}>
-                    <Flame size={12} color="#fb923c" fill="#fb923c" />
-                    <Text style={styles.quizStreakPillText}>{quizStreak}-day streak</Text>
-                  </View>
-                )}
-              </View>
+              <Text style={styles.quizTitle}>Daily eco-quiz</Text>
               <Text style={styles.quizSub}>Test your green IQ and earn KarmaCoins XP.</Text>
               <View style={styles.quizChipsRow}>
                 <View style={styles.quizChip}><Text style={styles.quizChipText}>3 questions</Text></View>
@@ -758,10 +750,7 @@ const styles = StyleSheet.create({
   quizDecor: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   quizContent: { flexDirection: 'row', alignItems: 'center', gap: 16, marginBottom: 16 },
   quizIconBg: { width: 48, height: 48, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },
-  quizTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
   quizTitle: { fontSize: 18, fontWeight: '900', color: 'white' },
-  quizStreakPill: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(255,255,255,0.18)', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999 },
-  quizStreakPillText: { color: '#fde68a', fontSize: 11, fontWeight: '800' },
   quizSub: { fontSize: 13, color: '#e9d5ff', fontWeight: '600', lineHeight: 18, marginTop: 4 },
   quizChipsRow: { flexDirection: 'row', gap: 8, marginTop: 10 },
   quizChip: { backgroundColor: 'rgba(255,255,255,0.16)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
