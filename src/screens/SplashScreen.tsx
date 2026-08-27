@@ -188,7 +188,7 @@ export function SplashScreen({ navigation }: any) {
           <View style={styles.impactCard}>
             <View style={[styles.impactIconBg, { backgroundColor: 'rgba(16,185,129,0.15)' }]}><LexIcon color="#10b981" /></View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.impactTitle}>1.855 Lakhs+</Text>
+              <Text style={styles.impactTitle}>1.86 Lakhs+</Text>
               <Text style={styles.impactDesc}>Citizens provided awareness</Text>
             </View>
           </View>
