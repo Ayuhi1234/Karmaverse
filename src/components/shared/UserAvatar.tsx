@@ -4,11 +4,12 @@ import Svg, { Circle, Path, Ellipse, ClipPath, Defs, LinearGradient, Stop, G, Re
 
 // A WhatsApp-style default avatar that reflects the user's gender: a white
 // silhouette (face + shoulders) with hair — short for male, shoulder-length for
-// female — on a saturated gender-coloured circle. Reads well on both the green
-// dashboard header and the white profile card.
+// female — on a saturated gender-coloured circle. Everything (including the
+// optional white ring) is drawn inside the SVG so the fill reaches the edge
+// with no gap. Reads well on both the green header and the white profile card.
 type Gender = string | null | undefined;
 
-const HAIR = 'rgba(15,23,42,0.38)'; // dark, semi-transparent — reads as hair on the white face
+const HAIR = 'rgba(15,23,42,0.4)'; // dark, semi-transparent — reads as hair on the white face
 const BODY = '#ffffff';
 
 function grad(gender: Gender): [string, string] {
@@ -22,7 +23,7 @@ export function UserAvatar({ gender, size = 48, ring }: { gender?: Gender; size?
   const [c1, c2] = grad(gender);
   const female = String(gender || '').toLowerCase() === 'female';
   return (
-    <View style={[{ width: size, height: size, borderRadius: size / 2, overflow: 'hidden' }, ring && { borderWidth: 2.5, borderColor: 'rgba(255,255,255,0.95)' }]}>
+    <View style={{ width: size, height: size }}>
       <Svg width={size} height={size} viewBox="0 0 100 100">
         <Defs>
           <ClipPath id="clip"><Circle cx="50" cy="50" r="50" /></ClipPath>
@@ -31,28 +32,33 @@ export function UserAvatar({ gender, size = 48, ring }: { gender?: Gender; size?
             <Stop offset="1" stopColor={c2} />
           </LinearGradient>
         </Defs>
+
+        {/* Gender-coloured disc — fills edge to edge */}
         <G clipPath="url(#clip)">
           <Rect x="0" y="0" width="100" height="100" fill="url(#bg)" />
 
-          {/* Shoulders — a wide rounded body, clipped by the circle at the bottom */}
-          <Ellipse cx="50" cy="108" rx="35" ry="42" fill={BODY} />
+          {/* Shoulders — wide rounded body, clipped by the disc at the bottom */}
+          <Ellipse cx="50" cy="98" rx="33" ry="35" fill={BODY} />
 
           {female ? (
             <>
               {/* Hair behind the head + two locks onto the shoulders */}
-              <Circle cx="50" cy="38" r="19" fill={HAIR} />
-              <Ellipse cx="33" cy="54" rx="6.5" ry="13" fill={HAIR} />
-              <Ellipse cx="67" cy="54" rx="6.5" ry="13" fill={HAIR} />
-              <Circle cx="50" cy="41" r="15" fill={BODY} />
+              <Circle cx="50" cy="35" r="19" fill={HAIR} />
+              <Ellipse cx="32" cy="50" rx="6.5" ry="13" fill={HAIR} />
+              <Ellipse cx="68" cy="50" rx="6.5" ry="13" fill={HAIR} />
+              <Circle cx="50" cy="38" r="15" fill={BODY} />
             </>
           ) : (
             <>
-              <Circle cx="50" cy="39" r="16" fill={BODY} />
+              <Circle cx="50" cy="37" r="16" fill={BODY} />
               {/* Short hair cap */}
-              <Path d="M34 39 C34 24 66 24 66 39 C61 31 56 28 50 28 C44 28 39 31 34 39 Z" fill={HAIR} />
+              <Path d="M34 37 C34 22 66 22 66 37 C61 29 56 26 50 26 C44 26 39 29 34 37 Z" fill={HAIR} />
             </>
           )}
         </G>
+
+        {/* Optional white ring, drawn inside the disc edge so no background shows through */}
+        {ring && <Circle cx="50" cy="50" r="47" fill="none" stroke="#ffffff" strokeWidth="5" opacity={0.95} />}
       </Svg>
     </View>
   );
