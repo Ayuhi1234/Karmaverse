@@ -4,7 +4,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Bell, ChevronRight, Truck, Camera, Clock, Users, Package, Flame, Gamepad2, Gift, Star, ShieldCheck, Coins, BadgeCheck, ArrowRight, BookOpen, X, WifiOff, RefreshCw, Trophy } from 'lucide-react-native';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
-import { QuizCalendarModal } from '../components/shared/QuizCalendarModal';
 import { NotificationPanel } from '../components/shared/NotificationPanel';
 import NotificationPermissionBanner from '../components/shared/NotificationPermissionBanner';
 import { LaunchDayPopup } from '../components/shared/LaunchDayPopup';
@@ -150,7 +149,6 @@ export function DashboardScreen({ navigation, route }: any) {
   const [isOffline, setIsOffline] = useState(false);
   const offlineAnim = useRef(new Animated.Value(0)).current;
   const [quizHistory, setQuizHistory] = useState<string[]>([]);
-  const [showQuizCalendar, setShowQuizCalendar] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const { notifications, unreadCount, markRead, markAllRead, clearAll } = useNotifications();
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
@@ -625,13 +623,6 @@ export function DashboardScreen({ navigation, route }: any) {
       </Modal>
 
     </ScrollView>
-
-    <QuizCalendarModal
-      visible={showQuizCalendar}
-      onClose={() => setShowQuizCalendar(false)}
-      playedDates={quizHistory}
-      streak={quizStreak}
-    />
 
     <NotificationPanel
       visible={showNotifications}
