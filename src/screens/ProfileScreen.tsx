@@ -721,13 +721,13 @@ export function ProfileScreen({ navigation }: any) {
                     <View style={styles.divider} />
                   </>
                 )}
-                {pushEnabled !== null && (
+                {Platform.OS !== 'web' && (
                   <>
                     <OptionRow
-                      icon={pushEnabled ? <Bell size={18} color="#16a34a" /> : <BellOff size={18} color="#b45309" />}
-                      bg={pushEnabled ? '#f0fdf4' : '#fffbeb'}
+                      icon={pushEnabled === false ? <BellOff size={18} color="#b45309" /> : <Bell size={18} color="#16a34a" />}
+                      bg={pushEnabled === false ? '#fffbeb' : '#f0fdf4'}
                       title="Notifications"
-                      sub={pushEnabled ? 'On' : 'Off — tap to turn on'}
+                      sub={pushEnabled === true ? 'On' : pushEnabled === false ? 'Off — tap to turn on' : 'Manage notifications'}
                       onPress={() => (pushEnabled ? openNotificationSettings() : enablePush())}
                     />
                     <View style={styles.divider} />
