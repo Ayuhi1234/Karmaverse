@@ -206,7 +206,6 @@ export function SplashScreen({ navigation }: any) {
               <Text style={styles.impactDesc}>Circular economy network across Delhi NCR</Text>
             </View>
           </View>
-          <Text style={{ textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: 11, marginTop: 10 }}>3RZeroWaste • Haryana, India • Est. 2024</Text>
         </View>
       );
     }
@@ -241,12 +240,6 @@ export function SplashScreen({ navigation }: any) {
       return (
         <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1, gap: 24 }}>
           <KarmaCoin size={120} glow animated />
-          <View style={{ alignItems: 'center', gap: 8 }}>
-            <View style={{ backgroundColor: 'rgba(74,222,128,0.15)', paddingVertical: 6, paddingHorizontal: 20, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(74,222,128,0.3)' }}>
-              <Text style={{ color: '#4ade80', fontWeight: '800', fontSize: 12, letterSpacing: 1.5 }}>3R ZERO WASTE</Text>
-            </View>
-            <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: '500' }}>Haryana, India • Est. 2024</Text>
-          </View>
         </View>
       );
     }
