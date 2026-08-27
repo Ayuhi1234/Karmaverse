@@ -8,7 +8,7 @@ import Svg, { Circle, Path, Ellipse, ClipPath, Defs, LinearGradient, Stop, G, Re
 // dashboard header and the white profile card.
 type Gender = string | null | undefined;
 
-const HAIR = 'rgba(15,23,42,0.34)'; // dark, semi-transparent — reads as hair on the white face
+const HAIR = 'rgba(15,23,42,0.38)'; // dark, semi-transparent — reads as hair on the white face
 const BODY = '#ffffff';
 
 function grad(gender: Gender): [string, string] {
@@ -18,14 +18,11 @@ function grad(gender: Gender): [string, string] {
   return ['#34d399', '#059669']; // other / not specified — brand green
 }
 
-// Shoulders reach the bottom edge so there's no gap under the circle.
-const SHOULDERS = 'M50 52 C32 52 19 66 19 100 L81 100 C81 66 68 52 50 52 Z';
-
 export function UserAvatar({ gender, size = 48, ring }: { gender?: Gender; size?: number; ring?: boolean }) {
   const [c1, c2] = grad(gender);
   const female = String(gender || '').toLowerCase() === 'female';
   return (
-    <View style={[{ width: size, height: size, borderRadius: size / 2, overflow: 'hidden' }, ring && { borderWidth: 3, borderColor: 'rgba(255,255,255,0.95)' }]}>
+    <View style={[{ width: size, height: size, borderRadius: size / 2, overflow: 'hidden' }, ring && { borderWidth: 2.5, borderColor: 'rgba(255,255,255,0.95)' }]}>
       <Svg width={size} height={size} viewBox="0 0 100 100">
         <Defs>
           <ClipPath id="clip"><Circle cx="50" cy="50" r="50" /></ClipPath>
@@ -36,21 +33,23 @@ export function UserAvatar({ gender, size = 48, ring }: { gender?: Gender; size?
         </Defs>
         <G clipPath="url(#clip)">
           <Rect x="0" y="0" width="100" height="100" fill="url(#bg)" />
-          <Path d={SHOULDERS} fill={BODY} />
+
+          {/* Shoulders — a wide rounded body, clipped by the circle at the bottom */}
+          <Ellipse cx="50" cy="108" rx="35" ry="42" fill={BODY} />
 
           {female ? (
             <>
-              {/* Hair behind the head + two locks falling onto the shoulders */}
-              <Circle cx="50" cy="37" r="19" fill={HAIR} />
-              <Ellipse cx="32" cy="55" rx="6" ry="14" fill={HAIR} />
-              <Ellipse cx="68" cy="55" rx="6" ry="14" fill={HAIR} />
-              <Circle cx="50" cy="40" r="14" fill={BODY} />
+              {/* Hair behind the head + two locks onto the shoulders */}
+              <Circle cx="50" cy="38" r="19" fill={HAIR} />
+              <Ellipse cx="33" cy="54" rx="6.5" ry="13" fill={HAIR} />
+              <Ellipse cx="67" cy="54" rx="6.5" ry="13" fill={HAIR} />
+              <Circle cx="50" cy="41" r="15" fill={BODY} />
             </>
           ) : (
             <>
-              <Circle cx="50" cy="38" r="15" fill={BODY} />
+              <Circle cx="50" cy="39" r="16" fill={BODY} />
               {/* Short hair cap */}
-              <Path d="M35 38 C35 24 65 24 65 38 C61 31 56 28 50 28 C44 28 39 31 35 38 Z" fill={HAIR} />
+              <Path d="M34 39 C34 24 66 24 66 39 C61 31 56 28 50 28 C44 28 39 31 34 39 Z" fill={HAIR} />
             </>
           )}
         </G>
