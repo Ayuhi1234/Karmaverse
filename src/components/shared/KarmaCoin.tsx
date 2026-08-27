@@ -69,20 +69,21 @@ export function KarmaCoin({ size = 48, glow = false, animated = false }: { size?
         </>
       )}
 
+      {/* Soft CIRCULAR gold halo — replaces the old image shadow, which rendered
+          as a square box behind the coin (shadow/elevation is cast from the PNG's
+          rectangular bounds, not its round shape). */}
+      {glow && (
+        <>
+          <View style={[styles.halo, { width: size * 1.4, height: size * 1.4, borderRadius: size, backgroundColor: '#fbbf24', opacity: 0.16 }]} />
+          <View style={[styles.halo, { width: size * 1.18, height: size * 1.18, borderRadius: size, backgroundColor: '#f59e0b', opacity: 0.28 }]} />
+        </>
+      )}
+
       {/* Approved KarmaVerse gold K-coin */}
       <Image
         source={require('../../../assets/coin.png')}
         resizeMode="contain"
-        style={{
-          width: size,
-          height: size,
-          position: 'absolute',
-          shadowColor: glow ? '#f59e0b' : '#000',
-          shadowOffset: { width: 0, height: glow ? 0 : 4 },
-          shadowOpacity: glow ? 0.7 : 0.3,
-          shadowRadius: glow ? 20 : 10,
-          elevation: glow ? 15 : 5,
-        }}
+        style={{ width: size, height: size, position: 'absolute' }}
       />
     </View>
   );
@@ -94,5 +95,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#f59e0b',
     backgroundColor: 'transparent',
+  },
+  halo: {
+    position: 'absolute',
   },
 });
