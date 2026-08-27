@@ -341,10 +341,6 @@ export function DashboardScreen({ navigation, route }: any) {
             </View>
           </View>
           <View style={{ flexDirection: 'row', gap: 12 }}>
-            <TouchableOpacity style={styles.streakBadge} onPress={() => setShowQuizCalendar(true)} activeOpacity={0.75}>
-              <Flame size={16} color="#f97316" fill="#f97316" />
-              <Text style={styles.streakText}>{quizStreak}</Text>
-            </TouchableOpacity>
             <TouchableOpacity style={styles.bellButton} onPress={() => setShowNotifications(true)}>
               <Bell size={20} color="white" />
               {unreadCount > 0 && (
@@ -710,8 +706,6 @@ const styles = StyleSheet.create({
   orderSub: { fontSize: 12, color: '#9ca3af', fontWeight: '500' },
   orderCreditsBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   orderCreditsText: { fontSize: 13, color: '#d97706', fontWeight: '700' },
-  streakBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.15)', paddingHorizontal: 12, borderRadius: 20, gap: 4 },
-  streakText: { color: 'white', fontWeight: 'bold', fontSize: 13 },
   quizCard: { borderRadius: 24, padding: 20, elevation: 6, shadowColor: '#047857', shadowOffset: {width: 0, height: 6}, shadowOpacity: 0.3, shadowRadius: 10, borderWidth: 1, borderColor: '#10b981' },
   quizContent: { flexDirection: 'row', alignItems: 'center', gap: 16, marginBottom: 16 },
   quizIconBg: { width: 48, height: 48, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },
