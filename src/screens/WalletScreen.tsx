@@ -424,8 +424,16 @@ const styles = StyleSheet.create({
   txAmount: { fontSize: 15, fontWeight: '900' },
 
   // Modals (ledger picker + tier ladder)
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(15,23,42,0.55)', justifyContent: 'flex-end' },
-  sheet: { backgroundColor: 'white', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 22, paddingBottom: 34, maxWidth: 560, width: '100%', alignSelf: 'center' },
+  // Web: centered dialog. Mobile: bottom sheet.
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(15,23,42,0.55)', justifyContent: Platform.OS === 'web' ? 'center' : 'flex-end', alignItems: 'center', padding: Platform.OS === 'web' ? 20 : 0 },
+  sheet: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 24, borderTopRightRadius: 24,
+    borderBottomLeftRadius: Platform.OS === 'web' ? 24 : 0,
+    borderBottomRightRadius: Platform.OS === 'web' ? 24 : 0,
+    padding: 22, paddingBottom: Platform.OS === 'web' ? 22 : 34,
+    maxWidth: 560, width: '100%', alignSelf: 'center',
+  },
   sheetHandle: { width: 44, height: 5, borderRadius: 3, backgroundColor: '#e2e8f0', alignSelf: 'center', marginBottom: 16 },
   sheetTitleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   sheetTitle: { fontSize: 18, fontWeight: '900', color: '#0f172a', marginBottom: 4 },
