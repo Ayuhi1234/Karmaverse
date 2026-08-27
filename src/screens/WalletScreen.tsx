@@ -146,7 +146,7 @@ export function WalletScreen({ navigation }: any) {
           {/* Balance card */}
           <View style={styles.balanceCard}>
             <View style={styles.cardTopRow}>
-              <Text style={styles.cardLabel}>Total earned</Text>
+              <Text style={styles.cardLabel}>Total balance</Text>
               <TouchableOpacity style={styles.tierPill} onPress={() => setTierModalVisible(true)} activeOpacity={0.8}>
                 <View style={[styles.activeDot, { backgroundColor: tierMeta.color }]} />
                 <Text style={styles.activeText}>{tierMeta.name} · {rewardRate}:1</Text>
@@ -155,8 +155,11 @@ export function WalletScreen({ navigation }: any) {
             <View style={styles.balanceRow}>
               <KarmaCoin size={44} glow animated />
               <View>
-                <Text style={styles.balanceText}>{lifetime.toLocaleString()}</Text>
-                <Text style={styles.unitTag} numberOfLines={1}>KarmaCoins XP</Text>
+                {/* Headline = current total = the two wallets below, so they add up. */}
+                <Text style={styles.balanceText}>{(pickupCoins + rewardCoins).toLocaleString()}</Text>
+                <Text style={styles.unitTag} numberOfLines={1}>
+                  KarmaCoins XP{lifetime > pickupCoins + rewardCoins ? ` · ${lifetime.toLocaleString()} earned all-time` : ''}
+                </Text>
               </View>
             </View>
 
