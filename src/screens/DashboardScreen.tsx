@@ -7,6 +7,7 @@ import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { getArticleById } from '../data/articles';
 import { NotificationPanel } from '../components/shared/NotificationPanel';
 import NotificationPermissionBanner from '../components/shared/NotificationPermissionBanner';
+import NotificationPrimerModal from '../components/shared/NotificationPrimerModal';
 import { LaunchDayPopup } from '../components/shared/LaunchDayPopup';
 import { useNotifications } from '../context/NotificationContext';
 import { profileService } from '../services/profile';
@@ -687,6 +688,8 @@ export function DashboardScreen({ navigation, route }: any) {
       </Modal>
 
     </ScrollView>
+
+    <NotificationPrimerModal />
 
     <NotificationPanel
       visible={showNotifications}

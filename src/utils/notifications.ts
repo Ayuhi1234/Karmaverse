@@ -48,13 +48,12 @@ export async function registerForPushNotifications(): Promise<string | null> {
     });
   }
 
-  const { status: existing } = await Notifications.getPermissionsAsync();
-  let finalStatus = existing;
-  if (existing !== 'granted') {
-    const { status } = await Notifications.requestPermissionsAsync();
-    finalStatus = status;
-  }
-  if (finalStatus !== 'granted') return null;
+  // Only register a token when permission is ALREADY granted — we never fire the OS
+  // prompt from here. Asking is done explicitly (the in-app primer / Profile row via
+  // enablePush → requestPushPermission), so the user sees our branded ask first and
+  // the one-shot iOS dialog is never spent silently on login.
+  const { status } = await Notifications.getPermissionsAsync();
+  if (status !== 'granted') return null;
 
   const tokenData = await Notifications.getDevicePushTokenAsync();
   return tokenData.data;
