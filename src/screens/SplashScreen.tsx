@@ -151,10 +151,6 @@ export function SplashScreen({ navigation }: any) {
       return (
         <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1 }}>
           <KarmaCoin size={140} glow animated />
-          <View style={{ backgroundColor: 'rgba(255,255,255,0.1)', paddingVertical: 6, paddingHorizontal: 16, borderRadius: 20, marginTop: 40, flexDirection: 'row', alignItems: 'center' }}>
-            <View style={{ width: 14, height: 14, borderRadius: 7, backgroundColor: '#4ade80', marginRight: 6, alignItems: 'center', justifyContent: 'center' }}><Text style={{fontSize: 6, fontWeight: '900', color: '#000'}}>3R</Text></View>
-            <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>Powered by <Text style={{ color: 'white', fontWeight: 'bold' }}>3RZeroWaste</Text></Text>
-          </View>
         </View>
       );
     }
