@@ -393,7 +393,14 @@ export function QuizScreen({ navigation }: any) {
           'Our server takes a few seconds to start. Please wait a moment and try again.',
         );
       } else {
-        showAlert('Could not start quiz', 'Something went wrong. Please try again.');
+        // Surface the real status/message so a backend error is diagnosable
+        // instead of a blank "something went wrong".
+        const status = err?.response?.status;
+        const backendMsg = err?.response?.data?.message || err?.message || '';
+        showAlert(
+          'Could not start quiz',
+          `Please try again in a moment.${status ? `\n\n(error ${status}${backendMsg ? `: ${backendMsg}` : ''})` : ''}`,
+        );
       }
     } finally {
       setIsFetching(false);
