@@ -3,33 +3,23 @@ import { showAlert } from './alert';
 
 // Fixed copy for persistent banners (Wallet screen, Home wallet widget) — kept static
 // so the text doesn't visibly change on every re-render/focus.
-export const REDEEM_INFO_TITLE = '🎉 Redemption opens 30th September!';
+export const REDEEM_INFO_TITLE = 'Redemption opens 1 October 🎉';
 export const REDEEM_INFO_MESSAGE =
-  '10 KarmaCoins XP = ₹1 — cash out starting 30th September. Keep taking sustainable actions, keep earning! ♻️✨';
+  'From 1 October, cash out your KarmaCoins XP — 10 XP = ₹1. Keep earning till then!';
 
 // Single switch that flips the Wallet screen's Redeem button from the countdown
 // popup over to the real redeem flow — flip the date (or the flow) here only.
-export const REDEEM_LAUNCH_DATE = new Date('2026-09-30T00:00:00');
+export const REDEEM_LAUNCH_DATE = new Date('2026-10-01T00:00:00');
 export function isRedeemLive() {
   return true;
 }
 
-// Rotating flavor text for one-off popups, so repeat triggers (booking, quiz, home)
-// don't all show the exact same line.
-const CHEESY_LINES = [
-  { emoji: '🎉', tagline: 'Ka-ching! Your KarmaCoins are about to turn into real cash!' },
-  { emoji: '🌱', tagline: 'Small scraps, big rewards — Mother Earth (and your wallet) says thanks!' },
-  { emoji: '♻️', tagline: "Trash today, cash tomorrow — you're basically a recycling superhero!" },
-  { emoji: '💰', tagline: 'Cha-ching! Every bit of KarmaCoins XP is quietly building your treasure chest.' },
-  { emoji: '🌍', tagline: "Saving the planet AND stacking coins? Now that's a win-win!" },
-  { emoji: '🚀', tagline: 'Your KarmaCoins are fueling up for lift-off — redemption day is almost here!' },
-];
-
+// One clean, consistent message — simple and not text-heavy. The blank line
+// between the two short paragraphs gives them room to breathe in the popup.
 function buildPopupContent() {
-  const { emoji, tagline } = CHEESY_LINES[Math.floor(Math.random() * CHEESY_LINES.length)];
   return {
-    title: `${emoji} Redemption opens 30th September!`,
-    message: `${tagline}\n\n10 KarmaCoins XP = ₹1 — cash out starting 30th September.\nKeep taking sustainable actions, keep earning! ♻️✨`,
+    title: 'Redemption opens 1 October 🎉',
+    message: 'From 1 October, your KarmaCoins XP turn into real cash — 10 XP = ₹1.\n\nKeep earning with every sustainable action! ♻️',
   };
 }
 
