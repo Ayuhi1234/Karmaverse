@@ -375,7 +375,7 @@ export function DashboardScreen({ navigation, route }: any) {
             </TouchableOpacity>
           </View>
           <View style={styles.balanceRow}>
-            <KarmaCoin size={44} glow />
+            <KarmaCoin size={44} glow animated />
             <Text style={styles.balanceText}>{balance.toLocaleString()}</Text>
           </View>
 
