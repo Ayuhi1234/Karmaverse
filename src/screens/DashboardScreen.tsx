@@ -4,7 +4,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Bell, ChevronRight, Truck, Camera, Clock, Users, Package, Flame, Gamepad2, Gift, Star, ShieldCheck, Coins, BadgeCheck, ArrowRight, X, WifiOff, RefreshCw, Trophy, Sparkles } from 'lucide-react-native';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
-import { getArticleById } from '../data/articles';
 import { NotificationPanel } from '../components/shared/NotificationPanel';
 import NotificationPermissionBanner from '../components/shared/NotificationPermissionBanner';
 import NotificationPrimerModal from '../components/shared/NotificationPrimerModal';
@@ -606,12 +605,12 @@ export function DashboardScreen({ navigation, route }: any) {
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 16 }}>
           <TouchableOpacity style={styles.articleCard} activeOpacity={0.8} onPress={() => navigation.navigate('ArticleDetail', { id: 'cut-plastic-at-home' })}>
-            <Image source={{ uri: getArticleById('cut-plastic-at-home').image }} style={[styles.articleImgPlaceholder, { backgroundColor: '#dcfce7' }]} resizeMode="cover" />
+            <Image source={require('../../assets/catalogue/hard-plastic.jpg')} style={[styles.articleImgPlaceholder, { backgroundColor: '#dcfce7' }]} resizeMode="cover" />
             <Text style={styles.articleTitle}>5 easy ways to cut plastic waste at home</Text>
             <Text style={styles.articleSource}>KarmaVerse editorial</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.articleCard} activeOpacity={0.8} onPress={() => navigation.navigate('ArticleDetail', { id: 'india-ewaste' })}>
-            <Image source={{ uri: getArticleById('india-ewaste').image }} style={[styles.articleImgPlaceholder, { backgroundColor: '#e0f2fe' }]} resizeMode="cover" />
+            <Image source={require('../../assets/catalogue/desktop.jpg')} style={[styles.articleImgPlaceholder, { backgroundColor: '#e0f2fe' }]} resizeMode="cover" />
             <Text style={styles.articleTitle}>India's e-waste mountain — and the opportunity inside it</Text>
             <Text style={styles.articleSource}>KarmaVerse editorial</Text>
           </TouchableOpacity>
