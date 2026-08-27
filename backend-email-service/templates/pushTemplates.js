@@ -32,7 +32,7 @@ const pushTemplates = {
   // time is midnight UTC leaking through, and it reads like there's all night left).
   DAILY_QUIZ_REMINDER: () => ({
     title: "Today's eco quiz is live",
-    body: `5 quick questions, instant ${CURRENCY}. Resets tonight.`,
+    body: `3 quick questions, instant ${CURRENCY}. Resets tonight.`,
     data: { route: 'Quiz', type: 'DAILY_QUIZ_REMINDER' },
   }),
 

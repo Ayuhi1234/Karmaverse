@@ -364,10 +364,10 @@ const templates = {
       subject: `Today's eco quiz is live on ${BRAND.namePlain}`,
       html: wrapEmail({
         unsubscribeUrl: unsub(unsubscribeUrl),
-        preheader: `5 quick questions, instant ${BRAND.currency}.`,
+        preheader: `3 quick questions, instant ${BRAND.currency}.`,
         heading: "Today's eco quiz is live",
         greetingName: name,
-        bodyHtml: `<p style="margin:0 0 8px;">Answer 5 quick questions on sustainability and earn ${BRAND.currency} — it resets tonight.</p>
+        bodyHtml: `<p style="margin:0 0 8px;">Answer 3 quick questions on sustainability and earn ${BRAND.currency} — it resets tonight.</p>
           ${st ? `<p style="margin:0 0 8px;">You're on a <strong>${st}-day</strong> streak — keep it alive!</p>` : ''}
           <p style="margin:0;">A few minutes, a little knowledge, real rewards.</p>`,
         ctaLabel: "Play today's quiz",

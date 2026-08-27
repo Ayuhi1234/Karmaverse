@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, Dimensions, Platform, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Bell, ChevronRight, Truck, Camera, Clock, Users, Package, Flame, Gamepad2, Gift, Star, ShieldCheck, Coins, BadgeCheck, ArrowRight, X, WifiOff, RefreshCw, Trophy } from 'lucide-react-native';
+import { Bell, ChevronRight, Truck, Camera, Clock, Users, Package, Flame, Gamepad2, Gift, Star, ShieldCheck, Coins, BadgeCheck, ArrowRight, X, WifiOff, RefreshCw, Trophy, Sparkles } from 'lucide-react-native';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { getArticleById } from '../data/articles';
 import { NotificationPanel } from '../components/shared/NotificationPanel';
@@ -149,6 +149,19 @@ export function DashboardScreen({ navigation, route }: any) {
   const [quizStreak, setQuizStreak] = useState(0);
   const [isOffline, setIsOffline] = useState(false);
   const offlineAnim = useRef(new Animated.Value(0)).current;
+  // Subtle shine sweep across the quiz "Play now" button.
+  const quizShine = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    const anim = Animated.loop(
+      Animated.sequence([
+        Animated.timing(quizShine, { toValue: 1, duration: 1100, delay: 900, useNativeDriver: Platform.OS !== 'web' }),
+        Animated.timing(quizShine, { toValue: 0, duration: 0, useNativeDriver: Platform.OS !== 'web' }),
+        Animated.delay(1500),
+      ])
+    );
+    anim.start();
+    return () => anim.stop();
+  }, []);
   const [quizHistory, setQuizHistory] = useState<string[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const { notifications, unreadCount, markRead, markAllRead, clearAll } = useNotifications();
@@ -442,20 +455,52 @@ export function DashboardScreen({ navigation, route }: any) {
 
       {/* Daily Eco-Quiz Banner */}
       <View style={styles.section}>
-        <LinearGradient colors={['#065f46', '#047857']} style={styles.quizCard} start={{x:0, y:0}} end={{x:1,y:1}}>
+        <LinearGradient colors={['#064e3b', '#047857', '#10b981']} style={styles.quizCard} start={{x:0, y:0}} end={{x:1,y:1}}>
+          {/* Decorative background — coins + sparkles */}
+          <View pointerEvents="none" style={styles.quizDecor}>
+            <View style={{ position: 'absolute', top: 6, right: 14, opacity: 0.13 }}><KarmaCoin size={72} /></View>
+            <Sparkles size={16} color="rgba(251,191,36,0.45)" style={{ position: 'absolute', top: 20, right: 92 }} />
+            <Sparkles size={11} color="rgba(255,255,255,0.35)" style={{ position: 'absolute', top: 54, right: 34 }} />
+            <Sparkles size={13} color="rgba(255,255,255,0.25)" style={{ position: 'absolute', bottom: 66, left: 26 }} />
+          </View>
+
           <View style={styles.quizContent}>
             <View style={styles.quizIconBg}>
               <Gamepad2 size={24} color="#fbbf24" />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.quizTitle}>Daily eco-quiz 🧠</Text>
-              <Text style={styles.quizSub}>Test your green IQ. Earn KarmaCoins XP daily.</Text>
+              <View style={styles.quizTitleRow}>
+                <Text style={styles.quizTitle}>Daily eco-quiz</Text>
+                {quizStreak > 0 && (
+                  <View style={styles.quizStreakPill}>
+                    <Flame size={12} color="#fb923c" fill="#fb923c" />
+                    <Text style={styles.quizStreakPillText}>{quizStreak}-day streak</Text>
+                  </View>
+                )}
+              </View>
+              <Text style={styles.quizSub}>Test your green IQ and earn KarmaCoins XP.</Text>
+              <View style={styles.quizChipsRow}>
+                <View style={styles.quizChip}><Text style={styles.quizChipText}>3 questions</Text></View>
+                <View style={styles.quizChip}><Text style={styles.quizChipText}>~1 min</Text></View>
+              </View>
             </View>
           </View>
 
-          <TouchableOpacity style={styles.quizBtn} onPress={() => navigation.navigate('Quiz')}>
-            <Text style={styles.quizBtnText}>Play now</Text>
-          </TouchableOpacity>
+          {quizPlayedToday ? (
+            <View style={[styles.quizBtn, styles.quizBtnDone]}>
+              <BadgeCheck size={18} color="#065f46" />
+              <Text style={styles.quizBtnDoneText}>Played today — back tomorrow</Text>
+            </View>
+          ) : (
+            <TouchableOpacity style={styles.quizBtn} onPress={() => navigation.navigate('Quiz')} activeOpacity={0.9}>
+              <Animated.View
+                pointerEvents="none"
+                style={[styles.quizShine, { transform: [{ translateX: quizShine.interpolate({ inputRange: [0, 1], outputRange: [-70, 380] }) }, { skewX: '-20deg' }] }]}
+              />
+              <Text style={styles.quizBtnText}>Play now</Text>
+              <ArrowRight size={18} color="#78350f" />
+            </TouchableOpacity>
+          )}
         </LinearGradient>
       </View>
 
@@ -698,13 +743,23 @@ const styles = StyleSheet.create({
   orderSub: { fontSize: 12, color: '#9ca3af', fontWeight: '500' },
   orderCreditsBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   orderCreditsText: { fontSize: 13, color: '#d97706', fontWeight: '700' },
-  quizCard: { borderRadius: 24, padding: 20, elevation: 6, shadowColor: '#047857', shadowOffset: {width: 0, height: 6}, shadowOpacity: 0.3, shadowRadius: 10, borderWidth: 1, borderColor: '#10b981' },
+  quizCard: { borderRadius: 24, padding: 20, overflow: 'hidden', elevation: 6, shadowColor: '#047857', shadowOffset: {width: 0, height: 6}, shadowOpacity: 0.3, shadowRadius: 10, borderWidth: 1, borderColor: '#10b981' },
+  quizDecor: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   quizContent: { flexDirection: 'row', alignItems: 'center', gap: 16, marginBottom: 16 },
   quizIconBg: { width: 48, height: 48, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },
-  quizTitle: { fontSize: 18, fontWeight: '900', color: 'white', marginBottom: 4 },
-  quizSub: { fontSize: 13, color: '#a7f3d0', fontWeight: '600', lineHeight: 18 },
-  quizBtn: { backgroundColor: '#fbbf24', paddingVertical: 14, borderRadius: 16, alignItems: 'center', shadowColor: '#f59e0b', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.2, shadowRadius: 4, elevation: 3 },
+  quizTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
+  quizTitle: { fontSize: 18, fontWeight: '900', color: 'white' },
+  quizStreakPill: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(255,255,255,0.18)', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999 },
+  quizStreakPillText: { color: '#fde68a', fontSize: 11, fontWeight: '800' },
+  quizSub: { fontSize: 13, color: '#a7f3d0', fontWeight: '600', lineHeight: 18, marginTop: 4 },
+  quizChipsRow: { flexDirection: 'row', gap: 8, marginTop: 10 },
+  quizChip: { backgroundColor: 'rgba(255,255,255,0.14)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
+  quizChipText: { color: '#d1fae5', fontSize: 11, fontWeight: '700' },
+  quizBtn: { backgroundColor: '#fbbf24', paddingVertical: 14, borderRadius: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, overflow: 'hidden', shadowColor: '#f59e0b', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.2, shadowRadius: 4, elevation: 3 },
+  quizShine: { position: 'absolute', top: 0, bottom: 0, width: 40, backgroundColor: 'rgba(255,255,255,0.45)' },
   quizBtnText: { color: '#78350f', fontSize: 15, fontWeight: '900' },
+  quizBtnDone: { backgroundColor: 'rgba(255,255,255,0.92)' },
+  quizBtnDoneText: { color: '#065f46', fontSize: 14, fontWeight: '800' },
   quizStreakRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'rgba(0,0,0,0.15)', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, marginBottom: 14 },
   quizStreakLeft: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   quizStreakCount: { fontSize: 18, fontWeight: '900', color: 'white' },
