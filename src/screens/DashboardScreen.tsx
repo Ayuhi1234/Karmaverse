@@ -507,7 +507,7 @@ export function DashboardScreen({ navigation, route }: any) {
           {quizPlayedToday ? (
             <View style={[styles.quizBtn, styles.quizBtnDone]}>
               <BadgeCheck size={18} color="#6d28d9" />
-              <Text style={styles.quizBtnDoneText}>Played today — back tomorrow</Text>
+              <Text style={styles.quizBtnDoneText}>Played today · unlocks 12:00 AM</Text>
             </View>
           ) : (
             <TouchableOpacity style={styles.quizBtn} onPress={() => navigation.navigate('Quiz')} activeOpacity={0.9}>
