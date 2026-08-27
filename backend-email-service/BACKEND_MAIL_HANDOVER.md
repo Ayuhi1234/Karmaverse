@@ -12,19 +12,20 @@ templates and sends via its own mailer.
 | File | What it is |
 |------|-----------|
 | `templates/layout.js` | Brand tokens (name, colours, logo, address, socials) + shared HTML shell (`wrapEmail`, buttons, detail tables, social icon row, footer). Every email is built through this. |
-| `templates/templates.js` | The **16 email templates** (10 transactional + 6 non-transactional). Each is a function `(data) => ({ subject, html })`. |
-| `templates/pushTemplates.js` | The **6 non-transactional push templates** (FCM). Each is `(data) => ({ title, body, data })` — see §8. |
+| `templates/templates.js` | The **19 email templates** (9 transactional + 10 engagement). Each is a function `(data) => ({ subject, html })`. |
+| `templates/pushTemplates.js` | The **6 engagement push templates** (FCM). Each is `(data) => ({ title, body, data })` — see §8. |
 | `assets/` | The **6 brand images** (`email-logo.png` + `social/*.png`) embedded inline in every email — see §3. |
-| `preview.html` | Open in a browser to **see all 10 emails rendered** with sample data. Regenerate with `node build-preview.js`. |
+| `preview.html` | Open in a browser to **see the emails rendered** with sample data. Regenerate with `node build-preview.js`. |
 
-There are **16 templates** — 10 transactional (below) + 6 non-transactional (§7). Agent-side emails were removed — user app only.
+**19 email templates** — 9 transactional (§2) + 10 engagement/non-transactional (§7) — plus 6 engagement push (§8). Agent-side emails were removed — user app only.
 
 ---
 
-## 2. The 10 templates — variables + when to send
+## 2. The 9 transactional templates — variables + when to send
 
 Each template is `templates.NAME(data)` → returns `{ subject, html }`.
 `name` is always the **user's full name**; the template auto-greets with the **first name only**.
+These are **always sent** (no consent gate, no unsubscribe).
 
 | Template | Send when (trigger) | Required `data` |
 |----------|--------------------|-----------------|
@@ -36,8 +37,10 @@ Each template is `templates.NAME(data)` → returns `{ subject, html }`.
 | `BOOKING_PICKED_UP` | Items picked up + coins credited | `{ name, coins, walletBalance }` |
 | `BOOKING_COMPLETED` | Booking marked complete | `{ name, bookingId }` |
 | `BOOKING_CANCELLED` | Booking cancelled (user/admin) | `{ name, bookingId, date }` |
-| `QUIZ_STREAK_REMINDER` | Daily cron — user's streak at risk | `{ name, streak }` |
 | `REFERRAL_REWARD` | Referral bonus credited | `{ name, friendName, coins }` |
+
+> `QUIZ_STREAK_REMINDER` used to be here — it's now an **engagement** send (needs
+> consent + unsubscribe). See §7.
 
 - Missing/undefined fields are handled safely (fall back to neutral copy), but pass
   what you have for the best result.
@@ -142,8 +145,10 @@ EMAIL_FROM_NAME=KarmaVerse
 
 ## 6. Checklist for backend
 
-- [ ] Wire each of the 10 triggers above to send the matching template
-- [ ] Pass the exact `data` fields listed per template
+- [ ] Wire each of the 9 transactional triggers (§2) + the engagement sends (§7/§8)
+- [ ] Pass the exact `data` fields listed per template (incl. the new ones in §10)
+- [ ] Implement the notification endpoints in §9 + include `notificationId` in pushes
+- [ ] Add the marketing opt-in flag + tokenised unsubscribe; gate all §7/§8 sends on it
 - [ ] **Attach the 6 `assets/` images as inline attachments with the matching `content_id`s (see §3)** — this is what makes the logo + icons show
 - [ ] Set `GMAIL_USER` / `GMAIL_APP_PASSWORD` / `EMAIL_FROM_NAME` env vars
 - [ ] Send yourself one of each and compare against `preview.html`
@@ -154,26 +159,45 @@ EMAIL_FROM_NAME=KarmaVerse
 
 Same `templates.NAME(data)` shape, but these are **NOT** triggered by a single
 transaction — you send them on a **schedule** or to a **targeted segment**.
+**Every one accepts `unsubscribeUrl`** and renders the unsubscribe footer.
 
 | Template | Send when | `data` |
 |----------|-----------|--------|
-| `IMPACT_REPORT` | Monthly recap (cron) to active users | `{ name, month, kg, pickups, coins }` |
-| `ECO_TIP` | Weekly educational nudge | `{ name, tipTitle, tipBody, readUrl }` |
-| `REDEMPTION_LIVE` | One-time campaign when cash-out opens | `{ name, balance }` |
-| `FEATURE_ANNOUNCEMENT` | Ad-hoc product/feature launches | `{ name, title, body, ctaLabel, ctaUrl }` |
-| `WIN_BACK` | Lapsed users (e.g. inactive 30d) | `{ name }` |
-| `SEASONAL_GREETING` | Festivals / seasonal | `{ name, occasion, message }` |
+| `IMPACT_REPORT` | Monthly recap (cron), first week of the month | `{ name, month, kg, pickups, coins, coinsSpent, balance, xp, joinedThisMonth, unsubscribeUrl }` |
+| `NEWSLETTER` | Monthly sustainability digest | `{ name, month, articles: [{ title, excerpt, image, url }], unsubscribeUrl }` |
+| `REDEMPTION_LIVE` | Rewards/redemption campaign (3 auto states) | `{ name, balance, xp, eligible, minRedeem, unsubscribeUrl }` |
+| `FEATURE_ANNOUNCEMENT` | Per feature launch, segment = active last 6 mo | `{ name, title, image, body, benefits: [str], ctaLabel, ctaUrl, unsubscribeUrl }` |
+| `WIN_BACK` | Lapsed users (define window, e.g. inactive 14d+) | `{ name, unsubscribeUrl }` |
+| `SEASONAL_GREETING` | Festivals (occasion auto title-cased) | `{ name, occasion, message, unsubscribeUrl }` |
+| `DAILY_QUIZ` | Daily, if today's quiz not played | `{ name, streak, unsubscribeUrl }` |
+| `QUIZ_STREAK_REMINDER` | Daily, streak at risk (alt of DAILY_QUIZ) | `{ name, streak, unsubscribeUrl }` |
+| `TIER_UPGRADE` | User moves up a streak tier | `{ name, tier, unsubscribeUrl }` |
+| `BIRTHDAY` | User's birthday (bonus optional) | `{ name, bonus, unsubscribeUrl }` |
+
+**Field notes / behaviour (important — these drive the edge cases):**
+- `IMPACT_REPORT`: pass **`coins` (earned this month)**, **`coinsSpent` (redeemed)** and
+  **`balance` (current)** as three separate numbers — the email shows them distinctly.
+  Set **`joinedThisMonth: true`** for users who registered mid/late-month → it renders a
+  "partial snapshot" welcome instead of a full recap. All-zero / inactive is handled.
+- `REDEMPTION_LIVE`: the template picks one of **three** versions from the data —
+  has balance (`eligible !== false`, `balance > 0`) → "Redeem now"; **zero balance** →
+  "Schedule a pickup"; **has balance but `eligible: false`** → "almost there" (pass
+  `minRedeem` to show the threshold). Never tells a zero-balance user to redeem.
+- `FEATURE_ANNOUNCEMENT`: `image` = a hosted screenshot URL; `benefits` = array of short
+  strings (rendered as a checklist); `ctaUrl` must deep-link to the feature, not the home.
+- `BIRTHDAY`: if `bonus > 0`, shows the gifted coins + wallet CTA; else a plain wish.
 
 > ⚠️ **These require consent + unsubscribe.** Send **only** to users opted in to
-> marketing emails, and apply a **frequency cap** (≈ 1–2/week).
+> marketing emails, and apply a **frequency cap** (engagement email cap per month;
+> ≤ 1 marketing push/day). Respect **quiet hours** (no overnight push, user TZ / IST).
 >
-> Each of these 6 templates now accepts an **`unsubscribeUrl`** field — pass a
-> **per-recipient, tokenised** URL (e.g. `https://karmaverse.earth/unsubscribe?token=…`)
-> so a single click unsubscribes that exact user. It renders an "Unsubscribe" link +
-> an opt-in line in the footer. If omitted, it falls back to `/unsubscribe` (generic).
-> Also set the **`List-Unsubscribe`** and **`List-Unsubscribe-Post`** headers at send
-> time so Gmail/Outlook show their own one-click unsubscribe. **Transactional emails
-> must NOT include unsubscribe** — they don't accept the field (they're legally exempt).
+> Pass a **per-recipient, tokenised** `unsubscribeUrl`
+> (e.g. `https://karmaverse.earth/unsubscribe?token=…`) so one click unsubscribes that
+> exact user. Also set the **`List-Unsubscribe`** + **`List-Unsubscribe-Post`** headers
+> at send time. **One opt-out must silence every engagement email AND push.**
+> **Transactional emails must NOT include unsubscribe** — they don't accept the field.
+> Send transactional and marketing over **separate streams/domains** so a marketing
+> spam complaint never hurts OTP/booking deliverability.
 
 ---
 
@@ -203,3 +227,48 @@ const { title, body, data } = pushTemplates.STREAK_AT_RISK({ tier: 'Gold' });
 > users opted in to non-transactional notifications, and cap frequency (e.g. ≤ 1/day).
 > Transactional pushes (booking accepted, coins credited, etc.) are separate and
 > always sent.
+
+**Open-rate reporting:** the app reports a tap back via
+`PATCH /api/v1/notifications/:id/opened`. For that to work, include a stable
+**`notificationId`** in every push's `data` payload (alongside `route`/`type`):
+```js
+data: { ...tpl.data, notificationId: "<the id you stored for this send>" }
+```
+Store each send so the id resolves; the PATCH is idempotent and fire-and-forget.
+
+---
+
+## 9. Notification plumbing (endpoints the app already calls)
+
+The frontend is wired to these — **backend must implement them**:
+
+| Method & path | When the app calls it | Body |
+|---------------|----------------------|------|
+| `POST /api/v1/notifications/device-token` | On login / app open (permission granted) | `{ token, platform: "ANDROID" \| "IOS" }` |
+| `DELETE /api/v1/notifications/device-token` | On logout | `{ token }` |
+| `PATCH /api/v1/notifications/:id/opened` | User taps a push | — (mark opened) |
+
+- Store one or more device tokens per user; a user can have several devices, and
+  tokens rotate (reinstall / restore) — the app re-registers automatically.
+- Send FCM to a user's stored token(s) using the `{ title, body, data }` from a push
+  template. Expire tokens that FCM reports as unregistered.
+- The app also has an in-app "turn notifications back on" flow — no backend work needed
+  there beyond accepting a freshly re-registered token.
+
+---
+
+## 10. New fields to make sure you supply (added this round)
+
+These are **new** since the last handover — templates fall back safely if missing,
+but you must pass them for the feature to actually work:
+
+- `IMPACT_REPORT` → `coinsSpent`, `balance`, `joinedThisMonth`
+- `REDEMPTION_LIVE` → `balance`, `xp`, `eligible`, `minRedeem`
+- `FEATURE_ANNOUNCEMENT` → `image`, `benefits[]`
+- `BIRTHDAY` → `bonus` (new template)
+- **`unsubscribeUrl`** on every §7 email
+- **`notificationId`** in every §8 push's `data`
+
+Also needed on the backend (not template fields):
+- A **marketing opt-in** flag per user + a **tokenised unsubscribe** endpoint.
+- Confirm the **sender "From" name** reads `KarmaVerse`.
