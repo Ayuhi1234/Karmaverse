@@ -3,7 +3,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Modal, TextInput, KeyboardAvoidingView, Platform, Animated, ActivityIndicator } from 'react-native';
 import { WebFooter } from '../components/shared/WebFooter';
 import { showAlert } from '../utils/alert';
-import { ChevronLeft, User, MapPin, Flame, Settings, HeartHandshake, LogOut, FileText, Trophy, X, Mail, Phone, ShieldCheck, CheckCircle, CalendarDays, UserSquare2, Heart, Briefcase, Users, ArrowRight, Gift, Trash2, Bell, BellOff } from 'lucide-react-native';
+import { ChevronLeft, User, MapPin, Flame, HeartHandshake, LogOut, FileText, Trophy, X, Mail, Phone, ShieldCheck, CheckCircle, CalendarDays, UserSquare2, Heart, Briefcase, Users, ArrowRight, Gift, Trash2, Bell, BellOff } from 'lucide-react-native';
 import { useNotifications } from '../context/NotificationContext';
 import { openNotificationSettings } from '../utils/notifications';
 import { addressService, SavedAddress, AddressLabel } from '../services/address';
@@ -717,18 +717,12 @@ export function ProfileScreen({ navigation }: any) {
               <View style={styles.optionsBlock}>
                 {Platform.OS !== 'web' && (
                   <>
-                    <OptionRow icon={<Settings size={18} color="#475569" />} bg="#f8fafc" title="App settings" />
-                    <View style={styles.divider} />
-                  </>
-                )}
-                {Platform.OS !== 'web' && (
-                  <>
                     <OptionRow
                       icon={pushEnabled === false ? <BellOff size={18} color="#b45309" /> : <Bell size={18} color="#16a34a" />}
                       bg={pushEnabled === false ? '#fffbeb' : '#f0fdf4'}
                       title="Notifications"
-                      sub={pushEnabled === true ? 'On' : pushEnabled === false ? 'Off — tap to turn on' : 'Manage notifications'}
-                      onPress={() => (pushEnabled ? openNotificationSettings() : enablePush())}
+                      sub={pushEnabled === true ? 'On' : pushEnabled === false ? 'Off — tap to turn on' : 'Manage in settings'}
+                      onPress={() => (pushEnabled === false ? enablePush() : openNotificationSettings())}
                     />
                     <View style={styles.divider} />
                   </>
