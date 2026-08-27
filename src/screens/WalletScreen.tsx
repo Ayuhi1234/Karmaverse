@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, StatusBar, ActivityIndicator, Platform, Modal } from 'react-native';
 import { WebFooter } from '../components/shared/WebFooter';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowDownLeft, ArrowUpRight, Heart, History, Clock, Flame, Snowflake, Recycle, Gift, Award, X, ChevronRight } from 'lucide-react-native';
+import { ArrowDownLeft, ArrowUpRight, Heart, History, Clock, Snowflake, Recycle, Gift, Award, X, ChevronRight } from 'lucide-react-native';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { profileService } from '../services/profile';
 import { streakService, StreakStatus } from '../services/streak';
@@ -133,10 +133,6 @@ export function WalletScreen({ navigation }: any) {
           <View style={styles.titleRow}>
             <Text style={styles.headerTitle}>My wallet</Text>
             <View style={{ flexDirection: 'row', gap: 10 }}>
-              <TouchableOpacity style={styles.streakBadge} onPress={() => setTierModalVisible(true)} activeOpacity={0.8}>
-                <Flame size={15} color="#fb923c" />
-                <Text style={styles.streakBadgeText}>{streak?.currentStreak ?? 0}</Text>
-              </TouchableOpacity>
               <TouchableOpacity style={styles.historyBtn} onPress={() => navigation.navigate('RedeemHistory')}>
                 <History size={18} color="white" />
               </TouchableOpacity>
@@ -361,12 +357,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.15)',
     alignItems: 'center', justifyContent: 'center',
   },
-  streakBadge: {
-    flexDirection: 'row', alignItems: 'center', gap: 5, height: 40, paddingHorizontal: 14, borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-  },
-  streakBadgeText: { color: 'white', fontWeight: '900', fontSize: 15 },
-
   balanceCard: {
     borderRadius: 24, padding: 20,
     backgroundColor: 'rgba(255,255,255,0.1)',
