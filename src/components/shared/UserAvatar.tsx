@@ -1,51 +1,56 @@
 import React from 'react';
 import { View } from 'react-native';
-import Svg, { Circle, Path, ClipPath, Defs, G, Rect } from 'react-native-svg';
+import Svg, { Circle, Path, Ellipse, ClipPath, Defs, LinearGradient, Stop, G, Rect } from 'react-native-svg';
 
-// A WhatsApp-style default avatar that reflects the user's gender: a clean
-// silhouette (face + body) with hair — short for male, shoulder-length for
-// female — on a soft gender-tinted circle. Used wherever we used the initials.
+// A WhatsApp-style default avatar that reflects the user's gender: a white
+// silhouette (face + shoulders) with hair — short for male, shoulder-length for
+// female — on a saturated gender-coloured circle. Reads well on both the green
+// dashboard header and the white profile card.
 type Gender = string | null | undefined;
 
-function palette(gender: Gender) {
+const HAIR = 'rgba(15,23,42,0.34)'; // dark, semi-transparent — reads as hair on the white face
+const BODY = '#ffffff';
+
+function grad(gender: Gender): [string, string] {
   const g = String(gender || '').toLowerCase();
-  if (g === 'male') return { bg: '#dbeafe', body: '#3b82f6', hair: '#1e3a8a', female: false };
-  if (g === 'female') return { bg: '#fce7f3', body: '#ec4899', hair: '#831843', female: true };
-  // Other / not specified — neutral brand green, no long hair.
-  return { bg: '#dcfce7', body: '#10b981', hair: '#065f46', female: false };
+  if (g === 'male') return ['#60a5fa', '#2563eb'];
+  if (g === 'female') return ['#f472b6', '#db2777'];
+  return ['#34d399', '#059669']; // other / not specified — brand green
 }
 
+// Shoulders reach the bottom edge so there's no gap under the circle.
+const SHOULDERS = 'M50 52 C32 52 19 66 19 100 L81 100 C81 66 68 52 50 52 Z';
+
 export function UserAvatar({ gender, size = 48, ring }: { gender?: Gender; size?: number; ring?: boolean }) {
-  const c = palette(gender);
+  const [c1, c2] = grad(gender);
+  const female = String(gender || '').toLowerCase() === 'female';
   return (
-    <View style={[{ width: size, height: size, borderRadius: size / 2, overflow: 'hidden' }, ring && { borderWidth: 3, borderColor: 'rgba(255,255,255,0.9)' }]}>
+    <View style={[{ width: size, height: size, borderRadius: size / 2, overflow: 'hidden' }, ring && { borderWidth: 3, borderColor: 'rgba(255,255,255,0.95)' }]}>
       <Svg width={size} height={size} viewBox="0 0 100 100">
         <Defs>
           <ClipPath id="clip"><Circle cx="50" cy="50" r="50" /></ClipPath>
+          <LinearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+            <Stop offset="0" stopColor={c1} />
+            <Stop offset="1" stopColor={c2} />
+          </LinearGradient>
         </Defs>
         <G clipPath="url(#clip)">
-          <Rect x="0" y="0" width="100" height="100" fill={c.bg} />
+          <Rect x="0" y="0" width="100" height="100" fill="url(#bg)" />
+          <Path d={SHOULDERS} fill={BODY} />
 
-          {c.female ? (
+          {female ? (
             <>
-              {/* Hair (behind) — frames the head and falls to the shoulders */}
-              <Path
-                d="M33 46 C33 26 67 26 67 46 C70 46 70 64 65 70 L65 49 C65 39 58 33 50 33 C42 33 35 39 35 49 L35 70 C30 64 30 46 33 46 Z"
-                fill={c.hair}
-              />
-              {/* Face */}
-              <Circle cx="50" cy="44" r="14" fill={c.body} />
-              {/* Body / shoulders */}
-              <Path d="M50 60 C33 60 21 72 21 92 L79 92 C79 72 67 60 50 60 Z" fill={c.body} />
+              {/* Hair behind the head + two locks falling onto the shoulders */}
+              <Circle cx="50" cy="37" r="19" fill={HAIR} />
+              <Ellipse cx="32" cy="55" rx="6" ry="14" fill={HAIR} />
+              <Ellipse cx="68" cy="55" rx="6" ry="14" fill={HAIR} />
+              <Circle cx="50" cy="40" r="14" fill={BODY} />
             </>
           ) : (
             <>
-              {/* Face */}
-              <Circle cx="50" cy="41" r="15" fill={c.body} />
-              {/* Short hair on top */}
-              <Path d="M35 40 C35 27 65 27 65 40 C61 34 56 31 50 31 C44 31 39 34 35 40 Z" fill={c.hair} />
-              {/* Body / shoulders */}
-              <Path d="M50 58 C33 58 21 71 21 91 L79 91 C79 71 67 58 50 58 Z" fill={c.body} />
+              <Circle cx="50" cy="38" r="15" fill={BODY} />
+              {/* Short hair cap */}
+              <Path d="M35 38 C35 24 65 24 65 38 C61 31 56 28 50 28 C44 28 39 31 35 38 Z" fill={HAIR} />
             </>
           )}
         </G>

@@ -349,7 +349,7 @@ export function DashboardScreen({ navigation, route }: any) {
         <View style={styles.topBar}>
           <View style={styles.userInfo}>
             <TouchableOpacity style={styles.avatar} onPress={() => navigation.navigate('Profile')}>
-              <UserAvatar gender={userGender} size={40} />
+              <UserAvatar gender={userGender} size={40} ring />
             </TouchableOpacity>
             <View>
               <Text style={styles.greetingText}>{getGreeting()},</Text>
