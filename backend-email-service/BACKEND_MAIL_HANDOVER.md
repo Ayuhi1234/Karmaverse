@@ -236,6 +236,31 @@ data: { ...tpl.data, notificationId: "<the id you stored for this send>" }
 ```
 Store each send so the id resolves; the PATCH is idempotent and fire-and-forget.
 
+### Transactional pushes — `txPushTemplates` (always sent)
+
+Exported alongside `pushTemplates` from the same file. These fire on a real
+booking event (the same socket events the app listens for), so — unlike the 6
+engagement pushes above — they are **always sent**: no consent gate, no cap, no
+quiet hours. `data.bookingId` deep-links the app to that booking.
+
+| Template | Fire on (socket event) | `data` | opens |
+|----------|------------------------|--------|-------|
+| `BOOKING_ACCEPTED` | Agent assigned | `{ agentName, bookingId }` | OrderTracking |
+| `AGENT_REACHED` | Agent at location | `{ bookingId }` | OrderTracking |
+| `BOOKING_PICKED_UP` | Items verified + coins credited | `{ coins, bookingId }` | Wallet |
+| `BOOKING_COMPLETED` | Pickup complete | `{ bookingId }` | OrderTracking |
+| `BOOKING_CANCEL_SUCCESS` | Booking cancelled | `{ bookingId }` | SchedulePickup |
+| `BOOKING_IN_POOL` | High demand → priority pool | `{ bookingId }` | OrderTracking |
+
+```js
+const { txPushTemplates } = require('./templates/pushTemplates');
+const { title, body, data } = txPushTemplates.BOOKING_ACCEPTED({ agentName: 'Ravi', bookingId });
+// send via FCM to the user's device token: { notification: { title, body }, data }
+```
+
+> **12 push templates total** — 6 engagement (`pushTemplates`, consent + cap) +
+> 6 transactional (`txPushTemplates`, always sent).
+
 ---
 
 ## 9. Notification plumbing (endpoints the app already calls)

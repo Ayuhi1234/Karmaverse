@@ -69,4 +69,57 @@ const pushTemplates = {
   }),
 };
 
-module.exports = { pushTemplates };
+// ─────────────────────────────────────────────────────────────────────────
+// TRANSACTIONAL pushes — fired by a real booking event (socket), so unlike the
+// engagement pushes above they are ALWAYS sent: no consent gate, no frequency
+// cap, no quiet hours. Titles/bodies mirror the in-app notifications the app
+// already shows for these events. `data.bookingId` lets the app deep-link
+// straight to that booking. Same `(data) => ({ title, body, data })` shape.
+const txPushTemplates = {
+  // Agent assigned to the pickup.
+  BOOKING_ACCEPTED: ({ agentName, bookingId }) => ({
+    title: 'Agent assigned',
+    body: `${s(agentName, 'Your pickup partner')} accepted your booking and is on the way.`,
+    data: { route: 'OrderTracking', type: 'BOOKING_ACCEPTED', bookingId: s(bookingId) },
+  }),
+
+  // Agent has reached the user's location.
+  AGENT_REACHED: ({ bookingId }) => ({
+    title: 'Agent arrived',
+    body: 'Your pickup partner has reached your location.',
+    data: { route: 'OrderTracking', type: 'AGENT_REACHED', bookingId: s(bookingId) },
+  }),
+
+  // Items verified + coins credited.
+  BOOKING_PICKED_UP: ({ coins, bookingId }) => {
+    const c = fmt(coins);
+    return {
+      title: c ? `+${c} ${CURRENCY}` : 'Coins credited',
+      body: c ? `${c} ${CURRENCY} credited to your wallet.` : `Your ${CURRENCY} have been credited to your wallet.`,
+      data: { route: 'Wallet', type: 'BOOKING_PICKED_UP', bookingId: s(bookingId) },
+    };
+  },
+
+  // Pickup complete.
+  BOOKING_COMPLETED: ({ bookingId }) => ({
+    title: 'Pickup complete',
+    body: 'Your pickup is complete — thank you for keeping resources in the loop.',
+    data: { route: 'OrderTracking', type: 'BOOKING_COMPLETED', bookingId: s(bookingId) },
+  }),
+
+  // Booking cancelled.
+  BOOKING_CANCEL_SUCCESS: ({ bookingId }) => ({
+    title: 'Booking cancelled',
+    body: "Your pickup was cancelled. Schedule a new one whenever you're ready.",
+    data: { route: 'SchedulePickup', type: 'BOOKING_CANCEL_SUCCESS', bookingId: s(bookingId) },
+  }),
+
+  // High demand — booking placed in the priority pool.
+  BOOKING_IN_POOL: ({ bookingId }) => ({
+    title: 'Added to priority queue',
+    body: 'High demand in your area — your booking is in our priority pool.',
+    data: { route: 'OrderTracking', type: 'BOOKING_IN_POOL', bookingId: s(bookingId) },
+  }),
+};
+
+module.exports = { pushTemplates, txPushTemplates };
