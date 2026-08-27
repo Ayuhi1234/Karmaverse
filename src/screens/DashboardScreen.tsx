@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, Dimensions, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, Dimensions, Platform, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Bell, ChevronRight, Truck, Camera, Clock, Users, Package, Flame, Gamepad2, Gift, Star, ShieldCheck, Coins, BadgeCheck, ArrowRight, BookOpen, X, WifiOff, RefreshCw, Trophy } from 'lucide-react-native';
+import { Bell, ChevronRight, Truck, Camera, Clock, Users, Package, Flame, Gamepad2, Gift, Star, ShieldCheck, Coins, BadgeCheck, ArrowRight, X, WifiOff, RefreshCw, Trophy } from 'lucide-react-native';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
+import { getArticleById } from '../data/articles';
 import { NotificationPanel } from '../components/shared/NotificationPanel';
 import NotificationPermissionBanner from '../components/shared/NotificationPermissionBanner';
 import { LaunchDayPopup } from '../components/shared/LaunchDayPopup';
@@ -558,12 +559,12 @@ export function DashboardScreen({ navigation, route }: any) {
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 16 }}>
           <TouchableOpacity style={styles.articleCard} activeOpacity={0.8} onPress={() => navigation.navigate('ArticleDetail', { id: 'cut-plastic-at-home' })}>
-            <View style={[styles.articleImgPlaceholder, { backgroundColor: '#dcfce7' }]}><BookOpen size={28} color="#16a34a" /></View>
+            <Image source={{ uri: getArticleById('cut-plastic-at-home').image }} style={[styles.articleImgPlaceholder, { backgroundColor: '#dcfce7' }]} resizeMode="cover" />
             <Text style={styles.articleTitle}>5 easy ways to cut plastic waste at home</Text>
             <Text style={styles.articleSource}>KarmaVerse editorial</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.articleCard} activeOpacity={0.8} onPress={() => navigation.navigate('ArticleDetail', { id: 'india-ewaste' })}>
-            <View style={[styles.articleImgPlaceholder, { backgroundColor: '#e0f2fe' }]}><BookOpen size={28} color="#0284c7" /></View>
+            <Image source={{ uri: getArticleById('india-ewaste').image }} style={[styles.articleImgPlaceholder, { backgroundColor: '#e0f2fe' }]} resizeMode="cover" />
             <Text style={styles.articleTitle}>India's e-waste mountain — and the opportunity inside it</Text>
             <Text style={styles.articleSource}>KarmaVerse editorial</Text>
           </TouchableOpacity>
