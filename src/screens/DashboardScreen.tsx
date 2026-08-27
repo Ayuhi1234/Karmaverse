@@ -8,6 +8,7 @@ import { getArticleById } from '../data/articles';
 import { NotificationPanel } from '../components/shared/NotificationPanel';
 import NotificationPermissionBanner from '../components/shared/NotificationPermissionBanner';
 import NotificationPrimerModal from '../components/shared/NotificationPrimerModal';
+import { UserAvatar } from '../components/shared/UserAvatar';
 import { LaunchDayPopup } from '../components/shared/LaunchDayPopup';
 import { useNotifications } from '../context/NotificationContext';
 import { profileService } from '../services/profile';
@@ -133,6 +134,7 @@ function getGreeting(): string {
 
 export function DashboardScreen({ navigation, route }: any) {
   const [userName, setUserName] = useState('Loading...');
+  const [userGender, setUserGender] = useState<string | null>(null);
   const [balance, setBalance] = useState(0);
   const [streak, setStreak] = useState(0);
   const [quizStreak, setQuizStreak] = useState(0);
@@ -197,6 +199,7 @@ export function DashboardScreen({ navigation, route }: any) {
             .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
             .join(' ')
         );
+        setUserGender(profileData.demographics?.gender || profileData.gender || null);
         setBalance(profileData.karmaCoins || profileData.coins || 0);
         setStreak(profileData.streak || profileData.activeStreak || 0);
 
@@ -346,7 +349,7 @@ export function DashboardScreen({ navigation, route }: any) {
         <View style={styles.topBar}>
           <View style={styles.userInfo}>
             <TouchableOpacity style={styles.avatar} onPress={() => navigation.navigate('Profile')}>
-              <Text style={styles.avatarText}>{userName !== 'Loading...' ? (userName.charAt(0) + (userName.split(' ')[1]?.[0] || '')) : 'RS'}</Text>
+              <UserAvatar gender={userGender} size={40} />
             </TouchableOpacity>
             <View>
               <Text style={styles.greetingText}>{getGreeting()},</Text>
@@ -702,7 +705,6 @@ const styles = StyleSheet.create({
   topBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
   userInfo: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },
-  avatarText: { color: 'white', fontWeight: 'bold' },
   greetingText: { color: 'rgba(255,255,255,0.6)', fontSize: 12, fontWeight: '500' },
   nameText: { color: 'white', fontSize: 16, fontWeight: '700' },
   bellButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' },

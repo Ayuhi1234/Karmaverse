@@ -6,6 +6,7 @@ import { showAlert } from '../utils/alert';
 import { ChevronLeft, User, MapPin, Flame, HeartHandshake, LogOut, FileText, Trophy, X, Mail, Phone, ShieldCheck, CheckCircle, CalendarDays, UserSquare2, Heart, Briefcase, Users, ArrowRight, Gift, Trash2, Bell, BellOff } from 'lucide-react-native';
 import { useNotifications } from '../context/NotificationContext';
 import { openNotificationSettings } from '../utils/notifications';
+import { UserAvatar } from '../components/shared/UserAvatar';
 import { addressService, SavedAddress, AddressLabel } from '../services/address';
 import { LinearGradient } from 'expo-linear-gradient';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
@@ -640,7 +641,7 @@ export function ProfileScreen({ navigation }: any) {
               {/* Avatar & Basic Info Card */}
               <View style={styles.profileInfoCard}>
                 <View style={styles.avatarMain}>
-                  <Text style={styles.avatarMainText}>{userProfile?.name?.charAt(0)}{userProfile?.name?.split(' ')[1]?.[0] || ''}</Text>
+                  <UserAvatar gender={userProfile?.demographics?.gender} size={66} />
                   <View style={styles.verifiedBadge}>
                     <View style={styles.verifiedDot} />
                   </View>
@@ -1284,7 +1285,6 @@ const styles = StyleSheet.create({
   /* Floating Profile Card */
   profileInfoCard: { alignItems: 'center', backgroundColor: 'white', borderRadius: 24, padding: 24, paddingTop: 32, elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.12, shadowRadius: 24, marginTop: -20, marginBottom: 24, borderWidth: 1, borderColor: '#f1f5f9' },
   avatarMain: { width: 72, height: 72, borderRadius: 36, backgroundColor: '#10b981', alignItems: 'center', justifyContent: 'center', marginBottom: 16, borderWidth: 3, borderColor: 'white', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8, elevation: 5 },
-  avatarMainText: { color: 'white', fontSize: 28, fontWeight: '900' },
   verifiedBadge: { position: 'absolute', bottom: 0, right: 0, width: 20, height: 20, backgroundColor: '#10b981', borderRadius: 10, borderWidth: 2, borderColor: 'white', alignItems: 'center', justifyContent: 'center' },
   verifiedDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: 'white' },
   userName: { fontSize: 22, fontWeight: '900', color: '#0f172a', marginBottom: 4, maxWidth: '85%', textAlign: 'center' },
