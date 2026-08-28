@@ -429,7 +429,7 @@ export function DashboardScreen({ navigation, route }: any) {
       <View style={styles.section}>
         <TouchableOpacity style={[styles.firstPickupCta, { marginTop: 0 }]} onPress={() => navigation.navigate('SchedulePickup')} activeOpacity={0.85}>
           <Truck size={18} color="white" />
-          <Text style={styles.firstPickupCtaText}>Schedule Your First Pickup</Text>
+          <Text style={styles.firstPickupCtaText}>{recentOrders.length > 0 ? 'Schedule a Pickup' : 'Schedule Your First Pickup'}</Text>
           <ArrowRight size={16} color="white" />
         </TouchableOpacity>
       </View>
