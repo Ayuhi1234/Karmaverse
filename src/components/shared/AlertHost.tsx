@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, Modal } from 'react-native';
 import { X } from 'lucide-react-native';
 import { registerAlertHandler, AlertPayload } from '../../utils/alert';
 
@@ -12,69 +12,69 @@ if (Platform.OS === 'web') {
   try { createPortal = require('react-dom').createPortal; } catch (_) { /* no-op */ }
 }
 
-// Renders showAlert() calls as an in-app modal on web (instead of the browser's
-// native window.alert). Mounted once at the app root. Native keeps Alert.alert.
+// Renders showAlert() calls as an in-app modal (instead of the OS Alert.alert /
+// browser window.alert) so every alert gets a branded card with a close (X)
+// button. Mounted once at the app root; used on BOTH web and native.
 export function AlertHost() {
   const [payload, setPayload] = useState<AlertPayload | null>(null);
 
   useEffect(() => {
-    if (Platform.OS !== 'web') return;
     registerAlertHandler((p) => setPayload(p));
     return () => registerAlertHandler(null);
   }, []);
 
   const close = () => setPayload(null);
-  const buttons = payload?.buttons && payload.buttons.length ? payload.buttons : [{ text: 'OK' }];
+  if (!payload) return null;
 
-  // Native uses the OS Alert.alert (see utils/alert), so this host only renders
-  // on web. Use a fixed, max-z-index overlay instead of <Modal>: two RNW modals
-  // are position:fixed siblings that stack by DOM order, so an alert opened from
-  // inside another modal (e.g. Edit profile) rendered BEHIND it. A top-most fixed
-  // overlay guarantees the alert is always visible above any open modal.
-  if (Platform.OS !== 'web' || !payload) return null;
+  const buttons = payload.buttons && payload.buttons.length ? payload.buttons : [{ text: 'OK' }];
 
-  const overlay = (
-    <View style={s.overlay}>
-      <View style={s.backdrop}>
-        <View style={s.card}>
-          <View style={s.header}>
-            <Text style={s.title}>{payload?.title}</Text>
-            <TouchableOpacity onPress={close} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              <X size={20} color="#94a3b8" />
+  const card = (
+    <View style={s.card}>
+      <View style={s.header}>
+        <Text style={s.title}>{payload.title}</Text>
+        <TouchableOpacity onPress={close} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+          <X size={20} color="#94a3b8" />
+        </TouchableOpacity>
+      </View>
+      {!!payload.message && <Text style={s.message}>{payload.message}</Text>}
+      <View style={s.btnRow}>
+        {buttons.map((b, i) => {
+          const danger = b.style === 'destructive';
+          const cancel = b.style === 'cancel';
+          return (
+            <TouchableOpacity
+              key={i}
+              style={[s.btn, cancel && s.btnCancel, danger && s.btnDanger]}
+              onPress={() => { close(); b.onPress?.(); }}
+              activeOpacity={0.85}
+            >
+              <Text style={[s.btnText, cancel && s.btnTextCancel, danger && s.btnTextDanger]}>{b.text}</Text>
             </TouchableOpacity>
-          </View>
-          {!!payload?.message && <Text style={s.message}>{payload.message}</Text>}
-          <View style={s.btnRow}>
-            {buttons.map((b, i) => {
-              const danger = b.style === 'destructive';
-              const cancel = b.style === 'cancel';
-              return (
-                <TouchableOpacity
-                  key={i}
-                  style={[s.btn, cancel && s.btnCancel, danger && s.btnDanger]}
-                  onPress={() => { close(); b.onPress?.(); }}
-                  activeOpacity={0.85}
-                >
-                  <Text style={[s.btnText, cancel && s.btnTextCancel, danger && s.btnTextDanger]}>{b.text}</Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </View>
+          );
+        })}
       </View>
     </View>
   );
 
-  // Portal to <body> so the alert escapes any modal's stacking context and its
-  // max z-index actually wins. Fall back to inline render if the portal is
-  // unavailable for any reason.
-  return (createPortal && typeof document !== 'undefined')
-    ? createPortal(overlay, document.body)
-    : overlay;
+  // Web: a fixed, max-z-index overlay portalled to <body> so it escapes any
+  // RNW <Modal> stacking context and always renders on top.
+  if (Platform.OS === 'web') {
+    const overlay = <View style={s.overlay}><View style={s.backdrop}>{card}</View></View>;
+    return (createPortal && typeof document !== 'undefined')
+      ? createPortal(overlay, document.body)
+      : overlay;
+  }
+
+  // Native: a transparent RN Modal renders above everything (including other modals).
+  return (
+    <Modal visible transparent animationType="fade" onRequestClose={close} statusBarTranslucent>
+      <View style={s.backdrop}>{card}</View>
+    </Modal>
+  );
 }
 
 const s = StyleSheet.create({
-  // position:fixed + max z-index keeps the alert above every RNW <Modal> on the page.
+  // position:fixed + max z-index keeps the alert above every RNW <Modal> on the page (web only).
   overlay: { position: 'fixed' as any, top: 0, left: 0, right: 0, bottom: 0, zIndex: 2147483647 },
   backdrop: { flex: 1, backgroundColor: 'rgba(15,23,42,0.5)', alignItems: 'center', justifyContent: 'center', padding: 24 },
   card: { backgroundColor: 'white', borderRadius: 20, padding: 22, width: '100%', maxWidth: 420, shadowColor: '#000', shadowOffset: { width: 0, height: 14 }, shadowOpacity: 0.22, shadowRadius: 32, elevation: 14 },
