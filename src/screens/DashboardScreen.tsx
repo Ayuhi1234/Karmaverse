@@ -521,10 +521,11 @@ export function DashboardScreen({ navigation, route }: any) {
 
         if (!quizPlayedToday) picked.push({ id: 'quiz', label: "Today's\nquiz", IconComp: Gamepad2, color: '#d97706', bg: '#fffbeb', iconBg: 'rgba(217,119,6,0.1)', navTarget: 'Quiz', badge: '🔥 New' });
         if (hasActiveOrder) picked.push({ id: 'track', label: 'Track\npickup', IconComp: Truck, color: '#0891b2', bg: '#f0f9ff', iconBg: 'rgba(8,145,178,0.1)', navTarget: 'Orders', badge: '● Live' });
-        if (balance >= 1000) picked.push({ id: 'redeem', label: 'Redeem\nrewards', IconComp: Gift, color: '#db2777', bg: '#fdf2f8', iconBg: 'rgba(219,39,119,0.1)', navTarget: 'Store' });
 
+        // Redeem sits AFTER the pickup actions (never between Track and Schedule).
         const defaults: ActionConfig[] = [
           { id: 'pickup',  label: 'Schedule\npickup', IconComp: Truck,  color: '#16a34a', bg: '#f0fdf4', iconBg: 'rgba(22,163,74,0.1)',    navTarget: 'SchedulePickup' },
+          ...(balance >= 1000 ? [{ id: 'redeem', label: 'Redeem\nrewards', IconComp: Gift, color: '#db2777', bg: '#fdf2f8', iconBg: 'rgba(219,39,119,0.1)', navTarget: 'Store' }] : []),
           { id: 'refer',   label: 'Refer\n& earn',    IconComp: Users,  color: '#db2777', bg: '#fdf2f8', iconBg: 'rgba(219,39,119,0.1)',   navTarget: 'Referral' },
           { id: 'orders',  label: 'My\norders',       IconComp: Clock,  color: '#7c3aed', bg: '#faf5ff', iconBg: 'rgba(124,58,237,0.1)',   navTarget: 'Orders' },
           { id: 'wallet',  label: 'My\nwallet',       IconComp: Coins,  color: '#d97706', bg: '#fffbeb', iconBg: 'rgba(217,119,6,0.1)',    navTarget: 'Wallet' },
