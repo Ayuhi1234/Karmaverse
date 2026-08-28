@@ -26,11 +26,11 @@ export function KarmaCoin({ size = 48, glow = false, animated = false }: { size?
 
   const ringScale1 = pulseAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [1, 1.8],
+    outputRange: [1, 1.4],
   });
   const ringScale2 = pulseAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [1, 2.6],
+    outputRange: [1, 1.7],
   });
   const ringOpacity = pulseAnim.interpolate({
     inputRange: [0, 0.5, 1],
