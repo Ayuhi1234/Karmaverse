@@ -404,7 +404,7 @@ export function DashboardScreen({ navigation, route }: any) {
                 </View>
                 <Text style={styles.statTileLabel} numberOfLines={1}>{st.label}</Text>
               </View>
-              <Text style={[styles.statTileVal, { color: st.label === 'Eco Quiz Streak' ? st.color : 'rgba(255,255,255,0.75)' }]}>{st.val}</Text>
+              <Text style={[styles.statTileVal, { color: st.color }]}>{st.val}</Text>
             </View>
           ))}
         </View>
@@ -713,7 +713,7 @@ const styles = StyleSheet.create({
   statTile: { flexGrow: 1, flexBasis: '46%', backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 14, padding: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
   statTileTop: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 },
   statTileIcon: { width: 26, height: 26, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
-  statTileLabel: { flex: 1, fontSize: 10, color: 'rgba(255,255,255,0.55)', fontWeight: '600' },
+  statTileLabel: { flex: 1, fontSize: 10, color: 'rgba(255,255,255,0.75)', fontWeight: '600' },
   statTileVal: { fontSize: 20, fontWeight: '900' },
   section: { paddingHorizontal: 20, marginTop: 24 },
   sectionTitle: { fontSize: 16, fontWeight: '700', color: '#111827', marginBottom: 12 },
