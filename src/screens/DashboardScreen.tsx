@@ -8,6 +8,7 @@ import { NotificationPanel } from '../components/shared/NotificationPanel';
 import NotificationPermissionBanner from '../components/shared/NotificationPermissionBanner';
 import NotificationPrimerModal from '../components/shared/NotificationPrimerModal';
 import { UserAvatar } from '../components/shared/UserAvatar';
+import { AnimatedPickupCta } from '../components/shared/AnimatedPickupCta';
 import { LaunchDayPopup } from '../components/shared/LaunchDayPopup';
 import { useNotifications } from '../context/NotificationContext';
 import { profileService } from '../services/profile';
@@ -112,7 +113,7 @@ function FeatureCard({ feature, onPress }: { feature: typeof FEATURES[0], onPres
 
         <Text style={styles.featureEmoji}>{feature.emoji}</Text>
         <Text style={styles.featureTitle} numberOfLines={2}>{feature.title}</Text>
-        
+
         <View style={styles.featureActionRow}>
           <Text style={[styles.featureActionText, { color: feature.accent }]}>Learn more</Text>
           <ArrowRight size={12} color={feature.accent} />
@@ -393,7 +394,7 @@ export function DashboardScreen({ navigation, route }: any) {
           {[
             { Icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total Karma Coins' },
             { Icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Day streak' },
-            { Icon: Trophy, color: '#c084fc', val: `${quizStreak}`, label: 'Eco Quiz Streak' },
+            { Icon: Trophy, color: '#fde68a', val: `${quizStreak}`, label: 'Eco Quiz Streak' },
             { Icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Sustainability Actions' },
           ].map((st, i) => (
             <View key={i} style={styles.statTile}>
@@ -403,7 +404,7 @@ export function DashboardScreen({ navigation, route }: any) {
                 </View>
                 <Text style={styles.statTileLabel} numberOfLines={1}>{st.label}</Text>
               </View>
-              <Text style={[styles.statTileVal, { color: st.color }]}>{st.val}</Text>
+              <Text style={[styles.statTileVal, { color: st.label === 'Eco Quiz Streak' ? st.color : 'rgba(255,255,255,0.75)' }]}>{st.val}</Text>
             </View>
           ))}
         </View>
@@ -427,11 +428,10 @@ export function DashboardScreen({ navigation, route }: any) {
 
       {/* Schedule pickup CTA (Featured-rewards partner cards removed to match web) */}
       <View style={styles.section}>
-        <TouchableOpacity style={[styles.firstPickupCta, { marginTop: 0 }]} onPress={() => navigation.navigate('SchedulePickup')} activeOpacity={0.85}>
-          <Truck size={18} color="white" />
-          <Text style={styles.firstPickupCtaText}>{recentOrders.length > 0 ? 'Schedule a Pickup' : 'Schedule Your First Pickup'}</Text>
-          <ArrowRight size={16} color="white" />
-        </TouchableOpacity>
+        <AnimatedPickupCta
+          label={recentOrders.length > 0 ? 'Schedule a Pickup' : 'Schedule Your First Pickup'}
+          onPress={() => navigation.navigate('SchedulePickup')}
+        />
       </View>
 
       {/* Impact Cards */}
@@ -808,6 +808,4 @@ const styles = StyleSheet.create({
   rewardCardEmoji: { fontSize: 26, marginBottom: 8 },
   rewardCardBrand: { color: 'white', fontSize: 12, fontWeight: '900', marginBottom: 2 },
   rewardCardLabel: { color: 'rgba(255,255,255,0.75)', fontSize: 10, fontWeight: '600', lineHeight: 13 },
-  firstPickupCta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#15803d', borderRadius: 14, paddingVertical: 14, marginTop: 14 },
-  firstPickupCtaText: { color: 'white', fontSize: 14, fontWeight: '900' },
 });
