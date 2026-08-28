@@ -81,8 +81,9 @@ const s = StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 8 },
   title: { flex: 1, fontSize: 17, fontWeight: '800', color: '#0f172a' },
   message: { fontSize: 14, color: '#475569', fontWeight: '500', lineHeight: 21, marginBottom: 18 },
-  btnRow: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10, marginTop: 4 },
-  btn: { backgroundColor: '#16a34a', borderRadius: 12, paddingHorizontal: 22, paddingVertical: 11 },
+  btnRow: { flexDirection: 'row', gap: 12, marginTop: 8 },
+  // Buttons share the row equally — a single OK spans full width, two split it.
+  btn: { flex: 1, backgroundColor: '#16a34a', borderRadius: 14, paddingVertical: 13, alignItems: 'center', justifyContent: 'center' },
   btnCancel: { backgroundColor: '#f1f5f9' },
   btnDanger: { backgroundColor: '#dc2626' },
   btnText: { color: 'white', fontSize: 14, fontWeight: '800' },
