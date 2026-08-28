@@ -9,6 +9,8 @@ import NotificationPermissionBanner from '../components/shared/NotificationPermi
 import NotificationPrimerModal from '../components/shared/NotificationPrimerModal';
 import { UserAvatar } from '../components/shared/UserAvatar';
 import { AnimatedPickupCta } from '../components/shared/AnimatedPickupCta';
+import { QuizCalendarModal } from '../components/shared/QuizCalendarModal';
+import { StreakModal } from '../components/shared/StreakModal';
 import { LaunchDayPopup } from '../components/shared/LaunchDayPopup';
 import { useNotifications } from '../context/NotificationContext';
 import { profileService } from '../services/profile';
@@ -166,6 +168,8 @@ export function DashboardScreen({ navigation, route }: any) {
     return () => t.stop();
   }, []);
   const [quizHistory, setQuizHistory] = useState<string[]>([]);
+  const [showQuizCal, setShowQuizCal] = useState(false);
+  const [showStreak, setShowStreak] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const { notifications, unreadCount, markRead, markAllRead, clearAll } = useNotifications();
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
@@ -392,23 +396,27 @@ export function DashboardScreen({ navigation, route }: any) {
         {/* Stats grid — mirrors the web dashboard (Total Karma Coins / Day streak / Eco Quiz Streak / Sustainability Actions) */}
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 14 }}>
           {[
-            { Icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total Karma Coins' },
-            { Icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Day streak' },
-            { Icon: Trophy, color: '#fde68a', val: `${quizStreak}`, label: 'Eco Quiz Streak' },
-            { Icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Sustainability Actions' },
+            { Icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total Karma Coins', onPress: () => navigation.navigate('Wallet') },
+            { Icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Day streak', onPress: () => setShowStreak(true) },
+            { Icon: Trophy, color: '#fde68a', val: `${quizStreak}`, label: 'Eco Quiz Streak', onPress: () => setShowQuizCal(true) },
+            { Icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Sustainability Actions', onPress: () => navigation.navigate('Orders', { tab: 'History' }) },
           ].map((st, i) => (
-            <View key={i} style={styles.statTile}>
+            <TouchableOpacity key={i} style={styles.statTile} activeOpacity={0.7} onPress={st.onPress}>
               <View style={styles.statTileTop}>
                 <View style={[styles.statTileIcon, { backgroundColor: st.color + '22' }]}>
                   <st.Icon size={14} color={st.color} />
                 </View>
                 <Text style={styles.statTileLabel} numberOfLines={1}>{st.label}</Text>
+                <ChevronRight size={13} color="rgba(255,255,255,0.4)" />
               </View>
               <Text style={[styles.statTileVal, { color: st.color }]}>{st.val}</Text>
-            </View>
+            </TouchableOpacity>
           ))}
         </View>
       </LinearGradient>
+
+      <QuizCalendarModal visible={showQuizCal} onClose={() => setShowQuizCal(false)} playedDates={quizHistory} streak={quizStreak} />
+      <StreakModal visible={showStreak} onClose={() => setShowStreak(false)} streak={streak} />
 
       {/* Notifications-off nudge — links to OS settings when the user turned push off */}
       <NotificationPermissionBanner />

@@ -8,8 +8,8 @@ import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { RatingModal } from '../components/shared/RatingModal';
 import { bookingService } from '../services/booking';
 
-export function OrdersScreen({ navigation }: any) {
-  const [activeTab, setActiveTab] = useState<'Active' | 'History'>('Active');
+export function OrdersScreen({ navigation, route }: any) {
+  const [activeTab, setActiveTab] = useState<'Active' | 'History'>(route?.params?.tab === 'History' ? 'History' : 'Active');
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   // Bookings rated this session — gives instant UI feedback before the next refetch
