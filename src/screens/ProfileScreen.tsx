@@ -1350,7 +1350,7 @@ const styles = StyleSheet.create({
   /* Modal Styles (Zomato/Swiggy Style) */
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: Platform.OS === 'web' ? 'center' : 'flex-end', alignItems: 'center', padding: Platform.OS === 'web' ? 16 : 0 },
   modalBackdropCloseArea: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
-  modalContent: { backgroundColor: 'white', borderTopLeftRadius: 32, borderTopRightRadius: 32, borderBottomLeftRadius: Platform.OS === 'web' ? 32 : 0, borderBottomRightRadius: Platform.OS === 'web' ? 32 : 0, padding: 24, paddingBottom: Platform.OS === 'ios' ? 40 : 24, elevation: 20, shadowColor: '#000', shadowOffset: { width: 0, height: -10 }, shadowOpacity: 0.1, shadowRadius: 20, width: '100%', maxWidth: 480, alignSelf: 'center', maxHeight: Platform.OS === 'web' ? '90%' : undefined },
+  modalContent: { backgroundColor: 'white', borderTopLeftRadius: 32, borderTopRightRadius: 32, borderBottomLeftRadius: Platform.OS === 'web' ? 32 : 0, borderBottomRightRadius: Platform.OS === 'web' ? 32 : 0, padding: 24, paddingBottom: Platform.OS === 'ios' ? 40 : 24, elevation: 20, shadowColor: '#000', shadowOffset: { width: 0, height: -10 }, shadowOpacity: 0.1, shadowRadius: 20, width: '100%', maxWidth: 480, alignSelf: 'center', maxHeight: '90%' },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
   modalTitle: { fontSize: 20, fontWeight: '900', color: '#0f172a' },
   closeBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#f1f5f9', alignItems: 'center', justifyContent: 'center' },
