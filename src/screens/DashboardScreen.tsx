@@ -113,7 +113,11 @@ function FeatureCard({ feature, onPress }: { feature: typeof FEATURES[0], onPres
           </View>
         </View>
 
-        <Text style={styles.featureEmoji}>{feature.emoji}</Text>
+        <View style={styles.featureMedia}>
+          {feature.id === 'earn'
+            ? <KarmaCoin size={40} />
+            : <Text style={styles.featureEmoji}>{feature.emoji}</Text>}
+        </View>
         <Text style={styles.featureTitle} numberOfLines={2}>{feature.title}</Text>
 
         <View style={styles.featureActionRow}>
@@ -634,7 +638,9 @@ export function DashboardScreen({ navigation, route }: any) {
             <View style={styles.modalContent}>
               <View style={styles.modalHeader}>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.modalEmoji}>{selectedFeature.emoji}</Text>
+                  {selectedFeature.id === 'earn'
+                    ? <View style={{ marginBottom: 8 }}><KarmaCoin size={36} /></View>
+                    : <Text style={styles.modalEmoji}>{selectedFeature.emoji}</Text>}
                   <Text style={styles.modalTitle}>{selectedFeature.title}</Text>
                 </View>
                 <TouchableOpacity onPress={() => setSelectedFeature(null)} style={styles.closeBtn}>
@@ -780,12 +786,15 @@ const styles = StyleSheet.create({
   discoverSub: { fontSize: 12, color: '#9ca3af', fontWeight: '600' },
 
   // Feature Discovery Card Styles
-  featureCard: { borderRadius: 24, padding: 20, height: 180, justifyContent: 'space-between', elevation: 6, shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.2, shadowRadius: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },
+  featureCard: { borderRadius: 24, padding: 20, height: 198, justifyContent: 'space-between', elevation: 6, shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.2, shadowRadius: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },
   featureTagRow: { marginBottom: 14 },
   featureTag: { alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, borderWidth: 1 },
   featureTagText: { fontSize: 9, fontWeight: '900', letterSpacing: 1.5 },
-  featureEmoji: { fontSize: 44, marginBottom: 10 },
-  featureTitle: { fontSize: 20, fontWeight: '900', color: 'white', marginBottom: 10, letterSpacing: -0.3 },
+  // Fixed-height media slot keeps the title/action aligned across cards regardless of
+  // whether the media is an emoji or the coin (emoji metrics differ between Expo Go and a release build).
+  featureMedia: { height: 44, justifyContent: 'center', marginBottom: 10 },
+  featureEmoji: { fontSize: 40, lineHeight: 44 },
+  featureTitle: { fontSize: 18, fontWeight: '900', color: 'white', marginBottom: 10, letterSpacing: -0.3, lineHeight: 23 },
   featureDesc: { fontSize: 13, color: 'rgba(255,255,255,0.75)', lineHeight: 20, fontWeight: '500', marginBottom: 18 },
   featureActionRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 'auto' },
   featureActionText: { fontSize: 11, fontWeight: '800' },
