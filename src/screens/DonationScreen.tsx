@@ -58,7 +58,7 @@ export function DonationScreen({ navigation, route }: any) {
     }
     showAlert(
       'Donations opening soon',
-      `Thanks for supporting the 3R Waste Foundation. The "${option.title}" donation will be live shortly — check back soon.`
+      `Thanks for supporting 3R ZeroWaste. The "${option.title}" donation will be live shortly — check back soon.`
     );
   };
 
@@ -88,17 +88,17 @@ export function DonationScreen({ navigation, route }: any) {
         <View style={styles.content}>
 
           {/* Foundation branding — neutral placeholder icon, NOT the KarmaVerse
-              logo (that misrepresented the foundation). TODO: drop the real 3R Waste
-              Foundation logo into assets/ and render it here once the Founding
+              logo (that misrepresented the partner). TODO: drop the real 3R ZeroWaste
+              logo into assets/ and render it here once the Founding
               Engineer supplies the branding asset. */}
           <View style={styles.foundationCard}>
             <View style={styles.foundationLogoWrap}>
               <HeartHandshake size={30} color="#15803d" />
             </View>
             <Text style={styles.foundationLabel}>IN PARTNERSHIP WITH</Text>
-            <Text style={styles.foundationName}>3R Waste Foundation</Text>
+            <Text style={styles.foundationName}>3R ZeroWaste</Text>
             <Text style={styles.foundationDesc}>
-              Every donation goes directly to the 3R Waste Foundation, supporting environmental and
+              Every donation goes directly to 3R ZeroWaste, supporting environmental and
               community welfare initiatives.
             </Text>
           </View>
