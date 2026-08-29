@@ -11,7 +11,7 @@ import { ChevronLeft, MapPin, CheckCircle2, PackageOpen, Plus, FileText, Magnet,
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { PhoneVerificationModal } from '../components/shared/PhoneVerificationModal';
 import { LinearGradient } from 'expo-linear-gradient';
-import { CupSoda, ShoppingBag, Archive, Newspaper as NewsIcon, BookOpen, Database, Cog, Utensils, Activity, Laptop, Cable, Tv, Battery, Shirt, Fan, AirVent, WashingMachine, Refrigerator, Flame, Home as HomeIcon, Briefcase, Watch } from 'lucide-react-native';
+import { CupSoda, ShoppingBag, Archive, Newspaper as NewsIcon, BookOpen, Database, Cog, Utensils, Activity, Laptop, Cable, Tv, Battery, Shirt, Fan, AirVent, WashingMachine, Refrigerator, Flame, Home as HomeIcon, Briefcase } from 'lucide-react-native';
 import { addressService, SavedAddress, AddressLabel } from '../services/address';
 import { bookingService } from '../services/booking';
 import * as Location from 'expo-location';
@@ -70,19 +70,15 @@ const ALL_ITEMS: CatalogueItem[] = [
   { id: 'pc1', catId: '1', subCategory: 'Laptop', unit: 'piece', hasCondition: true, coinsWorking: 10000, coinsNotWorking: 3000, itemIcon: Laptop, image: require('../../assets/catalogue/laptop.jpg') },
   { id: 'pc2', catId: '1', subCategory: 'Desktop', unit: 'piece', hasCondition: true, coinsWorking: 2000, coinsNotWorking: 1000, itemIcon: Cog, image: require('../../assets/catalogue/desktop.jpg') },
   { id: 'pc3', catId: '1', subCategory: 'Monitor (LCD/LED)', unit: 'piece', hasCondition: true, coinsWorking: 4000, coinsNotWorking: 1000, itemIcon: Tv, image: require('../../assets/catalogue/monitor.jpg') },
-  { id: 'pc4a', catId: '1', subCategory: 'Printer (Inkjet)', unit: 'piece', hasCondition: true, coinsWorking: 6000, coinsNotWorking: 1000, itemIcon: Archive, image: require('../../assets/catalogue/printer.jpg') },
-  { id: 'pc4b', catId: '1', subCategory: 'Printer (LaserJet)', unit: 'piece', hasCondition: true, coinsWorking: 10000, coinsNotWorking: 2000, itemIcon: Archive, image: require('../../assets/catalogue/printer.jpg') },
+  // Printer split (Inkjet/LaserJet) disabled until backend seeds them — backend has single 'Printer'.
+  { id: 'pc4', catId: '1', subCategory: 'Printer', unit: 'piece', hasCondition: true, coinsWorking: 6000, coinsNotWorking: 1000, itemIcon: Archive, image: require('../../assets/catalogue/printer.jpg') },
   { id: 'pc5', catId: '1', subCategory: 'Tablet', unit: 'piece', hasCondition: true, coinsWorking: 2000, coinsNotWorking: 1000, itemIcon: Smartphone, image: require('../../assets/catalogue/tablet.jpg') },
   { id: 'pc6', catId: '1', subCategory: 'Branded Smartphone', unit: 'piece', hasCondition: true, coinsWorking: 10000, coinsNotWorking: 1000, itemIcon: Smartphone, image: require('../../assets/catalogue/branded-smartphone.jpg') },
   { id: 'pc7', catId: '1', subCategory: 'Non-Branded Smartphone', unit: 'piece', hasCondition: true, coinsWorking: 5000, coinsNotWorking: 1000, itemIcon: Smartphone, image: require('../../assets/catalogue/non-branded-smartphone.jpg') },
   { id: 'pc8', catId: '1', subCategory: 'Keyboard', unit: 'piece', hasCondition: true, coinsWorking: 100, coinsNotWorking: 50, itemIcon: Cable, image: require('../../assets/catalogue/keyboard.jpg') },
   { id: 'pc9', catId: '1', subCategory: 'Mouse', unit: 'piece', hasCondition: true, coinsWorking: 100, coinsNotWorking: 10, itemIcon: Cable, image: require('../../assets/catalogue/mouse.jpg') },
   { id: 'pc10', catId: '1', subCategory: 'Touchpad Phone', unit: 'piece', hasCondition: true, coinsWorking: 200, coinsNotWorking: 100, itemIcon: Smartphone, image: require('../../assets/catalogue/touchpad-phone.jpg') },
-  // Smartwatch / wearables — temporary photos (closest existing gadget shots) until real product images arrive.
-  { id: 'sw1', catId: '1', subCategory: 'Branded Smartwatch', unit: 'piece', hasCondition: true, coinsWorking: 3000, coinsNotWorking: 500, itemIcon: Watch, image: require('../../assets/catalogue/branded-smartphone.jpg') },
-  { id: 'sw2', catId: '1', subCategory: 'Non-Branded Smartwatch', unit: 'piece', hasCondition: true, coinsWorking: 1000, coinsNotWorking: 200, itemIcon: Watch, image: require('../../assets/catalogue/non-branded-smartphone.jpg') },
-  { id: 'sw3', catId: '1', subCategory: 'Fitness Band', unit: 'piece', hasCondition: true, coinsWorking: 500, coinsNotWorking: 100, itemIcon: Watch, image: require('../../assets/catalogue/touchpad-phone.jpg') },
-  { id: 'sw4', catId: '1', subCategory: 'Other Wearable', unit: 'piece', hasCondition: true, coinsWorking: 300, coinsNotWorking: 100, itemIcon: Watch, image: require('../../assets/catalogue/non-branded-smartphone.jpg') },
+  // Smartwatch / wearables disabled until backend seeds them (not in live catalogue yet).
 
   // 2. Mixed E-Waste (kg)
   { id: 'me1', catId: '2', subCategory: 'Mixed E-waste', unit: 'kg', coins: 200, itemIcon: Cable, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Keyboards_and_mice_in_pile_of_ewaste.jpg/500px-Keyboards_and_mice_in_pile_of_ewaste.jpg' } },
@@ -92,7 +88,7 @@ const ALL_ITEMS: CatalogueItem[] = [
   { id: 'gl2', catId: '3', subCategory: 'Soft Drink Bottles', unit: 'kg', coins: 20, itemIcon: CupSoda, image: require('../../assets/catalogue/soft-drink-bottles.jpg') },
   { id: 'gl3', catId: '3', subCategory: 'Wine Bottles', unit: 'kg', coins: 20, itemIcon: Wine, image: require('../../assets/catalogue/wine-bottles.jpg') },
   { id: 'gl4', catId: '3', subCategory: 'Glass Jars', unit: 'kg', coins: 20, itemIcon: Archive, image: require('../../assets/catalogue/glass-jars.jpg') },
-  { id: 'gl6', catId: '3', subCategory: 'Window Glass', unit: 'kg', coins: 15, itemIcon: Archive, image: require('../../assets/catalogue/other-glass.jpg') },
+  // Window Glass disabled until backend seeds it.
   { id: 'gl5', catId: '3', subCategory: 'Other Glass', unit: 'kg', coins: 10, itemIcon: Wine, image: require('../../assets/catalogue/other-glass.jpg') },
 
   // 4. Paper (kg)
@@ -114,9 +110,8 @@ const ALL_ITEMS: CatalogueItem[] = [
   { id: 'ap10', catId: '5', subCategory: 'Other Large Appliances', unit: 'piece', hasCondition: true, coinsWorking: 15000, coinsNotWorking: 2500, itemIcon: Cog, image: require('../../assets/catalogue/other-large-appliances.jpg') },
 
   // 6. Batteries (kg) — minimum 1 kg
-  { id: 'ba1', catId: '6', subCategory: 'Lithium-ion Battery', unit: 'kg', coins: 300, minQty: 1, itemIcon: Battery, image: require('../../assets/catalogue/battery.jpg') },
-  { id: 'ba2', catId: '6', subCategory: 'Lead-Acid Battery', unit: 'kg', coins: 200, minQty: 1, itemIcon: Battery, image: require('../../assets/catalogue/battery.jpg') },
-  { id: 'ba3', catId: '6', subCategory: 'Dry Cell / Household Battery', unit: 'kg', coins: 100, minQty: 1, itemIcon: Battery, image: require('../../assets/catalogue/battery.jpg') },
+  // Battery split (Lithium-ion/Lead-Acid/Dry Cell) disabled until backend seeds them — backend has single 'Battery'.
+  { id: 'ba1', catId: '6', subCategory: 'Battery', unit: 'kg', coins: 200, minQty: 1, itemIcon: Battery, image: require('../../assets/catalogue/battery.jpg') },
 
   // 7. Footwear (piece)
   { id: 'sh1', catId: '7', subCategory: 'Branded', unit: 'piece', coins: 2000, itemIcon: ShoppingBag, image: require('../../assets/catalogue/branded-shoes.jpg') },
@@ -127,16 +122,14 @@ const ALL_ITEMS: CatalogueItem[] = [
   { id: 'mt2', catId: '8', subCategory: 'Copper Wire', unit: 'kg', coins: 800, itemIcon: Activity, image: require('../../assets/catalogue/copper-wire.jpg') },
   { id: 'mt3', catId: '8', subCategory: 'Iron', unit: 'kg', coins: 100, itemIcon: Cog, image: require('../../assets/catalogue/iron.jpg') },
   { id: 'mt4', catId: '8', subCategory: 'Steel/Utensils', unit: 'kg', coins: 100, itemIcon: Utensils, image: require('../../assets/catalogue/steel-utensils.jpg') },
-  { id: 'mt6', catId: '8', subCategory: 'Brass', unit: 'kg', coins: 400, itemIcon: Database, image: require('../../assets/catalogue/other-metals.jpg') },
+  // Brass disabled until backend seeds it.
   { id: 'mt5', catId: '8', subCategory: 'Other Metals', unit: 'kg', coins: 100, itemIcon: Magnet, image: require('../../assets/catalogue/other-metals.jpg') },
 
   // 9. Plastic (kg)
   { id: 'pl1', catId: '9', subCategory: 'PET Bottles', unit: 'kg', coins: 100, itemIcon: CupSoda, image: require('../../assets/catalogue/pet-bottles.jpg') },
   { id: 'pl2', catId: '9', subCategory: 'Hard Plastic (HDPE/PP)', unit: 'kg', coins: 150, itemIcon: Archive, image: require('../../assets/catalogue/hard-plastic.jpg') },
   { id: 'pl5', catId: '9', subCategory: 'LDPE', unit: 'kg', coins: 200, itemIcon: Droplets, image: require('../../assets/catalogue/ldpe.jpg') },
-  { id: 'pl6', catId: '9', subCategory: 'ABS', unit: 'kg', coins: 200, itemIcon: Archive, image: require('../../assets/catalogue/hard-plastic.jpg') },
-  { id: 'pl7', catId: '9', subCategory: 'Nylon', unit: 'kg', coins: 250, itemIcon: Droplets, image: require('../../assets/catalogue/other-plastic.jpg') },
-  { id: 'pl8', catId: '9', subCategory: 'TPU', unit: 'kg', coins: 200, itemIcon: Droplets, image: require('../../assets/catalogue/hard-plastic.jpg') },
+  // ABS / Nylon / TPU disabled until backend seeds them.
   { id: 'pl3', catId: '9', subCategory: 'Thermocol', unit: 'kg', coins: 30, itemIcon: PackageOpen, image: require('../../assets/catalogue/thermocol.jpg') },
   { id: 'pl4', catId: '9', subCategory: 'Other Plastic', unit: 'kg', coins: 10, itemIcon: Droplets, image: require('../../assets/catalogue/other-plastic.jpg') },
 
