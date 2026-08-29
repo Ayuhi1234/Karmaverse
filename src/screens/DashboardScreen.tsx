@@ -209,7 +209,7 @@ export function DashboardScreen({ navigation, route }: any) {
         );
         setUserGender(profileData.demographics?.gender || profileData.gender || null);
         setBalance(profileData.karmaCoins || profileData.coins || 0);
-        setStreak(profileData.streak || profileData.activeStreak || 0);
+        // Day streak is tracked on-device from app visits (see computeVisitStreak), not the backend.
 
         if (ordersData && Array.isArray(ordersData)) {
           const formattedOrders = ordersData.slice(0, 2).map((order: any) => {
@@ -266,12 +266,38 @@ export function DashboardScreen({ navigation, route }: any) {
       }
     };
 
+    // Day streak (on-device): +1 for each consecutive day the app is opened.
+    // Same day = no change; a missed day resets to 1. No backend involved.
+    const computeVisitStreak = async () => {
+      const token = await AsyncStorage.getItem('userToken');
+      const suffix = getStableUserSuffix(token);
+      const todayStr = getLocalDateStr();
+      const yesterdayStr = getLocalYesterdayStr();
+      const [lastVisit, storedStreak] = await Promise.all([
+        AsyncStorage.getItem(`lastVisitDate_${suffix}`),
+        AsyncStorage.getItem(`visitStreak_${suffix}`),
+      ]);
+      let streakVal = Number(storedStreak) || 0;
+      if (lastVisit === todayStr) {
+        streakVal = streakVal || 1;
+      } else {
+        streakVal = lastVisit === yesterdayStr ? streakVal + 1 : 1;
+        await AsyncStorage.multiSet([
+          [`visitStreak_${suffix}`, String(streakVal)],
+          [`lastVisitDate_${suffix}`, todayStr],
+        ]);
+      }
+      setStreak(streakVal);
+    };
+
     const unsubscribe = navigation.addListener('focus', () => {
       fetchDashboardData();
       fetchQuizStreak();
+      computeVisitStreak();
     });
     fetchDashboardData();
     fetchQuizStreak();
+    computeVisitStreak();
 
     (async () => {
       const token = await AsyncStorage.getItem('userToken');
