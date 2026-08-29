@@ -12,7 +12,7 @@ const SLIDES = [
     bg: ['#064e3b', '#0f766e'],
     accent: '#4ade80',
     title: '',
-    subtitle: "India's first circular economy rewards platform — doorstep recycling pickups for everyone.",
+    subtitle: "India's first circular economy rewards platform — free recycling pickups for everyone.",
     buttonText: 'Next',
   },
   {
@@ -159,7 +159,7 @@ export function SplashScreen({ navigation }: any) {
         <View style={{ paddingHorizontal: 10, width: '100%' }}>
           <View style={styles.timelineItem}>
             <View style={[styles.timelineIcon, { backgroundColor: '#3f3f46' }]}><Calendar size={16} color="#fbbf24" /></View>
-            <View style={[styles.timelineBox, { backgroundColor: 'rgba(255,255,255,0.05)' }]}><Text style={styles.timelineText}>Schedule a free doorstep pickup</Text></View>
+            <View style={[styles.timelineBox, { backgroundColor: 'rgba(255,255,255,0.05)' }]}><Text style={styles.timelineText}>Schedule a free pickup</Text></View>
             <View style={[styles.timelineLine, { height: 40, top: 40 }]} />
           </View>
           <View style={styles.timelineItem}>
@@ -170,10 +170,6 @@ export function SplashScreen({ navigation }: any) {
           <View style={styles.timelineItem}>
             <View style={[styles.timelineIcon, { backgroundColor: '#22c55e' }]}><CheckSquare size={16} color="white" /></View>
             <View style={[styles.timelineBox, { backgroundColor: 'rgba(255,255,255,0.05)' }]}><Text style={styles.timelineText}>Earn KarmaCoins XP instantly</Text></View>
-          </View>
-          <View style={{ backgroundColor: 'rgba(74,222,128,0.1)', paddingVertical: 14, paddingHorizontal: 20, borderRadius: 16, marginTop: 24, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(74,222,128,0.2)' }}>
-            <KarmaCoin size={18} />
-            <Text style={{ flex: 1, flexShrink: 1, color: '#4ade80', fontWeight: '700', fontSize: 13, marginLeft: 10, textAlign: 'left' }}>Earn KarmaCoins XP on every pickup</Text>
           </View>
         </View>
       );
@@ -192,7 +188,7 @@ export function SplashScreen({ navigation }: any) {
             <View style={[styles.impactIconBg, { backgroundColor: 'rgba(14,165,233,0.15)' }]}><Wind color="#0ea5e9" size={24} /></View>
             <View style={{ flex: 1 }}>
               <Text style={styles.impactTitle}>100% free</Text>
-              <Text style={styles.impactDesc}>Doorstep pickup service for all</Text>
+              <Text style={styles.impactDesc}>Free pickup service for all</Text>
             </View>
           </View>
           <View style={styles.impactCard}>
@@ -272,21 +268,21 @@ export function SplashScreen({ navigation }: any) {
             <View style={styles.contentContainer}>
               {slide.id === 'intro' ? (
                 <View style={{ marginBottom: 16 }}>
-                  <Text style={styles.title}>Turn your</Text>
-                  <Animated.Text style={[styles.title, {
+                  <Text style={[styles.title, styles.titleTight]}>Turn your</Text>
+                  <Animated.Text style={[styles.title, styles.titleTight, {
                     color: WASTE_WORDS[wordIndex].color,
                     opacity: wordOpacity,
                     transform: [{ translateY: wordTranslateY }],
                   }]}>
                     {WASTE_WORDS[wordIndex].word}
                   </Animated.Text>
-                  <Text style={styles.title}>into KarmaCoins XP</Text>
+                  <Text style={[styles.title, styles.titleTight]}>into KarmaCoins XP</Text>
                 </View>
               ) : slide.id === 'earn' ? (
                 <View style={{ marginBottom: 16 }}>
-                  <Text style={styles.title}>Earn KarmaCoins XP</Text>
-                  <Text style={styles.title}>by</Text>
-                  <Animated.Text style={[styles.title, {
+                  <Text style={[styles.title, styles.titleTight]}>Earn KarmaCoins XP</Text>
+                  <Text style={[styles.title, styles.titleTight]}>by</Text>
+                  <Animated.Text style={[styles.title, styles.titleTight, {
                     color: EARN_WORDS[earnWordIndex].color,
                     opacity: earnWordOpacity,
                     transform: [{ translateY: earnWordTranslateY }],
@@ -366,6 +362,10 @@ const styles = StyleSheet.create({
     lineHeight: 38,
     marginBottom: 16,
     letterSpacing: -0.5,
+  },
+  // Stacked headline lines (intro/earn) sit tight; the wrapping View adds the gap before the subtitle.
+  titleTight: {
+    marginBottom: 0,
   },
   subtitle: {
     fontSize: 15,
