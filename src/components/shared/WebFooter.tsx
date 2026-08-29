@@ -87,7 +87,7 @@ export function WebFooter() {
               <Image source={require('../../../assets/logo-nav.png')} style={{ height: 68, width: 144, resizeMode: 'contain' }} />
             </View>
             <Text style={s.aboutText}>
-              India's rewarding recycling platform. Turn your waste into KarmaCoins XP — schedule free doorstep pickups and earn rewards for every kg recycled.
+              India's rewarding recycling platform. Turn your waste into KarmaCoins XP — schedule free sustainable pickups and earn rewards for every kg recycled.
             </Text>
             <SocialRow />
           </View>

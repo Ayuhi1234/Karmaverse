@@ -317,7 +317,7 @@ export function SplashScreen({ navigation, route }: any) {
             <Text style={[s.heroTagline, isMobile && { fontSize: 18 }]}>“Kar Bhala Toh Ho Bhala.” 🌱</Text>
 
             <Text style={[s.heroSub, isMobile && { fontSize: 16 }]}>
-              KarmaVer$e rewards every sustainable action — schedule doorstep recycling pickups,
+              KarmaVer$e rewards every sustainable action — schedule green recycling pickups,
               sharpen your green knowledge with our AI-powered eco-quiz, and turn it all into
               KarmaCoins with real, measurable impact.
             </Text>

@@ -35,7 +35,7 @@ const FEATURE_DETAILS = [
   },
   {
     id: 'pickup', title: 'Schedule a pickup', emoji: '🚛', icon: Truck,
-    desc: 'Give your old items a second life — book a doorstep pickup in 3 taps and earn KarmaCoins for going green.',
+    desc: 'Give your old items a second life — book a sustainable pickup in 3 taps and earn KarmaCoins for going green.',
     steps: ['Pick what you want to recycle', 'Choose date & time slot', 'Agent comes to your door', 'Earn KarmaCoins XP instantly'],
     benefit: 'Earn coins on every pickup',
     gradient: ['#052e16', '#15803d'] as [string, string],
@@ -267,7 +267,7 @@ export function DashboardScreen({ navigation, route }: any) {
                 <ArrowRight size={20} color="rgba(255,255,255,0.4)" />
               </View>
               <Text style={z.actionCardTitle}>Schedule a pickup</Text>
-              <Text style={z.actionCardSub}>Turn your clutter into KarmaCoins — doorstep pickup, zero effort, planet-friendly</Text>
+              <Text style={z.actionCardSub}>Turn your clutter into KarmaCoins — sustainable pickup, zero effort, planet-friendly</Text>
               <View style={z.actionCardCTA}>
                 <Text style={z.actionCardCTAText}>Schedule now</Text>
                 <ArrowRight size={14} color="#4ade80" />

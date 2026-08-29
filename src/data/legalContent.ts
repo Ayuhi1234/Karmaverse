@@ -54,7 +54,7 @@ export const TERMS: LegalDoc = {
       heading: 'Services provided',
       body: ['KarmaVer$e provides the following services:'],
       bullets: [
-        'Waste pickup scheduling: free doorstep pickups for plastic, paper, metal, glass, e-waste, textile, organic, and hazardous materials',
+        'Waste pickup scheduling: free sustainable pickups for plastic, paper, metal, glass, e-waste, textile, organic, and hazardous materials',
         'KarmaCoins XP rewards: earn coins based on the type and verified weight of waste collected',
         'Daily eco-quiz: play daily quizzes to earn additional KarmaCoins XP',
         'Referral program: invite others and earn bonus coins on their first successful pickup',

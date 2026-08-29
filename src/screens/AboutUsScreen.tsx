@@ -6,13 +6,13 @@ import { ChevronLeft, Target, Eye, Recycle, Users, Truck, Coins, Sparkles } from
 
 const STATS = [
   { value: '1.85L+', label: 'Citizens reached' },
-  { value: '100%', label: 'Free doorstep pickup' },
+  { value: '100%', label: 'Free sustainable pickup' },
   { value: '10', label: 'Recyclable categories accepted' },
   { value: '2020', label: 'Founded in Haryana' },
 ];
 
 const INITIATIVES = [
-  { icon: Truck, title: 'Free doorstep recycling', desc: 'Verified agents collect plastic, paper, metal, e-waste and more directly from your home, at no cost.' },
+  { icon: Truck, title: 'Free sustainable recycling', desc: 'Verified agents collect plastic, paper, metal, e-waste and more directly from your home, at no cost.' },
   { icon: Coins, title: 'Rewarding good behavior', desc: 'Every verified kilogram earns KarmaCoins XP — real rewards for real environmental impact.' },
   { icon: Users, title: 'Community-first model', desc: 'Referral and awareness programs that grow the circular economy through the people already in it.' },
   { icon: Recycle, title: 'Closing the loop', desc: 'Segregated waste is routed to certified recyclers, keeping material in use instead of landfill.' },
@@ -41,7 +41,7 @@ export function AboutUsScreen({ navigation }: any) {
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.intro}>
-          KarmaVer$e is the doorstep recycling rewards platform built by 3RZeroWaste Pvt. Ltd. — a Haryana-based
+          KarmaVer$e is the sustainable recycling rewards platform built by 3RZeroWaste Pvt. Ltd. — a Haryana-based
           company founded to make responsible waste management effortless and rewarding for every household in India.
         </Text>
 
@@ -61,7 +61,7 @@ export function AboutUsScreen({ navigation }: any) {
           </View>
           <Text style={styles.cardText}>
             To turn India's growing waste problem into a circular economy opportunity — making it free, simple, and
-            rewarding for households to recycle plastic, paper, metal, e-waste and more from their doorstep.
+            rewarding for households to recycle plastic, paper, metal, e-waste and more sustainably.
           </Text>
         </View>
 
