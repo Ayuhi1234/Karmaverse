@@ -21,7 +21,7 @@ export interface LegalDoc {
 
 export const TERMS: LegalDoc = {
   title: 'Terms & conditions',
-  updated: 'August 2026',
+  updated: '2 September 2026',
   intro:
     `KarmaVer$e is operated by 3R Zero Waste ("Company", "we", "us", "our"), with its registered office at Plot 62, Sector 8 Road, IMT Manesar, Gurugram, Haryana 122503. These Terms & Conditions ("Terms") govern your access to and use of the KarmaVer$e app, website, and related services (the "Service"). Our Privacy Policy is incorporated by reference and forms part of your agreement with us. By creating an account, scheduling a pickup, or otherwise using the Service, you confirm that you have read and accepted these Terms. If you do not accept them, you must not use the Service.`,
   sections: [
@@ -298,7 +298,7 @@ export const TERMS: LegalDoc = {
 
 export const PRIVACY: LegalDoc = {
   title: 'Privacy policy',
-  updated: 'August 2026',
+  updated: '2 September 2026',
   intro:
     `3R Zero Waste ("Company", "we", "us", "our") operates the KarmaVer$e app and website (the "Service"). We are the Data Fiduciary for the personal data described here, which means we determine why and how it is processed. This Policy explains what personal data we collect, why, who we share it with, how long we keep it, and your rights under India’s Digital Personal Data Protection Act, 2023. It should be read together with our Terms & Conditions.`,
   sections: [
@@ -450,7 +450,7 @@ export const PRIVACY: LegalDoc = {
 
 export const TERMS_OF_USE: LegalDoc = {
   title: 'Terms of use',
-  updated: 'August 2026',
+  updated: '2 September 2026',
   intro:
     `These Terms of Use govern your access to and use of the KarmaVer$e app and website (the "Platform"), operated by 3R Zero Waste. They cover what you are allowed to do on the Platform — the licence to use it, acceptable use, content you post, intellectual property, availability, and our role as an intermediary. By accessing or using the Platform — whether or not you register — you accept these Terms of Use. If you register or book a Pickup, our Terms & Conditions also apply. If you do not accept these Terms of Use, you must not use the Platform.`,
   sections: [
