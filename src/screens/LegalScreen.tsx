@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar } from 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ChevronLeft, ShieldCheck, FileText, Trash2 } from 'lucide-react-native';
-import { TERMS, PRIVACY, DATA_DELETION, LegalDoc, LegalSection } from '../data/legalContent';
+import { TERMS, TERMS_OF_USE, PRIVACY, DATA_DELETION, LegalDoc, LegalSection } from '../data/legalContent';
 
 function SectionBlock({ section, index }: { section: LegalSection; index: number }) {
   return (
@@ -29,9 +29,13 @@ function SectionBlock({ section, index }: { section: LegalSection; index: number
 
 export function LegalScreen({ route, navigation }: any) {
   const rawType = route?.params?.type;
-  const type: 'terms' | 'privacy' | 'data-deletion' =
-    rawType === 'privacy' || rawType === 'data-deletion' ? rawType : 'terms';
-  const doc: LegalDoc = type === 'privacy' ? PRIVACY : type === 'data-deletion' ? DATA_DELETION : TERMS;
+  const type: 'terms' | 'terms-of-use' | 'privacy' | 'data-deletion' =
+    rawType === 'privacy' || rawType === 'data-deletion' || rawType === 'terms-of-use' ? rawType : 'terms';
+  const doc: LegalDoc =
+    type === 'privacy' ? PRIVACY :
+    type === 'data-deletion' ? DATA_DELETION :
+    type === 'terms-of-use' ? TERMS_OF_USE :
+    TERMS;
   const Icon = type === 'privacy' ? ShieldCheck : type === 'data-deletion' ? Trash2 : FileText;
 
   return (

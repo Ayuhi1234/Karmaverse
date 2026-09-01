@@ -1272,6 +1272,8 @@ export function LoginScreen({ navigation }: any) {
               <Text style={styles.termsText}>
                 I agree to the{' '}
                 <Text style={styles.termsLink} onPress={() => navigation.navigate('Legal', { type: 'terms' })}>Terms & Conditions</Text>
+                {', '}
+                <Text style={styles.termsLink} onPress={() => navigation.navigate('Legal', { type: 'terms-of-use' })}>Terms of Use</Text>
                 {' '}and{' '}
                 <Text style={styles.termsLink} onPress={() => navigation.navigate('Legal', { type: 'privacy' })}>Privacy Policy</Text>
               </Text>

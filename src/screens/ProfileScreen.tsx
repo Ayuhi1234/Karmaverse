@@ -740,6 +740,8 @@ export function ProfileScreen({ navigation }: any) {
                 <View style={styles.divider} />
                 <OptionRow icon={<FileText size={18} color="#475569" />} bg="#f8fafc" title="Terms & conditions" onPress={() => navigation.navigate('Legal', { type: 'terms' })} />
                 <View style={styles.divider} />
+                <OptionRow icon={<FileText size={18} color="#475569" />} bg="#f8fafc" title="Terms of use" onPress={() => navigation.navigate('Legal', { type: 'terms-of-use' })} />
+                <View style={styles.divider} />
                 <OptionRow icon={<ShieldCheck size={18} color="#475569" />} bg="#f8fafc" title="Privacy policy" onPress={() => navigation.navigate('Legal', { type: 'privacy' })} />
               </View>
 

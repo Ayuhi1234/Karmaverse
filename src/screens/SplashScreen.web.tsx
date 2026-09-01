@@ -538,7 +538,10 @@ export function SplashScreen({ navigation, route }: any) {
                   <Text style={s.footerLink}>Privacy policy</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => navigation.navigate('Legal', { type: 'terms' })}>
-                  <Text style={s.footerLink}>Terms of service</Text>
+                  <Text style={s.footerLink}>Terms & conditions</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate('Legal', { type: 'terms-of-use' })}>
+                  <Text style={s.footerLink}>Terms of use</Text>
                 </TouchableOpacity>
               </View>
 

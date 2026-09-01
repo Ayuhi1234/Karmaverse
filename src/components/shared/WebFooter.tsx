@@ -152,7 +152,11 @@ export function WebFooter() {
             </TouchableOpacity>
             <Text style={s.legalDot}>·</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Legal', { type: 'terms' })}>
-              <Text style={s.legalLink}>Terms of service</Text>
+              <Text style={s.legalLink}>Terms & conditions</Text>
+            </TouchableOpacity>
+            <Text style={s.legalDot}>·</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Legal', { type: 'terms-of-use' })}>
+              <Text style={s.legalLink}>Terms of use</Text>
             </TouchableOpacity>
           </View>
         </View>
