@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       backend_url:
-        description: "Backend URL to bake into the APK (leave default for QA/testing backend)"
+        description: "Backend URL to bake into the APK (default: AWS production)"
         required: true
-        default: "https://karmacoin-backend-testing.onrender.com"
+        default: "https://api.karmaverse.earth"
 
 jobs:
   build:

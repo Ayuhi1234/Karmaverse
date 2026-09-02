@@ -2,12 +2,10 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { navigationRef } from '../navigation/navRef';
 
-// Backend base URL. Defaults to PRODUCTION so the web/site build (Netlify) and the
-// production APK always hit production. QA/preview APK builds override this via the
-// EXPO_PUBLIC_API_URL env set in eas.json's `preview` profile (points to testing,
-// where in-progress features like the streak two-wallet system are deployed first).
+// Backend base URL — the AWS backend at api.karmaverse.earth. Can still be
+// overridden per build via the EXPO_PUBLIC_API_URL env (eas.json / CI input).
 export const BACKEND_BASE =
-  process.env.EXPO_PUBLIC_API_URL || 'https://karmacoin-backend-productionn.onrender.com';
+  process.env.EXPO_PUBLIC_API_URL || 'https://api.karmaverse.earth';
 const BASE_URL = BACKEND_BASE;
 
 const api = axios.create({

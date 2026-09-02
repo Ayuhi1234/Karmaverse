@@ -16,7 +16,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://karmacoin-backend-testing.onrender.com"
+        "EXPO_PUBLIC_API_URL": "https://api.karmaverse.earth"
       }
     },
     "production": {
