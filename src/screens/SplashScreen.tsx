@@ -261,10 +261,11 @@ export function SplashScreen({ navigation }: any) {
       >
         {SLIDES.map((slide, index) => (
           <View key={slide.id} style={styles.slide}>
+            <ScrollView style={styles.slideScroll} contentContainerStyle={styles.slideScrollInner} showsVerticalScrollIndicator={false}>
             <View style={styles.visualContainer}>
               {renderVisual(slide.id)}
             </View>
-            
+
             <View style={styles.contentContainer}>
               {slide.id === 'intro' ? (
                 <View style={{ marginBottom: 16 }}>
@@ -294,7 +295,10 @@ export function SplashScreen({ navigation }: any) {
                 <Text style={styles.title}>{slide.title}</Text>
               )}
               <Text style={styles.subtitle}>{slide.subtitle}</Text>
-              
+            </View>
+            </ScrollView>
+
+            <View style={styles.footerBlock}>
               <View style={styles.pagination}>
                 {SLIDES.map((_, i) => (
                   <View
@@ -342,19 +346,21 @@ const styles = StyleSheet.create({
   slide: {
     width,
     flex: 1,
-    justifyContent: 'space-between',
     paddingHorizontal: 24,
     paddingBottom: 40,
   },
+  // The visual + heading + subtitle live in a scroll view so they never collide
+  // on shorter or larger-font devices — they centre when they fit, scroll when they don't.
+  slideScroll: { flex: 1, width: '100%' },
+  slideScrollInner: { flexGrow: 1, justifyContent: 'center', paddingVertical: 10 },
   visualContainer: {
-    flex: 1.5,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingVertical: 8,
   },
-  contentContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
+  contentContainer: {},
+  // Pagination + Next button stay pinned below the scroll area.
+  footerBlock: { paddingTop: 12 },
   title: {
     fontSize: 32,
     fontWeight: '800',

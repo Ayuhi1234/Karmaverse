@@ -581,7 +581,7 @@ export function DashboardScreen({ navigation, route }: any) {
                   <View style={[styles.actionIconBg, { backgroundColor: action.iconBg }]}>
                     <action.IconComp size={20} color={action.color} />
                   </View>
-                  <Text style={styles.actionText}>{action.label}</Text>
+                  <Text style={styles.actionText} numberOfLines={2} adjustsFontSizeToFit allowFontScaling={false}>{action.label}</Text>
                 </TouchableOpacity>
               ))}
             </View>
