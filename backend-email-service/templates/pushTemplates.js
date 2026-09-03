@@ -67,6 +67,37 @@ const pushTemplates = {
     body: `Share your code — you each get 1,000 ${CURRENCY}.`,
     data: { route: 'Referral', type: 'REFERRAL_NUDGE' },
   }),
+
+  // Celebration when the user hits a streak milestone.
+  STREAK_MILESTONE: ({ streak }) => ({
+    title: `${s(streak, 'A new')}-day streak! 🔥`,
+    body: `You're on a roll — each reward coin is worth more the longer your streak runs.`,
+    data: { route: 'Wallet', type: 'STREAK_MILESTONE' },
+  }),
+
+  // Coins nearing expiry — only when an expiry policy is enabled.
+  COINS_EXPIRING: ({ coins, date }) => {
+    const c = fmt(coins);
+    return {
+      title: 'Coins expiring soon',
+      body: c ? `${c} ${CURRENCY} expire on ${s(date, 'soon')}. Redeem before they're gone.` : `Some ${CURRENCY} are expiring soon — redeem before they're gone.`,
+      data: { route: 'Wallet', type: 'COINS_EXPIRING' },
+    };
+  },
+
+  // One-time celebration after the user's first completed pickup.
+  FIRST_PICKUP_DONE: () => ({
+    title: 'Your first pickup is done! 🎉',
+    body: `You just turned everyday materials into ${CURRENCY}. Here's to many more.`,
+    data: { route: 'Wallet', type: 'FIRST_PICKUP_DONE' },
+  }),
+
+  // Expansion announcement — a new service area went live near the user.
+  SERVICE_AREA_LIVE: ({ area }) => ({
+    title: `We're now in ${s(area, 'your area')}!`,
+    body: `KarmaVerse pickups just launched near you — book your first free pickup.`,
+    data: { route: 'SchedulePickup', type: 'SERVICE_AREA_LIVE' },
+  }),
 };
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -120,6 +151,106 @@ const txPushTemplates = {
     body: 'High demand in your area — your booking is in our priority pool.',
     data: { route: 'OrderTracking', type: 'BOOKING_IN_POOL', bookingId: s(bookingId) },
   }),
+
+  // Day-before reminder for a scheduled pickup.
+  PICKUP_REMINDER: ({ timeSlot, bookingId }) => ({
+    title: 'Pickup reminder',
+    body: `Your pickup is scheduled for ${s(timeSlot, 'tomorrow')}. Keep your items segregated and ready.`,
+    data: { route: 'OrderTracking', type: 'PICKUP_REMINDER', bookingId: s(bookingId) },
+  }),
+
+  // Ask the user to rate the pickup partner after completion.
+  RATING_REQUEST: ({ agentName, bookingId }) => ({
+    title: 'Rate your pickup',
+    body: `How was ${s(agentName, 'your pickup partner')}? Tap to rate them.`,
+    data: { route: 'OrderTracking', type: 'RATING_REQUEST', bookingId: s(bookingId) },
+  }),
+
+  // Cash payout completed.
+  PAYOUT_SUCCESS: ({ amount }) => ({
+    title: 'Payout sent ✅',
+    body: amount ? `₹${s(amount)} has been sent to your account.` : 'Your payout has been sent to your account.',
+    data: { route: 'Wallet', type: 'PAYOUT_SUCCESS' },
+  }),
+
+  // Cash payout failed.
+  PAYOUT_FAILED: ({ amount }) => ({
+    title: "Payout didn't go through",
+    body: amount ? `We couldn't process your ₹${s(amount)} payout. Your coins are safe — tap for help.` : "We couldn't process your payout. Your coins are safe — tap for help.",
+    data: { route: 'Wallet', type: 'PAYOUT_FAILED' },
+  }),
+
+  // Redemption confirmed.
+  REDEMPTION_CONFIRMED: ({ coins }) => {
+    const c = fmt(coins);
+    return {
+      title: 'Redemption confirmed',
+      body: c ? `You redeemed ${c} ${CURRENCY}. The details are in your wallet.` : 'Your redemption is confirmed. The details are in your wallet.',
+      data: { route: 'Wallet', type: 'REDEMPTION_CONFIRMED' },
+    };
+  },
+
+  // Security — a new sign-in was detected.
+  LOGIN_ALERT: ({ device }) => ({
+    title: 'New sign-in to your account',
+    body: `A new sign-in was detected${device ? ` on ${s(device)}` : ''}. If this wasn't you, secure your account.`,
+    data: { route: 'Profile', type: 'LOGIN_ALERT' },
+  }),
 };
 
-module.exports = { pushTemplates, txPushTemplates };
+// ─────────────────────────────────────────────────────────────────────────
+// AGENT persona pushes — sent to the pickup partner. The transactional ones
+// mirror the in-app socket alerts the agent app already shows (NEW_BOOKING_
+// AVAILABLE, BOOKING_TAKEN, BOOKING_CANCELLED, NEW_RATING_RECEIVED); the last
+// three are scheduled/engagement nudges. `data.route` maps to agent-app screens.
+const agentPushTemplates = {
+  NEW_PICKUP_AVAILABLE: ({ distance, category, bookingId }) => ({
+    title: 'New pickup nearby',
+    body: `${s(distance, 'Nearby')}${category ? ` · ${s(category)}` : ''}. Accept before another partner does.`,
+    data: { route: 'JobFlow', type: 'NEW_PICKUP_AVAILABLE', bookingId: s(bookingId) },
+  }),
+
+  JOB_ACCEPTED: ({ area, bookingId }) => ({
+    title: 'Pickup accepted',
+    body: `You're assigned to ${s(area, 'a pickup')}. Navigate when you're ready.`,
+    data: { route: 'JobFlow', type: 'JOB_ACCEPTED', bookingId: s(bookingId) },
+  }),
+
+  BOOKING_TAKEN: ({ bookingId }) => ({
+    title: 'Job taken',
+    body: 'Another partner accepted this pickup. More are on the way.',
+    data: { route: 'Dashboard', type: 'BOOKING_TAKEN', bookingId: s(bookingId) },
+  }),
+
+  BOOKING_CANCELLED: ({ bookingId }) => ({
+    title: 'Pickup cancelled',
+    body: 'The customer cancelled this pickup.',
+    data: { route: 'Dashboard', type: 'BOOKING_CANCELLED', bookingId: s(bookingId) },
+  }),
+
+  NEW_RATING_RECEIVED: ({ rating }) => ({
+    title: `You got a ${s(rating, 'new')}★ rating`,
+    body: 'A customer just rated your pickup. Keep it up!',
+    data: { route: 'Profile', type: 'NEW_RATING_RECEIVED' },
+  }),
+
+  GO_ONLINE_NUDGE: () => ({
+    title: 'Go online to get pickups',
+    body: 'Pickups are waiting near you — flip online to start.',
+    data: { route: 'Dashboard', type: 'GO_ONLINE_NUDGE' },
+  }),
+
+  DAILY_SUMMARY: ({ count }) => ({
+    title: "Today's summary",
+    body: `${s(count, '0')} pickups completed today. Nice work!`,
+    data: { route: 'MyJobs', type: 'DAILY_SUMMARY' },
+  }),
+
+  PICKUP_MILESTONE: ({ count }) => ({
+    title: `${s(count, 'More')} pickups done! 🎉`,
+    body: `You've completed ${s(count, 'many')} pickups with KarmaVerse.`,
+    data: { route: 'Profile', type: 'PICKUP_MILESTONE' },
+  }),
+};
+
+module.exports = { pushTemplates, txPushTemplates, agentPushTemplates };

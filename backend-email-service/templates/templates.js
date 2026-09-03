@@ -409,6 +409,99 @@ const templates = {
       ctaUrl: `${SITE}/Wallet`,
     }),
   }),
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // TRANSACTIONAL additions — event-driven, no unsubscribe footer.
+  // ─────────────────────────────────────────────────────────────────────────
+
+  // Password reset OTP — distinct from the email-verification OTP above.
+  FORGOT_PASSWORD_OTP: ({ otp }) => ({
+    subject: `Your ${BRAND.namePlain} password reset code`,
+    html: wrapEmail({
+      preheader: `Your password reset code${otp ? ` is ${escapeHtml(otp)}` : ''}`,
+      heading: 'Reset your password',
+      bodyHtml: `<p style="margin:0 0 4px;">Use this code in the ${BRAND.name} app to reset your password:</p>
+        <p style="font-size:34px;font-weight:800;letter-spacing:10px;color:${BRAND.colors.deep};margin:18px 0;text-align:center;">${safe(otp, '------')}</p>
+        <p style="margin:0;color:${BRAND.colors.muted};">This code is valid for 10 minutes. Never share it — our team will never ask for it. If you didn't request this, you can safely ignore this email.</p>`,
+    }),
+  }),
+
+  // Cash payout completed.
+  PAYOUT_SUCCESS: ({ name, amount }) => ({
+    subject: `Your ${BRAND.namePlain} payout is on its way`,
+    html: wrapEmail({
+      preheader: `${amount ? `₹${escapeHtml(String(amount))}` : 'Your payout'} has been sent to your account.`,
+      heading: 'Payout sent',
+      greetingName: name,
+      bodyHtml: `<p style="margin:0 0 12px;">Good news — ${amount ? `<strong>₹${escapeHtml(String(amount))}</strong>` : 'your payout'} has been sent to your account. Depending on your bank, it may take a little time to reflect.</p>
+        <p style="margin:0;">Thank you for turning everyday actions into real impact.</p>`,
+      ctaLabel: 'View wallet',
+      ctaUrl: `${SITE}/Wallet`,
+    }),
+  }),
+
+  // Cash payout failed.
+  PAYOUT_FAILED: ({ name, amount }) => ({
+    subject: `We couldn't process your ${BRAND.namePlain} payout`,
+    html: wrapEmail({
+      preheader: `Your ${amount ? `₹${escapeHtml(String(amount))} ` : ''}payout couldn't be processed — your coins are safe.`,
+      heading: "Payout didn't go through",
+      greetingName: name,
+      bodyHtml: `<p style="margin:0 0 12px;">We couldn't process your ${amount ? `<strong>₹${escapeHtml(String(amount))}</strong> ` : ''}payout. Your ${BRAND.currency} are safe and remain in your wallet.</p>
+        <p style="margin:0;">Please check your payout details and try again, or <a href="mailto:${BRAND.supportEmail}" style="color:${BRAND.colors.green};font-weight:700;">contact support</a> if the problem continues.</p>`,
+      ctaLabel: 'View wallet',
+      ctaUrl: `${SITE}/Wallet`,
+    }),
+  }),
+
+  // Redemption confirmed.
+  REDEMPTION_CONFIRMED: ({ name, coins }) => ({
+    subject: `Your ${BRAND.namePlain} redemption is confirmed`,
+    html: wrapEmail({
+      preheader: `You redeemed ${safe(coins, 'your')} ${BRAND.currency}.`,
+      heading: 'Redemption confirmed',
+      greetingName: name,
+      bodyHtml: `<p style="margin:0 0 2px;">Your redemption is confirmed.</p>
+        ${rewardsCard(safe(coins, '0'), null)}
+        <p style="margin:0;">The details are in your wallet. Keep earning and keep redeeming.</p>`,
+      ctaLabel: 'View wallet',
+      ctaUrl: `${SITE}/Wallet`,
+    }),
+  }),
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // NON-TRANSACTIONAL additions — marketing opt-in + unsubscribe required.
+  // ─────────────────────────────────────────────────────────────────────────
+
+  // Streak milestone celebration (email companion to the push).
+  STREAK_MILESTONE: ({ name, streak, unsubscribeUrl }) => ({
+    subject: `You hit a ${safe(streak, 'new')}-day streak on ${BRAND.namePlain}!`,
+    html: wrapEmail({
+      unsubscribeUrl: unsub(unsubscribeUrl),
+      preheader: 'Each reward coin is worth more the longer your streak runs.',
+      heading: `${safe(streak, 'A new')}-day streak!`,
+      greetingName: name,
+      bodyHtml: `<p style="margin:0 0 12px;">You're on a roll — a <strong>${safe(streak, 'growing')}-day</strong> streak of green actions. The longer your streak runs, the more each reward coin is worth.</p>
+        <p style="margin:0;">Keep it alive with a pickup, quiz, or referral.</p>`,
+      ctaLabel: 'See my wallet',
+      ctaUrl: `${SITE}/Wallet`,
+    }),
+  }),
+
+  // Coins nearing expiry — only when an expiry policy is enabled.
+  COINS_EXPIRING: ({ name, coins, date, unsubscribeUrl }) => ({
+    subject: `Your ${BRAND.currency} expire soon — redeem on ${BRAND.namePlain}`,
+    html: wrapEmail({
+      unsubscribeUrl: unsub(unsubscribeUrl),
+      preheader: `${safe(coins, 'Some')} ${BRAND.currency} expire${date ? ` on ${escapeHtml(String(date))}` : ' soon'}.`,
+      heading: 'Coins expiring soon',
+      greetingName: name,
+      bodyHtml: `<p style="margin:0 0 12px;"><strong>${safe(coins, 'Some')} ${BRAND.currency}</strong> in your wallet expire${date ? ` on <strong>${escapeHtml(String(date))}</strong>` : ' soon'}. Redeem them before they're gone.</p>
+        <p style="margin:0;">A quick redemption is all it takes.</p>`,
+      ctaLabel: 'Redeem now',
+      ctaUrl: `${SITE}/Wallet`,
+    }),
+  }),
 };
 
 module.exports = { templates };
