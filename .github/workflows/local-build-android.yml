@@ -108,7 +108,7 @@ jobs:
           KV_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
         run: keytool -list -v -keystore "$RUNNER_TEMP/karmaverse-upload.keystore" -storepass "$KV_KEYSTORE_PASSWORD" -alias "$KV_KEY_ALIAS" 2>&1 | grep -E "SHA1|SHA256" || true
 
-      - name: Build release APK
+      - name: Build release APK + AAB
         working-directory: android
         env:
           KV_KEYSTORE_FILE: ${{ runner.temp }}/karmaverse-upload.keystore
@@ -117,10 +117,17 @@ jobs:
           KV_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon
+          # APK for direct install/testing; AAB (.aab) is the file the Play Store requires.
+          ./gradlew assembleRelease bundleRelease --no-daemon
 
-      - name: Upload APK
+      - name: Upload APK (direct install / testing)
         uses: actions/upload-artifact@v4
         with:
           name: app-release.apk
           path: android/app/build/outputs/apk/release/app-release.apk
+
+      - name: Upload AAB (Play Store upload)
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release.aab
+          path: android/app/build/outputs/bundle/release/app-release.aab
