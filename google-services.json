@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "152765471990-u3tqul94b03rr5q894jv2fm1aelkjeja.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.karmacredits.app",
+            "certificate_hash": "248e0850cddf6406b0531fbaa7deb6eb960979ae"
+          }
+        },
+        {
           "client_id": "152765471990-4g23up0gau0bclvkm3gk67fa1mpbe5r8.apps.googleusercontent.com",
           "client_type": 3
         }
