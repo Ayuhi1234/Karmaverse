@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { X, Trophy, Timer, Flame, CheckCircle2, XCircle, ArrowRight, WifiOff, Leaf } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getToken } from '../utils/tokenStore';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { quizService } from '../services/quiz';
 import { BACKEND_BASE } from '../services/api';
@@ -134,7 +135,7 @@ export function QuizScreen({ navigation }: any) {
 
   useEffect(() => {
     const init = async () => {
-      const token = await AsyncStorage.getItem('userToken');
+      const token = await getToken();
       const suffix = getStableUserSuffix(token);
       const dateKey = `lastQuizDate_${suffix}`;
       const streakKey = `quizStreak_${suffix}`;

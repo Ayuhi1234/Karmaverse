@@ -1,5 +1,5 @@
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getToken, removeToken } from '../utils/tokenStore';
 import { navigationRef } from '../navigation/navRef';
 
 // Backend base URL — the AWS backend at api.karmaverse.earth. Can still be
@@ -38,7 +38,7 @@ const isAuthEndpoint = (url?: string) => {
 api.interceptors.request.use(
   async (config) => {
     if (!isAuthEndpoint(config.url)) {
-      const token = await AsyncStorage.getItem('userToken');
+      const token = await getToken();
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -58,7 +58,7 @@ api.interceptors.response.use(
       // Token expired or invalid on a protected route — clear it and send the
       // user back to Login so they re-authenticate (e.g. a stale token from a
       // previous backend). Without this the app sits in a broken logged-in state.
-      await AsyncStorage.removeItem('userToken');
+      await removeToken();
       try {
         const current = navigationRef.current?.getCurrentRoute?.()?.name;
         if (navigationRef.current && current && !['Login', 'Splash'].includes(current)) {

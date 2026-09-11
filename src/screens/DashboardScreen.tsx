@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, Dimensions, Platform, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getToken } from '../utils/tokenStore';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Bell, ChevronRight, Truck, Camera, Clock, Users, Package, Flame, Gamepad2, Gift, Star, ShieldCheck, Coins, BadgeCheck, ArrowRight, X, WifiOff, RefreshCw, Trophy, Sparkles } from 'lucide-react-native';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
@@ -247,7 +248,7 @@ export function DashboardScreen({ navigation, route }: any) {
     };
     
     const fetchQuizStreak = async () => {
-      const token = await AsyncStorage.getItem('userToken');
+      const token = await getToken();
       const suffix = getStableUserSuffix(token);
       const [storedDate, storedStreak, storedHistory] = await Promise.all([
         AsyncStorage.getItem(`lastQuizDate_${suffix}`),
@@ -277,7 +278,7 @@ export function DashboardScreen({ navigation, route }: any) {
     // Day streak (on-device): +1 for each consecutive day the app is opened.
     // Same day = no change; a missed day resets to 1. No backend involved.
     const computeVisitStreak = async () => {
-      const token = await AsyncStorage.getItem('userToken');
+      const token = await getToken();
       const suffix = getStableUserSuffix(token);
       const todayStr = getLocalDateStr();
       const yesterdayStr = getLocalYesterdayStr();
@@ -308,7 +309,7 @@ export function DashboardScreen({ navigation, route }: any) {
     computeVisitStreak();
 
     (async () => {
-      const token = await AsyncStorage.getItem('userToken');
+      const token = await getToken();
       showRedeemInfoOnce(`firstHomeRedeemInfo_${getStableUserSuffix(token)}`);
 
       if (isLaunchDay()) {

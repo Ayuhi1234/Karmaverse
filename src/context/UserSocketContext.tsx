@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getToken } from '../utils/tokenStore';
 import { useNotifications } from './NotificationContext';
 import { BACKEND_BASE } from '../services/api';
 
@@ -48,7 +48,7 @@ export function UserSocketProvider({ children }: { children: React.ReactNode }) 
   const { addNotification } = useNotifications();
 
   const connectSocket = useCallback(async () => {
-    const token = await AsyncStorage.getItem('userToken');
+    const token = await getToken();
     if (!token) return;
 
     if (socketRef.current?.connected) return;

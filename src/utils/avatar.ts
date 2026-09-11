@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getToken } from './tokenStore';
 import { getStableUserSuffix } from './userId';
 
 // The chosen preset-avatar id ('a1'..'a10'). Source of truth is the backend
@@ -10,7 +11,7 @@ import { getStableUserSuffix } from './userId';
 const PENDING_KEY = 'avatarId_pending';
 
 async function userKey(): Promise<string> {
-  const token = await AsyncStorage.getItem('userToken');
+  const token = await getToken();
   return token ? `avatarId_${getStableUserSuffix(token)}` : PENDING_KEY;
 }
 

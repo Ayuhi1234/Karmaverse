@@ -1,5 +1,6 @@
 import api from './api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { removeToken, setToken } from '../utils/tokenStore';
 import { registerForPushNotifications, sendTokenToBackend, removeTokenFromBackend } from '../utils/notifications';
 
 // Pull the JWT out of a login/register/google response no matter which shape the
@@ -39,7 +40,7 @@ export const authService = {
         throw new Error('Authentication failed: No token received from server');
       }
 
-      await AsyncStorage.setItem('userToken', token);
+      await setToken(token);
 
       registerForPushNotifications().then(fcmToken => {
         if (fcmToken) sendTokenToBackend(fcmToken);
@@ -99,7 +100,7 @@ export const authService = {
       const response = await api.post('/api/v1/auth/google-login', { idToken });
       const token = extractToken(response.data);
       if (!token) throw new Error('No token received');
-      await AsyncStorage.setItem('userToken', token);
+      await setToken(token);
 
       registerForPushNotifications().then(fcmToken => {
         if (fcmToken) sendTokenToBackend(fcmToken);
@@ -118,7 +119,7 @@ export const authService = {
       const response = await api.post('/api/v1/auth/facebook-login', { accessToken });
       const token = extractToken(response.data);
       if (!token) throw new Error('No token received');
-      await AsyncStorage.setItem('userToken', token);
+      await setToken(token);
 
       registerForPushNotifications().then(fcmToken => {
         if (fcmToken) sendTokenToBackend(fcmToken);
@@ -162,7 +163,7 @@ export const authService = {
     } catch (error) {
       console.log('Logout API failed, clearing local token anyway');
     } finally {
-      await AsyncStorage.removeItem('userToken');
+      await removeToken();
       // Clear the social-login SDK sessions too. Without this, Facebook/Google
       // keep the previous account cached, so the next login is forced back into
       // that same account and a different ID can't sign in.

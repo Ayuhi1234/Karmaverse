@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { View, ActivityIndicator, StyleSheet, Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getToken } from '../utils/tokenStore';
 import { addNotificationResponseListener, getLastNotificationResponse, markNotificationOpened } from '../utils/notifications';
 import { SplashScreen } from '../screens/SplashScreen';
 import { LoginScreen } from '../screens/LoginScreen';
@@ -65,7 +65,7 @@ export function RootNavigator() {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const token = await AsyncStorage.getItem('userToken');
+        const token = await getToken();
         const isValid = !!token && token !== 'undefined' && token !== 'null';
         // Already logged in — the router resolves the deep link directly, so drop
         // any captured URL to avoid a stale redirect on a later in-session login.

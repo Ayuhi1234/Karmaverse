@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { AppState, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getToken } from '../utils/tokenStore';
 import { getStableUserSuffix } from '../utils/userId';
 import {
   isPushSupported,
@@ -73,7 +74,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     let cancelled = false;
 
     const sync = async () => {
-      const token = await AsyncStorage.getItem('userToken');
+      const token = await getToken();
       const next = token ? getStableUserSuffix(token) : null;
       if (cancelled || next === userKeyRef.current) return;
 

@@ -20,6 +20,7 @@ import { getLocalDateStr, getLocalYesterdayStr } from '../utils/quizDate';
 import { authService } from '../services/auth';
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getToken } from '../utils/tokenStore';
 import { getStableUserSuffix } from '../utils/userId';
 
 // Reusable Components
@@ -78,7 +79,7 @@ export function ProfileScreen({ navigation }: any) {
       try {
         const data = await profileService.getProfile();
         // Read quiz streak from AsyncStorage (same as Dashboard)
-        const token = await AsyncStorage.getItem('userToken');
+        const token = await getToken();
         const sfx = getStableUserSuffix(token);
         const [storedDate, storedStreak] = await Promise.all([
           AsyncStorage.getItem(`lastQuizDate_${sfx}`),

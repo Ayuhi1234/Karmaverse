@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions, Image, Linking, Platform } from 'react-native';
 import { Mail, MapPin, Phone, Instagram, Facebook, Linkedin, Twitter, Youtube } from 'lucide-react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getToken } from '../../utils/tokenStore';
 import { useNavigation } from '@react-navigation/native';
 
 const MAX = 1200;
@@ -29,7 +29,7 @@ export function WebFooter() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    AsyncStorage.getItem('userToken').then(t => setIsLoggedIn(!!t)).catch(() => {});
+    getToken().then(t => setIsLoggedIn(!!t)).catch(() => {});
   }, []);
 
   // Logged-in users must stay inside the authenticated app — sending them to the

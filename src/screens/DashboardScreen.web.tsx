@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, 
 import { LinearGradient } from 'expo-linear-gradient';
 import { Truck, Gamepad2, Coins, ChevronRight, Package, Users, Gift, BookOpen, Star, Flame, ArrowRight, Zap, Sparkles, Trophy, Calendar, X, CheckCircle2, BadgeCheck, ShieldCheck } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getToken } from '../utils/tokenStore';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { WebFooter } from '../components/shared/WebFooter';
 import { LaunchDayPopup } from '../components/shared/LaunchDayPopup';
@@ -125,7 +126,7 @@ export function DashboardScreen({ navigation, route }: any) {
       }
     };
     const loadQuiz = async () => {
-      const token = await AsyncStorage.getItem('userToken');
+      const token = await getToken();
       const sfx = getStableUserSuffix(token);
       const [sd, ss] = await Promise.all([AsyncStorage.getItem(`lastQuizDate_${sfx}`), AsyncStorage.getItem(`quizStreak_${sfx}`)]);
       const today = getLocalDateStr();
@@ -145,7 +146,7 @@ export function DashboardScreen({ navigation, route }: any) {
     load(); loadQuiz();
 
     (async () => {
-      const token = await AsyncStorage.getItem('userToken');
+      const token = await getToken();
       showRedeemInfoOnce(`firstHomeRedeemInfo_${getStableUserSuffix(token)}`);
 
       if (isLaunchDay()) {

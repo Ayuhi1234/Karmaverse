@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, StatusBar, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Image, Animated, ActivityIndicator } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getToken } from '../utils/tokenStore';
 import { showAlert } from '../utils/alert';
 import { showRedeemInfoOnce } from '../utils/redeemInfo';
 import { getStableUserSuffix } from '../utils/userId';
@@ -471,7 +471,7 @@ export function SchedulePickupScreen({ navigation }: any) {
       console.log('[Confirm Pickup] Created booking:', createdBooking);
 
       setIsSubmitted(true);
-      const token = await AsyncStorage.getItem('userToken');
+      const token = await getToken();
       showRedeemInfoOnce(`firstBookingRedeemInfo_${getStableUserSuffix(token)}`);
       setTimeout(() => navigation.replace('OrderTracking', {
         booking: createdBooking,
