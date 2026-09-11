@@ -38,16 +38,24 @@ const GRADS: Record<AvatarId, [string, string]> = {
   a10: ['#f87171', '#dc2626'], // heart — rose
 };
 
-const EYE = '#1f2937';
-// Shared friendly face (eyes + smile + cheeks), positioned lower-centre.
+const EYE = '#20303b';
+// Shared friendly face — big glossy eyes with catchlights, rosy cheeks and a
+// warm smile. The gloss + blush is what lifts these from "flat sticker" to cute.
 function Face() {
   return (
     <G>
-      <Circle cx="39" cy="55" r="4.5" fill={EYE} />
-      <Circle cx="61" cy="55" r="4.5" fill={EYE} />
-      <Circle cx="30" cy="63" r="4" fill="#ffffff" opacity={0.45} />
-      <Circle cx="70" cy="63" r="4" fill="#ffffff" opacity={0.45} />
-      <Path d="M41 66 Q50 74 59 66" stroke={EYE} strokeWidth={3.5} fill="none" strokeLinecap="round" />
+      {/* rosy cheeks (behind the eyes so highlights read on top) */}
+      <Ellipse cx="31" cy="63" rx="5" ry="3.4" fill="#ff8fa3" opacity={0.5} />
+      <Ellipse cx="69" cy="63" rx="5" ry="3.4" fill="#ff8fa3" opacity={0.5} />
+      {/* eyes */}
+      <Ellipse cx="39" cy="55" rx="5" ry="6" fill={EYE} />
+      <Ellipse cx="61" cy="55" rx="5" ry="6" fill={EYE} />
+      <Circle cx="41" cy="52.5" r="1.9" fill="#ffffff" />
+      <Circle cx="63" cy="52.5" r="1.9" fill="#ffffff" />
+      <Circle cx="37.5" cy="57.5" r="0.9" fill="#ffffff" opacity={0.7} />
+      <Circle cx="59.5" cy="57.5" r="0.9" fill="#ffffff" opacity={0.7} />
+      {/* smile */}
+      <Path d="M42 65 Q50 73 58 65" stroke={EYE} strokeWidth={3} fill="none" strokeLinecap="round" />
     </G>
   );
 }
@@ -165,6 +173,9 @@ export function Avatar({ avatarId, size = 48, name, ring }: {
           </LinearGradient>
         </Defs>
         <Circle cx="50" cy="50" r="50" fill={`url(#g-${id})`} />
+        {/* soft top sheen + bottom shading for depth */}
+        <Ellipse cx="36" cy="32" rx="28" ry="18" fill="#ffffff" opacity={0.16} />
+        <Ellipse cx="50" cy="92" rx="44" ry="16" fill="#000000" opacity={0.07} />
         <Motif id={id} />
         <Face />
       </Svg>

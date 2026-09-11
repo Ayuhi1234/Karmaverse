@@ -22,10 +22,20 @@ export async function getStoredAvatarId(): Promise<string | null> {
   }
 }
 
+// In-memory subscribers so every avatar surface (profile, dashboard, top nav)
+// updates the instant a new avatar is picked — no refetch needed.
+type AvatarListener = (id: string) => void;
+const listeners = new Set<AvatarListener>();
+export function subscribeAvatar(fn: AvatarListener): () => void {
+  listeners.add(fn);
+  return () => { listeners.delete(fn); };
+}
+
 export async function setStoredAvatarId(id: string): Promise<void> {
   try {
     await AsyncStorage.setItem(await userKey(), id);
   } catch {}
+  listeners.forEach((fn) => fn(id));
 }
 
 // Registration flow: no token yet, so stash the pick and claim it after login.
