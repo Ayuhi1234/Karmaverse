@@ -18,7 +18,11 @@ import { LegalScreen } from '../screens/LegalScreen';
 import { RedeemScreen } from '../screens/RedeemScreen';
 import { RedeemHistoryScreen } from '../screens/RedeemHistoryScreen';
 import { DonationScreen } from '../screens/DonationScreen';
+import { TransferScreen } from '../screens/TransferScreen';
 import { AboutUsScreen } from '../screens/AboutUsScreen';
+import { FeedbackScreen } from '../screens/FeedbackScreen';
+import { UnsubscribeScreen } from '../screens/UnsubscribeScreen';
+import { EmailPreferencesScreen } from '../screens/EmailPreferencesScreen';
 import { NotFoundScreen } from '../screens/NotFoundScreen';
 import { TabNavigator } from './TabNavigator';
 import { navigationRef } from './navRef';
@@ -130,10 +134,19 @@ export function RootNavigator() {
             Redeem: 'Redeem',
             RedeemHistory: 'RedeemHistory',
             Donation: 'Donation',
+            Transfer: 'Transfer',
             AboutUs: 'AboutUs',
+            Feedback: 'feedback',
+            Unsubscribe: 'unsubscribe',
+            EmailPreferences: 'preferences',
             NotFound: '*',
           }
-        : { Splash: '', Login: 'login', Legal: 'legal/:type', AboutUs: 'AboutUs', NotFound: '*' },
+        : {
+            Splash: '', Login: 'login', Legal: 'legal/:type', AboutUs: 'AboutUs',
+            // Public, token-based mailer destinations — openable while logged out.
+            Feedback: 'feedback', Unsubscribe: 'unsubscribe', EmailPreferences: 'preferences',
+            NotFound: '*',
+          },
     },
   }), [isLoggedIn]);
 
@@ -184,7 +197,11 @@ export function RootNavigator() {
         <Stack.Screen name="Redeem" component={RedeemScreen} />
         <Stack.Screen name="RedeemHistory" component={RedeemHistoryScreen} />
         <Stack.Screen name="Donation" component={DonationScreen} />
+        <Stack.Screen name="Transfer" component={TransferScreen} />
         <Stack.Screen name="AboutUs" component={AboutUsScreen} />
+        <Stack.Screen name="Feedback" component={FeedbackScreen} />
+        <Stack.Screen name="Unsubscribe" component={UnsubscribeScreen} />
+        <Stack.Screen name="EmailPreferences" component={EmailPreferencesScreen} />
         <Stack.Screen name="NotFound" component={NotFoundScreen} />
       </Stack.Navigator>
     </NavigationContainer>

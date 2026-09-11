@@ -206,15 +206,25 @@ const templates = {
   // full article — and each card links out to the app/site. Keeps the HTML light.
   NEWSLETTER: ({ name, month, articles, unsubscribeUrl }) => {
     const list = Array.isArray(articles) ? articles.slice(0, 5) : [];
-    const cards = list.map((a) => `
+    // Each card deep-links to THAT specific article inside the app's Knowledge Hub
+    // (/ArticleDetail?id=<id> — the same route the app uses); falls back to the
+    // article's own url if the backend already built one, then to the hub itself.
+    const linkFor = (a) => (a && a.url) || (a && a.id ? `${SITE}/ArticleDetail?id=${encodeURIComponent(String(a.id))}` : `${SITE}/KnowledgeHub`);
+    const cards = list.map((a) => {
+      const href = linkFor(a);
+      const meta = [a && a.category, a && a.readTime].filter((x) => has0(x)).map((x) => escapeHtml(String(x))).join(' &middot; ');
+      const excerpt = safe(a && (a.excerpt || a.intro), '');
+      return `
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 18px;border:1px solid ${BRAND.colors.line};border-radius:14px;overflow:hidden;">
-        ${a && a.image ? `<tr><td><a href="${(a && a.url) || `${SITE}/KnowledgeHub`}" target="_blank"><img src="${a.image}" width="536" alt="${safe(a.title, 'Article')}" style="display:block;width:100%;max-width:536px;height:auto;border:0;" /></a></td></tr>` : ''}
+        ${a && a.image ? `<tr><td><a href="${href}" target="_blank"><img src="${a.image}" width="536" alt="${safe(a && a.title, 'Article')}" style="display:block;width:100%;max-width:536px;height:auto;border:0;" /></a></td></tr>` : ''}
         <tr><td style="padding:16px 18px;">
-          <h3 style="margin:0 0 6px;font-size:16px;line-height:1.3;color:${BRAND.colors.text};font-weight:800;">${safe(a && a.title, 'Untitled')}</h3>
-          <p style="margin:0 0 12px;font-size:13.5px;line-height:1.55;color:${BRAND.colors.body};">${safe(a && a.excerpt, '')}</p>
-          <a href="${(a && a.url) || `${SITE}/KnowledgeHub`}" style="font-size:13px;font-weight:800;color:${BRAND.colors.green};text-decoration:none;">Read more &rarr;</a>
+          ${meta ? `<div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:${BRAND.colors.green};margin:0 0 6px;">${meta}</div>` : ''}
+          <h3 style="margin:0 0 6px;font-size:16px;line-height:1.3;font-weight:800;"><a href="${href}" target="_blank" style="color:${BRAND.colors.text};text-decoration:none;">${safe(a && a.title, 'Untitled')}</a></h3>
+          <p style="margin:0 0 12px;font-size:13.5px;line-height:1.55;color:${BRAND.colors.body};">${excerpt}</p>
+          <a href="${href}" style="font-size:13px;font-weight:800;color:${BRAND.colors.green};text-decoration:none;">Read more &rarr;</a>
         </td></tr>
-      </table>`).join('');
+      </table>`;
+    }).join('');
     return {
       subject: `Your ${safe(month, 'monthly')} sustainability update from ${BRAND.namePlain}`,
       html: wrapEmail({
@@ -500,6 +510,146 @@ const templates = {
         <p style="margin:0;">A quick redemption is all it takes.</p>`,
       ctaLabel: 'Redeem now',
       ctaUrl: `${SITE}/Wallet`,
+    }),
+  }),
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // NON-TRANSACTIONAL — lifecycle coverage additions (activation, growth,
+  // impact, promo, feedback). All require marketing opt-in + unsubscribe.
+  // ─────────────────────────────────────────────────────────────────────────
+
+  // Activation: signed up but hasn't booked a first pickup yet. Drip-friendly.
+  FIRST_PICKUP_NUDGE: ({ name, unsubscribeUrl }) => ({
+    subject: `Your first pickup is one tap away on ${BRAND.namePlain}`,
+    html: wrapEmail({
+      unsubscribeUrl: unsub(unsubscribeUrl),
+      preheader: `Book a free pickup and earn your first ${BRAND.currency}.`,
+      heading: 'Ready for your first pickup?',
+      greetingName: name,
+      bodyHtml: `<p style="margin:0 0 12px;">You're all set up — the only thing left is your first pickup. Hand over the everyday materials lying around your home and we'll turn them into ${BRAND.currency}.</p>
+        <p style="margin:0;">It's free, it's quick, and every pickup keeps valuable resources in the loop.</p>`,
+      ctaLabel: 'Book a free pickup',
+      ctaUrl: `${SITE}/SchedulePickup`,
+    }),
+  }),
+
+  // Expansion + activation: pickups just went live in the user's area.
+  SERVICE_AREA_LIVE: ({ name, area, unsubscribeUrl }) => {
+    const a = has0(area) ? escapeHtml(String(area)) : '';
+    return {
+      subject: a ? `${BRAND.namePlain} is now live in ${a}` : `${BRAND.namePlain} just launched near you`,
+      html: wrapEmail({
+        unsubscribeUrl: unsub(unsubscribeUrl),
+        preheader: `Book your first free pickup${a ? ` in ${a}` : ''}.`,
+        heading: a ? `We're now in ${a}!` : "We've launched near you!",
+        greetingName: name,
+        bodyHtml: `<p style="margin:0 0 12px;">Great news — ${BRAND.name} pickups just went live ${a ? `in <strong>${a}</strong>` : 'in your area'}. You can now book a free pickup and start turning everyday materials into ${BRAND.currency}.</p>
+          <p style="margin:0;">Be one of the first in your neighbourhood to make an impact.</p>`,
+        ctaLabel: 'Book a free pickup',
+        ctaUrl: `${SITE}/SchedulePickup`,
+      }),
+    };
+  },
+
+  // One-time celebration after the user's first completed pickup (email companion
+  // to the push). `coins` = coins credited for that pickup.
+  FIRST_PICKUP_DONE: ({ name, coins, unsubscribeUrl }) => ({
+    subject: `Your first pickup is done — welcome to the loop!`,
+    html: wrapEmail({
+      unsubscribeUrl: unsub(unsubscribeUrl),
+      preheader: `You earned your first ${BRAND.currency}.`,
+      heading: 'Your first pickup is done!',
+      greetingName: name,
+      bodyHtml: `<p style="margin:0 0 2px;">You just completed your very first pickup — and turned everyday materials into real impact.</p>
+        ${rewardsCard(safe(coins, '0'), null)}
+        <p style="margin:0;">This is only the beginning. Keep going and watch your ${BRAND.currency} — and your impact — grow.</p>`,
+      ctaLabel: 'Schedule your next pickup',
+      ctaUrl: `${SITE}/SchedulePickup`,
+    }),
+  }),
+
+  // Growth: promotional invite to refer friends (distinct from REFERRAL_REWARD,
+  // which is the transactional payout). `code` optional referral code to show;
+  // `coins` optional per-side reward (defaults to 1,000).
+  REFERRAL_INVITE: ({ name, code, coins, unsubscribeUrl }) => {
+    const amt = has0(coins) ? escapeHtml(comma(coins)) : '1,000';
+    const codeCard = has0(code)
+      ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:6px 0 16px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:14px;"><tr><td align="center" style="padding:16px;">
+          <div style="font-size:12px;font-weight:700;color:${BRAND.colors.muted};letter-spacing:.08em;text-transform:uppercase;">Your referral code</div>
+          <div style="font-size:26px;font-weight:900;letter-spacing:4px;color:${BRAND.colors.green};margin-top:4px;">${escapeHtml(String(code))}</div>
+        </td></tr></table>`
+      : '';
+    return {
+      subject: `Invite a friend, you both earn ${BRAND.currency}`,
+      html: wrapEmail({
+        unsubscribeUrl: unsub(unsubscribeUrl),
+        preheader: `Share your code — you each get ${amt} ${BRAND.currency}.`,
+        heading: 'Invite friends, both earn',
+        greetingName: name,
+        bodyHtml: `<p style="margin:0 0 12px;">Know someone who'd love to turn everyday materials into rewards? Share ${BRAND.name} — when they join and complete their first pickup, <strong>you each earn ${amt} ${BRAND.currency}</strong>.</p>
+          ${codeCard}
+          <p style="margin:0;">The more friends you bring, the more you both keep earning.</p>`,
+        ctaLabel: 'Invite friends',
+        ctaUrl: `${SITE}/Referral`,
+      }),
+    };
+  },
+
+  // Limited-time promotional offer / bonus-coins campaign. Flexible per campaign:
+  //   `title`/`body` — campaign copy; `endDate` — when it ends; `ctaLabel`/`ctaUrl`.
+  LIMITED_OFFER: ({ name, title, body, endDate, ctaLabel, ctaUrl, unsubscribeUrl }) => ({
+    subject: has0(title) ? `${safe(title)} — ${BRAND.namePlain}` : `A limited-time ${BRAND.currency} boost is live`,
+    html: wrapEmail({
+      unsubscribeUrl: unsub(unsubscribeUrl),
+      preheader: has0(endDate) ? `Ends ${escapeHtml(String(endDate))} — don't miss out.` : `For a limited time only.`,
+      heading: safe(title, 'Limited-time offer'),
+      greetingName: name,
+      bodyHtml: `<p style="margin:0 0 12px;">${safe(body, `For a limited time, every pickup earns you extra ${BRAND.currency}. There's never been a better moment to book.`)}</p>
+        ${has0(endDate) ? `<p style="margin:0 0 12px;font-weight:700;color:${BRAND.colors.deep};">Offer ends ${escapeHtml(String(endDate))}.</p>` : ''}
+        <p style="margin:0;">Book now and make the most of it.</p>`,
+      ctaLabel: safe(ctaLabel, 'Book a pickup'),
+      ctaUrl: safe(ctaUrl, `${SITE}/SchedulePickup`),
+    }),
+  }),
+
+  // Lifetime impact milestone (distinct from the monthly IMPACT_REPORT): a
+  // cumulative achievement — total kg recovered, CO2 saved, pickups done.
+  IMPACT_MILESTONE: ({ name, kg, co2, pickups, unsubscribeUrl }) => {
+    const num = (v) => (v != null && String(v).trim() !== '' ? Number(String(v).replace(/[^\d.]/g, '')) || 0 : 0);
+    const has = (v) => v != null && String(v).trim() !== '';
+    const hasKg = num(kg) > 0;
+    return {
+      subject: hasKg ? `You've recovered ${escapeHtml(comma(kg))} kg with ${BRAND.namePlain}!` : `A new impact milestone on ${BRAND.namePlain}`,
+      html: wrapEmail({
+        unsubscribeUrl: unsub(unsubscribeUrl),
+        preheader: hasKg ? `${escapeHtml(comma(kg))} kg of resources given a second life — and counting.` : `Your everyday actions are adding up to real impact.`,
+        heading: hasKg ? `${escapeHtml(comma(kg))} kg recovered!` : 'A new impact milestone!',
+        greetingName: name,
+        bodyHtml: `<p style="margin:0 0 4px;">Look how far your everyday green gestures have come with ${BRAND.name}:</p>
+          ${detailTable([
+            ['Resources given a second life', hasKg ? `${escapeHtml(comma(kg))} kg` : '—'],
+            ...(has(co2) ? [['CO₂ emissions avoided', `${escapeHtml(comma(co2))} kg`]] : []),
+            ...(has(pickups) ? [['Green pickups completed', safe(pickups, '0')]] : []),
+          ])}
+          <p style="margin:14px 0 0;">Every kilogram keeps our shared ecosystem lighter. Thank you for keeping resources in the loop.</p>`,
+        ctaLabel: 'Schedule your next pickup',
+        ctaUrl: `${SITE}/SchedulePickup`,
+      }),
+    };
+  },
+
+  // Feedback / NPS survey request. `surveyUrl` links to the survey form.
+  FEEDBACK_SURVEY: ({ name, surveyUrl, unsubscribeUrl }) => ({
+    subject: `We'd love your feedback on ${BRAND.namePlain}`,
+    html: wrapEmail({
+      unsubscribeUrl: unsub(unsubscribeUrl),
+      preheader: `Two minutes of your time helps us make ${BRAND.namePlain} better.`,
+      heading: 'How are we doing?',
+      greetingName: name,
+      bodyHtml: `<p style="margin:0 0 12px;">Your experience shapes ${BRAND.name}. If you have two minutes, we'd love to hear what's working, what isn't, and what you'd like to see next.</p>
+        <p style="margin:0;">Every response is read by a real person on our team — thank you for helping us improve.</p>`,
+      ctaLabel: 'Share your feedback',
+      ctaUrl: safe(surveyUrl, `${SITE}/feedback`),
     }),
   }),
 };

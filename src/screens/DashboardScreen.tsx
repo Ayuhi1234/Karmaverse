@@ -476,8 +476,8 @@ export function DashboardScreen({ navigation, route }: any) {
       {/* Feature Discovery — Swipeable Cards */}
       <View style={styles.section}>
         <View style={styles.sectionHeaderRow}>
-          <Text style={[styles.sectionTitle, { marginBottom: 0 }]}>Discover the feature ✨</Text>
-          <Text style={styles.discoverSub}>Swipe to explore →</Text>
+          <Text numberOfLines={1} style={[styles.sectionTitle, { marginBottom: 0, flexShrink: 0 }]}>Discover the feature ✨</Text>
+          <Text numberOfLines={1} style={styles.discoverSub}>Swipe to explore →</Text>
         </View>
         <ScrollView
           horizontal
@@ -809,7 +809,7 @@ const styles = StyleSheet.create({
   articleImgPlaceholder: { height: 120, width: '100%', alignItems: 'center', justifyContent: 'center' },
   articleTitle: { padding: 12, fontSize: 14, fontWeight: '700', color: '#111827', paddingBottom: 4 },
   articleSource: { paddingHorizontal: 12, paddingBottom: 12, fontSize: 11, color: '#6b7280', fontWeight: '500' },
-  discoverSub: { fontSize: 12, color: '#9ca3af', fontWeight: '600' },
+  discoverSub: { fontSize: 12, color: '#9ca3af', fontWeight: '600', flexShrink: 1, marginLeft: 8, textAlign: 'right' },
 
   // Feature Discovery Card Styles
   featureCard: { borderRadius: 24, padding: 20, height: 198, justifyContent: 'space-between', elevation: 6, shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.2, shadowRadius: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },

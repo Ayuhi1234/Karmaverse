@@ -1,6 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Home, PackageCheck, Wallet, ShoppingBag } from 'lucide-react-native';
 
 import { DashboardScreen } from '../screens/DashboardScreen';
@@ -13,12 +14,21 @@ const isTablet = SCREEN_WIDTH >= 768;
 const Tab = createBottomTabNavigator();
 
 export function TabNavigator() {
+  const insets = useSafeAreaInsets();
+  const baseHeight = isTablet ? 80 : 70;
+
   return (
     <Tab.Navigator
         screenOptions={({ route }) => ({
           headerShown: false,
           tabBarShowLabel: false,
-          tabBarStyle: styles.tabBar,
+          tabBarStyle: [
+            styles.tabBar,
+            {
+              height: baseHeight + insets.bottom,
+              paddingBottom: 10 + insets.bottom,
+            },
+          ],
           tabBarIcon: ({ focused }) => {
             let IconComp = Home;
             let label = '';
@@ -62,7 +72,6 @@ const styles = StyleSheet.create({
   tabBar: {
     position: 'absolute',
     bottom: 0,
-    height: isTablet ? 80 : 70,
     backgroundColor: 'rgba(255,255,255,0.97)',
     borderTopWidth: 1,
     borderTopColor: 'rgba(0,0,0,0.06)',
@@ -71,7 +80,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.08,
     shadowRadius: 20,
-    paddingBottom: 10,
   },
   tabItem: {
     alignItems: 'center',

@@ -12,6 +12,9 @@ const BRAND = {
   company: '3RZeroWaste',
   site: 'https://karmaverse.earth',
   logo: 'https://karmaverse.earth/email-logo.png', // public HTTPS (served by Netlify)
+  androidUrl: 'https://play.google.com/store/apps/details?id=com.karmacredits.app',
+  iosUrl: 'https://karmaverse.earth/', // TODO: point to the App Store listing once iOS is live
+
   supportEmail: 'info@0waste.co.in',
   phone: '+91 70931 98828',
   address: 'Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051',
@@ -66,7 +69,18 @@ const IMAGES = {
   linkedin:  { cid: 'kv-social-linkedin',  file: 'social/linkedin.png',  url: BRAND.site + '/email/social/linkedin.png' },
   x:         { cid: 'kv-social-x',         file: 'social/x.png',         url: BRAND.site + '/email/social/x.png' },
   youtube:   { cid: 'kv-social-youtube',   file: 'social/youtube.png',   url: BRAND.site + '/email/social/youtube.png' },
+  appstore:  { cid: 'kv-badge-appstore',   file: 'appstore.png',         url: BRAND.site + '/email/appstore.png' },
+  appstore_soon: { cid: 'kv-badge-appstore-soon', file: 'appstore_soon.png', url: BRAND.site + '/email/appstore_soon.png' },
+  googleplay:{ cid: 'kv-badge-googleplay', file: 'googleplay.png',       url: BRAND.site + '/email/googleplay.png' },
 };
+
+// iOS launches 30 Sep 2026. Until then the App Store badge shows "Coming soon" and
+// links to the site (not a dead store URL); it auto-flips to the live badge + real
+// store link on launch day — no manual change needed on 30 Sep.
+const IOS_LAUNCH = Date.parse('2026-09-30T00:00:00+05:30');
+const iosLive = () => Date.now() >= IOS_LAUNCH;
+const iosBadgeKey = () => (iosLive() ? 'appstore' : 'appstore_soon');
+const iosBadgeHref = () => (iosLive() ? BRAND.iosUrl : BRAND.site);
 
 // 'cid'   → cid:<id>  (real sends — inline attachments; the default)
 // 'url'   → public HTTPS on karmaverse.earth (if a client can't do inline)
@@ -169,6 +183,13 @@ function wrapEmail({ preheader = '', heading = '', greetingName, bodyHtml = '', 
           <div style="font-size:15px;line-height:1.6;color:${c.body};">${bodyHtml}</div>
           ${cta}
         </td></tr>
+        <tr><td align="center" style="padding:20px 32px;background:#ffffff;border-top:1px solid ${c.line};font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;">
+          <p style="margin:0 0 12px;font-size:13px;font-weight:700;color:${c.text};">Get the ${BRAND.name} app</p>
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;"><tr>
+            <td style="padding:0 5px;"><a href="${BRAND.androidUrl}" target="_blank" style="text-decoration:none;"><img src="${imgSrc('googleplay')}" width="150" alt="Get it on Google Play" style="display:block;border:0;outline:none;height:auto;"></a></td>
+            <td style="padding:0 5px;"><a href="${iosBadgeHref()}" target="_blank" style="text-decoration:none;"><img src="${imgSrc(iosBadgeKey())}" width="150" alt="${iosLive() ? 'Download on the App Store' : 'App Store — coming soon'}" style="display:block;border:0;outline:none;height:auto;"></a></td>
+          </tr></table>
+        </td></tr>
         <tr><td style="padding:22px 32px;background:#f8fafc;border-top:1px solid ${c.line};font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;">
           <div style="margin:0 0 14px;">${socialRow}</div>
           <p style="margin:0 0 4px;font-size:12px;color:${c.faint};">
@@ -185,7 +206,7 @@ function wrapEmail({ preheader = '', heading = '', greetingName, bodyHtml = '', 
           </p>` : ''}
           <p style="margin:0;font-size:11px;color:#cbd5e1;">
             &copy; ${new Date().getFullYear()} ${BRAND.company}. All rights reserved.
-            &middot; <a href="${BRAND.site}/" style="color:#cbd5e1;text-decoration:underline;">Manage preferences</a>
+            &middot; <a href="${BRAND.site}/preferences" style="color:#cbd5e1;text-decoration:underline;">Manage preferences</a>
           </p>
         </td></tr>
       </table>

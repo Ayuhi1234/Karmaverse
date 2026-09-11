@@ -35,7 +35,7 @@ export const authService = {
       const token = extractToken(response.data);
 
       if (!token) {
-        console.error('Login: no token in response', JSON.stringify(response.data));
+        console.error('Login failed: no token in response');
         throw new Error('Authentication failed: No token received from server');
       }
 
@@ -163,6 +163,24 @@ export const authService = {
       console.log('Logout API failed, clearing local token anyway');
     } finally {
       await AsyncStorage.removeItem('userToken');
+      // Clear the social-login SDK sessions too. Without this, Facebook/Google
+      // keep the previous account cached, so the next login is forced back into
+      // that same account and a different ID can't sign in.
+      await clearSocialSessions();
     }
   }
+};
+
+// Sign the native Facebook and Google SDKs out so a logged-out user can pick a
+// different account next time. Wrapped in try/catch and lazy-required so it's a
+// no-op on web and in Expo Go where the native modules aren't present.
+const clearSocialSessions = async () => {
+  try {
+    const { LoginManager } = require('react-native-fbsdk-next');
+    await LoginManager.logOut();
+  } catch (_) {}
+  try {
+    const { GoogleSignin } = require('@react-native-google-signin/google-signin');
+    await GoogleSignin.signOut();
+  } catch (_) {}
 };

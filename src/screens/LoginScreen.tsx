@@ -498,6 +498,10 @@ export function LoginScreen({ navigation }: any) {
     }
     setFacebookLoading(true);
     try {
+      // Clear any cached Facebook session first so the login always starts fresh.
+      // Otherwise Facebook silently reuses the previous account and a different
+      // ID can't be chosen ("Continue as <previous user>" with no way to switch).
+      try { await FBLoginManager.logOut(); } catch (_) {}
       const result = await FBLoginManager.logInWithPermissions(['public_profile', 'email']);
       if (result.isCancelled) { setFacebookLoading(false); return; }
       const data = await FBAccessToken.getCurrentAccessToken();

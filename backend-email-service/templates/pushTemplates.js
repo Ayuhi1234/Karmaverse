@@ -98,6 +98,75 @@ const pushTemplates = {
     body: `KarmaVerse pickups just launched near you — book your first free pickup.`,
     data: { route: 'SchedulePickup', type: 'SERVICE_AREA_LIVE' },
   }),
+
+  // Activation: signed up but never booked a first pickup.
+  FIRST_PICKUP_NUDGE: () => ({
+    title: 'Ready for your first pickup?',
+    body: `Book a free pickup and earn your first ${CURRENCY}.`,
+    data: { route: 'SchedulePickup', type: 'FIRST_PICKUP_NUDGE' },
+  }),
+
+  // Monthly impact recap is ready (push companion to the IMPACT_REPORT email).
+  IMPACT_REPORT: ({ month }) => ({
+    title: `Your ${s(month, 'monthly')} impact is ready`,
+    body: 'See what your pickups added up to this month.',
+    data: { route: 'Wallet', type: 'IMPACT_REPORT' },
+  }),
+
+  // Cumulative lifetime impact milestone.
+  IMPACT_MILESTONE: ({ kg }) => {
+    const k = fmt(kg);
+    return {
+      title: k ? `${k} kg recovered — and counting! 🌱` : 'A new impact milestone! 🌱',
+      body: 'Your pickups keep giving resources a second life. Thank you.',
+      data: { route: 'Wallet', type: 'IMPACT_MILESTONE' },
+    };
+  },
+
+  // Monthly sustainability newsletter nudge.
+  NEWSLETTER: ({ month }) => ({
+    title: `${s(month, 'This month')}'s sustainability stories`,
+    body: 'Fresh reads from the Knowledge Hub. Tap to explore.',
+    data: { route: 'KnowledgeHub', type: 'NEWSLETTER' },
+  }),
+
+  // Generic feature / product announcement.
+  FEATURE_ANNOUNCEMENT: ({ title }) => ({
+    title: s(title, 'Something new just landed'),
+    body: 'Tap to see the latest update in the app.',
+    data: { route: 'Dashboard', type: 'FEATURE_ANNOUNCEMENT' },
+  }),
+
+  // Limited-time promo / bonus-coins campaign.
+  LIMITED_OFFER: ({ title, endDate }) => ({
+    title: s(title, `Limited-time ${CURRENCY} boost`),
+    body: endDate ? `Earn extra on every pickup. Ends ${s(endDate)}.` : 'Earn extra on every pickup for a limited time.',
+    data: { route: 'SchedulePickup', type: 'LIMITED_OFFER' },
+  }),
+
+  // Seasonal / festival greeting.
+  SEASONAL_GREETING: ({ occasion }) => ({
+    title: s(occasion, 'Warm wishes from KarmaVerse'),
+    body: 'Wishing you a bright, joyful and sustainable celebration.',
+    data: { route: 'Dashboard', type: 'SEASONAL_GREETING' },
+  }),
+
+  // Birthday greeting, with or without a coin gift.
+  BIRTHDAY: ({ name, bonus }) => {
+    const b = fmt(bonus);
+    return {
+      title: `Happy birthday${name && String(name).trim() ? ', ' + s(name) : ''}! 🎉`,
+      body: b ? `A gift of ${b} ${CURRENCY} is waiting in your wallet.` : 'Wishing you a wonderful day from all of us.',
+      data: { route: b ? 'Wallet' : 'Dashboard', type: 'BIRTHDAY' },
+    };
+  },
+
+  // Feedback / NPS survey request.
+  FEEDBACK_SURVEY: () => ({
+    title: 'Got 2 minutes?',
+    body: `Tell us how we're doing — your feedback shapes ${CURRENCY}.`,
+    data: { route: 'Profile', type: 'FEEDBACK_SURVEY' },
+  }),
 };
 
 // ─────────────────────────────────────────────────────────────────────────

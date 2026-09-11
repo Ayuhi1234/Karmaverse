@@ -11,12 +11,6 @@ import { showAlert } from '../utils/alert';
 import { PICKUP_RATE, STREAK_FREEZE_COST, STREAK_TIERS, tierByName, rupeesFor, formatRupees, LedgerType } from '../utils/streakTiers';
 
 const showWithdrawInfo = () => showRedeemInfoNow();
-// Peer transfers aren't built yet — show a clear, dedicated coming-soon message
-// instead of reusing the redeem/cash-out popup (which confused users).
-const showTransferInfo = () => showAlert(
-  'Transfers coming soon',
-  "You'll soon be able to send KarmaCoins XP to friends and family. We're building this — stay tuned!",
-);
 
 // Per-source icon for the transaction list. Historical rows have no `source`.
 function txSourceIcon(source?: string, isCredit?: boolean) {
@@ -25,6 +19,7 @@ function txSourceIcon(source?: string, isCredit?: boolean) {
     case 'QUIZ': return <Award size={20} color="#7c3aed" />;
     case 'REFERRAL': case 'WELCOME_BONUS': return <Gift size={20} color="#d97706" />;
     case 'STREAK_FREEZE': return <Snowflake size={20} color="#0ea5e9" />;
+    case 'TRANSFER': return isCredit ? <ArrowDownLeft size={20} color="#16a34a" /> : <ArrowUpRight size={20} color="#d97706" />;
     default: return isCredit ? <ArrowDownLeft size={20} color="#16a34a" /> : <ArrowUpRight size={20} color="#e11d48" />;
   }
 }
@@ -219,7 +214,11 @@ export function WalletScreen({ navigation }: any) {
             <ArrowDownLeft size={18} color="#16a34a" />
             <Text style={[styles.actionLabel, { color: '#16a34a' }]}>Redeem</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.actionBtn, styles.actionBtnAmber]} onPress={showTransferInfo} activeOpacity={0.8}>
+          <TouchableOpacity
+            style={[styles.actionBtn, styles.actionBtnAmber]}
+            onPress={() => navigation.navigate('Transfer', { pickupCoins, rewardCoins, rewardRate, tier: streak?.tier })}
+            activeOpacity={0.8}
+          >
             <ArrowUpRight size={18} color="#d97706" />
             <Text style={[styles.actionLabel, { color: '#d97706' }]}>Transfer</Text>
           </TouchableOpacity>
