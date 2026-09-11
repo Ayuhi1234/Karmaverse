@@ -8,6 +8,8 @@ import { NotificationPanel } from '../components/shared/NotificationPanel';
 import NotificationPermissionBanner from '../components/shared/NotificationPermissionBanner';
 import NotificationPrimerModal from '../components/shared/NotificationPrimerModal';
 import { UserAvatar } from '../components/shared/UserAvatar';
+import { Avatar } from '../components/shared/Avatar';
+import { getStoredAvatarId, setStoredAvatarId } from '../utils/avatar';
 import { AnimatedPickupCta } from '../components/shared/AnimatedPickupCta';
 import { QuizCalendarModal } from '../components/shared/QuizCalendarModal';
 import { StreakModal } from '../components/shared/StreakModal';
@@ -141,6 +143,7 @@ function getGreeting(): string {
 export function DashboardScreen({ navigation, route }: any) {
   const [userName, setUserName] = useState('Loading...');
   const [userGender, setUserGender] = useState<string | null>(null);
+  const [avatarId, setAvatarId] = useState<string | null>(null);
   const [balance, setBalance] = useState(0);
   const [streak, setStreak] = useState(0);
   const [quizStreak, setQuizStreak] = useState(0);
@@ -208,6 +211,11 @@ export function DashboardScreen({ navigation, route }: any) {
             .join(' ')
         );
         setUserGender(profileData.demographics?.gender || profileData.gender || null);
+        const resolvedAvatar = profileData.avatarId || (await getStoredAvatarId());
+        if (resolvedAvatar) {
+          setAvatarId(resolvedAvatar);
+          if (profileData.avatarId) setStoredAvatarId(profileData.avatarId);
+        }
         setBalance(profileData.karmaCoins || profileData.coins || 0);
         // Day streak is tracked on-device from app visits (see computeVisitStreak), not the backend.
 
@@ -383,7 +391,11 @@ export function DashboardScreen({ navigation, route }: any) {
         <View style={styles.topBar}>
           <View style={styles.userInfo}>
             <TouchableOpacity style={styles.avatar} onPress={() => navigation.navigate('Profile')}>
-              <UserAvatar gender={userGender} size={40} ring />
+              {avatarId ? (
+                <Avatar avatarId={avatarId} size={40} ring />
+              ) : (
+                <UserAvatar gender={userGender} size={40} ring />
+              )}
             </TouchableOpacity>
             <View>
               <Text style={styles.greetingText}>{getGreeting()},</Text>

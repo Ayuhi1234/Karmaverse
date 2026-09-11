@@ -3,10 +3,13 @@ import { useFocusEffect } from '@react-navigation/native';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Modal, TextInput, KeyboardAvoidingView, Platform, Animated, ActivityIndicator } from 'react-native';
 import { WebFooter } from '../components/shared/WebFooter';
 import { showAlert } from '../utils/alert';
-import { ChevronLeft, User, MapPin, Flame, HeartHandshake, LogOut, FileText, Trophy, X, Mail, Phone, ShieldCheck, CheckCircle, CalendarDays, UserSquare2, Heart, Briefcase, Users, ArrowRight, Gift, Trash2, Bell, BellOff } from 'lucide-react-native';
+import { ChevronLeft, User, MapPin, Flame, HeartHandshake, LogOut, FileText, Trophy, X, Mail, Phone, ShieldCheck, CheckCircle, CalendarDays, UserSquare2, Heart, Briefcase, Users, ArrowRight, Gift, Trash2, Bell, BellOff, Camera } from 'lucide-react-native';
 import { useNotifications } from '../context/NotificationContext';
 import { openNotificationSettings } from '../utils/notifications';
 import { UserAvatar } from '../components/shared/UserAvatar';
+import { Avatar } from '../components/shared/Avatar';
+import { AvatarPickerModal } from '../components/shared/AvatarPickerModal';
+import { getStoredAvatarId, setStoredAvatarId } from '../utils/avatar';
 import { addressService, SavedAddress, AddressLabel } from '../services/address';
 import { LinearGradient } from 'expo-linear-gradient';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
@@ -63,6 +66,8 @@ export function ProfileScreen({ navigation }: any) {
   // Main Profile State
   const [userProfile, setUserProfile] = useState<any>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [avatarId, setAvatarId] = useState<string | null>(null);
+  const [avatarPickerVisible, setAvatarPickerVisible] = useState(false);
 
   // Fetch Profile on Mount
   // Refetch on every focus (not just mount) so a phone verified elsewhere — e.g.
@@ -110,6 +115,13 @@ export function ProfileScreen({ navigation }: any) {
            phone: isRealPhone(data.phone) ? cleanPhone(data.phone) : '',
            email: data.email || '',
         });
+        // Prefer the backend avatarId; fall back to the locally-stored pick so it
+        // shows even if the backend hasn't persisted it yet.
+        const resolvedAvatar = data.avatarId || (await getStoredAvatarId());
+        if (resolvedAvatar) {
+          setAvatarId(resolvedAvatar);
+          if (data.avatarId) setStoredAvatarId(data.avatarId);
+        }
       } catch (error) {
         console.error('Failed to load profile', error);
       } finally {
@@ -118,6 +130,15 @@ export function ProfileScreen({ navigation }: any) {
     };
     fetchProfile();
   }, []));
+
+  // Save the chosen avatar: reflect it instantly, cache locally, and push to the
+  // backend (fire-and-forget — the local cache keeps it even if that field isn't
+  // wired server-side yet).
+  const chooseAvatar = (id: string) => {
+    setAvatarId(id);
+    setStoredAvatarId(id);
+    profileService.updateAvatar(id).catch(() => {});
+  };
 
   // Modal State
   const [modalVisible, setModalVisible] = useState(false);
@@ -640,12 +661,16 @@ export function ProfileScreen({ navigation }: any) {
             <>
               {/* Avatar & Basic Info Card */}
               <View style={styles.profileInfoCard}>
-                <View style={styles.avatarMain}>
-                  <UserAvatar gender={userProfile?.demographics?.gender} size={66} />
-                  <View style={styles.verifiedBadge}>
-                    <View style={styles.verifiedDot} />
+                <TouchableOpacity style={styles.avatarMain} onPress={() => setAvatarPickerVisible(true)} activeOpacity={0.85}>
+                  {avatarId ? (
+                    <Avatar avatarId={avatarId} size={66} />
+                  ) : (
+                    <UserAvatar gender={userProfile?.demographics?.gender} size={66} />
+                  )}
+                  <View style={styles.avatarEditBadge}>
+                    <Camera size={13} color="#ffffff" />
                   </View>
-                </View>
+                </TouchableOpacity>
                 
                 <Text style={styles.userName} numberOfLines={1} ellipsizeMode="tail">
                   {userProfile?.name}
@@ -758,6 +783,14 @@ export function ProfileScreen({ navigation }: any) {
         </View>
         {Platform.OS === 'web' && <WebFooter />}
         </ScrollView>
+
+      {/* Avatar picker */}
+      <AvatarPickerModal
+        visible={avatarPickerVisible}
+        currentId={avatarId}
+        onSelect={chooseAvatar}
+        onClose={() => setAvatarPickerVisible(false)}
+      />
 
       {/* Demographics View Modal */}
       <Modal visible={demoModalVisible} transparent={true} animationType="fade" onRequestClose={closeDemoModal}>
@@ -1289,6 +1322,7 @@ const styles = StyleSheet.create({
   avatarMain: { width: 72, height: 72, borderRadius: 36, backgroundColor: '#10b981', alignItems: 'center', justifyContent: 'center', marginBottom: 16, borderWidth: 3, borderColor: 'white', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8, elevation: 5 },
   verifiedBadge: { position: 'absolute', bottom: 0, right: 0, width: 20, height: 20, backgroundColor: '#10b981', borderRadius: 10, borderWidth: 2, borderColor: 'white', alignItems: 'center', justifyContent: 'center' },
   verifiedDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: 'white' },
+  avatarEditBadge: { position: 'absolute', bottom: -2, right: -2, width: 24, height: 24, backgroundColor: '#15803d', borderRadius: 12, borderWidth: 2, borderColor: 'white', alignItems: 'center', justifyContent: 'center' },
   userName: { fontSize: 22, fontWeight: '900', color: '#0f172a', marginBottom: 4, maxWidth: '85%', textAlign: 'center' },
   userPhone: { fontSize: 14, color: '#475569', fontWeight: '700', marginBottom: 2 },
   addPhoneLink: { fontSize: 14, color: '#16a34a', fontWeight: '800', marginBottom: 2 },

@@ -1,6 +1,18 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import Svg, { Defs, LinearGradient, Stop, Circle, Path, Ellipse, G, Rect } from 'react-native-svg';
+
+// Illustrated "people" avatars (real image assets) — young/old, different genders.
+// Ids are 'p1'..'p5'; rendered as a circular <Image>. These sit alongside the SVG
+// eco-creatures below so the picker can offer both.
+const PERSON_IMAGES: Record<string, any> = {
+  p1: require('../../../assets/avatars/woman.png'),
+  p2: require('../../../assets/avatars/man.png'),
+  p3: require('../../../assets/avatars/senior-man.png'),
+  p4: require('../../../assets/avatars/senior-woman.png'),
+  p5: require('../../../assets/avatars/youth.png'),
+};
+export const PERSON_AVATAR_IDS = ['p1', 'p2', 'p3', 'p4', 'p5'] as const;
 
 // 10 preset illustrated "eco creature" avatars. Each is a rounded character with a
 // distinct colour + a small nature motif on top + a friendly face. Rendered from
@@ -120,6 +132,15 @@ export function Avatar({ avatarId, size = 48, name, ring }: {
   name?: string;
   ring?: boolean; // subtle white ring (for coloured headers)
 }) {
+  // Illustrated people avatars (image assets) — rendered as a circular photo.
+  if (avatarId && PERSON_IMAGES[avatarId]) {
+    return (
+      <View style={[{ width: size, height: size, borderRadius: size / 2, overflow: 'hidden' }, ring && styles.ring]}>
+        <Image source={PERSON_IMAGES[avatarId]} style={{ width: size, height: size }} resizeMode="cover" />
+      </View>
+    );
+  }
+
   const id = (avatarId && (AVATAR_IDS as readonly string[]).includes(avatarId)) ? (avatarId as AvatarId) : null;
 
   if (!id) {

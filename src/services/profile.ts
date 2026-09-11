@@ -23,6 +23,18 @@ export const profileService = {
     }
   },
 
+  // Persist the chosen preset-avatar id on the profile. Stored locally too, so the
+  // pick shows instantly and survives even if the backend hasn't wired the field yet.
+  updateAvatar: async (avatarId: string) => {
+    try {
+      const response = await api.patch('/api/v1/users/profile', { avatarId });
+      return response.data;
+    } catch (error) {
+      console.error('Update Avatar Error:', error);
+      throw error;
+    }
+  },
+
   // Get user profile
   getProfile: async () => {
     try {
