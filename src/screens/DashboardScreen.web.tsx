@@ -316,7 +316,7 @@ export function DashboardScreen({ navigation, route }: any) {
       </View>
 
 
-      {/* ════════ IMPACT — carbon footprint entry ════════ */}
+      {/* ════════ IMPACT — carbon footprint entry (reuses the order card styles) ════════ */}
       <View style={[z.container, { marginTop: 28, paddingHorizontal: pad }]}>
         <View style={z.sectionHead}>
           <View>
@@ -324,13 +324,21 @@ export function DashboardScreen({ navigation, route }: any) {
             <Text style={z.sectionTitle}>Your impact</Text>
           </View>
         </View>
-        <TouchableOpacity style={z.carbonCard} onPress={() => nav('CarbonFootprint')} activeOpacity={0.8}>
-          <View style={z.carbonIcon}><Leaf size={22} color="#16a34a" /></View>
-          <View style={{ flex: 1 }}>
-            <Text style={z.carbonTitle}>My carbon footprint</Text>
-            <Text style={z.carbonSub}>See where your CO₂ comes from and how much you've saved</Text>
+        <TouchableOpacity
+          style={[z.mobileOrderCard, { flexDirection: 'row', alignItems: 'center', gap: 12 }]}
+          onPress={() => nav('CarbonFootprint')}
+          activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel="Carbon footprint. Track and reduce your impact"
+        >
+          <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center' }}>
+            <Leaf size={20} color="#16a34a" />
           </View>
-          <ChevronRight size={20} color="#94a3b8" />
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 14, fontWeight: '800', color: '#0f172a' }}>Carbon footprint</Text>
+            <Text style={{ fontSize: 12, fontWeight: '500', color: '#64748b', marginTop: 2 }}>Track and reduce your impact</Text>
+          </View>
+          <Text style={z.viewAll}>View →</Text>
         </TouchableOpacity>
       </View>
 
@@ -541,12 +549,6 @@ const z = StyleSheet.create({
   sectionLabel: { fontSize: 10, fontWeight: '900', color: '#16a34a', letterSpacing: 2, marginBottom: 3 },
   sectionTitle: { fontSize: 20, fontWeight: '900', color: '#0f172a', letterSpacing: -0.3 },
   viewAll: { color: '#16a34a', fontWeight: '700', fontSize: 14 },
-
-  // Impact entry
-  carbonCard: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, backgroundColor: 'white', borderRadius: 16, borderWidth: 1, borderColor: '#f1f5f9', elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8 },
-  carbonIcon: { width: 42, height: 42, borderRadius: 12, backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center' },
-  carbonTitle: { fontSize: 14, fontWeight: '800', color: '#0f172a', marginBottom: 2 },
-  carbonSub: { fontSize: 12, color: '#64748b', fontWeight: '600' },
 
   // Discover
   discoverRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 16, justifyContent: 'center' },

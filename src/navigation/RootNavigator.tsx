@@ -25,6 +25,8 @@ import { UnsubscribeScreen } from '../screens/UnsubscribeScreen';
 import { EmailPreferencesScreen } from '../screens/EmailPreferencesScreen';
 import { NotFoundScreen } from '../screens/NotFoundScreen';
 import { CarbonFootprintScreen } from '../screens/CarbonFootprintScreen';
+import { CarbonAssessmentScreen } from '../screens/CarbonAssessmentScreen';
+import { CarbonJourneyScreen } from '../screens/CarbonJourneyScreen';
 import { TabNavigator } from './TabNavigator';
 import { navigationRef } from './navRef';
 import { capturePendingDeepLink, clearPendingDeepLink, hasPendingDeepLink, hasPendingReferral } from '../utils/deepLink';
@@ -141,6 +143,8 @@ export function RootNavigator() {
             Unsubscribe: 'unsubscribe',
             EmailPreferences: 'preferences',
             CarbonFootprint: 'CarbonFootprint',
+            CarbonAssessment: 'CarbonAssessment',
+            CarbonJourney: 'CarbonJourney',
             NotFound: '*',
           }
         : {
@@ -207,6 +211,8 @@ export function RootNavigator() {
         <Stack.Screen name="Unsubscribe" component={UnsubscribeScreen} />
         <Stack.Screen name="EmailPreferences" component={EmailPreferencesScreen} />
         <Stack.Screen name="CarbonFootprint" component={CarbonFootprintScreen} />
+        <Stack.Screen name="CarbonAssessment" component={CarbonAssessmentScreen} />
+        <Stack.Screen name="CarbonJourney" component={CarbonJourneyScreen} />
         <Stack.Screen name="NotFound" component={NotFoundScreen} />
       </Stack.Navigator>
     </NavigationContainer>
