@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Truck, Gamepad2, Coins, ChevronRight, Package, Users, Gift, BookOpen, Star, Flame, ArrowRight, Zap, Sparkles, Trophy, Calendar, X, CheckCircle2, BadgeCheck, ShieldCheck } from 'lucide-react-native';
+import { Truck, Gamepad2, Coins, ChevronRight, Package, Users, Gift, BookOpen, Star, Flame, ArrowRight, Zap, Sparkles, Trophy, Calendar, X, CheckCircle2, BadgeCheck, ShieldCheck, Leaf } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getToken } from '../utils/tokenStore';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
@@ -316,6 +316,24 @@ export function DashboardScreen({ navigation, route }: any) {
       </View>
 
 
+      {/* ════════ IMPACT — carbon footprint entry ════════ */}
+      <View style={[z.container, { marginTop: 28, paddingHorizontal: pad }]}>
+        <View style={z.sectionHead}>
+          <View>
+            <Text style={z.sectionLabel}>IMPACT</Text>
+            <Text style={z.sectionTitle}>Your impact</Text>
+          </View>
+        </View>
+        <TouchableOpacity style={z.carbonCard} onPress={() => nav('CarbonFootprint')} activeOpacity={0.8}>
+          <View style={z.carbonIcon}><Leaf size={22} color="#16a34a" /></View>
+          <View style={{ flex: 1 }}>
+            <Text style={z.carbonTitle}>My carbon footprint</Text>
+            <Text style={z.carbonSub}>See where your CO₂ comes from and how much you've saved</Text>
+          </View>
+          <ChevronRight size={20} color="#94a3b8" />
+        </TouchableOpacity>
+      </View>
+
       {/* ════════ DISCOVER FEATURES ════════ */}
       <View style={[z.container, { marginTop: 28, paddingHorizontal: pad }]}>
         <View style={z.sectionHead}>
@@ -523,6 +541,12 @@ const z = StyleSheet.create({
   sectionLabel: { fontSize: 10, fontWeight: '900', color: '#16a34a', letterSpacing: 2, marginBottom: 3 },
   sectionTitle: { fontSize: 20, fontWeight: '900', color: '#0f172a', letterSpacing: -0.3 },
   viewAll: { color: '#16a34a', fontWeight: '700', fontSize: 14 },
+
+  // Impact entry
+  carbonCard: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, backgroundColor: 'white', borderRadius: 16, borderWidth: 1, borderColor: '#f1f5f9', elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8 },
+  carbonIcon: { width: 42, height: 42, borderRadius: 12, backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center' },
+  carbonTitle: { fontSize: 14, fontWeight: '800', color: '#0f172a', marginBottom: 2 },
+  carbonSub: { fontSize: 12, color: '#64748b', fontWeight: '600' },
 
   // Discover
   discoverRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 16, justifyContent: 'center' },

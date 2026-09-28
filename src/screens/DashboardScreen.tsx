@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getToken } from '../utils/tokenStore';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Bell, ChevronRight, Truck, Camera, Clock, Users, Package, Flame, Gamepad2, Gift, Star, ShieldCheck, Coins, BadgeCheck, ArrowRight, X, WifiOff, RefreshCw, Trophy, Sparkles } from 'lucide-react-native';
+import { Bell, ChevronRight, Truck, Camera, Clock, Users, Package, Flame, Gamepad2, Gift, Star, ShieldCheck, Coins, BadgeCheck, ArrowRight, X, WifiOff, RefreshCw, Trophy, Sparkles, Leaf } from 'lucide-react-native';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { NotificationPanel } from '../components/shared/NotificationPanel';
 import NotificationPermissionBanner from '../components/shared/NotificationPermissionBanner';
@@ -485,7 +485,19 @@ export function DashboardScreen({ navigation, route }: any) {
         />
       </View>
 
-      {/* Impact Cards */}
+      {/* Impact — carbon footprint entry */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Your impact</Text>
+        <TouchableOpacity style={styles.carbonCard} onPress={() => navigation.navigate('CarbonFootprint')} activeOpacity={0.8}>
+          <View style={styles.carbonIcon}><Leaf size={22} color="#16a34a" /></View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.carbonTitle}>My carbon footprint</Text>
+            <Text style={styles.carbonSub}>See where your CO₂ comes from and how much you've saved</Text>
+          </View>
+          <ChevronRight size={20} color="#94a3b8" />
+        </TouchableOpacity>
+      </View>
+
       {/* Feature Discovery — Swipeable Cards */}
       <View style={styles.section}>
         <View style={styles.sectionHeaderRow}>
@@ -781,6 +793,10 @@ const styles = StyleSheet.create({
   actionBadge: { position: 'absolute', top: 6, right: 6, backgroundColor: '#16a34a', borderRadius: 6, paddingHorizontal: 5, paddingVertical: 2 },
   actionBadgeText: { color: 'white', fontSize: 8, fontWeight: '800' },
   impactGrid: { flexDirection: 'row', gap: 12 },
+  carbonCard: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, backgroundColor: 'white', borderRadius: 16, borderWidth: 1, borderColor: '#f1f5f9', elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8 },
+  carbonIcon: { width: 42, height: 42, borderRadius: 12, backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center' },
+  carbonTitle: { fontSize: 14, fontWeight: '800', color: '#0f172a', marginBottom: 2 },
+  carbonSub: { fontSize: 12, color: '#64748b', fontWeight: '600' },
   impactCard: { flex: 1, padding: 16, borderRadius: 16, elevation: 1 },
   impactCardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
   impactIconWrapper: { width: 36, height: 36, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
