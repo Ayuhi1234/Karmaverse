@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, StatusBar, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StatusBar, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, Clock, CheckCircle2, XCircle, History } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { redeemService } from '../services/redeem';
+import { useTheme, makeStyles } from '../theme';
 
 export function RedeemHistoryScreen({ navigation }: any) {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const [requests, setRequests] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -66,12 +69,12 @@ export function RedeemHistoryScreen({ navigation }: any) {
       <ScrollView style={styles.scroll} contentContainerStyle={{ padding: 16, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
         {isLoading ? (
           <View style={{ marginTop: 40, alignItems: 'center' }}>
-            <ActivityIndicator size="large" color="#16a34a" />
-            <Text style={{ marginTop: 12, color: '#64748b' }}>Loading your requests...</Text>
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Text style={{ marginTop: 12, color: colors.textMuted }}>Loading your requests...</Text>
           </View>
         ) : requests.length === 0 ? (
           <View style={styles.emptyState}>
-            <History size={56} color="#cbd5e1" />
+            <History size={56} color={colors.textFaint} />
             <Text style={styles.emptyText}>No redeem requests yet.</Text>
           </View>
         ) : (
@@ -119,8 +122,8 @@ export function RedeemHistoryScreen({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f4f4f5' },
+const useStyles = makeStyles((c) => ({
+  container: { flex: 1, backgroundColor: c.bg },
   topNotchFiller: { position: 'absolute', top: 0, left: 0, right: 0, height: 60, backgroundColor: '#064e3b' },
   scroll: { flex: 1 },
 
@@ -130,22 +133,22 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 20, fontWeight: '900', color: 'white', textAlign: 'center' },
 
   emptyState: { alignItems: 'center', paddingVertical: 60 },
-  emptyText: { color: '#94a3b8', marginTop: 12, fontWeight: '600' },
+  emptyText: { color: c.textFaint, marginTop: 12, fontWeight: '600' },
 
-  card: { backgroundColor: 'white', borderRadius: 16, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: '#f1f5f9', elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8 },
+  card: { backgroundColor: c.surface, borderRadius: 16, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: c.border, elevation: 2, shadowColor: c.shadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8 },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   amountRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  coinsText: { fontSize: 16, fontWeight: '900', color: '#0f172a' },
-  rupeesText: { fontSize: 12, fontWeight: '700', color: '#64748b', marginLeft: 4 },
+  coinsText: { fontSize: 16, fontWeight: '900', color: c.text },
+  rupeesText: { fontSize: 12, fontWeight: '700', color: c.textMuted, marginLeft: 4 },
   statusBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 100, gap: 6 },
   statusText: { fontSize: 11, fontWeight: '800' },
 
-  ledgerBadge: { alignSelf: 'flex-start', backgroundColor: '#f1f5f9', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3, marginTop: 8 },
-  ledgerBadgeText: { fontSize: 11, fontWeight: '800', color: '#475569' },
+  ledgerBadge: { alignSelf: 'flex-start', backgroundColor: c.surfaceAlt, borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3, marginTop: 8 },
+  ledgerBadgeText: { fontSize: 11, fontWeight: '800', color: c.textMuted },
 
-  dateText: { fontSize: 12, color: '#94a3b8', fontWeight: '500', marginTop: 8 },
-  paidText: { fontSize: 12, color: '#16a34a', fontWeight: '700', marginTop: 4 },
+  dateText: { fontSize: 12, color: c.textFaint, fontWeight: '500', marginTop: 8 },
+  paidText: { fontSize: 12, color: c.primary, fontWeight: '700', marginTop: 4 },
 
   rejectionBanner: { marginTop: 10, backgroundColor: '#fef2f2', borderRadius: 10, padding: 10 },
   rejectionText: { fontSize: 12, color: '#b91c1c', fontWeight: '600', lineHeight: 17 },
-});
+}));

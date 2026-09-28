@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TextInput, TouchableOpacity, StyleSheet, StatusBar, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TextInput, TouchableOpacity, StatusBar, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, User, Hash, Landmark, ShieldCheck, CheckCircle2, Coins } from 'lucide-react-native';
+import { useTheme, makeStyles } from '../theme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { redeemService } from '../services/redeem';
@@ -22,6 +23,8 @@ export function RedeemScreen({ navigation, route }: any) {
   const ledger: LedgerType = route?.params?.ledger === 'reward' ? 'reward' : 'pickup';
   const isPickup = ledger === 'pickup';
 
+  const styles = useStyles();
+  const { colors } = useTheme();
   const [balance, setBalance] = useState<number>(route?.params?.balance || 0);
   // Rate = coins per ₹1. Pickup is always fixed; reward comes from the live streak tier.
   const [rate, setRate] = useState<number>(isPickup ? PICKUP_RATE : (route?.params?.rewardRate || 100));
@@ -93,7 +96,7 @@ export function RedeemScreen({ navigation, route }: any) {
         <StatusBar barStyle="light-content" backgroundColor="#064e3b" />
         <View style={styles.successScreen}>
           <View style={styles.successIconBg}>
-            <CheckCircle2 size={48} color="#16a34a" />
+            <CheckCircle2 size={48} color={colors.primary} />
           </View>
           <Text style={styles.successTitle}>Request submitted!</Text>
           <Text style={styles.successSub}>
@@ -151,14 +154,14 @@ export function RedeemScreen({ navigation, route }: any) {
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Coins to redeem</Text>
             <View style={styles.inputWrapper}>
-              <Coins size={18} color="#94a3b8" style={styles.inputIcon} />
+              <Coins size={18} color={colors.textFaint} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 value={coinsInput}
                 onChangeText={(t) => setCoinsInput(t.replace(/[^0-9]/g, ''))}
                 keyboardType="number-pad"
                 placeholder="e.g. 50"
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor={colors.textFaint}
               />
             </View>
             <View style={styles.quickRow}>
@@ -200,13 +203,13 @@ export function RedeemScreen({ navigation, route }: any) {
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Account holder name</Text>
             <View style={styles.inputWrapper}>
-              <User size={18} color="#94a3b8" style={styles.inputIcon} />
+              <User size={18} color={colors.textFaint} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 value={accountHolderName}
                 onChangeText={setAccountHolderName}
                 placeholder="Full name as per bank account"
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor={colors.textFaint}
               />
             </View>
           </View>
@@ -214,14 +217,14 @@ export function RedeemScreen({ navigation, route }: any) {
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Bank account number</Text>
             <View style={styles.inputWrapper}>
-              <Hash size={18} color="#94a3b8" style={styles.inputIcon} />
+              <Hash size={18} color={colors.textFaint} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 value={accountNumber}
                 onChangeText={(t) => setAccountNumber(t.replace(/[^0-9]/g, ''))}
                 keyboardType="number-pad"
                 placeholder="9-18 digit account number"
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor={colors.textFaint}
               />
             </View>
           </View>
@@ -229,14 +232,14 @@ export function RedeemScreen({ navigation, route }: any) {
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>IFSC code</Text>
             <View style={styles.inputWrapper}>
-              <ShieldCheck size={18} color="#94a3b8" style={styles.inputIcon} />
+              <ShieldCheck size={18} color={colors.textFaint} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 value={ifscCode}
                 onChangeText={(t) => setIfscCode(t.toUpperCase())}
                 autoCapitalize="characters"
                 placeholder="e.g. SBIN0001234"
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor={colors.textFaint}
                 maxLength={11}
               />
             </View>
@@ -245,13 +248,13 @@ export function RedeemScreen({ navigation, route }: any) {
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Branch name</Text>
             <View style={styles.inputWrapper}>
-              <Landmark size={18} color="#94a3b8" style={styles.inputIcon} />
+              <Landmark size={18} color={colors.textFaint} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 value={branchName}
                 onChangeText={setBranchName}
                 placeholder="e.g. MG Road Branch"
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor={colors.textFaint}
               />
             </View>
           </View>
@@ -263,7 +266,7 @@ export function RedeemScreen({ navigation, route }: any) {
             activeOpacity={0.8}
           >
             {isSubmitting ? (
-              <ActivityIndicator color="white" />
+              <ActivityIndicator color={colors.onPrimary} />
             ) : (
               <Text style={styles.primaryActionText}>Submit request</Text>
             )}
@@ -278,8 +281,8 @@ export function RedeemScreen({ navigation, route }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f4f4f5' },
+const useStyles = makeStyles((c) => ({
+  container: { flex: 1, backgroundColor: c.bg },
   topNotchFiller: { position: 'absolute', top: 0, left: 0, right: 0, height: 60, backgroundColor: '#064e3b' },
   scroll: { flex: 1 },
 
@@ -296,35 +299,35 @@ const styles = StyleSheet.create({
   rateNote: { color: 'rgba(255,255,255,0.8)', fontWeight: '700', fontSize: 12, textAlign: 'center', marginTop: 8 },
 
   formContainer: { padding: 20, maxWidth: 800, width: '100%', alignSelf: 'center' },
-  sectionTitle: { fontSize: 15, fontWeight: '800', color: '#0f172a', marginTop: 8, marginBottom: 12 },
+  sectionTitle: { fontSize: 15, fontWeight: '800', color: c.text, marginTop: 8, marginBottom: 12 },
 
   inputGroup: { marginBottom: 16 },
-  inputLabel: { fontSize: 13, fontWeight: '700', color: '#475569', marginBottom: 6, marginLeft: 4 },
-  inputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 16, paddingHorizontal: 16, height: 56 },
+  inputLabel: { fontSize: 13, fontWeight: '700', color: c.textMuted, marginBottom: 6, marginLeft: 4 },
+  inputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.surfaceAlt, borderWidth: 1, borderColor: c.border, borderRadius: 16, paddingHorizontal: 16, height: 56 },
   inputIcon: { marginRight: 12 },
-  input: { flex: 1, fontSize: 16, color: '#0f172a', fontWeight: '600', height: '100%' },
+  input: { flex: 1, fontSize: 16, color: c.text, fontWeight: '600', height: '100%' },
 
   quickRow: { flexDirection: 'row', gap: 8, marginTop: 10 },
-  quickChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 100, borderWidth: 1.5, borderColor: '#e2e8f0', backgroundColor: 'white' },
-  quickChipActive: { borderColor: '#15803d', backgroundColor: '#f0fdf4' },
-  quickChipText: { fontSize: 13, fontWeight: '700', color: '#64748b' },
-  quickChipTextActive: { color: '#15803d' },
+  quickChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 100, borderWidth: 1.5, borderColor: c.border, backgroundColor: c.surface },
+  quickChipActive: { borderColor: c.primary, backgroundColor: c.primarySoft },
+  quickChipText: { fontSize: 13, fontWeight: '700', color: c.textMuted },
+  quickChipTextActive: { color: c.primary },
 
-  helperText: { fontSize: 12, color: '#16a34a', fontWeight: '600', marginTop: 8, marginLeft: 4 },
-  helperTextError: { color: '#dc2626' },
+  helperText: { fontSize: 12, color: c.primary, fontWeight: '600', marginTop: 8, marginLeft: 4 },
+  helperTextError: { color: c.danger },
 
-  primaryActionBtn: { backgroundColor: '#15803d', paddingVertical: 15, paddingHorizontal: 44, borderRadius: 16, alignItems: 'center', justifyContent: 'center', alignSelf: 'center', minWidth: 240, marginTop: 10, shadowColor: '#16a34a', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 5 },
-  primaryActionBtnDisabled: { backgroundColor: '#94a3b8', shadowOpacity: 0, elevation: 0 },
-  primaryActionText: { color: 'white', fontSize: 16, fontWeight: '900' },
-  securityNote: { textAlign: 'center', color: '#94a3b8', fontSize: 11, fontWeight: '500', marginTop: 12, paddingHorizontal: 8 },
+  primaryActionBtn: { backgroundColor: c.primary, paddingVertical: 15, paddingHorizontal: 44, borderRadius: 16, alignItems: 'center', justifyContent: 'center', alignSelf: 'center', minWidth: 240, marginTop: 10, shadowColor: c.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 5 },
+  primaryActionBtnDisabled: { backgroundColor: c.textFaint, shadowOpacity: 0, elevation: 0 },
+  primaryActionText: { color: c.onPrimary, fontSize: 16, fontWeight: '900' },
+  securityNote: { textAlign: 'center', color: c.textFaint, fontSize: 11, fontWeight: '500', marginTop: 12, paddingHorizontal: 8 },
 
   secondaryActionBtn: { marginTop: 14, alignItems: 'center' },
-  secondaryActionText: { color: '#64748b', fontWeight: '700', fontSize: 13 },
+  secondaryActionText: { color: c.textMuted, fontWeight: '700', fontSize: 13 },
 
   successScreen: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 30 },
-  successIconBg: { width: 96, height: 96, borderRadius: 48, backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center', marginBottom: 20, borderWidth: 1.5, borderColor: '#bbf7d0' },
-  successTitle: { fontSize: 24, fontWeight: '900', color: '#0f172a', marginBottom: 10 },
-  successSub: { fontSize: 14, color: '#64748b', textAlign: 'center', fontWeight: '500', lineHeight: 20, marginBottom: 16 },
-  successInfoNote: { backgroundColor: '#f0fdf4', borderWidth: 1, borderColor: '#bbf7d0', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12, marginBottom: 28, maxWidth: 420 },
-  successInfoText: { fontSize: 13, color: '#15803d', textAlign: 'center', fontWeight: '700', lineHeight: 19 },
-});
+  successIconBg: { width: 96, height: 96, borderRadius: 48, backgroundColor: c.primarySoft, alignItems: 'center', justifyContent: 'center', marginBottom: 20, borderWidth: 1.5, borderColor: c.border },
+  successTitle: { fontSize: 24, fontWeight: '900', color: c.text, marginBottom: 10 },
+  successSub: { fontSize: 14, color: c.textMuted, textAlign: 'center', fontWeight: '500', lineHeight: 20, marginBottom: 16 },
+  successInfoNote: { backgroundColor: c.primarySoft, borderWidth: 1, borderColor: c.border, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12, marginBottom: 28, maxWidth: 420 },
+  successInfoText: { fontSize: 13, color: c.primary, textAlign: 'center', fontWeight: '700', lineHeight: 19 },
+}));
