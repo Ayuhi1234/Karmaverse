@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, FlatList, ScrollView,
-  StyleSheet, ActivityIndicator, Keyboard, Modal,
+  ActivityIndicator, Keyboard, Modal,
   StatusBar, Platform, KeyboardAvoidingView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -10,6 +10,7 @@ import * as Location from 'expo-location';
 import { mapService, MapSuggestion } from '../../services/mapService';
 import { MapPicker } from './MapPicker';
 import { isWithinServiceArea } from '../../utils/serviceArea';
+import { useTheme, makeStyles } from '../../theme';
 
 export interface AddressDetails {
   houseNo: string;
@@ -60,6 +61,8 @@ interface AddressSearchProps {
 }
 
 export function AddressSearch({ visible, onSelect, onCancel, userCoords, initialDetails }: AddressSearchProps) {
+  const styles = useStyles();
+  const { colors, isDark } = useTheme();
   const [step, setStep] = useState<'map' | 'details'>('map');
 
   const [query, setQuery] = useState('');
@@ -255,11 +258,11 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
   if (step === 'details') {
     return (
       <Modal visible={visible} animationType="slide" statusBarTranslucent onRequestClose={handleCancel}>
-        <StatusBar backgroundColor="#fff" barStyle="dark-content" />
+        <StatusBar backgroundColor={colors.bg} barStyle={isDark ? 'light-content' : 'dark-content'} />
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.screen}>
           <View style={styles.topBar}>
             <TouchableOpacity onPress={() => setStep('map')} style={styles.backBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <ArrowLeft size={22} color="#1c1c1e" />
+              <ArrowLeft size={22} color={colors.text} />
             </TouchableOpacity>
             <Text style={styles.detailsTitle}>Add address details</Text>
           </View>
@@ -294,7 +297,7 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
                     onPress={() => setLabel(key)}
                     activeOpacity={0.8}
                   >
-                    <Icon size={16} color={active ? '#15803d' : '#64748b'} />
+                    <Icon size={16} color={active ? '#15803d' : colors.textMuted} />
                     <Text style={[styles.labelPillText, active && styles.labelPillTextActive]}>{key}</Text>
                   </TouchableOpacity>
                 );
@@ -315,7 +318,7 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
                 <View style={styles.toastIcon}><Text style={styles.toastIconText}>!</Text></View>
                 <Text style={styles.toastText}>{toast}</Text>
                 <TouchableOpacity onPress={() => setToast(null)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                  <X size={18} color="#94a3b8" />
+                  <X size={18} color={colors.textFaint} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -328,12 +331,12 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
   // ────────────────────────────── MAP STEP ──────────────────────────────
   return (
     <Modal visible={visible} animationType="slide" statusBarTranslucent onRequestClose={handleCancel}>
-      <StatusBar backgroundColor="#fff" barStyle="dark-content" />
+      <StatusBar backgroundColor={colors.bg} barStyle={isDark ? 'light-content' : 'dark-content'} />
       <View style={styles.screen}>
         {/* ── Top bar ── */}
         <View style={styles.topBar}>
           <TouchableOpacity onPress={handleCancel} style={styles.backBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <ArrowLeft size={22} color="#1c1c1e" />
+            <ArrowLeft size={22} color={colors.text} />
           </TouchableOpacity>
           <View style={styles.searchBox}>
             <TextInput
@@ -342,7 +345,7 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
               value={query}
               onChangeText={(t) => setQuery(t)}
               placeholder="Search area, street, landmark..."
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor={colors.textFaint}
               autoCorrect={false}
               autoCapitalize="none"
               returnKeyType="search"
@@ -460,6 +463,8 @@ function Field({
   label: string; value: string; onChangeText: (t: string) => void; placeholder?: string;
   required?: boolean; autoFocus?: boolean; keyboardType?: any;
 }) {
+  const styles = useStyles();
+  const { colors } = useTheme();
   return (
     <View style={styles.fieldWrap}>
       <Text style={styles.fieldLabel}>
@@ -470,7 +475,7 @@ function Field({
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor="#9ca3af"
+        placeholderTextColor={colors.textFaint}
         autoFocus={autoFocus}
         keyboardType={keyboardType}
       />
@@ -478,10 +483,10 @@ function Field({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   screen: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: c.bg,
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight ?? 24 : 50,
   },
 
@@ -493,25 +498,25 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     gap: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
+    borderBottomColor: c.border,
   },
   backBtn: { padding: 4 },
-  detailsTitle: { fontSize: 17, fontWeight: '800', color: '#0f172a' },
+  detailsTitle: { fontSize: 17, fontWeight: '800', color: c.text },
   searchBox: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f8fafc',
+    backgroundColor: c.inputBg,
     borderRadius: 10,
     paddingHorizontal: 12,
     height: 44,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: c.border,
   },
-  searchInput: { flex: 1, fontSize: 15, color: '#0f172a', fontWeight: '500', paddingVertical: 0 },
+  searchInput: { flex: 1, fontSize: 15, color: c.text, fontWeight: '500', paddingVertical: 0 },
   searchSpinner: { marginLeft: 8 },
   clearBtn: { padding: 4, marginLeft: 4 },
-  clearX: { fontSize: 13, color: '#94a3b8', fontWeight: '700' },
+  clearX: { fontSize: 13, color: c.textFaint, fontWeight: '700' },
 
   // Map body
   mapBody: { flex: 1, position: 'relative' },
@@ -522,39 +527,39 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'white',
+    backgroundColor: c.surface,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
-    shadowColor: '#000',
+    shadowColor: c.shadow,
     shadowOpacity: 0.15,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
   },
 
   // Suggestions overlay
-  suggestionsOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#fff' },
-  rowSep: { height: 1, backgroundColor: '#f8fafc', marginLeft: 70 },
+  suggestionsOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: c.bg },
+  rowSep: { height: 1, backgroundColor: c.border, marginLeft: 70 },
   resultRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 14, gap: 14 },
-  resultIconWrap: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center' },
+  resultIconWrap: { width: 36, height: 36, borderRadius: 18, backgroundColor: c.primarySoft, alignItems: 'center', justifyContent: 'center' },
   resultText: { flex: 1 },
-  resultName: { fontSize: 14, fontWeight: '700', color: '#111827' },
-  resultAddr: { fontSize: 12, color: '#64748b', marginTop: 2, lineHeight: 17 },
+  resultName: { fontSize: 14, fontWeight: '700', color: c.text },
+  resultAddr: { fontSize: 12, color: c.textMuted, marginTop: 2, lineHeight: 17 },
   emptyState: { alignItems: 'center', paddingTop: 48, gap: 10 },
   emptyIcon: { fontSize: 36 },
-  emptyText: { fontSize: 14, color: '#64748b', textAlign: 'center', paddingHorizontal: 32 },
+  emptyText: { fontSize: 14, color: c.textMuted, textAlign: 'center', paddingHorizontal: 32 },
 
   // Bottom sheet
   bottomSheet: {
-    backgroundColor: 'white',
+    backgroundColor: c.surface,
     borderTopWidth: 1,
-    borderTopColor: '#f1f5f9',
+    borderTopColor: c.border,
     paddingHorizontal: 20,
     paddingTop: 16,
     paddingBottom: 12,
   },
   addressRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 14 },
-  addressText: { flex: 1, fontSize: 14, fontWeight: '600', color: '#0f172a', lineHeight: 20 },
+  addressText: { flex: 1, fontSize: 14, fontWeight: '600', color: c.text, lineHeight: 20 },
   outOfAreaBanner: { backgroundColor: '#fef2f2', borderWidth: 1, borderColor: '#fecaca', borderRadius: 12, padding: 12, marginBottom: 14 },
   outOfAreaText: { fontSize: 13, fontWeight: '600', color: '#dc2626', lineHeight: 18 },
   confirmBtn: { backgroundColor: '#16a34a', borderRadius: 14, paddingVertical: 15, alignItems: 'center' },
@@ -562,40 +567,40 @@ const styles = StyleSheet.create({
   confirmBtnText: { color: 'white', fontSize: 15, fontWeight: '800' },
 
   toastOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24, pointerEvents: 'box-none' },
-  toastCard: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: 'white', borderRadius: 16, paddingVertical: 16, paddingHorizontal: 18, maxWidth: 420, width: '100%', borderWidth: 1, borderColor: '#fecaca', shadowColor: '#000', shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.18, shadowRadius: 28, elevation: 12 },
+  toastCard: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: c.surface, borderRadius: 16, paddingVertical: 16, paddingHorizontal: 18, maxWidth: 420, width: '100%', borderWidth: 1, borderColor: '#fecaca', shadowColor: c.shadow, shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.18, shadowRadius: 28, elevation: 12 },
   toastIcon: { width: 30, height: 30, borderRadius: 15, backgroundColor: '#fee2e2', alignItems: 'center', justifyContent: 'center' },
   toastIconText: { color: '#dc2626', fontSize: 17, fontWeight: '900' },
-  toastText: { flex: 1, color: '#0f172a', fontSize: 14, fontWeight: '600', lineHeight: 20 },
+  toastText: { flex: 1, color: c.text, fontSize: 14, fontWeight: '600', lineHeight: 20 },
 
   // Details form
   detailsScroll: { padding: 20, paddingBottom: 32, maxWidth: 640, width: '100%', alignSelf: 'center' },
   locBanner: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
-    backgroundColor: '#f0fdf4', borderRadius: 14, padding: 14, marginBottom: 22,
+    backgroundColor: c.primarySoft, borderRadius: 14, padding: 14, marginBottom: 22,
     borderWidth: 1, borderColor: '#dcfce7',
   },
   locBannerIcon: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#dcfce7', alignItems: 'center', justifyContent: 'center' },
-  locBannerText: { flex: 1, fontSize: 13, fontWeight: '600', color: '#166534', lineHeight: 18 },
+  locBannerText: { flex: 1, fontSize: 13, fontWeight: '600', color: c.primary, lineHeight: 18 },
   locChangeBtn: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   locChangeText: { fontSize: 12, fontWeight: '800', color: '#16a34a' },
 
   fieldWrap: { marginBottom: 16 },
-  fieldLabel: { fontSize: 13, fontWeight: '700', color: '#334155', marginBottom: 7 },
+  fieldLabel: { fontSize: 13, fontWeight: '700', color: c.textMuted, marginBottom: 7 },
   required: { color: '#ef4444' },
   fieldInput: {
-    backgroundColor: '#f8fafc', borderRadius: 12, borderWidth: 1, borderColor: '#e2e8f0',
+    backgroundColor: c.inputBg, borderRadius: 12, borderWidth: 1, borderColor: c.border,
     paddingHorizontal: 14, paddingVertical: Platform.OS === 'ios' ? 14 : 11,
-    fontSize: 15, color: '#0f172a', fontWeight: '500',
+    fontSize: 15, color: c.text, fontWeight: '500',
   },
 
   labelRow: { flexDirection: 'row', gap: 10, marginTop: 4 },
   labelPill: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     paddingHorizontal: 16, paddingVertical: 10, borderRadius: 100,
-    borderWidth: 1.5, borderColor: '#e2e8f0', backgroundColor: 'white',
+    borderWidth: 1.5, borderColor: c.border, backgroundColor: c.surface,
   },
-  labelPillActive: { borderColor: '#16a34a', backgroundColor: '#f0fdf4' },
-  labelPillText: { fontSize: 13, fontWeight: '700', color: '#64748b' },
+  labelPillActive: { borderColor: '#16a34a', backgroundColor: c.primarySoft },
+  labelPillText: { fontSize: 13, fontWeight: '700', color: c.textMuted },
   labelPillTextActive: { color: '#15803d' },
 
-});
+}));
