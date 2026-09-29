@@ -1,6 +1,6 @@
 ﻿import React, { useRef, useEffect, useState } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, ScrollView,
+  View, Text, TouchableOpacity, ScrollView,
   Animated, Dimensions, StatusBar, ActivityIndicator, Linking, Platform
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,6 +13,7 @@ import { showAlert } from '../utils/alert';
 import { useUserSocket } from '../context/UserSocketContext';
 import { RatingModal } from '../components/shared/RatingModal';
 import { TrackingMap } from '../components/shared/TrackingMap';
+import { useTheme, makeStyles } from '../theme';
 
 const { height } = Dimensions.get('window');
 
@@ -66,6 +67,8 @@ const mockBooking = {
 };
 
 export function OrderTrackingScreen({ route, navigation }: any) {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const pulseAnim = useRef(new Animated.Value(1)).current;
   
   // Resolve passed parameters or fallback to mock data
@@ -310,15 +313,15 @@ export function OrderTrackingScreen({ route, navigation }: any) {
               doesn't render as a stray circle like the styled help button would. */}
           <View style={{ width: 36 }} />
         </SafeAreaView>
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, backgroundColor: '#fff' }}>
-          <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: '#fee2e2', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, backgroundColor: colors.bg }}>
+          <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: colors.dangerSoft, alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
             <XCircle size={44} color="#dc2626" />
           </View>
-          <Text style={{ fontSize: 22, fontWeight: '900', color: '#0f172a', marginBottom: 10, textAlign: 'center' }}>Pickup Cancelled</Text>
-          <Text style={{ fontSize: 14, color: '#64748b', fontWeight: '500', textAlign: 'center', lineHeight: 22, marginBottom: 8 }}>
+          <Text style={{ fontSize: 22, fontWeight: '900', color: colors.text, marginBottom: 10, textAlign: 'center' }}>Pickup Cancelled</Text>
+          <Text style={{ fontSize: 14, color: colors.textMuted, fontWeight: '500', textAlign: 'center', lineHeight: 22, marginBottom: 8 }}>
             Your pickup request has been cancelled successfully.
           </Text>
-          <Text style={{ fontSize: 13, color: '#94a3b8', fontWeight: '600', marginBottom: 40 }}>{bookingData.id}</Text>
+          <Text style={{ fontSize: 13, color: colors.textFaint, fontWeight: '600', marginBottom: 40 }}>{bookingData.id}</Text>
           <TouchableOpacity
             style={{ backgroundColor: '#15803d', borderRadius: 16, paddingVertical: 16, paddingHorizontal: 32, width: '100%', maxWidth: 420, alignItems: 'center', elevation: 3, shadowColor: '#15803d', shadowOpacity: 0.3, shadowRadius: 8, shadowOffset: { width: 0, height: 3 } }}
             onPress={() => navigation.navigate('SchedulePickup')}
@@ -326,10 +329,10 @@ export function OrderTrackingScreen({ route, navigation }: any) {
             <Text style={{ color: 'white', fontSize: 15, fontWeight: '800' }}>Schedule New Pickup</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={{ marginTop: 14, borderRadius: 16, paddingVertical: 14, paddingHorizontal: 32, width: '100%', maxWidth: 420, alignItems: 'center', borderWidth: 1.5, borderColor: '#e2e8f0' }}
+            style={{ marginTop: 14, borderRadius: 16, paddingVertical: 14, paddingHorizontal: 32, width: '100%', maxWidth: 420, alignItems: 'center', borderWidth: 1.5, borderColor: colors.border }}
             onPress={() => navigation.navigate('Orders')}
           >
-            <Text style={{ color: '#475569', fontSize: 15, fontWeight: '700' }}>View All Orders</Text>
+            <Text style={{ color: colors.textMuted, fontSize: 15, fontWeight: '700' }}>View All Orders</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -393,12 +396,12 @@ export function OrderTrackingScreen({ route, navigation }: any) {
           </View>
         </View>
       ) : (
-        <View style={[styles.agentCard, { backgroundColor: '#f0fdf4', borderColor: '#86efac', borderWidth: 1 }]}>
-          <View style={[styles.agentAvatar, { backgroundColor: '#dcfce7' }]}>
+        <View style={[styles.agentCard, { backgroundColor: colors.primarySoft, borderColor: '#86efac', borderWidth: 1 }]}>
+          <View style={[styles.agentAvatar, { backgroundColor: colors.surfaceAlt }]}>
             <ActivityIndicator size="small" color="#15803d" />
           </View>
           <View style={styles.agentInfo}>
-            <Text style={[styles.agentName, { color: '#166534', fontWeight: '700' }]}>Finding agent...</Text>
+            <Text style={[styles.agentName, { color: colors.primary, fontWeight: '700' }]}>Finding agent...</Text>
             <Text style={styles.agentDistance}>Searching for nearest active recycling partner</Text>
           </View>
         </View>
@@ -481,7 +484,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
                   </Animated.View>
                 ) : (
                   <View style={styles.stepPendingCircle}>
-                    <Circle size={20} color="#d1d5db" />
+                    <Circle size={20} color={colors.border} />
                   </View>
                 )}
                 {index < steps.length - 1 && (
@@ -513,7 +516,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.secondaryBtn} onPress={showSupport}>
-          <HelpCircle size={16} color="#475569" />
+          <HelpCircle size={16} color={colors.textMuted} />
           <Text style={styles.secondaryBtnText}>Need help?</Text>
         </TouchableOpacity>
 
@@ -572,8 +575,8 @@ export function OrderTrackingScreen({ route, navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8fafc' },
+const useStyles = makeStyles((c) => ({
+  container: { flex: 1, backgroundColor: c.bg },
 
   // Header
   header: { backgroundColor: '#15803d', flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingBottom: 12 },
@@ -582,29 +585,29 @@ const styles = StyleSheet.create({
   helpIconBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
 
   // Booking Badge
-  bookingBadge: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'white', marginHorizontal: 16, marginTop: 12, borderRadius: 14, padding: 14, elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 8, shadowOffset: { width: 0, height: 2 } },
+  bookingBadge: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: c.surface, marginHorizontal: 16, marginTop: 12, borderRadius: 14, padding: 14, elevation: 2, shadowColor: c.shadow, shadowOpacity: 0.06, shadowRadius: 8, shadowOffset: { width: 0, height: 2 } },
   bookingBadgeLeft: {},
-  bookingIdLabel: { fontSize: 11, color: '#94a3b8', fontWeight: '600' },
-  bookingId: { fontSize: 18, fontWeight: '900', color: '#0f172a', marginTop: 2 },
+  bookingIdLabel: { fontSize: 11, color: c.textFaint, fontWeight: '600' },
+  bookingId: { fontSize: 18, fontWeight: '900', color: c.text, marginTop: 2 },
   inProgressBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: '#fef9c3', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 20 },
   inProgressDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#ca8a04' },
   inProgressText: { fontSize: 10, fontWeight: '800', color: '#ca8a04' },
 
   // Agent Card
-  agentCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'white', marginHorizontal: 16, marginTop: 10, borderRadius: 14, padding: 14, elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 8, shadowOffset: { width: 0, height: 2 }, maxWidth: 900, width: '100%', alignSelf: 'center' },
+  agentCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.surface, marginHorizontal: 16, marginTop: 10, borderRadius: 14, padding: 14, elevation: 2, shadowColor: c.shadow, shadowOpacity: 0.06, shadowRadius: 8, shadowOffset: { width: 0, height: 2 }, maxWidth: 900, width: '100%', alignSelf: 'center' },
   agentAvatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#15803d', alignItems: 'center', justifyContent: 'center', marginRight: 12 },
   agentInitials: { color: 'white', fontWeight: '800', fontSize: 16 },
   agentInfo: { flex: 1 },
-  agentName: { fontSize: 15, fontWeight: '800', color: '#0f172a' },
+  agentName: { fontSize: 15, fontWeight: '800', color: c.text },
   agentRatingRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
-  agentRating: { fontSize: 12, fontWeight: '700', color: '#0f172a' },
-  agentDistance: { fontSize: 12, color: '#64748b', fontWeight: '500' },
-  callBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#f0fdf4', borderWidth: 1, borderColor: '#bbf7d0', alignItems: 'center', justifyContent: 'center' },
+  agentRating: { fontSize: 12, fontWeight: '700', color: c.text },
+  agentDistance: { fontSize: 12, color: c.textMuted, fontWeight: '500' },
+  callBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: c.primarySoft, borderWidth: 1, borderColor: '#bbf7d0', alignItems: 'center', justifyContent: 'center' },
 
   // Map
-  mapContainer: { marginHorizontal: 16, marginTop: 10, borderRadius: 20, overflow: 'hidden', height: height * 0.22, elevation: 3, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 12, shadowOffset: { width: 0, height: 3 }, maxWidth: 900, width: '100%', alignSelf: 'center' },
-  mapComingSoon: { flex: 1, backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center', padding: 20 },
-  mapComingSoonTitle: { fontSize: 14, fontWeight: '700', color: '#15803d', marginTop: 8, textAlign: 'center' },
+  mapContainer: { marginHorizontal: 16, marginTop: 10, borderRadius: 20, overflow: 'hidden', height: height * 0.22, elevation: 3, shadowColor: c.shadow, shadowOpacity: 0.08, shadowRadius: 12, shadowOffset: { width: 0, height: 3 }, maxWidth: 900, width: '100%', alignSelf: 'center' },
+  mapComingSoon: { flex: 1, backgroundColor: c.primarySoft, alignItems: 'center', justifyContent: 'center', padding: 20 },
+  mapComingSoonTitle: { fontSize: 14, fontWeight: '700', color: c.primary, marginTop: 8, textAlign: 'center' },
   userPin: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#dcfce7', borderWidth: 2, borderColor: '#16a34a', alignItems: 'center', justifyContent: 'center' },
   agentPin: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#fff', borderWidth: 2, borderColor: '#0ea5e9', alignItems: 'center', justifyContent: 'center', elevation: 4, shadowColor: '#0ea5e9', shadowOpacity: 0.3, shadowRadius: 6, shadowOffset: { width: 0, height: 2 } },
   map: { flex: 1 },
@@ -614,58 +617,58 @@ const styles = StyleSheet.create({
   userMarkerInner: { width: 12, height: 12, borderRadius: 6, backgroundColor: '#3b82f6', borderWidth: 2, borderColor: 'white' },
 
   // Bottom Sheet
-  bottomSheet: { flex: 1, backgroundColor: 'white', marginTop: 10, borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 20, paddingTop: 20, overflow: 'hidden', maxWidth: 900, width: '100%', alignSelf: 'center' },
+  bottomSheet: { flex: 1, backgroundColor: c.surface, marginTop: 10, borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 20, paddingTop: 20, overflow: 'hidden', maxWidth: 900, width: '100%', alignSelf: 'center' },
 
   // Live Status
   liveStatusRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 },
   liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#22c55e' },
-  liveStatusLabel: { fontSize: 13, fontWeight: '700', color: '#475569', flex: 1 },
-  liveStatusTime: { fontSize: 11, color: '#94a3b8', fontWeight: '500' },
-  liveStatusText: { fontSize: 14, color: '#0f172a', fontWeight: '600', marginBottom: 16 },
+  liveStatusLabel: { fontSize: 13, fontWeight: '700', color: c.textMuted, flex: 1 },
+  liveStatusTime: { fontSize: 11, color: c.textFaint, fontWeight: '500' },
+  liveStatusText: { fontSize: 14, color: c.text, fontWeight: '600', marginBottom: 16 },
 
   // Stats
-  statsRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f8fafc', borderRadius: 16, padding: 16, marginBottom: 20, borderWidth: 1, borderColor: '#f1f5f9' },
+  statsRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.surfaceAlt, borderRadius: 16, padding: 16, marginBottom: 20, borderWidth: 1, borderColor: c.border },
   statItem: { flex: 1, alignItems: 'center' },
-  statValue: { fontSize: 18, fontWeight: '900', color: '#15803d' },
-  statLabel: { fontSize: 11, color: '#94a3b8', fontWeight: '600', marginTop: 2 },
-  statDivider: { width: 1, height: 36, backgroundColor: '#e2e8f0' },
+  statValue: { fontSize: 18, fontWeight: '900', color: c.primary },
+  statLabel: { fontSize: 11, color: c.textFaint, fontWeight: '600', marginTop: 2 },
+  statDivider: { width: 1, height: 36, backgroundColor: c.border },
 
   // Steps
-  sectionTitle: { fontSize: 15, fontWeight: '800', color: '#0f172a', marginBottom: 16 },
+  sectionTitle: { fontSize: 15, fontWeight: '800', color: c.text, marginBottom: 16 },
   stepsContainer: { marginBottom: 24 },
   stepRow: { flexDirection: 'row', gap: 14 },
   stepIconCol: { alignItems: 'center', width: 24 },
   stepDoneCircle: {},
-  stepActiveCircle: { width: 22, height: 22, borderRadius: 11, backgroundColor: '#dcfce7', borderWidth: 2, borderColor: '#15803d', alignItems: 'center', justifyContent: 'center' },
+  stepActiveCircle: { width: 22, height: 22, borderRadius: 11, backgroundColor: c.primarySoft, borderWidth: 2, borderColor: '#15803d', alignItems: 'center', justifyContent: 'center' },
   stepActiveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#15803d' },
   stepPendingCircle: {},
-  stepLine: { width: 2, height: 36, backgroundColor: '#e2e8f0', marginVertical: 4 },
+  stepLine: { width: 2, height: 36, backgroundColor: c.border, marginVertical: 4 },
   stepLineDone: { backgroundColor: '#15803d' },
   stepTextCol: { flex: 1, paddingBottom: 20 },
   stepTitleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  stepLabel: { fontSize: 14, fontWeight: '700', color: '#0f172a' },
-  stepLabelActive: { color: '#15803d' },
-  stepLabelPending: { color: '#94a3b8' },
-  stepTime: { fontSize: 11, color: '#64748b', fontWeight: '600' },
-  stepSublabel: { fontSize: 12, color: '#94a3b8', fontWeight: '500', marginTop: 2 },
+  stepLabel: { fontSize: 14, fontWeight: '700', color: c.text },
+  stepLabelActive: { color: c.primary },
+  stepLabelPending: { color: c.textFaint },
+  stepTime: { fontSize: 11, color: c.textMuted, fontWeight: '600' },
+  stepSublabel: { fontSize: 12, color: c.textFaint, fontWeight: '500', marginTop: 2 },
 
   poolBadge: { backgroundColor: '#fef3c7', borderRadius: 12, padding: 12, marginBottom: 16, borderWidth: 1, borderColor: '#fde68a' },
   poolBadgeText: { fontSize: 13, color: '#92400e', fontWeight: '600', lineHeight: 18 },
-  coinsBadge: { backgroundColor: '#f0fdf4', borderRadius: 12, padding: 12, marginBottom: 16, borderWidth: 1, borderColor: '#bbf7d0' },
-  coinsBadgeText: { fontSize: 13, color: '#15803d', fontWeight: '700' },
+  coinsBadge: { backgroundColor: c.primarySoft, borderRadius: 12, padding: 12, marginBottom: 16, borderWidth: 1, borderColor: '#bbf7d0' },
+  coinsBadgeText: { fontSize: 13, color: c.primary, fontWeight: '700' },
 
   // Buttons
   primaryBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#15803d', borderRadius: 16, paddingVertical: 16, marginBottom: 12, elevation: 3, shadowColor: '#15803d', shadowOpacity: 0.3, shadowRadius: 8, shadowOffset: { width: 0, height: 3 } },
   primaryBtnText: { color: 'white', fontSize: 15, fontWeight: '800' },
-  secondaryBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: 'white', borderRadius: 16, paddingVertical: 14, borderWidth: 1.5, borderColor: '#e2e8f0' },
-  secondaryBtnText: { color: '#475569', fontSize: 15, fontWeight: '700' },
+  secondaryBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: c.surface, borderRadius: 16, paddingVertical: 14, borderWidth: 1.5, borderColor: c.border },
+  secondaryBtnText: { color: c.textMuted, fontSize: 15, fontWeight: '700' },
   cancelBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#fef2f2', borderRadius: 16, paddingVertical: 14, borderWidth: 1.5, borderColor: '#fecaca', marginTop: 8 },
   cancelBtnText: { color: '#ef4444', fontSize: 15, fontWeight: '700' },
   cancelConfirmBox: { backgroundColor: '#fef2f2', borderRadius: 16, padding: 16, marginTop: 8, borderWidth: 1.5, borderColor: '#fecaca' },
   cancelConfirmText: { fontSize: 14, fontWeight: '700', color: '#0f172a', textAlign: 'center', marginBottom: 12 },
   cancelConfirmRow: { flexDirection: 'row', gap: 10 },
-  cancelConfirmNo: { flex: 1, backgroundColor: 'white', borderRadius: 12, paddingVertical: 12, alignItems: 'center', borderWidth: 1, borderColor: '#e2e8f0' },
-  cancelConfirmNoText: { color: '#475569', fontSize: 14, fontWeight: '700' },
+  cancelConfirmNo: { flex: 1, backgroundColor: c.surface, borderRadius: 12, paddingVertical: 12, alignItems: 'center', borderWidth: 1, borderColor: c.border },
+  cancelConfirmNoText: { color: c.textMuted, fontSize: 14, fontWeight: '700' },
   cancelConfirmYes: { flex: 1, backgroundColor: '#ef4444', borderRadius: 12, paddingVertical: 12, alignItems: 'center' },
   cancelConfirmYesText: { color: 'white', fontSize: 14, fontWeight: '700' },
-});
+}));
