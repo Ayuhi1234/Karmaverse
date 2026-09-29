@@ -17,6 +17,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.karmacredits.app",
       "buildNumber": "1",
+      "usesAppleSignIn": true,
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "KarmaVerse uses your location to auto-fill your pickup address and show pickup partners near you on the map.",
@@ -45,6 +46,7 @@
     },
     "plugins": [
       "./plugins/withMappls",
+      "expo-apple-authentication",
       [
         "@react-native-google-signin/google-signin",
         {
