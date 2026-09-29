@@ -23,15 +23,18 @@ import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getToken } from '../utils/tokenStore';
 import { getStableUserSuffix } from '../utils/userId';
+import { useTheme, makeStyles } from '../theme';
 
 // Reusable Components
 function InputField({ placeholder, value, onChange, keyboardType = 'default', maxLength }: any) {
+  const styles = useStyles();
+  const { colors } = useTheme();
   return (
     <View style={styles.demoInputContainer}>
       <TextInput
         style={styles.demoInput}
         placeholder={placeholder}
-        placeholderTextColor="#9ca3af"
+        placeholderTextColor={colors.textFaint}
         value={value}
         onChangeText={onChange}
         keyboardType={keyboardType}
@@ -42,6 +45,7 @@ function InputField({ placeholder, value, onChange, keyboardType = 'default', ma
 }
 
 function SelectionPills({ options, selected, onSelect }: { options: string[], selected: string, onSelect: (v: string) => void }) {
+  const styles = useStyles();
   return (
     <View style={styles.pillsContainer}>
       {options.map((opt) => (
@@ -64,6 +68,8 @@ const cleanPhone = (p?: string) => String(p || '').replace(/\D/g, '').replace(/^
 const isRealPhone = (p?: string) => /^[6-9]\d{9}$/.test(cleanPhone(p));
 
 export function ProfileScreen({ navigation }: any) {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const { pushEnabled, enablePush } = useNotifications();
   // Main Profile State
   const [userProfile, setUserProfile] = useState<any>(null);
@@ -666,12 +672,12 @@ export function ProfileScreen({ navigation }: any) {
           {isLoadingProfile ? (
              <View style={{ padding: 40, alignItems: 'center' }}>
                <ActivityIndicator size="large" color="#16a34a" />
-               <Text style={{ marginTop: 10, color: '#64748b' }}>Loading Profile...</Text>
+               <Text style={{ marginTop: 10, color: colors.textMuted }}>Loading Profile...</Text>
              </View>
           ) : !userProfile ? (
              <View style={{ padding: 40, alignItems: 'center', gap: 16 }}>
                <Text style={{ color: '#ef4444', fontWeight: '600', fontSize: 15 }}>Failed to load profile.</Text>
-               <Text style={{ color: '#94a3b8', fontSize: 13, textAlign: 'center' }}>Check your internet connection and try again.</Text>
+               <Text style={{ color: colors.textFaint, fontSize: 13, textAlign: 'center' }}>Check your internet connection and try again.</Text>
                <TouchableOpacity
                  style={{ backgroundColor: '#16a34a', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12 }}
                  onPress={() => { setIsLoadingProfile(true); profileService.getProfile().then(data => { setUserProfile({ name: data.name || 'User', phone: data.phone || '', email: data.email || '', coins: data.karmaCoins || data.coins || 0, address: data.address ? (typeof data.address === 'object' ? data.address.fullAddress : data.address) : '', demographics: { age: data.demographics?.age || data.age || 25, gender: data.demographics?.gender || data.gender || 'Not Specified', sexualOrientation: data.demographics?.sexualOrientation || data.sexualOrientation || 'Not Specified', maritalStatus: data.demographics?.maritalStatus || 'Not Specified', employment: data.demographics?.employment || 'Not Specified' } }); }).catch(() => {}).finally(() => setIsLoadingProfile(false)); }}
@@ -680,7 +686,7 @@ export function ProfileScreen({ navigation }: any) {
                </TouchableOpacity>
                {/* Logout even when profile fails */}
                <TouchableOpacity
-                 style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8, paddingVertical: 12, paddingHorizontal: 24, borderRadius: 12, borderWidth: 1, borderColor: '#fecaca', backgroundColor: 'white' }}
+                 style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8, paddingVertical: 12, paddingHorizontal: 24, borderRadius: 12, borderWidth: 1, borderColor: '#fecaca', backgroundColor: colors.surface }}
                  onPress={async () => { await authService.logout(); navigation.replace('Login'); }}
                >
                  <LogOut size={18} color="#ef4444" />
@@ -790,8 +796,8 @@ export function ProfileScreen({ navigation }: any) {
                   </>
                 )}
                 <OptionRow
-                  icon={<HeartHandshake size={18} color="#475569" />}
-                  bg="#f8fafc"
+                  icon={<HeartHandshake size={18} color={colors.textMuted} />}
+                  bg={colors.surfaceAlt}
                   title="Help & support"
                   onPress={() => showAlert(
                     'Help & support',
@@ -799,11 +805,11 @@ export function ProfileScreen({ navigation }: any) {
                   )}
                 />
                 <View style={styles.divider} />
-                <OptionRow icon={<FileText size={18} color="#475569" />} bg="#f8fafc" title="Terms & conditions" onPress={() => navigation.navigate('Legal', { type: 'terms' })} />
+                <OptionRow icon={<FileText size={18} color={colors.textMuted} />} bg={colors.surfaceAlt} title="Terms & conditions" onPress={() => navigation.navigate('Legal', { type: 'terms' })} />
                 <View style={styles.divider} />
-                <OptionRow icon={<FileText size={18} color="#475569" />} bg="#f8fafc" title="Terms of use" onPress={() => navigation.navigate('Legal', { type: 'terms-of-use' })} />
+                <OptionRow icon={<FileText size={18} color={colors.textMuted} />} bg={colors.surfaceAlt} title="Terms of use" onPress={() => navigation.navigate('Legal', { type: 'terms-of-use' })} />
                 <View style={styles.divider} />
-                <OptionRow icon={<ShieldCheck size={18} color="#475569" />} bg="#f8fafc" title="Privacy policy" onPress={() => navigation.navigate('Legal', { type: 'privacy' })} />
+                <OptionRow icon={<ShieldCheck size={18} color={colors.textMuted} />} bg={colors.surfaceAlt} title="Privacy policy" onPress={() => navigation.navigate('Legal', { type: 'privacy' })} />
               </View>
 
               {/* Logout */}
@@ -823,10 +829,10 @@ export function ProfileScreen({ navigation }: any) {
                 activeOpacity={0.7}
               >
                 {deletingAccount ? (
-                  <ActivityIndicator size="small" color="#94a3b8" />
+                  <ActivityIndicator size="small" color={colors.textFaint} />
                 ) : (
                   <>
-                    <Trash2 size={16} color="#94a3b8" />
+                    <Trash2 size={16} color={colors.textFaint} />
                     <Text style={styles.deleteAccountText}>Delete account</Text>
                   </>
                 )}
@@ -856,7 +862,7 @@ export function ProfileScreen({ navigation }: any) {
             <View style={[styles.modalHeader, { borderBottomWidth: 0, paddingBottom: 10 }]}>
               <Text style={styles.modalTitle}>Personal details</Text>
               <TouchableOpacity onPress={closeDemoModal} style={styles.closeBtn}>
-                <X size={20} color="#64748b" />
+                <X size={20} color={colors.textMuted} />
               </TouchableOpacity>
             </View>
 
@@ -865,7 +871,7 @@ export function ProfileScreen({ navigation }: any) {
               showsVerticalScrollIndicator={false}
               contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 32 }}
             >
-              <Text style={{ fontSize: 14, color: '#64748b', marginBottom: 24, lineHeight: 20 }}>
+              <Text style={{ fontSize: 14, color: colors.textMuted, marginBottom: 24, lineHeight: 20 }}>
                 These are the details you submitted during registration. They help us tailor eco-rewards directly for you.
               </Text>
 
@@ -1002,7 +1008,7 @@ export function ProfileScreen({ navigation }: any) {
               </Text>
               {flowStep !== 'success' && flowStep !== 'loading' && (
                 <TouchableOpacity onPress={closeModal} style={styles.closeBtn}>
-                  <X size={20} color="#64748b" />
+                  <X size={20} color={colors.textMuted} />
                 </TouchableOpacity>
               )}
             </View>
@@ -1013,12 +1019,12 @@ export function ProfileScreen({ navigation }: any) {
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Full Name</Text>
                   <View style={styles.inputWrapper}>
-                    <User size={18} color="#94a3b8" style={styles.inputIcon} />
+                    <User size={18} color={colors.textFaint} style={styles.inputIcon} />
                     <TextInput 
                       style={styles.input} 
                       value={editForm.name} 
                       onChangeText={(t) => setEditForm({...editForm, name: t})}
-                      placeholderTextColor="#94a3b8"
+                      placeholderTextColor={colors.textFaint}
                     />
                   </View>
                 </View>
@@ -1026,7 +1032,7 @@ export function ProfileScreen({ navigation }: any) {
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Mobile Number</Text>
                   <View style={styles.inputWrapper}>
-                    <Phone size={18} color="#94a3b8" style={styles.inputIcon} />
+                    <Phone size={18} color={colors.textFaint} style={styles.inputIcon} />
                     <TextInput
                       style={styles.input}
                       value={editForm.phone}
@@ -1040,7 +1046,7 @@ export function ProfileScreen({ navigation }: any) {
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Email Address</Text>
                   <View style={styles.inputWrapper}>
-                    <Mail size={18} color="#94a3b8" style={styles.inputIcon} />
+                    <Mail size={18} color={colors.textFaint} style={styles.inputIcon} />
                     <TextInput 
                       style={styles.input} 
                       value={editForm.email} 
@@ -1075,8 +1081,8 @@ export function ProfileScreen({ navigation }: any) {
                 <View style={{ width: 56, height: 56, borderRadius: 16, backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center', marginBottom: 16, borderWidth: 1.5, borderColor: '#bbf7d0' }}>
                   <ShieldCheck size={24} color="#15803d" />
                 </View>
-                <Text style={{ fontSize: 20, fontWeight: '900', color: '#0f172a', marginBottom: 6, textAlign: 'center' }}>Secure verification</Text>
-                <Text style={{ fontSize: 13, color: '#64748b', fontWeight: '500', marginBottom: 4, textAlign: 'center' }}>
+                <Text style={{ fontSize: 20, fontWeight: '900', color: colors.text, marginBottom: 6, textAlign: 'center' }}>Secure verification</Text>
+                <Text style={{ fontSize: 13, color: colors.textMuted, fontWeight: '500', marginBottom: 4, textAlign: 'center' }}>
                   {otpStage === 'phone' ? 'OTP sent to your new mobile number' : 'OTP sent to your registered mobile number'}
                 </Text>
                 <Text style={{ fontSize: 14, color: '#15803d', fontWeight: '800', marginBottom: 24, textAlign: 'center' }}>
@@ -1092,8 +1098,8 @@ export function ProfileScreen({ navigation }: any) {
                         width: 44, height: 52, borderRadius: 12, borderWidth: 2,
                         borderColor: digit ? '#15803d' : '#e2e8f0',
                         backgroundColor: digit ? '#f0fdf4' : '#f8fafc',
-                        textAlign: 'center', fontSize: 20, fontWeight: '900', color: '#0f172a',
-                      }}
+                        textAlign: 'center', fontSize: 20, fontWeight: '900', color: colors.text,
+      }}
                       value={digit}
                       onChangeText={(t: string) => handleProfileOtpChange(t, i)}
                       onKeyPress={(e: any) => handleProfileOtpKey(e, i)}
@@ -1113,8 +1119,8 @@ export function ProfileScreen({ navigation }: any) {
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => setFlowStep('form')} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-                  <ChevronLeft size={15} color="#64748b" />
-                  <Text style={{ color: '#64748b', fontWeight: '600', fontSize: 13 }}>Back to edit</Text>
+                  <ChevronLeft size={15} color={colors.textMuted} />
+                  <Text style={{ color: colors.textMuted, fontWeight: '600', fontSize: 13 }}>Back to edit</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -1143,11 +1149,11 @@ export function ProfileScreen({ navigation }: any) {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Update Address</Text>
               <TouchableOpacity onPress={closeAddressModal} style={styles.closeBtn}>
-                <X size={20} color="#64748b" />
+                <X size={20} color={colors.textMuted} />
               </TouchableOpacity>
             </View>
             <ScrollView style={{ paddingHorizontal: 24 }} contentContainerStyle={{ paddingBottom: 32 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-              <Text style={{ fontSize: 13, color: '#64748b', marginBottom: 16, lineHeight: 18 }}>
+              <Text style={{ fontSize: 13, color: colors.textMuted, marginBottom: 16, lineHeight: 18 }}>
                 This address will be used as your default pickup location.
               </Text>
 
@@ -1156,7 +1162,7 @@ export function ProfileScreen({ navigation }: any) {
                 <TextInput
                   style={styles.demoInput}
                   placeholder="e.g. 42, Block B"
-                  placeholderTextColor="#9ca3af"
+                  placeholderTextColor={colors.textFaint}
                   value={addressForm.flatNo}
                   onChangeText={(t) => handleAddressChange('flatNo', t.replace(/[^a-zA-Z0-9\s\-\/,\.]/g, ''))}
                   onBlur={() => handleAddressBlur('flatNo')}
@@ -1169,7 +1175,7 @@ export function ProfileScreen({ navigation }: any) {
                 <TextInput
                   style={styles.demoInput}
                   placeholder="e.g. Green Park Colony, Sector 14"
-                  placeholderTextColor="#9ca3af"
+                  placeholderTextColor={colors.textFaint}
                   value={addressForm.street}
                   onChangeText={(t) => handleAddressChange('street', t.replace(/[^a-zA-Z0-9\s\-\/,\.]/g, ''))}
                   onBlur={() => handleAddressBlur('street')}
@@ -1184,7 +1190,7 @@ export function ProfileScreen({ navigation }: any) {
                     <TextInput
                       style={styles.demoInput}
                       placeholder="Type state name"
-                      placeholderTextColor="#9ca3af"
+                      placeholderTextColor={colors.textFaint}
                       value={addressForm.state}
                       onChangeText={(t) => { handleAddressChange('state', t.replace(/[^a-zA-Z\s]/g, '')); setShowStateSuggestions(true); handleAddressChange('city', ''); }}
                       onFocus={() => setShowStateSuggestions(true)}
@@ -1208,7 +1214,7 @@ export function ProfileScreen({ navigation }: any) {
                     <TextInput
                       style={styles.demoInput}
                       placeholder={addressForm.state ? 'Type city name' : 'Select state first'}
-                      placeholderTextColor="#9ca3af"
+                      placeholderTextColor={colors.textFaint}
                       value={addressForm.city}
                       onChangeText={(t) => { handleAddressChange('city', t.replace(/[^a-zA-Z\s]/g, '')); setShowCitySuggestions(true); }}
                       onFocus={() => setShowCitySuggestions(true)}
@@ -1234,7 +1240,7 @@ export function ProfileScreen({ navigation }: any) {
                 <TextInput
                   style={styles.demoInput}
                   placeholder="6-digit pincode"
-                  placeholderTextColor="#9ca3af"
+                  placeholderTextColor={colors.textFaint}
                   value={addressForm.pincode}
                   onChangeText={(t) => handleAddressChange('pincode', t.replace(/[^0-9]/g, ''))}
                   onBlur={() => handleAddressBlur('pincode')}
@@ -1263,7 +1269,7 @@ export function ProfileScreen({ navigation }: any) {
             <View style={styles.addrMgrHeader}>
               <Text style={styles.addrMgrTitle}>Saved addresses</Text>
               <TouchableOpacity style={styles.addrMgrClose} onPress={() => setAddrMgrVisible(false)}>
-                <X size={18} color="#0f172a" />
+                <X size={18} color={colors.text} />
               </TouchableOpacity>
             </View>
 
@@ -1350,45 +1356,49 @@ export function ProfileScreen({ navigation }: any) {
   );
 }
 
-const OptionRow = ({ icon, bg, title, sub, onPress }: any) => (
+const OptionRow = ({ icon, bg, title, sub, onPress }: any) => {
+  const styles = useStyles();
+  const { colors } = useTheme();
+  return (
   <TouchableOpacity style={styles.optionRow} onPress={onPress} activeOpacity={0.7}>
     <View style={[styles.iconBg, { backgroundColor: bg }]}>{icon}</View>
     <View style={styles.optionTextColumn}>
       <Text style={styles.optionTitle}>{title}</Text>
       {sub && <Text style={styles.optionSub}>{sub}</Text>}
     </View>
-    <ChevronLeft size={16} color="#cbd5e1" style={{ transform: [{ rotate: '180deg' }] }} />
+    <ChevronLeft size={16} color={colors.borderStrong} style={{ transform: [{ rotate: '180deg' }] }} />
   </TouchableOpacity>
-);
+  );
+};
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f0fdf6' },
+const useStyles = makeStyles((c) => ({
+  container: { flex: 1, backgroundColor: c.bg },
   backgroundGradient: { paddingTop: 60, paddingBottom: 20, borderBottomLeftRadius: 24, borderBottomRightRadius: 24 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingBottom: 16 },
   backBtn: { padding: 8, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 12 },
   headerTitle: { fontSize: 18, fontWeight: '700', color: 'white' },
   placeholderBox: { width: 40 },
   scrollContent: { paddingHorizontal: 20, paddingBottom: 40, maxWidth: 800, width: '100%', alignSelf: 'center' },
-  
+
   /* Floating Profile Card */
-  profileInfoCard: { alignItems: 'center', backgroundColor: 'white', borderRadius: 24, padding: 24, paddingTop: 32, elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.12, shadowRadius: 24, marginTop: -20, marginBottom: 24, borderWidth: 1, borderColor: '#f1f5f9' },
+  profileInfoCard: { alignItems: 'center', backgroundColor: c.surface, borderRadius: 24, padding: 24, paddingTop: 32, elevation: 8, shadowColor: c.shadow, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.12, shadowRadius: 24, marginTop: -20, marginBottom: 24, borderWidth: 1, borderColor: c.border },
   avatarMain: { width: 72, height: 72, borderRadius: 36, backgroundColor: '#10b981', alignItems: 'center', justifyContent: 'center', marginBottom: 16, borderWidth: 3, borderColor: 'white', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8, elevation: 5 },
   verifiedBadge: { position: 'absolute', bottom: 0, right: 0, width: 20, height: 20, backgroundColor: '#10b981', borderRadius: 10, borderWidth: 2, borderColor: 'white', alignItems: 'center', justifyContent: 'center' },
   verifiedDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: 'white' },
   avatarEditBadge: { position: 'absolute', bottom: -2, right: -2, width: 24, height: 24, backgroundColor: '#15803d', borderRadius: 12, borderWidth: 2, borderColor: 'white', alignItems: 'center', justifyContent: 'center' },
-  userName: { fontSize: 22, fontWeight: '900', color: '#0f172a', marginBottom: 4, maxWidth: '85%', textAlign: 'center' },
-  userPhone: { fontSize: 14, color: '#475569', fontWeight: '700', marginBottom: 2 },
+  userName: { fontSize: 22, fontWeight: '900', color: c.text, marginBottom: 4, maxWidth: '85%', textAlign: 'center' },
+  userPhone: { fontSize: 14, color: c.textMuted, fontWeight: '700', marginBottom: 2 },
   addPhoneLink: { fontSize: 14, color: '#16a34a', fontWeight: '800', marginBottom: 2 },
-  userEmail: { fontSize: 13, color: '#94a3b8', fontWeight: '500', marginBottom: 20 },
-  
-  statsRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f8fafc', paddingHorizontal: 16, paddingVertical: 12, borderRadius: 16, marginBottom: 20, gap: 12, borderWidth: 1, borderColor: '#f1f5f9' },
-  statPill: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  statText: { fontSize: 13, fontWeight: '800', color: '#334155' },
-  statDivider: { width: 1, height: 20, backgroundColor: '#cbd5e1' },
+  userEmail: { fontSize: 13, color: c.textFaint, fontWeight: '500', marginBottom: 20 },
 
-  editBtn: { paddingHorizontal: 24, paddingVertical: 10, backgroundColor: '#f0fdf4', borderRadius: 100, borderWidth: 1, borderColor: '#bbf7d0', width: '100%', alignItems: 'center' },
+  statsRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.surfaceAlt, paddingHorizontal: 16, paddingVertical: 12, borderRadius: 16, marginBottom: 20, gap: 12, borderWidth: 1, borderColor: c.border },
+  statPill: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  statText: { fontSize: 13, fontWeight: '800', color: c.text },
+  statDivider: { width: 1, height: 20, backgroundColor: c.borderStrong },
+
+  editBtn: { paddingHorizontal: 24, paddingVertical: 10, backgroundColor: c.primarySoft, borderRadius: 100, borderWidth: 1, borderColor: '#bbf7d0', width: '100%', alignItems: 'center' },
   editBtnText: { color: '#16a34a', fontWeight: '800', fontSize: 14 },
-  
+
   /* Referral Banner */
   referBanner: { marginBottom: 24, borderRadius: 20, overflow: 'hidden', elevation: 6, shadowColor: '#0d9488', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.25, shadowRadius: 14 },
   referBannerGradient: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 18, paddingVertical: 16 },
@@ -1399,76 +1409,76 @@ const styles = StyleSheet.create({
   referBannerArrow: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },
 
   /* Options Sections */
-  sectionTitle: { fontSize: 15, fontWeight: '800', color: '#1e293b', marginBottom: 12, marginLeft: 6 },
-  optionsBlock: { backgroundColor: 'white', borderRadius: 20, paddingHorizontal: 16, marginBottom: 24, elevation: 4, shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.08, shadowRadius: 16, borderWidth: 1, borderColor: '#f1f5f9' },
+  sectionTitle: { fontSize: 15, fontWeight: '800', color: c.text, marginBottom: 12, marginLeft: 6 },
+  optionsBlock: { backgroundColor: c.surface, borderRadius: 20, paddingHorizontal: 16, marginBottom: 24, elevation: 4, shadowColor: c.shadow, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.08, shadowRadius: 16, borderWidth: 1, borderColor: c.border },
   optionRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 16 },
-  
+
   /* Demographics Modal Styles */
-  demoListRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f8fafc', padding: 16, borderRadius: 16, borderWidth: 1, borderColor: '#f1f5f9' },
+  demoListRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.surfaceAlt, padding: 16, borderRadius: 16, borderWidth: 1, borderColor: c.border },
   demoListIconBg: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginRight: 16 },
-  demoListLabel: { fontSize: 13, color: '#64748b', fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 2 },
-  demoListValue: { fontSize: 16, color: '#0f172a', fontWeight: '800' },
-  
+  demoListLabel: { fontSize: 13, color: c.textMuted, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 2 },
+  demoListValue: { fontSize: 16, color: c.text, fontWeight: '800' },
+
   /* Edit Mode Styles inside Modal */
   editBtnOutline: { marginTop: 8, paddingVertical: 14, borderRadius: 12, borderWidth: 1.5, borderColor: '#16a34a', alignItems: 'center' },
   editBtnOutlineText: { color: '#16a34a', fontSize: 15, fontWeight: '800' },
-  fieldLabel: { fontSize: 13, fontWeight: '800', color: '#475569', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
+  fieldLabel: { fontSize: 13, fontWeight: '800', color: c.textMuted, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
   demoInputContainer: { justifyContent: 'center' },
-  demoInput: { height: 50, borderRadius: 12, backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#e2e8f0', paddingHorizontal: 16, fontSize: 15, color: '#0f172a', fontWeight: '700' },
+  demoInput: { height: 50, borderRadius: 12, backgroundColor: c.inputBg, borderWidth: 1, borderColor: c.border, paddingHorizontal: 16, fontSize: 15, color: c.text, fontWeight: '700' },
   inputError: { borderColor: '#ef4444', borderWidth: 1.5 },
   fieldError: { fontSize: 12, color: '#ef4444', fontWeight: '600', marginTop: 4, marginLeft: 2 },
-  suggestionsBox: { position: 'absolute', top: 78, left: 0, right: 0, maxHeight: 180, backgroundColor: 'white', borderRadius: 12, borderWidth: 1, borderColor: '#e2e8f0', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 12, elevation: 8, zIndex: 100 },
-  suggestionItem: { paddingHorizontal: 14, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#f1f5f9' },
-  suggestionText: { fontSize: 14, fontWeight: '600', color: '#0f172a' },
+  suggestionsBox: { position: 'absolute', top: 78, left: 0, right: 0, maxHeight: 180, backgroundColor: c.surface, borderRadius: 12, borderWidth: 1, borderColor: c.border, shadowColor: c.shadow, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 12, elevation: 8, zIndex: 100 },
+  suggestionItem: { paddingHorizontal: 14, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: c.border },
+  suggestionText: { fontSize: 14, fontWeight: '600', color: c.text },
   pillsContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  pill: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 100, backgroundColor: 'white', borderWidth: 1, borderColor: '#e2e8f0', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 1 },
+  pill: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 100, backgroundColor: c.surface, borderWidth: 1, borderColor: c.border, shadowColor: c.shadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 1 },
   pillActive: { backgroundColor: '#15803d', borderColor: '#15803d', shadowOpacity: 0.3, elevation: 3 },
-  pillText: { fontSize: 13, fontWeight: '700', color: '#64748b' },
+  pillText: { fontSize: 13, fontWeight: '700', color: c.textMuted },
   pillTextActive: { color: 'white', fontWeight: '800' },
 
   iconBg: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   optionTextColumn: { flex: 1, marginLeft: 16 },
-  optionTitle: { fontSize: 15, fontWeight: '800', color: '#0f172a', marginBottom: 2 },
-  optionSub: { fontSize: 12, color: '#64748b', fontWeight: '500' },
-  divider: { height: 1, backgroundColor: '#f1f5f9', marginLeft: 56 },
-  
+  optionTitle: { fontSize: 15, fontWeight: '800', color: c.text, marginBottom: 2 },
+  optionSub: { fontSize: 12, color: c.textMuted, fontWeight: '500' },
+  divider: { height: 1, backgroundColor: c.border, marginLeft: 56 },
+
   /* Logout */
-  logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: 'white', paddingVertical: 16, borderRadius: 20, borderWidth: 1, borderColor: '#fecaca', marginBottom: 12 },
+  logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: c.surface, paddingVertical: 16, borderRadius: 20, borderWidth: 1, borderColor: '#fecaca', marginBottom: 12 },
   logoutText: { color: '#ef4444', fontSize: 15, fontWeight: '800' },
   deleteAccountBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, paddingVertical: 12, marginBottom: 20 },
-  deleteAccountText: { color: '#94a3b8', fontSize: 13.5, fontWeight: '700' },
+  deleteAccountText: { color: c.textFaint, fontSize: 13.5, fontWeight: '700' },
 
   /* Modal Styles (Zomato/Swiggy Style) */
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: Platform.OS === 'web' ? 'center' : 'flex-end', alignItems: 'center', padding: Platform.OS === 'web' ? 16 : 0 },
+  modalOverlay: { flex: 1, backgroundColor: c.overlay, justifyContent: Platform.OS === 'web' ? 'center' : 'flex-end', alignItems: 'center', padding: Platform.OS === 'web' ? 16 : 0 },
   modalBackdropCloseArea: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
-  modalContent: { backgroundColor: 'white', borderTopLeftRadius: 32, borderTopRightRadius: 32, borderBottomLeftRadius: Platform.OS === 'web' ? 32 : 0, borderBottomRightRadius: Platform.OS === 'web' ? 32 : 0, padding: 24, paddingBottom: Platform.OS === 'ios' ? 40 : 24, elevation: 20, shadowColor: '#000', shadowOffset: { width: 0, height: -10 }, shadowOpacity: 0.1, shadowRadius: 20, width: '100%', maxWidth: 480, alignSelf: 'center', maxHeight: '90%' },
+  modalContent: { backgroundColor: c.surface, borderTopLeftRadius: 32, borderTopRightRadius: 32, borderBottomLeftRadius: Platform.OS === 'web' ? 32 : 0, borderBottomRightRadius: Platform.OS === 'web' ? 32 : 0, padding: 24, paddingBottom: Platform.OS === 'ios' ? 40 : 24, elevation: 20, shadowColor: c.shadow, shadowOffset: { width: 0, height: -10 }, shadowOpacity: 0.1, shadowRadius: 20, width: '100%', maxWidth: 480, alignSelf: 'center', maxHeight: '90%' },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
-  modalTitle: { fontSize: 20, fontWeight: '900', color: '#0f172a' },
-  closeBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#f1f5f9', alignItems: 'center', justifyContent: 'center' },
-  
+  modalTitle: { fontSize: 20, fontWeight: '900', color: c.text },
+  closeBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: c.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
+
   /* Form Step */
   formContainer: {},
   inputGroup: { marginBottom: 16 },
-  inputLabel: { fontSize: 13, fontWeight: '700', color: '#475569', marginBottom: 6, marginLeft: 4 },
-  inputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 16, paddingHorizontal: 16, height: 56 },
+  inputLabel: { fontSize: 13, fontWeight: '700', color: c.textMuted, marginBottom: 6, marginLeft: 4 },
+  inputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.inputBg, borderWidth: 1, borderColor: c.border, borderRadius: 16, paddingHorizontal: 16, height: 56 },
   inputIcon: { marginRight: 12 },
-  input: { flex: 1, fontSize: 16, color: '#0f172a', fontWeight: '600', height: '100%' },
-  
+  input: { flex: 1, fontSize: 16, color: c.text, fontWeight: '600', height: '100%' },
+
   primaryActionBtn: { backgroundColor: '#15803d', paddingVertical: 18, borderRadius: 16, alignItems: 'center', marginTop: 10, shadowColor: '#16a34a', shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.3, shadowRadius: 10, elevation: 5 },
   primaryActionBtnDisabled: { backgroundColor: '#94a3b8', shadowOpacity: 0, elevation: 0 },
   primaryActionText: { color: 'white', fontSize: 16, fontWeight: '900' },
-  securityNote: { textAlign: 'center', color: '#94a3b8', fontSize: 11, fontWeight: '500', marginTop: 12 },
+  securityNote: { textAlign: 'center', color: c.textFaint, fontSize: 11, fontWeight: '500', marginTop: 12 },
 
   /* OTP Step */
   otpContainer: { alignItems: 'center', paddingVertical: 20 },
-  otpIconWrapper: { width: 64, height: 64, borderRadius: 20, backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
-  otpHeading: { fontSize: 22, fontWeight: '900', color: '#0f172a', marginBottom: 8, textAlign: 'center' },
-  otpSub: { fontSize: 14, color: '#64748b', textAlign: 'center', marginBottom: 32 },
-  otpMainInput: { backgroundColor: '#f8fafc', borderWidth: 2, borderColor: '#cbd5e1', borderRadius: 16, fontSize: 32, fontWeight: '900', color: '#0f172a', letterSpacing: 16, textAlign: 'center', width: '100%', height: 72 },
+  otpIconWrapper: { width: 64, height: 64, borderRadius: 20, backgroundColor: c.primarySoft, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
+  otpHeading: { fontSize: 22, fontWeight: '900', color: c.text, marginBottom: 8, textAlign: 'center' },
+  otpSub: { fontSize: 14, color: c.textMuted, textAlign: 'center', marginBottom: 32 },
+  otpMainInput: { backgroundColor: c.inputBg, borderWidth: 2, borderColor: c.borderStrong, borderRadius: 16, fontSize: 32, fontWeight: '900', color: c.text, letterSpacing: 16, textAlign: 'center', width: '100%', height: 72 },
   otpInputError: { borderColor: '#ef4444', color: '#ef4444' },
   errorText: { color: '#ef4444', fontSize: 13, fontWeight: '600', marginTop: 8 },
   resendBtn: { padding: 16, marginTop: 16 },
-  resendText: { fontSize: 14, color: '#64748b', fontWeight: '600' },
+  resendText: { fontSize: 14, color: c.textMuted, fontWeight: '600' },
 
   /* Loading */
   loadingContainer: { paddingVertical: 60, alignItems: 'center', justifyContent: 'center' },
@@ -1477,35 +1487,35 @@ const styles = StyleSheet.create({
   /* Success */
   successContainer: { alignItems: 'center', paddingVertical: 40 },
   successTitle: { fontSize: 24, fontWeight: '900', color: '#16a34a', marginTop: 16, marginBottom: 8 },
-  successSub: { fontSize: 14, color: '#64748b', textAlign: 'center', paddingHorizontal: 20, fontWeight: '500' },
+  successSub: { fontSize: 14, color: c.textMuted, textAlign: 'center', paddingHorizontal: 20, fontWeight: '500' },
 
   /* Saved addresses manager */
-  addrMgrBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', alignItems: 'center', justifyContent: 'center', padding: 20 },
-  addrMgrCard: { backgroundColor: 'white', borderRadius: 24, padding: 20, width: '100%', maxWidth: 480 },
+  addrMgrBackdrop: { flex: 1, backgroundColor: c.overlay, alignItems: 'center', justifyContent: 'center', padding: 20 },
+  addrMgrCard: { backgroundColor: c.surface, borderRadius: 24, padding: 20, width: '100%', maxWidth: 480 },
 
   /* Second-level delete confirmation (renders above the manager) */
   deleteConfirmOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(15,23,42,0.55)', alignItems: 'center', justifyContent: 'center', padding: 24 },
-  deleteConfirmCard: { backgroundColor: 'white', borderRadius: 20, padding: 22, width: '100%', maxWidth: 380 },
-  deleteConfirmTitle: { fontSize: 17, fontWeight: '800', color: '#0f172a', marginBottom: 8 },
-  deleteConfirmMsg: { fontSize: 14, color: '#475569', fontWeight: '500', lineHeight: 20, marginBottom: 18 },
+  deleteConfirmCard: { backgroundColor: c.surface, borderRadius: 20, padding: 22, width: '100%', maxWidth: 380 },
+  deleteConfirmTitle: { fontSize: 17, fontWeight: '800', color: c.text, marginBottom: 8 },
+  deleteConfirmMsg: { fontSize: 14, color: c.textMuted, fontWeight: '500', lineHeight: 20, marginBottom: 18 },
   deleteConfirmRow: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10 },
-  deleteConfirmCancel: { backgroundColor: '#f1f5f9', borderRadius: 12, paddingHorizontal: 20, paddingVertical: 11 },
-  deleteConfirmCancelText: { color: '#475569', fontSize: 14, fontWeight: '800' },
+  deleteConfirmCancel: { backgroundColor: c.surfaceAlt, borderRadius: 12, paddingHorizontal: 20, paddingVertical: 11 },
+  deleteConfirmCancelText: { color: c.textMuted, fontSize: 14, fontWeight: '800' },
   deleteConfirmDelete: { backgroundColor: '#dc2626', borderRadius: 12, paddingHorizontal: 20, paddingVertical: 11 },
   deleteConfirmDeleteText: { color: 'white', fontSize: 14, fontWeight: '800' },
   addrMgrHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
-  addrMgrTitle: { fontSize: 19, fontWeight: '900', color: '#0f172a' },
-  addrMgrClose: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#f1f5f9', alignItems: 'center', justifyContent: 'center' },
-  addrMgrEmpty: { fontSize: 13.5, color: '#94a3b8', fontWeight: '500', textAlign: 'center', paddingVertical: 24 },
-  addrMgrRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#f1f5f9' },
+  addrMgrTitle: { fontSize: 19, fontWeight: '900', color: c.text },
+  addrMgrClose: { width: 34, height: 34, borderRadius: 17, backgroundColor: c.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
+  addrMgrEmpty: { fontSize: 13.5, color: c.textFaint, fontWeight: '500', textAlign: 'center', paddingVertical: 24 },
+  addrMgrRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: c.border },
   addrMgrLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 3 },
-  addrMgrLabel: { fontSize: 13.5, fontWeight: '800', color: '#0f172a' },
+  addrMgrLabel: { fontSize: 13.5, fontWeight: '800', color: c.text },
   addrMgrDefTag: { backgroundColor: '#dcfce7', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 100 },
   addrMgrDefTagText: { fontSize: 9.5, fontWeight: '800', color: '#15803d', letterSpacing: 0.4 },
   addrMgrMakeDef: { fontSize: 11.5, fontWeight: '700', color: '#0284c7' },
-  addrMgrText: { fontSize: 12.5, color: '#64748b', fontWeight: '500', lineHeight: 18 },
-  addrMgrReceiver: { fontSize: 11.5, color: '#94a3b8', fontWeight: '600', marginTop: 3 },
+  addrMgrText: { fontSize: 12.5, color: c.textMuted, fontWeight: '500', lineHeight: 18 },
+  addrMgrReceiver: { fontSize: 11.5, color: c.textFaint, fontWeight: '600', marginTop: 3 },
   addrMgrDel: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#fef2f2', alignItems: 'center', justifyContent: 'center', marginTop: 2 },
-  addrMgrAddBtn: { marginTop: 14, borderWidth: 1.5, borderColor: '#bbf7d0', borderStyle: 'dashed', backgroundColor: '#f0fdf4', paddingVertical: 12, borderRadius: 14, alignItems: 'center' },
+  addrMgrAddBtn: { marginTop: 14, borderWidth: 1.5, borderColor: '#bbf7d0', borderStyle: 'dashed', backgroundColor: c.primarySoft, paddingVertical: 12, borderRadius: 14, alignItems: 'center' },
   addrMgrAddText: { color: '#15803d', fontSize: 14, fontWeight: '800' },
-});
+}));
