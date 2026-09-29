@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Modal, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { MapPin, ChevronDown, X, Search } from 'lucide-react-native';
 import { INDIA_STATES, INDIA_STATES_CITIES } from '../../data/indiaStatesCities';
+import { useTheme, makeStyles } from '../../theme';
 
 const OTHER = 'Other';
 
@@ -13,6 +14,8 @@ const titleCase = (s: string) =>
 function Dropdown({ value, placeholder, options, onSelect, disabled }: {
   value: string; placeholder: string; options: string[]; onSelect: (v: string) => void; disabled?: boolean;
 }) {
+  const s = useStyles();
+  const { colors } = useTheme();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const q = query.trim();
@@ -31,7 +34,7 @@ function Dropdown({ value, placeholder, options, onSelect, disabled }: {
         onPress={() => { setQuery(''); setOpen(true); }}
       >
         <Text style={[s.fieldText, !value && s.placeholder]} numberOfLines={1}>{value || placeholder}</Text>
-        <ChevronDown size={18} color="#94a3b8" />
+        <ChevronDown size={18} color={colors.textFaint} />
       </TouchableOpacity>
 
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
@@ -40,15 +43,15 @@ function Dropdown({ value, placeholder, options, onSelect, disabled }: {
             <View style={s.sheetHead}>
               <Text style={s.sheetTitle}>{placeholder}</Text>
               <TouchableOpacity onPress={() => setOpen(false)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                <X size={22} color="#64748b" />
+                <X size={22} color={colors.textMuted} />
               </TouchableOpacity>
             </View>
             <View style={s.searchRow}>
-              <Search size={16} color="#94a3b8" />
+              <Search size={16} color={colors.textFaint} />
               <TextInput
                 style={s.searchInput}
                 placeholder="Search..."
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor={colors.textFaint}
                 value={query}
                 onChangeText={setQuery}
                 autoCorrect={false}
@@ -83,6 +86,8 @@ function Dropdown({ value, placeholder, options, onSelect, disabled }: {
 export function StateCityFields({ state, city, setState, setCity }: {
   state: string; city: string; setState: (v: string) => void; setCity: (v: string) => void;
 }) {
+  const s = useStyles();
+  const { colors } = useTheme();
   const [stateOther, setStateOther] = useState(() => !!state && !INDIA_STATES.includes(state));
   const [cityOther, setCityOther] = useState(false);
 
@@ -111,18 +116,18 @@ export function StateCityFields({ state, city, setState, setCity }: {
   return (
     <>
       <View style={s.section}>
-        <View style={s.labelRow}><MapPin size={18} color="#0f172a" /><Text style={s.label}>State</Text></View>
+        <View style={s.labelRow}><MapPin size={18} color={colors.text} /><Text style={s.label}>State</Text></View>
         {stateOther ? (
-          <TextInput style={s.input} placeholder="Enter your state" placeholderTextColor="#94a3b8" value={state} onChangeText={setState} autoCapitalize="words" />
+          <TextInput style={s.input} placeholder="Enter your state" placeholderTextColor={colors.textFaint} value={state} onChangeText={setState} autoCapitalize="words" />
         ) : (
           <Dropdown value={state} placeholder="Select state" options={stateOptions} onSelect={onStateSelect} />
         )}
       </View>
 
       <View style={s.section}>
-        <View style={s.labelRow}><MapPin size={18} color="#0f172a" /><Text style={s.label}>City</Text></View>
+        <View style={s.labelRow}><MapPin size={18} color={colors.text} /><Text style={s.label}>City</Text></View>
         {cityOther ? (
-          <TextInput style={s.input} placeholder="Enter your city" placeholderTextColor="#94a3b8" value={city} onChangeText={setCity} autoCapitalize="words" />
+          <TextInput style={s.input} placeholder="Enter your city" placeholderTextColor={colors.textFaint} value={city} onChangeText={setCity} autoCapitalize="words" />
         ) : (
           <Dropdown
             value={city}
@@ -137,26 +142,26 @@ export function StateCityFields({ state, city, setState, setCity }: {
   );
 }
 
-const s = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   section: { marginBottom: 4 },
   labelRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
-  label: { fontSize: 15, fontWeight: '700', color: '#0f172a' },
+  label: { fontSize: 15, fontWeight: '700', color: c.text },
 
-  field: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 14, paddingHorizontal: 16, height: 52 },
+  field: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: c.inputBg, borderWidth: 1, borderColor: c.border, borderRadius: 14, paddingHorizontal: 16, height: 52 },
   fieldDisabled: { opacity: 0.5 },
-  fieldText: { flex: 1, fontSize: 15, color: '#0f172a', fontWeight: '600' },
-  placeholder: { color: '#94a3b8', fontWeight: '500' },
+  fieldText: { flex: 1, fontSize: 15, color: c.text, fontWeight: '600' },
+  placeholder: { color: c.textFaint, fontWeight: '500' },
 
-  input: { backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 14, paddingHorizontal: 16, height: 52, fontSize: 15, color: '#0f172a', fontWeight: '600' },
+  input: { backgroundColor: c.inputBg, borderWidth: 1, borderColor: c.border, borderRadius: 14, paddingHorizontal: 16, height: 52, fontSize: 15, color: c.text, fontWeight: '600' },
 
-  overlay: { flex: 1, backgroundColor: 'rgba(15,23,42,0.55)', justifyContent: 'flex-end' },
-  sheet: { backgroundColor: 'white', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 18, paddingBottom: 28, maxWidth: 560, width: '100%', alignSelf: 'center' },
+  overlay: { flex: 1, backgroundColor: c.overlay, justifyContent: 'flex-end' },
+  sheet: { backgroundColor: c.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 18, paddingBottom: 28, maxWidth: 560, width: '100%', alignSelf: 'center' },
   sheetHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  sheetTitle: { fontSize: 17, fontWeight: '900', color: '#0f172a' },
-  searchRow: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#f1f5f9', borderRadius: 12, paddingHorizontal: 12, height: 44, marginBottom: 8 },
-  searchInput: { flex: 1, fontSize: 15, color: '#0f172a' },
-  option: { paddingVertical: 13, paddingHorizontal: 6, borderBottomWidth: 1, borderBottomColor: '#f1f5f9' },
-  optionText: { fontSize: 15, color: '#334155', fontWeight: '600' },
+  sheetTitle: { fontSize: 17, fontWeight: '900', color: c.text },
+  searchRow: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: c.surfaceAlt, borderRadius: 12, paddingHorizontal: 12, height: 44, marginBottom: 8 },
+  searchInput: { flex: 1, fontSize: 15, color: c.text },
+  option: { paddingVertical: 13, paddingHorizontal: 6, borderBottomWidth: 1, borderBottomColor: c.border },
+  optionText: { fontSize: 15, color: c.text, fontWeight: '600' },
   optionActive: { color: '#15803d', fontWeight: '800' },
-  empty: { textAlign: 'center', color: '#94a3b8', paddingVertical: 20, fontWeight: '600' },
-});
+  empty: { textAlign: 'center', color: c.textFaint, paddingVertical: 20, fontWeight: '600' },
+}));

@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import { Modal, View, Text, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { Phone, ShieldCheck, X } from 'lucide-react-native';
 import { authService } from '../../services/auth';
 import { profileService } from '../../services/profile';
 import { showAlert } from '../../utils/alert';
+import { useTheme, makeStyles } from '../../theme';
 
 // Reuses the existing send-otp -> verify-otp -> change-phone flow so OAuth users
 // (Google/Facebook) who never verified a phone can do it inline before booking.
@@ -20,6 +21,8 @@ export function PhoneVerificationModal({
   onVerified: () => void;
   initialPhone?: string;
 }) {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [phone, setPhone] = useState(initialPhone);
   const [otp, setOtp] = useState('');
@@ -90,7 +93,7 @@ export function PhoneVerificationModal({
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.center}>
           <View style={styles.card}>
             <TouchableOpacity style={styles.closeBtn} onPress={close} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <X size={20} color="#94a3b8" />
+              <X size={20} color={colors.textFaint} />
             </TouchableOpacity>
 
             <View style={styles.iconWrap}>
@@ -106,11 +109,11 @@ export function PhoneVerificationModal({
             {step === 'phone' ? (
               <>
                 <View style={styles.inputRow}>
-                  <Phone size={18} color="#94a3b8" style={{ marginRight: 10 }} />
+                  <Phone size={18} color={colors.textFaint} style={{ marginRight: 10 }} />
                   <TextInput
                     style={styles.input}
                     placeholder="10-digit mobile number"
-                    placeholderTextColor="#94a3b8"
+                    placeholderTextColor={colors.textFaint}
                     keyboardType="number-pad"
                     value={phone}
                     onChangeText={(v) => setPhone(v.replace(/[^0-9]/g, ''))}
@@ -128,7 +131,7 @@ export function PhoneVerificationModal({
                   <TextInput
                     style={[styles.input, styles.otpInput]}
                     placeholder="------"
-                    placeholderTextColor="#cbd5e1"
+                    placeholderTextColor={colors.borderStrong}
                     keyboardType="number-pad"
                     value={otp}
                     onChangeText={(v) => setOtp(v.replace(/[^0-9]/g, ''))}
@@ -151,20 +154,20 @@ export function PhoneVerificationModal({
   );
 }
 
-const styles = StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)' },
+const useStyles = makeStyles((c) => ({
+  overlay: { flex: 1, backgroundColor: c.overlay },
   center: { flex: 1, justifyContent: 'center', paddingHorizontal: 24 },
-  card: { backgroundColor: 'white', borderRadius: 24, padding: 24, width: '100%', maxWidth: 420, alignSelf: 'center' },
+  card: { backgroundColor: c.surface, borderRadius: 24, padding: 24, width: '100%', maxWidth: 420, alignSelf: 'center' },
   closeBtn: { position: 'absolute', top: 16, right: 16, zIndex: 1 },
-  iconWrap: { width: 60, height: 60, borderRadius: 18, backgroundColor: '#dcfce7', alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
-  title: { fontSize: 19, fontWeight: '800', color: '#0f172a', marginBottom: 8 },
-  sub: { fontSize: 14, color: '#64748b', lineHeight: 20, marginBottom: 20 },
-  inputRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f8fafc', borderRadius: 14, borderWidth: 1, borderColor: '#e2e8f0', paddingHorizontal: 14, height: 52, marginBottom: 16 },
-  input: { flex: 1, fontSize: 15, color: '#0f172a', fontWeight: '600' },
+  iconWrap: { width: 60, height: 60, borderRadius: 18, backgroundColor: c.primarySoft, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
+  title: { fontSize: 19, fontWeight: '800', color: c.text, marginBottom: 8 },
+  sub: { fontSize: 14, color: c.textMuted, lineHeight: 20, marginBottom: 20 },
+  inputRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.inputBg, borderRadius: 14, borderWidth: 1, borderColor: c.border, paddingHorizontal: 14, height: 52, marginBottom: 16 },
+  input: { flex: 1, fontSize: 15, color: c.text, fontWeight: '600' },
   otpInput: { textAlign: 'center', letterSpacing: 8, fontSize: 20 },
   primaryBtn: { height: 52, borderRadius: 14, backgroundColor: '#16a34a', alignItems: 'center', justifyContent: 'center' },
   btnDisabled: { opacity: 0.6 },
   primaryBtnText: { color: 'white', fontSize: 15, fontWeight: '800' },
   linkBtn: { alignItems: 'center', marginTop: 14 },
   linkText: { color: '#16a34a', fontSize: 14, fontWeight: '700' },
-});
+}));

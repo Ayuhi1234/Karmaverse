@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Flame, Check } from 'lucide-react-native';
 import { StatModal } from './StatModal';
+import { makeStyles } from '../../theme';
 
 const MILESTONES = [3, 7, 14, 30, 60, 100];
 const WD = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -11,6 +12,7 @@ const WD = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 // week's activity (last N consecutive days lit, derived from the streak count),
 // progress to the next milestone and how to keep the streak alive.
 export function StreakModal({ visible, onClose, streak }: { visible: boolean; onClose: () => void; streak: number; }) {
+  const s = useStyles();
   const next = MILESTONES.find(m => m > streak) ?? null;
   const prev = [...MILESTONES].reverse().find(m => m <= streak) ?? 0;
   const progress = next ? Math.max(0, Math.min(1, (streak - prev) / (next - prev))) : 1;
@@ -77,7 +79,7 @@ export function StreakModal({ visible, onClose, streak }: { visible: boolean; on
   );
 }
 
-const s = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   hero: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 18, borderRadius: 18, marginBottom: 18, overflow: 'hidden' },
   heroGlow: { position: 'absolute', top: -30, right: -20, width: 120, height: 120, borderRadius: 60, backgroundColor: 'rgba(255,255,255,0.18)' },
   flameCircle: { width: 52, height: 52, borderRadius: 26, backgroundColor: 'rgba(255,255,255,0.25)', alignItems: 'center', justifyContent: 'center' },
@@ -87,20 +89,20 @@ const s = StyleSheet.create({
   weekCol: { alignItems: 'center', gap: 6 },
   dot: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
   dotActive: { backgroundColor: '#fb923c' },
-  dotIdle: { backgroundColor: '#fff7ed', borderWidth: 1, borderColor: '#fed7aa' },
+  dotIdle: { backgroundColor: c.surfaceAlt, borderWidth: 1, borderColor: '#fed7aa' },
   dotToday: { borderWidth: 2, borderColor: '#ea580c' },
-  weekLabel: { fontSize: 11, fontWeight: '700', color: '#94a3b8' },
+  weekLabel: { fontSize: 11, fontWeight: '700', color: c.textFaint },
   progressWrap: { marginBottom: 16 },
   progressHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
   progressText: { fontSize: 12.5, fontWeight: '700', color: '#ea580c', flex: 1 },
-  progressGoal: { fontSize: 12.5, fontWeight: '800', color: '#94a3b8' },
-  track: { height: 8, borderRadius: 4, backgroundColor: '#fff2e6', overflow: 'hidden' },
+  progressGoal: { fontSize: 12.5, fontWeight: '800', color: c.textFaint },
+  track: { height: 8, borderRadius: 4, backgroundColor: c.surfaceAlt, overflow: 'hidden' },
   fill: { height: 8, borderRadius: 4 },
   maxed: { fontSize: 13, fontWeight: '700', color: '#16a34a', marginBottom: 16 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 14 },
-  chip: { flexDirection: 'row', alignItems: 'center', gap: 3, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, backgroundColor: '#f1f5f9' },
+  chip: { flexDirection: 'row', alignItems: 'center', gap: 3, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, backgroundColor: c.surfaceAlt },
   chipDone: { backgroundColor: '#fff7ed', borderWidth: 1, borderColor: '#fdba74' },
-  chipText: { fontSize: 12, fontWeight: '800', color: '#94a3b8' },
+  chipText: { fontSize: 12, fontWeight: '800', color: c.textFaint },
   chipTextDone: { color: '#ea580c' },
-  tip: { fontSize: 12, fontWeight: '500', color: '#64748b', lineHeight: 18 },
-});
+  tip: { fontSize: 12, fontWeight: '500', color: c.textMuted, lineHeight: 18 },
+}));
