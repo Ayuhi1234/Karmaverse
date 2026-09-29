@@ -70,6 +70,7 @@ export function ProfileScreen({ navigation }: any) {
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [avatarId, setAvatarId] = useState<string | null>(null);
   const [avatarPickerVisible, setAvatarPickerVisible] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   // Fetch Profile on Mount
   // Refetch on every focus (not just mount) so a phone verified elsewhere — e.g.
@@ -140,6 +141,33 @@ export function ProfileScreen({ navigation }: any) {
     setAvatarId(id);
     setStoredAvatarId(id);
     profileService.updateAvatar(id).catch(() => {});
+  };
+
+  // Permanently delete the account (Apple + DPDP requirement). Two-step confirm so
+  // it can never be triggered by an accidental tap, then sign out to Login.
+  const confirmDeleteAccount = () => {
+    showAlert(
+      'Delete account?',
+      'This permanently deletes your account, KarmaCoins XP balance, streak, and pickup history. This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: runDeleteAccount },
+      ]
+    );
+  };
+
+  const runDeleteAccount = async () => {
+    if (deletingAccount) return;
+    setDeletingAccount(true);
+    try {
+      await profileService.deleteAccount();
+      await authService.logout();
+      navigation.replace('Login');
+      showAlert('Account deleted', 'Your account and data have been removed.');
+    } catch (error: any) {
+      setDeletingAccount(false);
+      showAlert('Could not delete account', error?.response?.data?.message || 'Please try again, or contact support.');
+    }
   };
 
   // Modal State
@@ -786,6 +814,23 @@ export function ProfileScreen({ navigation }: any) {
                 <LogOut size={18} color="#ef4444" />
                 <Text style={styles.logoutText}>Log out</Text>
               </TouchableOpacity>
+
+              {/* Delete account — permanent, required by Apple / DPDP */}
+              <TouchableOpacity
+                style={styles.deleteAccountBtn}
+                onPress={confirmDeleteAccount}
+                disabled={deletingAccount}
+                activeOpacity={0.7}
+              >
+                {deletingAccount ? (
+                  <ActivityIndicator size="small" color="#94a3b8" />
+                ) : (
+                  <>
+                    <Trash2 size={16} color="#94a3b8" />
+                    <Text style={styles.deleteAccountText}>Delete account</Text>
+                  </>
+                )}
+              </TouchableOpacity>
             </>
           )}
         </View>
@@ -1388,8 +1433,10 @@ const styles = StyleSheet.create({
   divider: { height: 1, backgroundColor: '#f1f5f9', marginLeft: 56 },
   
   /* Logout */
-  logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: 'white', paddingVertical: 16, borderRadius: 20, borderWidth: 1, borderColor: '#fecaca', marginBottom: 20 },
+  logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: 'white', paddingVertical: 16, borderRadius: 20, borderWidth: 1, borderColor: '#fecaca', marginBottom: 12 },
   logoutText: { color: '#ef4444', fontSize: 15, fontWeight: '800' },
+  deleteAccountBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, paddingVertical: 12, marginBottom: 20 },
+  deleteAccountText: { color: '#94a3b8', fontSize: 13.5, fontWeight: '700' },
 
   /* Modal Styles (Zomato/Swiggy Style) */
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: Platform.OS === 'web' ? 'center' : 'flex-end', alignItems: 'center', padding: Platform.OS === 'web' ? 16 : 0 },
