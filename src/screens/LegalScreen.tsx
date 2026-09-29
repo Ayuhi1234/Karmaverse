@@ -1,11 +1,13 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ChevronLeft, ShieldCheck, FileText, Trash2 } from 'lucide-react-native';
 import { TERMS, TERMS_OF_USE, PRIVACY, DATA_DELETION, LegalDoc, LegalSection } from '../data/legalContent';
+import { makeStyles } from '../theme';
 
 function SectionBlock({ section, index }: { section: LegalSection; index: number }) {
+  const styles = useStyles();
   return (
     <View style={styles.section}>
       <View style={styles.sectionHeadRow}>
@@ -28,6 +30,7 @@ function SectionBlock({ section, index }: { section: LegalSection; index: number
 }
 
 export function LegalScreen({ route, navigation }: any) {
+  const styles = useStyles();
   const rawType = route?.params?.type;
   const type: 'terms' | 'terms-of-use' | 'privacy' | 'data-deletion' =
     rawType === 'privacy' || rawType === 'data-deletion' || rawType === 'terms-of-use' ? rawType : 'terms';
@@ -81,8 +84,8 @@ export function LegalScreen({ route, navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#f8fafc' },
+const useStyles = makeStyles((c) => ({
+  root: { flex: 1, backgroundColor: c.bg },
 
   header: { borderBottomLeftRadius: 24, borderBottomRightRadius: 24 },
   headerInner: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 22, maxWidth: 800, width: '100%', alignSelf: 'center' },
@@ -96,20 +99,20 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   scrollContent: { paddingHorizontal: 20, paddingTop: 22, paddingBottom: 60, maxWidth: 800, width: '100%', alignSelf: 'center' },
 
-  intro: { fontSize: 15, color: '#475569', fontWeight: '500', lineHeight: 24, marginBottom: 28 },
+  intro: { fontSize: 15, color: c.textMuted, fontWeight: '500', lineHeight: 24, marginBottom: 28 },
 
   section: { marginBottom: 26 },
   sectionHeadRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
-  sectionNum: { width: 26, height: 26, borderRadius: 8, backgroundColor: '#dcfce7', alignItems: 'center', justifyContent: 'center' },
-  sectionNumText: { fontSize: 13, fontWeight: '900', color: '#15803d' },
-  sectionHeading: { flex: 1, fontSize: 17, fontWeight: '800', color: '#0f172a' },
+  sectionNum: { width: 26, height: 26, borderRadius: 8, backgroundColor: c.primarySoft, alignItems: 'center', justifyContent: 'center' },
+  sectionNumText: { fontSize: 13, fontWeight: '900', color: c.primary },
+  sectionHeading: { flex: 1, fontSize: 17, fontWeight: '800', color: c.text },
 
-  paragraph: { fontSize: 14.5, color: '#475569', fontWeight: '500', lineHeight: 23, marginBottom: 10 },
+  paragraph: { fontSize: 14.5, color: c.textMuted, fontWeight: '500', lineHeight: 23, marginBottom: 10 },
 
   bulletRow: { flexDirection: 'row', gap: 10, marginBottom: 9, paddingLeft: 2 },
   bulletDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#16a34a', marginTop: 8 },
-  bulletText: { flex: 1, fontSize: 14.5, color: '#475569', fontWeight: '500', lineHeight: 23 },
+  bulletText: { flex: 1, fontSize: 14.5, color: c.textMuted, fontWeight: '500', lineHeight: 23 },
 
-  closingBox: { marginTop: 8, padding: 16, backgroundColor: '#f0fdf4', borderRadius: 16, borderWidth: 1, borderColor: '#bbf7d0' },
-  closingText: { fontSize: 13, color: '#166534', fontWeight: '600', lineHeight: 21, textAlign: 'center' },
-});
+  closingBox: { marginTop: 8, padding: 16, backgroundColor: c.primarySoft, borderRadius: 16, borderWidth: 1, borderColor: '#bbf7d0' },
+  closingText: { fontSize: 13, color: c.primary, fontWeight: '600', lineHeight: 21, textAlign: 'center' },
+}));

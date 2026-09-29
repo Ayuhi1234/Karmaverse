@@ -1,11 +1,13 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, StatusBar, ScrollView, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StatusBar, ScrollView, Platform } from 'react-native';
 import { WebFooter } from '../components/shared/WebFooter';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ShoppingBag, Gift, ArrowRight } from 'lucide-react-native';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
+import { makeStyles } from '../theme';
 
 export function StoreScreen({ navigation }: any) {
+  const styles = useStyles();
   return (
     <View style={styles.rootContainer}>
       <StatusBar barStyle="light-content" />
@@ -51,9 +53,9 @@ export function StoreScreen({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  rootContainer: { flex: 1, backgroundColor: '#f0fdf6' },
-  container: { flex: 1, backgroundColor: '#f0fdf6' },
+const useStyles = makeStyles((c) => ({
+  rootContainer: { flex: 1, backgroundColor: c.bg },
+  container: { flex: 1, backgroundColor: c.bg },
   header: {
     paddingTop: 60,
     paddingHorizontal: 20,
@@ -68,10 +70,10 @@ const styles = StyleSheet.create({
   
   content: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, paddingBottom: 60, maxWidth: 600, width: '100%', alignSelf: 'center' },
   coinWrap: { marginBottom: 32, alignItems: 'center', justifyContent: 'center' },
-  giftBadge: { position: 'absolute', top: -6, right: -14, backgroundColor: 'white', padding: 8, borderRadius: 20, elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.12, shadowRadius: 6 },
-  comingSoonText: { fontSize: 32, fontWeight: '900', color: '#0f172a', marginBottom: 16 },
-  descText: { fontSize: 15, color: '#64748b', textAlign: 'center', fontWeight: '500', lineHeight: 24, marginBottom: 40 },
-  
+  giftBadge: { position: 'absolute', top: -6, right: -14, backgroundColor: c.surface, padding: 8, borderRadius: 20, elevation: 5, shadowColor: c.shadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.12, shadowRadius: 6 },
+  comingSoonText: { fontSize: 32, fontWeight: '900', color: c.text, marginBottom: 16 },
+  descText: { fontSize: 15, color: c.textMuted, textAlign: 'center', fontWeight: '500', lineHeight: 24, marginBottom: 40 },
+
   actionBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#15803d', paddingHorizontal: 24, paddingVertical: 16, borderRadius: 20, gap: 12, shadowColor: '#16a34a', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 6 },
   actionBtnText: { color: 'white', fontWeight: '900', fontSize: 15 },
-});
+}));

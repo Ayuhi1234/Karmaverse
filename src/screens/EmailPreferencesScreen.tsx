@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, ActivityIndicator, Switch, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StatusBar, ActivityIndicator, Switch, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SlidersHorizontal, Check, AlertCircle } from 'lucide-react-native';
 import { getPreferences, savePreferences, EmailPrefs, DEFAULT_PREFS, PREF_META } from '../services/emailPrefs';
+import { useTheme, makeStyles } from '../theme';
 
 const SUPPORT = 'info@0waste.co.in';
 
@@ -14,6 +15,8 @@ function goHome(navigation: any) {
 }
 
 export function EmailPreferencesScreen({ route, navigation }: any) {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const token: string | undefined = route?.params?.token;
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [saving, setSaving] = useState(false);
@@ -98,9 +101,9 @@ export function EmailPreferencesScreen({ route, navigation }: any) {
                 <Switch
                   value={prefs[m.key]}
                   onValueChange={(v) => setOne(m.key, v)}
-                  trackColor={{ false: '#cbd5e1', true: '#16a34a' }}
+                  trackColor={{ false: colors.borderStrong, true: '#16a34a' }}
                   thumbColor="#ffffff"
-                  ios_backgroundColor="#cbd5e1"
+                  ios_backgroundColor={colors.borderStrong}
                 />
               </View>
             ))}
@@ -113,9 +116,9 @@ export function EmailPreferencesScreen({ route, navigation }: any) {
               <Switch
                 value={allOff}
                 onValueChange={toggleAllOff}
-                trackColor={{ false: '#cbd5e1', true: '#dc2626' }}
+                trackColor={{ false: colors.borderStrong, true: '#dc2626' }}
                 thumbColor="#ffffff"
-                ios_backgroundColor="#cbd5e1"
+                ios_backgroundColor={colors.borderStrong}
               />
             </View>
 
@@ -125,7 +128,7 @@ export function EmailPreferencesScreen({ route, navigation }: any) {
 
             {saved && (
               <View style={styles.savedRow}>
-                <Check size={16} color="#15803d" />
+                <Check size={16} color={colors.primary} />
                 <Text style={styles.savedText}>Preferences saved</Text>
               </View>
             )}
@@ -140,8 +143,8 @@ export function EmailPreferencesScreen({ route, navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#f8fafc' },
+const useStyles = makeStyles((c) => ({
+  root: { flex: 1, backgroundColor: c.bg },
   header: { borderBottomLeftRadius: 24, borderBottomRightRadius: 24 },
   headerInner: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 24, maxWidth: 620, width: '100%', alignSelf: 'center' },
   headerIconBox: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center', marginBottom: 14 },
@@ -152,25 +155,25 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   scrollContent: { paddingHorizontal: 20, paddingTop: 22, paddingBottom: 60, maxWidth: 620, width: '100%', alignSelf: 'center' },
 
-  lead: { fontSize: 14.5, color: '#475569', lineHeight: 22, marginBottom: 12 },
+  lead: { fontSize: 14.5, color: c.textMuted, lineHeight: 22, marginBottom: 12 },
 
-  pref: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 15, borderTopWidth: 1, borderTopColor: '#e2e8f0' },
+  pref: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 15, borderTopWidth: 1, borderTopColor: c.border },
   prefText: { flex: 1, minWidth: 0 },
-  prefTitle: { fontSize: 14.5, fontWeight: '700', color: '#0f172a' },
-  prefSub: { fontSize: 12.5, color: '#64748b', marginTop: 2, lineHeight: 18 },
+  prefTitle: { fontSize: 14.5, fontWeight: '700', color: c.text },
+  prefSub: { fontSize: 12.5, color: c.textMuted, marginTop: 2, lineHeight: 18 },
 
-  allRow: { flexDirection: 'row', alignItems: 'center', gap: 14, marginTop: 14, paddingTop: 16, borderTopWidth: 1, borderTopColor: '#cbd5e1', borderStyle: 'dashed' },
+  allRow: { flexDirection: 'row', alignItems: 'center', gap: 14, marginTop: 14, paddingTop: 16, borderTopWidth: 1, borderTopColor: c.borderStrong, borderStyle: 'dashed' },
 
   primaryBtn: { marginTop: 22, backgroundColor: '#16a34a', borderRadius: 12, paddingVertical: 15, alignItems: 'center', alignSelf: 'stretch' },
   primaryBtnText: { color: 'white', fontSize: 15, fontWeight: '800' },
   savedRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 12 },
-  savedText: { color: '#15803d', fontSize: 13.5, fontWeight: '700' },
-  ghostBtn: { marginTop: 14, borderWidth: 1, borderColor: '#cbd5e1', borderRadius: 12, paddingVertical: 13, alignItems: 'center', alignSelf: 'stretch' },
-  ghostBtnText: { color: '#15803d', fontSize: 14.5, fontWeight: '800' },
+  savedText: { color: c.primary, fontSize: 13.5, fontWeight: '700' },
+  ghostBtn: { marginTop: 14, borderWidth: 1, borderColor: c.borderStrong, borderRadius: 12, paddingVertical: 13, alignItems: 'center', alignSelf: 'stretch' },
+  ghostBtnText: { color: c.primary, fontSize: 14.5, fontWeight: '800' },
 
   center: { alignItems: 'center', paddingTop: 40 },
-  workText: { marginTop: 16, fontSize: 14.5, color: '#64748b', fontWeight: '600' },
-  tickErr: { width: 64, height: 64, borderRadius: 32, backgroundColor: '#fdecec', alignItems: 'center', justifyContent: 'center', marginBottom: 18 },
-  doneTitle: { fontSize: 22, fontWeight: '900', color: '#0f172a', marginBottom: 8, textAlign: 'center' },
-  doneText: { fontSize: 14.5, color: '#64748b', textAlign: 'center', lineHeight: 22, maxWidth: 360 },
-});
+  workText: { marginTop: 16, fontSize: 14.5, color: c.textMuted, fontWeight: '600' },
+  tickErr: { width: 64, height: 64, borderRadius: 32, backgroundColor: c.dangerSoft, alignItems: 'center', justifyContent: 'center', marginBottom: 18 },
+  doneTitle: { fontSize: 22, fontWeight: '900', color: c.text, marginBottom: 8, textAlign: 'center' },
+  doneText: { fontSize: 14.5, color: c.textMuted, textAlign: 'center', lineHeight: 22, maxWidth: 360 },
+}));

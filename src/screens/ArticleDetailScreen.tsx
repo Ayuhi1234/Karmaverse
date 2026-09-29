@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Share, Image, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StatusBar, Share, Image, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, Share2, Heart, Clock, Lightbulb } from 'lucide-react-native';
 import { getArticleById, ARTICLES } from '../data/articles';
+import { useTheme, makeStyles } from '../theme';
 
 export function ArticleDetailScreen({ route, navigation }: any) {
+  const styles = useStyles();
+  const { colors, isDark } = useTheme();
   const article = getArticleById(route.params?.id);
   const [liked, setLiked] = useState(false);
 
@@ -27,16 +30,16 @@ export function ArticleDetailScreen({ route, navigation }: any) {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#f8fafc" />
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.bg} />
 
       <SafeAreaView style={styles.safeArea}>
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.backBtn} onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('App')}>
-            <ChevronLeft size={24} color="#0f172a" />
+            <ChevronLeft size={24} color={colors.text} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.actionBtn} onPress={handleShare}>
-            <Share2 size={20} color="#0f172a" />
+            <Share2 size={20} color={colors.text} />
           </TouchableOpacity>
         </View>
 
@@ -45,7 +48,7 @@ export function ArticleDetailScreen({ route, navigation }: any) {
           <Text style={[styles.categoryTag, { color: article.categoryColor }]}>{article.category}</Text>
           <Text style={styles.title}>{article.title}</Text>
           <View style={styles.metaRow}>
-            <Clock size={13} color="#64748b" />
+            <Clock size={13} color={colors.textMuted} />
             <Text style={styles.meta}>{article.source} • {article.readTime} • {article.date}</Text>
           </View>
 
@@ -86,7 +89,7 @@ export function ArticleDetailScreen({ route, navigation }: any) {
                 <Text style={[styles.likeText, liked && styles.likeTextOn]}>{liked ? 'Liked' : 'Like'}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.shareBtn} onPress={handleShare} activeOpacity={0.8}>
-                <Share2 size={18} color="#0f172a" />
+                <Share2 size={18} color={colors.text} />
                 <Text style={styles.shareText}>Share</Text>
               </TouchableOpacity>
             </View>
@@ -111,42 +114,42 @@ export function ArticleDetailScreen({ route, navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8fafc' },
+const useStyles = makeStyles((c) => ({
+  container: { flex: 1, backgroundColor: c.bg },
   safeArea: { flex: 1 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 20, paddingBottom: 16, maxWidth: 800, width: '100%', alignSelf: 'center' },
-  backBtn: { padding: 8, backgroundColor: 'white', borderRadius: 12, elevation: 1 },
-  actionBtn: { padding: 8, backgroundColor: 'white', borderRadius: 12, elevation: 1 },
+  backBtn: { padding: 8, backgroundColor: c.surface, borderRadius: 12, elevation: 1 },
+  actionBtn: { padding: 8, backgroundColor: c.surface, borderRadius: 12, elevation: 1 },
 
   scrollContent: { paddingHorizontal: 20, paddingBottom: 60, paddingTop: 10, maxWidth: 800, width: '100%', alignSelf: 'center' },
   categoryTag: { fontSize: 12, fontWeight: '800', letterSpacing: 1, marginBottom: 12 },
-  title: { fontSize: 27, fontWeight: '800', color: '#0f172a', lineHeight: 36, marginBottom: 14 },
+  title: { fontSize: 27, fontWeight: '800', color: c.text, lineHeight: 36, marginBottom: 14 },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 22 },
-  meta: { fontSize: 13, color: '#64748b', fontWeight: '600' },
+  meta: { fontSize: 13, color: c.textMuted, fontWeight: '600' },
 
-  heroImg: { width: '100%', height: 230, borderRadius: 18, marginBottom: 26, backgroundColor: '#e2e8f0' },
+  heroImg: { width: '100%', height: 230, borderRadius: 18, marginBottom: 26, backgroundColor: c.surfaceAlt },
 
-  intro: { fontSize: 17.5, color: '#1e293b', lineHeight: 29, fontWeight: '600', marginBottom: 26 },
-  paragraph: { fontSize: 16, color: '#334155', lineHeight: 28, marginBottom: 20 },
-  subHeading: { fontSize: 20, fontWeight: '800', color: '#0f172a', marginTop: 10, marginBottom: 14 },
+  intro: { fontSize: 17.5, color: c.text, lineHeight: 29, fontWeight: '600', marginBottom: 26 },
+  paragraph: { fontSize: 16, color: c.textMuted, lineHeight: 28, marginBottom: 20 },
+  subHeading: { fontSize: 20, fontWeight: '800', color: c.text, marginTop: 10, marginBottom: 14 },
 
-  factBox: { flexDirection: 'row', gap: 12, backgroundColor: '#f0fdf4', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#bbf7d0', marginBottom: 24, alignItems: 'flex-start' },
-  factIconWrap: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#dcfce7', alignItems: 'center', justifyContent: 'center' },
-  factText: { flex: 1, fontSize: 14.5, color: '#166534', lineHeight: 23, fontWeight: '600' },
+  factBox: { flexDirection: 'row', gap: 12, backgroundColor: c.primarySoft, borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#bbf7d0', marginBottom: 24, alignItems: 'flex-start' },
+  factIconWrap: { width: 32, height: 32, borderRadius: 16, backgroundColor: c.surface, alignItems: 'center', justifyContent: 'center' },
+  factText: { flex: 1, fontSize: 14.5, color: c.primary, lineHeight: 23, fontWeight: '600' },
 
-  engagementArea: { marginTop: 28, paddingTop: 24, borderTopWidth: 1, borderTopColor: '#e2e8f0', alignItems: 'center' },
-  engagementText: { fontSize: 14, color: '#64748b', fontWeight: '600', marginBottom: 16 },
+  engagementArea: { marginTop: 28, paddingTop: 24, borderTopWidth: 1, borderTopColor: c.border, alignItems: 'center' },
+  engagementText: { fontSize: 14, color: c.textMuted, fontWeight: '600', marginBottom: 16 },
   engagementRow: { flexDirection: 'row', gap: 12 },
   likeBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fef2f2', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 20, gap: 8, borderWidth: 1, borderColor: '#fecaca' },
   likeBtnOn: { backgroundColor: '#ef4444', borderColor: '#ef4444' },
   likeText: { color: '#ef4444', fontWeight: '700', fontSize: 15 },
   likeTextOn: { color: 'white' },
-  shareBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'white', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 20, gap: 8, borderWidth: 1, borderColor: '#e2e8f0' },
-  shareText: { color: '#0f172a', fontWeight: '700', fontSize: 15 },
+  shareBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.surface, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 20, gap: 8, borderWidth: 1, borderColor: c.border },
+  shareText: { color: c.text, fontWeight: '700', fontSize: 15 },
 
-  nextCard: { flexDirection: 'row', gap: 14, backgroundColor: 'white', borderRadius: 18, padding: 12, marginTop: 28, alignItems: 'center', borderWidth: 1, borderColor: '#f1f5f9', elevation: 1 },
-  nextThumb: { width: 74, height: 74, borderRadius: 12, backgroundColor: '#f0fdf4' },
+  nextCard: { flexDirection: 'row', gap: 14, backgroundColor: c.surface, borderRadius: 18, padding: 12, marginTop: 28, alignItems: 'center', borderWidth: 1, borderColor: c.border, elevation: 1 },
+  nextThumb: { width: 74, height: 74, borderRadius: 12, backgroundColor: c.surfaceAlt },
   nextLabel: { fontSize: 10, fontWeight: '800', color: '#16a34a', letterSpacing: 1, marginBottom: 4 },
-  nextTitle: { fontSize: 14.5, fontWeight: '700', color: '#0f172a', lineHeight: 19, marginBottom: 4 },
-  nextMeta: { fontSize: 11.5, color: '#94a3b8', fontWeight: '500' },
-});
+  nextTitle: { fontSize: 14.5, fontWeight: '700', color: c.text, lineHeight: 19, marginBottom: 4 },
+  nextMeta: { fontSize: 11.5, color: c.textFaint, fontWeight: '500' },
+}));
