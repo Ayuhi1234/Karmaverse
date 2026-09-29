@@ -5,13 +5,13 @@ import {
   Text,
   TouchableOpacity,
   TextInput,
-  StyleSheet,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
 } from 'react-native';
 import { Star } from 'lucide-react-native';
+import { useTheme, makeStyles } from '../../theme';
 
 interface RatingModalProps {
   visible: boolean;
@@ -29,6 +29,8 @@ export function RatingModal({
   onSkip,
   onSubmit,
 }: RatingModalProps) {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const [selectedRating, setSelectedRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [comment, setComment] = useState('');
@@ -100,7 +102,7 @@ export function RatingModal({
                 >
                   <Star
                     size={40}
-                    color={star <= displayRating ? '#f59e0b' : '#d1d5db'}
+                    color={star <= displayRating ? '#f59e0b' : colors.border}
                     fill={star <= displayRating ? '#f59e0b' : 'transparent'}
                   />
                 </TouchableOpacity>
@@ -116,7 +118,7 @@ export function RatingModal({
             <TextInput
               style={styles.commentInput}
               placeholder="Share your experience (optional)..."
-              placeholderTextColor="#94a3b8"
+              placeholderTextColor={colors.textFaint}
               value={comment}
               onChangeText={setComment}
               multiline
@@ -149,10 +151,10 @@ export function RatingModal({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.55)',
+    backgroundColor: c.overlay,
   },
   scrollContent: {
     flexGrow: 1,
@@ -160,14 +162,14 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   card: {
-    backgroundColor: 'white',
+    backgroundColor: c.surface,
     borderRadius: 28,
     padding: 28,
     width: '100%',
     maxWidth: 420,
     alignSelf: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: c.shadow,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.15,
     shadowRadius: 24,
@@ -176,12 +178,12 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 20,
     fontWeight: '900',
-    color: '#0f172a',
+    color: c.text,
     marginBottom: 4,
   },
   subheading: {
     fontSize: 14,
-    color: '#64748b',
+    color: c.textMuted,
     fontWeight: '500',
     marginBottom: 16,
   },
@@ -190,7 +192,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
     marginBottom: 24,
-    backgroundColor: '#f0fdf4',
+    backgroundColor: c.primarySoft,
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 50,
@@ -211,7 +213,7 @@ const styles = StyleSheet.create({
   agentName: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#166534',
+    color: c.primary,
   },
   starsRow: {
     flexDirection: 'row',
@@ -231,15 +233,15 @@ const styles = StyleSheet.create({
   commentInput: {
     width: '100%',
     borderWidth: 1.5,
-    borderColor: '#e2e8f0',
+    borderColor: c.border,
     borderRadius: 14,
     padding: 14,
     fontSize: 14,
-    color: '#0f172a',
+    color: c.text,
     textAlignVertical: 'top',
     minHeight: 80,
     marginBottom: 20,
-    backgroundColor: '#f8fafc',
+    backgroundColor: c.inputBg,
   },
   submitBtn: {
     width: '100%',
@@ -255,7 +257,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 3 },
   },
   submitBtnDisabled: {
-    backgroundColor: '#d1d5db',
+    backgroundColor: c.borderStrong,
     shadowOpacity: 0,
     elevation: 0,
   },
@@ -268,8 +270,8 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   skipBtnText: {
-    color: '#94a3b8',
+    color: c.textFaint,
     fontWeight: '600',
     fontSize: 14,
   },
-});
+}));
