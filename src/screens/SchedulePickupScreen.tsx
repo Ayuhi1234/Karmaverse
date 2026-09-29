@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, StatusBar, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Image, Animated, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, StatusBar, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Image, Animated, ActivityIndicator } from 'react-native';
 import { getToken } from '../utils/tokenStore';
 import { showAlert } from '../utils/alert';
 import { showRedeemInfoOnce } from '../utils/redeemInfo';
@@ -16,6 +16,7 @@ import { addressService, SavedAddress, AddressLabel } from '../services/address'
 import { bookingService } from '../services/booking';
 import * as Location from 'expo-location';
 import { SCREEN_WIDTH as width } from '../utils/layout';
+import { useTheme, makeStyles } from '../theme';
 
 const CARD_MARGIN = 8;
 const COLS = Platform.OS === 'web' && width > 768 ? 4 : 2;
@@ -151,6 +152,7 @@ const MIN_ORDER_VALUE = 1000;
 // Working / Not Working switch. Tapping anywhere flips it; the thumb slides to
 // the active side so the current condition is readable at a glance.
 function ConditionToggle({ value, onChange }: { value: Condition; onChange: (c: Condition) => void }) {
+  const styles = useStyles();
   const isWorking = value === 'Working';
   const slide = useRef(new Animated.Value(isWorking ? 0 : 1)).current;
 
@@ -238,6 +240,7 @@ const TIMES = [
 
 // Shows the product photo; if it fails to load, falls back to the category icon.
 function ItemImage({ image, Icon, color }: { image?: any; Icon: any; color: string }) {
+  const styles = useStyles();
   const [failed, setFailed] = useState(false);
   if (image && !failed) {
     return <Image source={image} style={styles.cardImage} resizeMode="contain" onError={() => setFailed(true)} />;
@@ -246,6 +249,8 @@ function ItemImage({ image, Icon, color }: { image?: any; Icon: any; color: stri
 }
 
 export function SchedulePickupScreen({ navigation }: any) {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets(); // bottom inset so the cart bar / Confirm button clear the Android gesture pill
   // Step Management
   const [currentStep, setCurrentStep] = useState<1 | 2>(1);
@@ -533,7 +538,7 @@ export function SchedulePickupScreen({ navigation }: any) {
             }
             return (
               <TouchableOpacity key={cat.id} style={styles.filterChip} onPress={() => setActiveCategory(cat.id)}>
-                <Icon size={16} color="#64748b" style={{ marginRight: 6 }} />
+                <Icon size={16} color={colors.textMuted} style={{ marginRight: 6 }} />
                 <Text style={styles.filterText}>{cat.name}</Text>
               </TouchableOpacity>
             );
@@ -587,7 +592,7 @@ export function SchedulePickupScreen({ navigation }: any) {
 
                   {qty === 0 ? (
                     <TouchableOpacity style={styles.addBtn} onPress={() => updateQuantity(key, 1)}>
-                      <Plus size={18} color="white" />
+                      <Plus size={18} color={colors.bg} />
                       <Text style={styles.addBtnText}>ADD</Text>
                     </TouchableOpacity>
                   ) : (
@@ -709,8 +714,8 @@ export function SchedulePickupScreen({ navigation }: any) {
             </View>
             <View style={{ flex: 1 }}>
               <View style={styles.addrLabelRow}>
-                <LabelIcon size={13} color={on ? '#15803d' : '#64748b'} />
-                <Text style={[styles.addrLabel, on && { color: '#15803d' }]}>{addr.label}</Text>
+                <LabelIcon size={13} color={on ? colors.primary : colors.textMuted} />
+                <Text style={[styles.addrLabel, on && { color: colors.primary }]}>{addr.label}</Text>
                 {addr.isDefault && (
                   <View style={styles.addrDefaultTag}><Text style={styles.addrDefaultTagText}>Default</Text></View>
                 )}
@@ -732,12 +737,12 @@ export function SchedulePickupScreen({ navigation }: any) {
 
       {isSavingAddress ? (
         <View style={styles.addrAddBtn}>
-          <ActivityIndicator size="small" color="#15803d" />
+          <ActivityIndicator size="small" color={colors.primary} />
           <Text style={styles.addrAddText}>Saving address...</Text>
         </View>
       ) : (
         <TouchableOpacity style={styles.addrAddBtn} onPress={() => setIsAddingAddress(true)} activeOpacity={0.8}>
-          <Plus size={16} color="#15803d" />
+          <Plus size={16} color={colors.primary} />
           <Text style={styles.addrAddText}>Add new address</Text>
         </TouchableOpacity>
       )}
@@ -765,11 +770,11 @@ export function SchedulePickupScreen({ navigation }: any) {
         <View style={styles.estimateBigCoin}><KarmaCoin size={60} glow /></View>
       </View>
 
-      <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Special instructions <Text style={{fontWeight: '400', fontSize: 13, color: '#9ca3af'}}>(optional)</Text></Text>
+      <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Special instructions <Text style={{fontWeight: '400', fontSize: 13, color: colors.textFaint}}>(optional)</Text></Text>
       <TextInput
-        style={[styles.inputBox, { color: '#0f172a' }]}
+        style={[styles.inputBox, { color: colors.text }]}
         placeholder="E.g. Ring the bell twice, leave at the door..."
-        placeholderTextColor="#9ca3af"
+        placeholderTextColor={colors.textFaint}
         value={instructions}
         onChangeText={setInstructions}
         multiline
@@ -829,8 +834,8 @@ export function SchedulePickupScreen({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f4f4f5' },
+const useStyles = makeStyles((c) => ({
+  container: { flex: 1, backgroundColor: c.bg },
   topNotchFiller: { position: 'absolute', top: 0, left: 0, right: 0, height: 60, backgroundColor: '#064e3b' },
   header: { paddingBottom: 16, borderBottomLeftRadius: 32, borderBottomRightRadius: 32, elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 10, zIndex: 10 },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 10 },
@@ -841,8 +846,8 @@ const styles = StyleSheet.create({
   stepContainer: { flex: 1 },
   filterSection: { paddingTop: 20, paddingBottom: 10, maxWidth: 900, width: '100%', alignSelf: 'center' },
   filterList: { paddingHorizontal: 20, gap: 10 },
-  filterChip: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'white', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 100, borderWidth: 1, borderColor: '#e4e4e7' },
-  filterText: { fontSize: 13, color: '#52525b', fontWeight: '600' },
+  filterChip: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.surface, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 100, borderWidth: 1, borderColor: c.border },
+  filterText: { fontSize: 13, color: c.textMuted, fontWeight: '600' },
   filterChipActive: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 18, paddingVertical: 10, borderRadius: 100, elevation: 4 },
   filterTextActive: { fontSize: 13, color: 'white', fontWeight: '800' },
 
@@ -850,40 +855,40 @@ const styles = StyleSheet.create({
   glassNote: { marginHorizontal: 16, marginTop: 12, backgroundColor: '#fffbeb', borderWidth: 1, borderColor: '#fde68a', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10 },
   glassNoteText: { color: '#92400e', fontSize: 12.5, fontWeight: '600', lineHeight: 18 },
   gridContainer: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 12, marginTop: 10, maxWidth: 900, alignSelf: 'center', width: '100%', justifyContent: 'center' },
-  
-  cardContainer: { width: CARD_WIDTH, backgroundColor: 'white', borderRadius: 18, marginBottom: 10, marginHorizontal: CARD_MARGIN, overflow: 'hidden', elevation: 2, borderWidth: 2, borderColor: 'transparent' },
-  cardContainerActive: { borderColor: '#16a34a', backgroundColor: '#f0fdf4' },
-  cardImageArea: { height: 92, width: '100%', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', backgroundColor: '#f8fafc', padding: 10 },
+
+  cardContainer: { width: CARD_WIDTH, backgroundColor: c.surface, borderRadius: 18, marginBottom: 10, marginHorizontal: CARD_MARGIN, overflow: 'hidden', elevation: 2, borderWidth: 2, borderColor: 'transparent' },
+  cardContainerActive: { borderColor: '#16a34a', backgroundColor: c.primarySoft },
+  cardImageArea: { height: 92, width: '100%', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', backgroundColor: c.surfaceAlt, padding: 10 },
   cardImage: { width: '100%', height: '100%' },
   cardInfo: { padding: 10, flex: 1 },
   // Fixed two-line block so a one-line name and a wrapping one push the toggle,
   // rate and button down by the same amount — cards stay aligned across the grid.
-  itemName: { fontSize: 15, fontWeight: '800', color: '#0f172a', marginBottom: 2, lineHeight: 19, minHeight: 38 },
-  itemUnit: { fontSize: 12, color: '#71717a', fontWeight: '500', marginBottom: 8 },
+  itemName: { fontSize: 15, fontWeight: '800', color: c.text, marginBottom: 2, lineHeight: 19, minHeight: 38 },
+  itemUnit: { fontSize: 12, color: c.textMuted, fontWeight: '500', marginBottom: 8 },
   coinPill: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', backgroundColor: '#fef3c7', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8, gap: 4, marginBottom: 16 },
   coinValue: { fontSize: 12, fontWeight: '800', color: '#d97706' },
   minHint: { fontSize: 11, color: '#dc2626', fontWeight: '700', marginBottom: 8 },
   toggleTrack: {
     flexDirection: 'row', height: 28, borderRadius: 14, marginBottom: 10,
-    backgroundColor: '#f1f5f9', borderWidth: 1, borderColor: '#e4e4e7',
+    backgroundColor: c.surfaceAlt, borderWidth: 1, borderColor: c.border,
     position: 'relative', overflow: 'hidden',
   },
   toggleThumb: { position: 'absolute', top: 2, bottom: 2, width: '48%', borderRadius: 12 },
   toggleHalf: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  toggleLabel: { fontSize: 9.5, fontWeight: '800', color: '#71717a' },
+  toggleLabel: { fontSize: 9.5, fontWeight: '800', color: c.textMuted },
   toggleLabelOn: { color: '#ffffff' },
   
   // `marginTop: auto` pins the button to the bottom of the card, so buttons line
   // up across a row even when the content above differs in height. Both states
   // share the same height/radius so a card doesn't shift when it's added.
-  addBtn: { marginTop: 'auto', backgroundColor: '#1e293b', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', height: 32, borderRadius: 10, gap: 4, borderWidth: 1, borderColor: 'transparent' },
-  addBtnText: { color: 'white', fontSize: 11, fontWeight: '800' },
-  addedBtn: { marginTop: 'auto', backgroundColor: '#dcfce7', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', height: 32, borderRadius: 10, gap: 4, borderWidth: 1, borderColor: '#16a34a' },
+  addBtn: { marginTop: 'auto', backgroundColor: c.text, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', height: 32, borderRadius: 10, gap: 4, borderWidth: 1, borderColor: 'transparent' },
+  addBtnText: { color: c.bg, fontSize: 11, fontWeight: '800' },
+  addedBtn: { marginTop: 'auto', backgroundColor: c.primarySoft, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', height: 32, borderRadius: 10, gap: 4, borderWidth: 1, borderColor: '#16a34a' },
   addedBtnText: { color: '#16a34a', fontSize: 12, fontWeight: '800' },
-  stepperRow: { marginTop: 'auto', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', height: 32, borderRadius: 10, backgroundColor: '#f0fdf4', borderWidth: 1, borderColor: '#16a34a', paddingHorizontal: 4 },
+  stepperRow: { marginTop: 'auto', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', height: 32, borderRadius: 10, backgroundColor: c.primarySoft, borderWidth: 1, borderColor: '#16a34a', paddingHorizontal: 4 },
   stepperBtn: { width: 26, height: 26, borderRadius: 8, backgroundColor: '#16a34a', alignItems: 'center', justifyContent: 'center' },
   stepperBtnText: { color: 'white', fontSize: 16, fontWeight: '900', lineHeight: 18 },
-  stepperValue: { flex: 1, textAlign: 'center', fontSize: 13, fontWeight: '800', color: '#166534' },
+  stepperValue: { flex: 1, textAlign: 'center', fontSize: 13, fontWeight: '800', color: c.primary },
 
   floatingCart: { position: 'absolute', bottom: 30, left: 20, right: 20, maxWidth: 860, marginHorizontal: 'auto', backgroundColor: '#1e293b', borderRadius: 24, padding: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', elevation: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10 },
   cartInfo: { flex: 1 },
@@ -895,41 +900,41 @@ const styles = StyleSheet.create({
   checkoutBtnText: { color: 'white', fontWeight: '800', fontSize: 14 },
 
   /* Step 2 Details Styles */
-  scrollContent: { padding: 20, paddingBottom: 80, backgroundColor: '#f4f4f5', maxWidth: 900, width: '100%', alignSelf: 'center' },
+  scrollContent: { padding: 20, paddingBottom: 80, backgroundColor: c.bg, maxWidth: 900, width: '100%', alignSelf: 'center' },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 16, marginTop: 12, gap: 10 },
   sectionNum: { width: 24, height: 24, borderRadius: 12, backgroundColor: '#16a34a', alignItems: 'center', justifyContent: 'center' },
   sectionNumText: { color: 'white', fontWeight: '800', fontSize: 14 },
-  sectionTitle: { fontSize: 18, fontWeight: '800', color: '#0f172a' },
-  
+  sectionTitle: { fontSize: 18, fontWeight: '800', color: c.text },
+
   dateScroller: { gap: 12, paddingBottom: 16, marginBottom: 10 },
-  dateBox: { width: 64, height: 80, backgroundColor: 'white', borderRadius: 16, alignItems: 'center', justifyContent: 'center', elevation: 1, borderWidth: 2, borderColor: 'transparent' },
+  dateBox: { width: 64, height: 80, backgroundColor: c.surface, borderRadius: 16, alignItems: 'center', justifyContent: 'center', elevation: 1, borderWidth: 2, borderColor: 'transparent' },
   dateBoxSelected: { backgroundColor: '#166534', borderColor: '#166534' },
-  dateDay: { fontSize: 13, color: '#64748b', fontWeight: '700', marginBottom: 4 },
+  dateDay: { fontSize: 13, color: c.textMuted, fontWeight: '700', marginBottom: 4 },
   dateDaySelected: { color: 'rgba(255,255,255,0.7)' },
-  dateNum: { fontSize: 24, color: '#0f172a', fontWeight: '800' },
+  dateNum: { fontSize: 24, color: c.text, fontWeight: '800' },
   dateNumSelected: { color: 'white' },
 
   timeScroller: { gap: 12, paddingBottom: 16, marginBottom: 10 },
-  timeBox: { paddingHorizontal: 20, paddingVertical: 14, backgroundColor: 'white', borderRadius: 12, elevation: 1, borderWidth: 2, borderColor: 'transparent' },
-  timeBoxSelected: { backgroundColor: '#f0fdf4', borderColor: '#16a34a' },
-  timeText: { fontSize: 13, color: '#64748b', fontWeight: '700' },
-  timeTextSelected: { color: '#16a34a', fontWeight: '800' },
+  timeBox: { paddingHorizontal: 20, paddingVertical: 14, backgroundColor: c.surface, borderRadius: 12, elevation: 1, borderWidth: 2, borderColor: 'transparent' },
+  timeBoxSelected: { backgroundColor: c.primarySoft, borderColor: '#16a34a' },
+  timeText: { fontSize: 13, color: c.textMuted, fontWeight: '700' },
+  timeTextSelected: { color: c.primary, fontWeight: '800' },
 
   // Saved-address picker
-  addrRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, backgroundColor: 'white', padding: 14, borderRadius: 16, borderWidth: 1.5, borderColor: '#f1f5f9', marginBottom: 10 },
-  addrRowOn: { borderColor: '#16a34a', backgroundColor: '#f0fdf4' },
-  addrRadio: { width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: '#cbd5e1', alignItems: 'center', justifyContent: 'center', marginTop: 1 },
+  addrRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, backgroundColor: c.surface, padding: 14, borderRadius: 16, borderWidth: 1.5, borderColor: c.border, marginBottom: 10 },
+  addrRowOn: { borderColor: '#16a34a', backgroundColor: c.primarySoft },
+  addrRadio: { width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: c.borderStrong, alignItems: 'center', justifyContent: 'center', marginTop: 1 },
   addrRadioOn: { borderColor: '#16a34a' },
   addrRadioDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: '#16a34a' },
   addrLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 3 },
-  addrLabel: { fontSize: 13, fontWeight: '800', color: '#334155' },
+  addrLabel: { fontSize: 13, fontWeight: '800', color: c.text },
   addrDefaultTag: { backgroundColor: '#dcfce7', paddingHorizontal: 7, paddingVertical: 2, borderRadius: 100, marginLeft: 4 },
   addrDefaultTagText: { fontSize: 9, fontWeight: '800', color: '#15803d', letterSpacing: 0.4 },
-  addrText: { fontSize: 12.5, color: '#64748b', fontWeight: '500', lineHeight: 18 },
-  addrReceiver: { fontSize: 11.5, color: '#94a3b8', fontWeight: '600', marginTop: 3 },
-  addrEmpty: { fontSize: 13, color: '#94a3b8', fontWeight: '500', marginBottom: 10, marginLeft: 4 },
-  addrAddBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, borderWidth: 1.5, borderColor: '#bbf7d0', borderStyle: 'dashed', backgroundColor: '#f0fdf4', paddingVertical: 12, borderRadius: 16, marginBottom: 24 },
-  addrAddText: { color: '#15803d', fontSize: 14, fontWeight: '800' },
+  addrText: { fontSize: 12.5, color: c.textMuted, fontWeight: '500', lineHeight: 18 },
+  addrReceiver: { fontSize: 11.5, color: c.textFaint, fontWeight: '600', marginTop: 3 },
+  addrEmpty: { fontSize: 13, color: c.textFaint, fontWeight: '500', marginBottom: 10, marginLeft: 4 },
+  addrAddBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, borderWidth: 1.5, borderColor: '#bbf7d0', borderStyle: 'dashed', backgroundColor: c.primarySoft, paddingVertical: 12, borderRadius: 16, marginBottom: 24 },
+  addrAddText: { color: c.primary, fontSize: 14, fontWeight: '800' },
 
   estimatesBox: { backgroundColor: '#fffbeb', borderRadius: 16, padding: 20, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#fde68a' },
   estimateLabel: { fontSize: 12, color: '#b45309', fontWeight: '700', marginBottom: 8 },
@@ -938,11 +943,11 @@ const styles = StyleSheet.create({
   estimateNote: { fontSize: 11, color: '#d97706', opacity: 0.8, fontWeight: '600', lineHeight: 16 },
   estimateBigCoin: { opacity: 0.8 },
 
-  inputBox: { backgroundColor: 'white', borderRadius: 16, padding: 16, height: 100, textAlignVertical: 'top', color: '#0f172a', fontSize: 14, fontWeight: '500', marginTop: 12, marginBottom: 24, elevation: 1, borderWidth: 1, borderColor: '#e2e8f0' },
+  inputBox: { backgroundColor: c.inputBg, borderRadius: 16, padding: 16, height: 100, textAlignVertical: 'top', color: c.text, fontSize: 14, fontWeight: '500', marginTop: 12, marginBottom: 24, elevation: 1, borderWidth: 1, borderColor: c.border },
   submitBtn: { backgroundColor: '#15803d', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 18, borderRadius: 16, gap: 10, elevation: 4 },
   submitBtnText: { color: 'white', fontSize: 16, fontWeight: '900' },
 
-  successContainer: { flex: 1, backgroundColor: '#f0fdf4', justifyContent: 'center', alignItems: 'center' },
+  successContainer: { flex: 1, backgroundColor: c.bg, justifyContent: 'center', alignItems: 'center' },
   successTitle: { fontSize: 24, fontWeight: '900', color: '#16a34a', marginTop: 24, marginBottom: 8 },
-  successSub: { fontSize: 16, color: '#15803d', fontWeight: '600' },
-});
+  successSub: { fontSize: 16, color: c.primary, fontWeight: '600' },
+}));
