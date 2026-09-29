@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, ScrollView, StatusBar, Linking
+  View, Text, TouchableOpacity, ScrollView, StatusBar, Linking
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LiveMap } from '../components/shared/LiveMap';
@@ -10,6 +10,7 @@ import {
   Phone, Star, Navigation, FileText
 } from 'lucide-react-native';
 import { bookingService } from '../services/booking';
+import { useTheme, makeStyles } from '../theme';
 
 const FALLBACK = {
   id: 'KC12345',
@@ -26,6 +27,8 @@ const FALLBACK = {
 };
 
 export function BookingDetailsScreen({ navigation, route }: any) {
+  const styles = useStyles();
+  const { colors, isDark } = useTheme();
   const passed = route?.params?.booking;
   const bookingId = passed?._id || passed?.id || '';
   const [agentData, setAgentData] = useState<any>(passed?.agent || null);
@@ -74,16 +77,16 @@ export function BookingDetailsScreen({ navigation, route }: any) {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#f8fafc" />
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.bg} />
       <SafeAreaView edges={['top']}>
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('App')} style={styles.backBtn}>
-            <ArrowLeft size={20} color="#0f172a" />
+            <ArrowLeft size={20} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Booking details</Text>
           <TouchableOpacity style={styles.moreBtn}>
-            <MoreHorizontal size={20} color="#0f172a" />
+            <MoreHorizontal size={20} color={colors.text} />
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -180,7 +183,7 @@ export function BookingDetailsScreen({ navigation, route }: any) {
               </TouchableOpacity>
             </View>
           ) : (
-            <Text style={{ color: '#94a3b8', fontWeight: '600' }}>Agent not yet assigned</Text>
+            <Text style={{ color: colors.textFaint, fontWeight: '600' }}>Agent not yet assigned</Text>
           )}
         </View>
         </>
@@ -235,19 +238,19 @@ export function BookingDetailsScreen({ navigation, route }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8fafc' },
+const useStyles = makeStyles((c) => ({
+  container: { flex: 1, backgroundColor: c.bg },
   scrollContent: { maxWidth: 680, width: '100%', alignSelf: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12 },
-  backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'white', alignItems: 'center', justifyContent: 'center', elevation: 2, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 4, shadowOffset: { width: 0, height: 1 } },
-  headerTitle: { flex: 1, textAlign: 'center', fontSize: 17, fontWeight: '800', color: '#0f172a' },
-  moreBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'white', alignItems: 'center', justifyContent: 'center', elevation: 2, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 4, shadowOffset: { width: 0, height: 1 } },
+  backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: c.surface, alignItems: 'center', justifyContent: 'center', elevation: 2, shadowColor: c.shadow, shadowOpacity: 0.08, shadowRadius: 4, shadowOffset: { width: 0, height: 1 } },
+  headerTitle: { flex: 1, textAlign: 'center', fontSize: 17, fontWeight: '800', color: c.text },
+  moreBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: c.surface, alignItems: 'center', justifyContent: 'center', elevation: 2, shadowColor: c.shadow, shadowOpacity: 0.08, shadowRadius: 4, shadowOffset: { width: 0, height: 1 } },
 
-  card: { backgroundColor: 'white', marginHorizontal: 16, marginBottom: 12, borderRadius: 20, padding: 18, elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 10, shadowOffset: { width: 0, height: 2 } },
+  card: { backgroundColor: c.surface, marginHorizontal: 16, marginBottom: 12, borderRadius: 20, padding: 18, elevation: 2, shadowColor: c.shadow, shadowOpacity: 0.06, shadowRadius: 10, shadowOffset: { width: 0, height: 2 } },
 
   bookingTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
-  bookingIdLabel: { fontSize: 11, color: '#94a3b8', fontWeight: '600' },
-  bookingId: { fontSize: 22, fontWeight: '900', color: '#0f172a', marginTop: 2 },
+  bookingIdLabel: { fontSize: 11, color: c.textFaint, fontWeight: '600' },
+  bookingId: { fontSize: 22, fontWeight: '900', color: c.text, marginTop: 2 },
   statusBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: '#fef9c3', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 20 },
   statusDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#ca8a04' },
   statusText: { fontSize: 10, fontWeight: '800', color: '#ca8a04' },
@@ -255,40 +258,40 @@ const styles = StyleSheet.create({
   detailRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, marginBottom: 12 },
   detailIconBg: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginTop: 2 },
   detailText: { flex: 1 },
-  detailLabel: { fontSize: 12, color: '#94a3b8', fontWeight: '600', marginBottom: 2 },
-  detailValue: { fontSize: 14, color: '#0f172a', fontWeight: '600', lineHeight: 20 },
+  detailLabel: { fontSize: 12, color: c.textFaint, fontWeight: '600', marginBottom: 2 },
+  detailValue: { fontSize: 14, color: c.text, fontWeight: '600', lineHeight: 20 },
 
-  divider: { height: 1, backgroundColor: '#f1f5f9', marginVertical: 14 },
+  divider: { height: 1, backgroundColor: c.border, marginVertical: 14 },
 
   detailsGrid: { flexDirection: 'row', gap: 8 },
   gridItem: { flex: 1 },
-  gridLabel: { fontSize: 11, color: '#94a3b8', fontWeight: '600', marginBottom: 4 },
-  gridValue: { fontSize: 15, color: '#0f172a', fontWeight: '800' },
+  gridLabel: { fontSize: 11, color: c.textFaint, fontWeight: '600', marginBottom: 4 },
+  gridValue: { fontSize: 15, color: c.text, fontWeight: '800' },
   coinsRow: { flexDirection: 'row', alignItems: 'center' },
 
-  sectionTitle: { fontSize: 15, fontWeight: '800', color: '#0f172a', marginHorizontal: 16, marginBottom: 8 },
+  sectionTitle: { fontSize: 15, fontWeight: '800', color: c.text, marginHorizontal: 16, marginBottom: 8 },
 
   agentRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   agentAvatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: '#15803d', alignItems: 'center', justifyContent: 'center' },
   agentInitials: { color: 'white', fontSize: 18, fontWeight: '900' },
   agentInfo: { flex: 1 },
-  agentName: { fontSize: 16, fontWeight: '800', color: '#0f172a' },
+  agentName: { fontSize: 16, fontWeight: '800', color: c.text },
   ratingRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 3 },
-  agentRating: { fontSize: 13, fontWeight: '700', color: '#0f172a' },
-  callBtn: { width: 42, height: 42, borderRadius: 21, backgroundColor: '#f0fdf4', borderWidth: 1.5, borderColor: '#bbf7d0', alignItems: 'center', justifyContent: 'center' },
+  agentRating: { fontSize: 13, fontWeight: '700', color: c.text },
+  callBtn: { width: 42, height: 42, borderRadius: 21, backgroundColor: c.primarySoft, borderWidth: 1.5, borderColor: '#bbf7d0', alignItems: 'center', justifyContent: 'center' },
 
   liveSectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginHorizontal: 16, marginBottom: 8, marginTop: 4 },
   updatedBadge: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   updatedDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#22c55e' },
   updatedText: { fontSize: 11, color: '#22c55e', fontWeight: '600' },
 
-  mapCard: { marginHorizontal: 16, marginBottom: 16, borderRadius: 20, overflow: 'hidden', height: 200, elevation: 3, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 10, shadowOffset: { width: 0, height: 3 } },
+  mapCard: { marginHorizontal: 16, marginBottom: 16, borderRadius: 20, overflow: 'hidden', height: 200, elevation: 3, shadowColor: c.shadow, shadowOpacity: 0.08, shadowRadius: 10, shadowOffset: { width: 0, height: 3 } },
   map: { flex: 1 },
-  mapOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(255,255,255,0.95)', paddingHorizontal: 16, paddingVertical: 10 },
+  mapOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: c.surface, paddingHorizontal: 16, paddingVertical: 10 },
   etaChip: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  etaText: { fontSize: 13, color: '#0f172a', fontWeight: '600' },
+  etaText: { fontSize: 13, color: c.text, fontWeight: '600' },
 
   ctaContainer: { marginHorizontal: 16 },
   trackBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#15803d', borderRadius: 16, paddingVertical: 16, elevation: 3, shadowColor: '#15803d', shadowOpacity: 0.3, shadowRadius: 8, shadowOffset: { width: 0, height: 3 } },
   trackBtnText: { color: 'white', fontSize: 16, fontWeight: '800' },
-});
+}));
