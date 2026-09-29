@@ -16,6 +16,7 @@ import { referralService } from '../services/referral';
 import { useUserSocket } from '../context/UserSocketContext';
 import { LaunchConfetti } from '../components/shared/LaunchConfetti';
 import { EARLY_BIRD_COINS } from '../utils/earlyBird';
+import { useTheme, makeStyles } from '../theme';
 let GoogleSignin: any = null;
 let isErrorWithCode: any = null;
 let statusCodes: any = {};
@@ -121,6 +122,8 @@ const EMOJI_REGEX_GLOBAL = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F1E0}-\u{1F
 
 // Reusable Components
 function InputField({ placeholder, value, onChange, secureTextEntry = false, icon, autoFocus = false, keyboardType = 'default', maxLength, showToggle = false, onSubmitEditing, returnKeyType, inputRef, textContentType, autoComplete, guardAutofill = false }: any) {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const [hidden, setHidden] = useState(secureTextEntry);
   // Bulletproof anti-autofill: on web the field starts read-only so the browser's
   // password manager can't dump (and mask) a saved password into it on load. It
@@ -147,7 +150,7 @@ function InputField({ placeholder, value, onChange, secureTextEntry = false, ico
           (guardAutofill && Platform.OS === 'web') ? ({ WebkitTextSecurity: 'none' } as any) : {},
         ]}
         placeholder={placeholder}
-        placeholderTextColor="#94a3b8"
+        placeholderTextColor={colors.textFaint}
         value={value}
         onChangeText={onChange}
         secureTextEntry={guardAutofill ? false : hidden}
@@ -166,7 +169,7 @@ function InputField({ placeholder, value, onChange, secureTextEntry = false, ico
       />
       {showToggle && (
         <TouchableOpacity style={{ position: 'absolute', right: 16, zIndex: 1 }} onPress={() => setHidden((h: boolean) => !h)} activeOpacity={0.7}>
-          {hidden ? <EyeOff size={18} color="#94a3b8" /> : <Eye size={18} color="#94a3b8" />}
+          {hidden ? <EyeOff size={18} color={colors.textFaint} /> : <Eye size={18} color={colors.textFaint} />}
         </TouchableOpacity>
       )}
     </View>
@@ -174,6 +177,7 @@ function InputField({ placeholder, value, onChange, secureTextEntry = false, ico
 }
 
 function PrimaryButton({ onPress, disabled, loading, children, style }: any) {
+  const styles = useStyles();
   return (
     <TouchableOpacity
       style={[styles.button, disabled && !loading ? styles.buttonDisabled : undefined, style]}
@@ -187,6 +191,7 @@ function PrimaryButton({ onPress, disabled, loading, children, style }: any) {
 }
 
 function SelectionPills({ options, selected, onSelect }: { options: string[], selected: string, onSelect: (v: string) => void }) {
+  const styles = useStyles();
   return (
     <View style={styles.pillsContainer}>
       {options.map((opt) => {
@@ -210,6 +215,7 @@ function SelectionPills({ options, selected, onSelect }: { options: string[], se
 const JOURNEY_STAGES = ['Register', 'Claim Reward', 'Start Your Eco Journey'] as const;
 
 function SignupJourneyProgress({ stage }: { stage: 0 | 1 | 2 }) {
+  const styles = useStyles();
   return (
     <View style={styles.journeyProgress}>
       {JOURNEY_STAGES.map((label, i) => (
@@ -223,6 +229,8 @@ function SignupJourneyProgress({ stage }: { stage: 0 | 1 | 2 }) {
 }
 
 export function LoginScreen({ navigation }: any) {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets(); // bottom inset so "Skip for now" clears the Android gesture pill
   const { reconnect } = useUserSocket();
   const [step, setStep] = useState<Step>('entry');
@@ -913,7 +921,7 @@ export function LoginScreen({ navigation }: any) {
               setIdentifier(/^\d+$/.test(cleaned) ? cleaned.slice(0, 10) : cleaned);
               if (emailError) setEmailError('');
             }}
-            icon={<User size={18} color="#94a3b8" />}
+            icon={<User size={18} color={colors.textFaint} />}
             keyboardType="email-address"
             maxLength={254}
             autoFocus
@@ -1039,7 +1047,7 @@ export function LoginScreen({ navigation }: any) {
             onChange={setPassword}
             secureTextEntry
             showToggle
-            icon={<Lock size={18} color="#94a3b8" />}
+            icon={<Lock size={18} color={colors.textFaint} />}
             autoFocus
           />
           <PrimaryButton onPress={handleLoginSubmit} disabled={!password || isLoading} loading={isLoading}>
@@ -1049,7 +1057,7 @@ export function LoginScreen({ navigation }: any) {
           
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
             <TouchableOpacity onPress={() => { setStep('entry'); setIdentifier(''); }}>
-               <Text style={{ color: '#64748b', fontWeight: 'bold' }}>Change account</Text>
+               <Text style={{ color: colors.textMuted, fontWeight: 'bold' }}>Change account</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => { const id = identifier.trim(); const prefill = linkedPhone || (/^[6-9]\d{9}$/.test(id) ? id : (id.includes('@') ? id : '')); setForgotPhone(prefill); setResetSubStep('send_otp'); setOtpValue(''); setNewPassword(''); setConfirmPassword(''); setStep('reset_password'); }}>
                <Text style={{ color: '#16a34a', fontWeight: 'bold' }}>Forgot password?</Text>
@@ -1074,7 +1082,7 @@ export function LoginScreen({ navigation }: any) {
               onChange={(v: string) => setForgotPhone(v.replace(/\s/g, ''))}
               keyboardType="email-address"
               maxLength={254}
-              icon={<User size={18} color="#94a3b8" />}
+              icon={<User size={18} color={colors.textFaint} />}
               autoComplete="username"
               guardAutofill
             />
@@ -1120,7 +1128,7 @@ export function LoginScreen({ navigation }: any) {
               <ArrowRight size={18} color="#fff" />
             </PrimaryButton>
             <TouchableOpacity style={{ alignItems: 'center', marginTop: 10 }} onPress={() => setStep('login')}>
-              <Text style={{ color: '#64748b', fontWeight: 'bold' }}>Back to login</Text>
+              <Text style={{ color: colors.textMuted, fontWeight: 'bold' }}>Back to login</Text>
             </TouchableOpacity>
           </View>
         );
@@ -1143,7 +1151,7 @@ export function LoginScreen({ navigation }: any) {
               }}
               keyboardType="number-pad"
               maxLength={6}
-              icon={<CheckCircle2 size={18} color="#94a3b8" />}
+              icon={<CheckCircle2 size={18} color={colors.textFaint} />}
               autoFocus
             />
             <PrimaryButton onPress={async () => {
@@ -1195,7 +1203,7 @@ export function LoginScreen({ navigation }: any) {
               </Text>
             </TouchableOpacity>
             <TouchableOpacity style={{ alignItems: 'center', marginTop: 8 }} onPress={() => { setResetSubStep('send_otp'); setOtpValue(''); }}>
-              <Text style={{ color: '#64748b', fontWeight: 'bold' }}>Back to login</Text>
+              <Text style={{ color: colors.textMuted, fontWeight: 'bold' }}>Back to login</Text>
             </TouchableOpacity>
           </View>
         );
@@ -1216,7 +1224,7 @@ export function LoginScreen({ navigation }: any) {
               onChange={setNewPassword}
               secureTextEntry
               showToggle
-              icon={<Lock size={18} color="#94a3b8" />}
+              icon={<Lock size={18} color={colors.textFaint} />}
               returnKeyType="next"
               onSubmitEditing={() => confirmPasswordRef.current?.focus()}
               textContentType="newPassword"
@@ -1229,7 +1237,7 @@ export function LoginScreen({ navigation }: any) {
               onChange={setConfirmPassword}
               secureTextEntry
               showToggle
-              icon={<Lock size={18} color="#94a3b8" />}
+              icon={<Lock size={18} color={colors.textFaint} />}
               returnKeyType="done"
               onSubmitEditing={handleResetPassword}
               textContentType="newPassword"
@@ -1240,7 +1248,7 @@ export function LoginScreen({ navigation }: any) {
               <CheckCircle2 size={18} color="#fff" />
             </PrimaryButton>
             <TouchableOpacity style={{ alignItems: 'center', marginTop: 10 }} onPress={() => setStep('login')}>
-              <Text style={{ color: '#64748b', fontWeight: 'bold' }}>Back to login</Text>
+              <Text style={{ color: colors.textMuted, fontWeight: 'bold' }}>Back to login</Text>
             </TouchableOpacity>
           </View>
         );
@@ -1265,14 +1273,14 @@ export function LoginScreen({ navigation }: any) {
               value={email}
               onChange={(v: string) => { setEmail(v.replace(EMOJI_REGEX_GLOBAL, '')); setSignupErrors(e => ({ ...e, email: undefined })); }}
               keyboardType="email-address"
-              icon={<User size={18} color="#94a3b8" />}
+              icon={<User size={18} color={colors.textFaint} />}
             />
             {signupErrors.email ? <Text style={styles.fieldError}>{signupErrors.email}</Text> : null}
             <InputField
               placeholder="Full name"
               value={name}
               onChange={(v: string) => { setName(v.replace(/[^a-zA-Z\s]/g, '')); setSignupErrors(e => ({ ...e, name: undefined })); }}
-              icon={<User size={18} color="#94a3b8" />}
+              icon={<User size={18} color={colors.textFaint} />}
             />
             {signupErrors.name ? <Text style={styles.fieldError}>{signupErrors.name}</Text> : null}
             <InputField
@@ -1281,7 +1289,7 @@ export function LoginScreen({ navigation }: any) {
               onChange={(v: string) => { setPhone(v.replace(/[^0-9]/g, '')); setSignupErrors(e => ({ ...e, phone: undefined })); }}
               keyboardType="number-pad"
               maxLength={10}
-              icon={<User size={18} color="#94a3b8" />}
+              icon={<User size={18} color={colors.textFaint} />}
             />
             {signupErrors.phone ? <Text style={styles.fieldError}>{signupErrors.phone}</Text> : null}
             <InputField
@@ -1290,7 +1298,7 @@ export function LoginScreen({ navigation }: any) {
               onChange={(v: string) => { setPassword(v); setSignupErrors(e => ({ ...e, password: undefined })); }}
               secureTextEntry
               showToggle
-              icon={<Lock size={18} color="#94a3b8" />}
+              icon={<Lock size={18} color={colors.textFaint} />}
             />
             {signupErrors.password ? <Text style={styles.fieldError}>{signupErrors.password}</Text> : null}
             {!signupErrors.password && password.length > 0 && (
@@ -1302,7 +1310,7 @@ export function LoginScreen({ navigation }: any) {
               placeholder="Referral code (optional)"
               value={referralCode}
               onChange={(v: string) => setReferralCode(v.replace(/\s/g, '').toUpperCase())}
-              icon={<Gift size={18} color="#94a3b8" />}
+              icon={<Gift size={18} color={colors.textFaint} />}
               autoCapitalize="characters"
             />
             {referralStatus === 'loading' && (
@@ -1341,7 +1349,7 @@ export function LoginScreen({ navigation }: any) {
               <ArrowRight size={18} color="#fff" />
             </PrimaryButton>
             <TouchableOpacity style={{ alignItems: 'center', marginTop: 10 }} onPress={() => setStep('entry')}>
-              <Text style={{ color: '#64748b', fontWeight: 'bold' }}>Already have an account? Login</Text>
+              <Text style={{ color: colors.textMuted, fontWeight: 'bold' }}>Already have an account? Login</Text>
             </TouchableOpacity>
           </ScrollView>
       );
@@ -1400,13 +1408,13 @@ export function LoginScreen({ navigation }: any) {
                 } finally { setIsLoading(false); }
               }}
             >
-              <Text style={[styles.otpResendText, resendTimer > 0 && { color: '#94a3b8' }]}>
+              <Text style={[styles.otpResendText, resendTimer > 0 && { color: colors.textFaint }]}>
                 {resendTimer > 0 ? `Resend OTP in ${resendTimer}s` : "Didn't receive? Resend OTP"}
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => setStep('signup')} style={{ marginTop: 8 }}>
-              <Text style={{ color: '#64748b', fontWeight: '600', fontSize: 14, textAlign: 'center' }}>← Back to signup</Text>
+              <Text style={{ color: colors.textMuted, fontWeight: '600', fontSize: 14, textAlign: 'center' }}>← Back to signup</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -1488,11 +1496,11 @@ export function LoginScreen({ navigation }: any) {
             +1,000 KarmaCoins XP added to your wallet
           </Text>
           {referralValidName ? (
-            <Text style={{ fontSize: 13, color: '#64748b', fontWeight: '500', textAlign: 'center', marginBottom: 32, lineHeight: 20 }}>
+            <Text style={{ fontSize: 13, color: colors.textMuted, fontWeight: '500', textAlign: 'center', marginBottom: 32, lineHeight: 20 }}>
               You and {referralValidName} both received 1,000 KarmaCoins XP for joining together.
             </Text>
           ) : (
-            <Text style={{ fontSize: 13, color: '#64748b', fontWeight: '500', textAlign: 'center', marginBottom: 32, lineHeight: 20 }}>
+            <Text style={{ fontSize: 13, color: colors.textMuted, fontWeight: '500', textAlign: 'center', marginBottom: 32, lineHeight: 20 }}>
               You've both been rewarded with 1,000 KarmaCoins XP each.
             </Text>
           )}
@@ -1504,7 +1512,7 @@ export function LoginScreen({ navigation }: any) {
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={{ fontSize: 13, fontWeight: '800', color: '#064e3b' }}>Your starting balance</Text>
-                <Text style={{ fontSize: 11, color: '#64748b', fontWeight: '500' }}>1,000 coins waiting in your wallet</Text>
+                <Text style={{ fontSize: 11, color: colors.textMuted, fontWeight: '500' }}>1,000 coins waiting in your wallet</Text>
               </View>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
@@ -1513,7 +1521,7 @@ export function LoginScreen({ navigation }: any) {
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={{ fontSize: 13, fontWeight: '800', color: '#064e3b' }}>Schedule your first pickup</Text>
-                <Text style={{ fontSize: 11, color: '#64748b', fontWeight: '500' }}>Recycle & earn even more coins</Text>
+                <Text style={{ fontSize: 11, color: colors.textMuted, fontWeight: '500' }}>Recycle & earn even more coins</Text>
               </View>
             </View>
           </View>
@@ -1547,7 +1555,7 @@ export function LoginScreen({ navigation }: any) {
 
             <View style={styles.fieldSection}>
               <View style={styles.labelRow}>
-                <CalendarDays size={18} color="#0f172a" />
+                <CalendarDays size={18} color={colors.text} />
                 <Text style={styles.fieldLabel}>Your age</Text>
               </View>
               <InputField
@@ -1563,7 +1571,7 @@ export function LoginScreen({ navigation }: any) {
 
             <View style={styles.fieldSection}>
               <View style={styles.labelRow}>
-                <User size={18} color="#0f172a" />
+                <User size={18} color={colors.text} />
                 <Text style={styles.fieldLabel}>Identity (gender)</Text>
               </View>
               <SelectionPills
@@ -1577,7 +1585,7 @@ export function LoginScreen({ navigation }: any) {
 
             <View style={styles.fieldSection}>
               <View style={styles.labelRow}>
-                <Heart size={18} color="#0f172a" />
+                <Heart size={18} color={colors.text} />
                 <Text style={styles.fieldLabel}>Sexual orientation</Text>
               </View>
               <SelectionPills
@@ -1591,7 +1599,7 @@ export function LoginScreen({ navigation }: any) {
 
             <View style={styles.fieldSection}>
               <View style={styles.labelRow}>
-                <Heart size={18} color="#0f172a" />
+                <Heart size={18} color={colors.text} />
                 <Text style={styles.fieldLabel}>Marital status</Text>
               </View>
               <SelectionPills 
@@ -1605,7 +1613,7 @@ export function LoginScreen({ navigation }: any) {
 
             <View style={styles.fieldSection}>
               <View style={styles.labelRow}>
-                <Briefcase size={18} color="#0f172a" />
+                <Briefcase size={18} color={colors.text} />
                 <Text style={styles.fieldLabel}>Employment</Text>
               </View>
               <SelectionPills
@@ -1631,7 +1639,7 @@ export function LoginScreen({ navigation }: any) {
             <CheckCircle2 size={20} color="#fff" />
           </PrimaryButton>
           <TouchableOpacity style={{ alignItems: 'center', paddingVertical: 12 }} onPress={() => { reconnect(); navigation.replace('App', { screen: 'Dashboard', params: { justClaimedWelcomeBonus: true } }); }}>
-            <Text style={{ color: '#64748b', fontWeight: '700', fontSize: 14 }}>Skip for now</Text>
+            <Text style={{ color: colors.textMuted, fontWeight: '700', fontSize: 14 }}>Skip for now</Text>
           </TouchableOpacity>
         </ScrollView>
       );
@@ -1683,18 +1691,18 @@ export function LoginScreen({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   rootContainer: { flex: 1, backgroundColor: '#064e3b' },
   journeyProgress: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: 6, marginBottom: 20 },
-  journeyStage: { fontSize: 11, fontWeight: '700', color: '#94a3b8' },
+  journeyStage: { fontSize: 11, fontWeight: '700', color: c.textFaint },
   journeyStageActive: { color: '#15803d' },
-  journeyArrow: { fontSize: 11, fontWeight: '700', color: '#cbd5e1' },
+  journeyArrow: { fontSize: 11, fontWeight: '700', color: c.borderStrong },
   offlineBanner: { backgroundColor: '#fef2f2', borderWidth: 1, borderColor: '#fecaca', borderRadius: 12, padding: 12, marginBottom: 8 },
   offlineBannerText: { color: '#dc2626', fontSize: 13, fontWeight: '700', textAlign: 'center' },
   fieldError: { color: '#dc2626', fontSize: 12, fontWeight: '600', marginTop: -16, paddingLeft: 4 },
-  referralHint: { fontSize: 12, fontWeight: '600', marginTop: -16, paddingLeft: 4, color: '#64748b' },
+  referralHint: { fontSize: 12, fontWeight: '600', marginTop: -16, paddingLeft: 4, color: c.textMuted },
   topNotchFiller: { position: 'absolute', top: 0, left: 0, right: 0, height: 100, backgroundColor: '#064e3b' },
-  container: { flex: 1, backgroundColor: '#ffffff', maxWidth: 900, width: '100%', alignSelf: 'center' },
+  container: { flex: 1, backgroundColor: c.bg, maxWidth: 900, width: '100%', alignSelf: 'center' },
   header: {
     alignItems: 'center',
     paddingTop: 16,
@@ -1713,9 +1721,9 @@ const styles = StyleSheet.create({
   logoWordText: { fontSize: 28, fontWeight: '900', letterSpacing: -0.5, lineHeight: 32 },
   logoTagline: { fontSize: 9.5, fontWeight: '800', letterSpacing: 0.9, marginTop: 3 },
   termsRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginTop: 4 },
-  checkbox: { width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: '#cbd5e1', alignItems: 'center', justifyContent: 'center', marginTop: 1 },
+  checkbox: { width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: c.borderStrong, alignItems: 'center', justifyContent: 'center', marginTop: 1 },
   checkboxOn: { backgroundColor: '#16a34a', borderColor: '#16a34a' },
-  termsText: { flex: 1, fontSize: 13, color: '#475569', lineHeight: 19, fontWeight: '500' },
+  termsText: { flex: 1, fontSize: 13, color: c.textMuted, lineHeight: 19, fontWeight: '500' },
   termsLink: { color: '#16a34a', fontWeight: '800' },
   
   // 460 keeps the form a comfortable centred column on desktop — at 800 the
@@ -1726,22 +1734,22 @@ const styles = StyleSheet.create({
   stepContent: { gap: 14 },
   scrollStepContent: { paddingHorizontal: 24, paddingBottom: 50, gap: 16 },
   
-  title: { fontSize: 24, fontWeight: '900', color: '#0f172a' },
-  subtitle: { fontSize: 13, color: '#64748b', marginTop: 6, lineHeight: 20, fontWeight: '500' },
+  title: { fontSize: 24, fontWeight: '900', color: c.text },
+  subtitle: { fontSize: 13, color: c.textMuted, marginTop: 6, lineHeight: 20, fontWeight: '500' },
   successTagRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
   successTagText: { fontSize: 12, color: '#16a34a', fontWeight: '800' },
-  
+
   inputContainer: { position: 'relative', justifyContent: 'center' },
   iconWrapper: { position: 'absolute', left: 16, zIndex: 1 },
   input: {
     height: 56,
     borderRadius: 16,
-    backgroundColor: '#f8fafc',
+    backgroundColor: c.inputBg,
     borderWidth: 1.5,
-    borderColor: '#e2e8f0',
+    borderColor: c.border,
     paddingHorizontal: 16,
     fontSize: 15,
-    color: '#0f172a',
+    color: c.text,
     fontWeight: '700'
   },
   
@@ -1763,8 +1771,8 @@ const styles = StyleSheet.create({
   buttonText: { color: '#ffffff', fontWeight: '900', fontSize: 16 },
   
   dividerRow: { flexDirection: 'row', alignItems: 'center', marginTop: 16, marginBottom: 12 },
-  dividerLine: { flex: 1, height: 1, backgroundColor: '#f1f5f9' },
-  dividerText: { marginHorizontal: 16, color: '#94a3b8', fontSize: 13, fontWeight: '700' },
+  dividerLine: { flex: 1, height: 1, backgroundColor: c.border },
+  dividerText: { marginHorizontal: 16, color: c.textFaint, fontSize: 13, fontWeight: '700' },
 
   // Full-width "Continue with Google" button (native) / mount point (web, where
   // Google's own GIS button renders itself inside this container).
@@ -1772,20 +1780,20 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 56,
     borderRadius: 16,
-    backgroundColor: 'white',
+    backgroundColor: c.surface,
     borderWidth: 1.5,
-    borderColor: '#e2e8f0',
+    borderColor: c.border,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: c.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 6,
   },
-  googleFullBtnText: { color: '#1f2937', fontWeight: '700', fontSize: 15 },
+  googleFullBtnText: { color: c.text, fontWeight: '700', fontSize: 15 },
   googleFullBtnMount: { width: '100%', minHeight: 44, alignItems: 'center', justifyContent: 'center' },
   // Web: our own button renders immediately (so the slot is never blank while GIS
   // loads); Google's real button is layered exactly on top, fully transparent, so
@@ -1801,9 +1809,9 @@ const styles = StyleSheet.create({
   socialIconWrap: { width: 88, height: 56, position: 'relative' },
   socialIconBtn: {
     width: 88, height: 56, borderRadius: 14,
-    backgroundColor: 'white', borderWidth: 1, borderColor: '#e8ecf1',
+    backgroundColor: c.surface, borderWidth: 1, borderColor: c.border,
     alignItems: 'center', justifyContent: 'center',
-    elevation: 2, shadowColor: '#0f172a', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.08, shadowRadius: 8,
+    elevation: 2, shadowColor: c.shadow, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.08, shadowRadius: 8,
   },
 
   // Full-width "Continue with Facebook" button — native uses react-native-fbsdk-next,
@@ -1832,13 +1840,13 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: 'white',
+    backgroundColor: c.surface,
     borderWidth: 1.5,
-    borderColor: '#e2e8f0',
+    borderColor: c.border,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: c.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
@@ -1846,62 +1854,62 @@ const styles = StyleSheet.create({
 
   // Demographics Premium UI Redesign
   demoHeader: { alignItems: 'center', marginBottom: 12, marginTop: 10 },
-  demoTitle: { fontSize: 28, fontWeight: '900', color: '#064e3b', textAlign: 'center' },
-  demoSubtitle: { fontSize: 13, color: '#475569', textAlign: 'center', marginTop: 8, paddingHorizontal: 20, lineHeight: 20 },
-  
-  formCard: { 
-    backgroundColor: 'white', 
-    borderRadius: 24, 
-    padding: 20, 
-    elevation: 4, 
-    shadowColor: '#000', 
-    shadowOffset: { width: 0, height: 4 }, 
-    shadowOpacity: 0.08, 
-    shadowRadius: 12, 
-    marginBottom: 20 
+  demoTitle: { fontSize: 28, fontWeight: '900', color: c.text, textAlign: 'center' },
+  demoSubtitle: { fontSize: 13, color: c.textMuted, textAlign: 'center', marginTop: 8, paddingHorizontal: 20, lineHeight: 20 },
+
+  formCard: {
+    backgroundColor: c.surface,
+    borderRadius: 24,
+    padding: 20,
+    elevation: 4,
+    shadowColor: c.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    marginBottom: 20
   },
-  
+
   fieldSection: { marginVertical: 8 },
   labelRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 14 },
-  fieldLabel: { fontSize: 15, fontWeight: '900', color: '#0f172a' },
-  fieldDivider: { height: 1, backgroundColor: '#f1f5f9', marginVertical: 16 },
-  
+  fieldLabel: { fontSize: 15, fontWeight: '900', color: c.text },
+  fieldDivider: { height: 1, backgroundColor: c.border, marginVertical: 16 },
+
   pillsContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  pill: { 
+  pill: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16, 
-    paddingVertical: 12, 
-    borderRadius: 100, 
-    backgroundColor: '#f8fafc', 
-    borderWidth: 1.5, 
-    borderColor: '#e2e8f0' 
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 100,
+    backgroundColor: c.surfaceAlt,
+    borderWidth: 1.5,
+    borderColor: c.border
   },
-  pillActive: { 
-    backgroundColor: '#16a34a', 
-    borderColor: '#16a34a', 
-    shadowColor: '#16a34a', 
+  pillActive: {
+    backgroundColor: '#16a34a',
+    borderColor: '#16a34a',
+    shadowColor: '#16a34a',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
-    elevation: 4 
+    elevation: 4
   },
-  pillText: { fontSize: 14, fontWeight: '700', color: '#475569' },
+  pillText: { fontSize: 14, fontWeight: '700', color: c.textMuted },
   pillTextActive: { color: 'white', fontWeight: '800' },
-  readonlyEmailBox: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#f1f5f9', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14, marginBottom: 16 },
-  readonlyEmailText: { flex: 1, fontSize: 15, color: '#475569', fontWeight: '500' },
+  readonlyEmailBox: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: c.surfaceAlt, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14, marginBottom: 16 },
+  readonlyEmailText: { flex: 1, fontSize: 15, color: c.textMuted, fontWeight: '500' },
 
   // OTP Verification
   otpContainer: { alignItems: 'center', paddingHorizontal: 24, paddingTop: 32, paddingBottom: 40 },
-  otpIconBg: { width: 64, height: 64, borderRadius: 20, backgroundColor: '#dcfce7', alignItems: 'center', justifyContent: 'center', marginBottom: 20, borderWidth: 1.5, borderColor: '#86efac' },
-  otpTitle: { fontSize: 24, fontWeight: '900', color: '#0f172a', marginBottom: 8, textAlign: 'center' },
-  otpSubtitle: { fontSize: 14, color: '#64748b', fontWeight: '500', textAlign: 'center' },
+  otpIconBg: { width: 64, height: 64, borderRadius: 20, backgroundColor: c.primarySoft, alignItems: 'center', justifyContent: 'center', marginBottom: 20, borderWidth: 1.5, borderColor: '#86efac' },
+  otpTitle: { fontSize: 24, fontWeight: '900', color: c.text, marginBottom: 8, textAlign: 'center' },
+  otpSubtitle: { fontSize: 14, color: c.textMuted, fontWeight: '500', textAlign: 'center' },
   otpEmail: { fontSize: 15, color: '#15803d', fontWeight: '800', marginBottom: 28, textAlign: 'center' },
   // Boxes flex down on narrow phones (6 fixed 48px boxes + gaps need ~390px,
   // small screens are 320-360) — maxWidth keeps them at 48px on wide screens.
   otpBoxRow: { flexDirection: 'row', gap: 8, marginBottom: 28, justifyContent: 'center', width: '100%', maxWidth: 360, alignSelf: 'center' },
-  otpBox: { flex: 1, minWidth: 0, maxWidth: 48, height: 56, borderRadius: 14, borderWidth: 2, borderColor: '#e2e8f0', backgroundColor: '#f8fafc', textAlign: 'center', fontSize: 22, fontWeight: '900', color: '#0f172a' },
-  otpBoxFilled: { borderColor: '#15803d', backgroundColor: '#f0fdf4' },
+  otpBox: { flex: 1, minWidth: 0, maxWidth: 48, height: 56, borderRadius: 14, borderWidth: 2, borderColor: c.border, backgroundColor: c.inputBg, textAlign: 'center', fontSize: 22, fontWeight: '900', color: c.text },
+  otpBoxFilled: { borderColor: '#15803d', backgroundColor: c.primarySoft },
   otpResendBtn: { marginTop: 16 },
   otpResendText: { color: '#15803d', fontWeight: '700', fontSize: 14 },
-});
+}));
