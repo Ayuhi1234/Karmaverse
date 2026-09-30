@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated, Platform, Image, Linking, Easing } from 'react-native';
+import { View, Text, TouchableOpacity, Animated, Platform, Image, Linking, Easing } from 'react-native';
 import { X, ArrowRight } from 'lucide-react-native';
+import { useTheme, makeStyles } from '../../theme';
 
 const SHOW_DELAY_MS = 2200;
 const REAPPEAR_GAP_MS = 15000;
@@ -20,6 +21,8 @@ interface Props {
 }
 
 export function MascotPopupBanner({ suppressed = false }: Props) {
+  const s = useStyles();
+  const { colors } = useTheme();
   const [visible, setVisible] = useState(false);
   const scale = useRef(new Animated.Value(0.9)).current;
   const opacity = useRef(new Animated.Value(0)).current;
@@ -188,7 +191,7 @@ export function MascotPopupBanner({ suppressed = false }: Props) {
     <View style={[s.container, { pointerEvents: suppressed ? 'none' : 'box-none' }]}>
       <Animated.View style={[s.widget, { opacity: Animated.multiply(opacity, suppressOpacity), transform: [{ scale }] }]}>
         <TouchableOpacity style={s.closeBtn} onPress={dismiss} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <X size={14} color="#64748b" />
+          <X size={14} color={colors.textMuted} />
         </TouchableOpacity>
 
         <Animated.View style={[s.speechBubble, { opacity: bubbleOpacity, transform: [{ scale: bubbleScale }] }]}>
@@ -234,7 +237,7 @@ export function MascotPopupBanner({ suppressed = false }: Props) {
   );
 }
 
-const s = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   container: {
     ...Platform.select({
       web: { position: 'fixed' } as any,
@@ -253,7 +256,7 @@ const s = StyleSheet.create({
   widget: { alignItems: 'center', position: 'relative', pointerEvents: 'auto' },
   closeBtn: {
     position: 'absolute', top: -6, right: -6, width: 22, height: 22, borderRadius: 11, zIndex: 1,
-    backgroundColor: 'white', alignItems: 'center', justifyContent: 'center',
+    backgroundColor: c.surface, alignItems: 'center', justifyContent: 'center',
     ...Platform.select({
       web: { boxShadow: '0 2px 8px rgba(0,0,0,0.18)' } as any,
       default: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 4 },
@@ -268,24 +271,24 @@ const s = StyleSheet.create({
   armOverlayImg: { width: 19, height: 22 },
   speechBubble: {
     minWidth: 110, maxWidth: 200, marginBottom: 8,
-    backgroundColor: 'white', borderRadius: 14, borderWidth: 1.5, borderColor: '#dcfce7',
+    backgroundColor: c.surface, borderRadius: 14, borderWidth: 1.5, borderColor: '#dcfce7',
     paddingHorizontal: 12, paddingVertical: 8, alignItems: 'center',
     ...Platform.select({
       web: { boxShadow: '0 6px 16px rgba(0,0,0,0.12)' } as any,
       default: { shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.15, shadowRadius: 8, elevation: 6 },
     }),
   },
-  speechText: { fontSize: 12, color: '#0f172a', fontWeight: '700', lineHeight: 16, textAlign: 'center' },
+  speechText: { fontSize: 12, color: c.text, fontWeight: '700', lineHeight: 16, textAlign: 'center' },
   speechTail: {
     position: 'absolute', bottom: -7, left: '50%', marginLeft: -6, width: 0, height: 0,
     borderLeftWidth: 6, borderRightWidth: 6, borderTopWidth: 7,
-    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: 'white',
+    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: c.surface,
   },
   typingRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 3 },
   typingDot: { width: 7, height: 7, borderRadius: 3.5, backgroundColor: '#16a34a' },
   lookPill: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 8,
-    backgroundColor: 'white', borderRadius: 12, borderWidth: 1.5, borderColor: '#dcfce7',
+    backgroundColor: c.surface, borderRadius: 12, borderWidth: 1.5, borderColor: '#dcfce7',
     paddingHorizontal: 14, paddingVertical: 8, maxWidth: 200,
     ...Platform.select({
       web: { boxShadow: '0 4px 12px rgba(0,0,0,0.1)' } as any,
@@ -293,4 +296,4 @@ const s = StyleSheet.create({
     }),
   },
   lookPillText: { flexShrink: 1, fontSize: 12, color: '#16a34a', fontWeight: '800', textAlign: 'center', lineHeight: 16 },
-});
+}));

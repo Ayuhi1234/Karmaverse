@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import { Leaf } from 'lucide-react-native';
+import { makeStyles } from '../../theme';
 
 const MAX_WIDTH = 430;
 
@@ -19,6 +20,7 @@ function TopBar() {
 }
 
 export function ResponsiveContainer({ children }: { children: React.ReactNode }) {
+  const s = useStyles();
   if (Platform.OS !== 'web') return <>{children}</>;
 
   return (
@@ -38,7 +40,7 @@ export function FullWidthContainer({ children }: { children: React.ReactNode }) 
   return <View style={{ flex: 1 }}>{children}</View>;
 }
 
-const s = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   outer: {
     flex: 1,
     backgroundColor: '#064e3b',
@@ -52,7 +54,7 @@ const s = StyleSheet.create({
     flex: 1,
     width: '100%',
     maxWidth: MAX_WIDTH,
-    backgroundColor: '#ffffff',
+    backgroundColor: c.bg,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     overflow: 'hidden',
@@ -62,7 +64,7 @@ const s = StyleSheet.create({
     shadowRadius: 20,
     elevation: 10,
   },
-});
+}));
 
 const tb = StyleSheet.create({
   bar: {

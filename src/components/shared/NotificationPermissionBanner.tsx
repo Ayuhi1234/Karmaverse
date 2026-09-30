@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BellOff, X } from 'lucide-react-native';
 import { useNotifications } from '../../context/NotificationContext';
+import { useTheme, makeStyles } from '../../theme';
 
 // Slim, dismissible nudge shown on the dashboard when OS notifications are off.
 // Dismiss hides it for a week; the permanent home for turning them on is Profile.
@@ -10,6 +11,8 @@ const DISMISS_KEY = 'notifPermBannerDismissedAt';
 const COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000;
 
 export default function NotificationPermissionBanner() {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const { pushEnabled, enablePush } = useNotifications();
   // Start hidden until we've read the cooldown, so it never flashes on mount.
   const [dismissed, setDismissed] = useState(true);
@@ -47,13 +50,13 @@ export default function NotificationPermissionBanner() {
         <Text style={styles.ctaText}>Turn on</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.close} onPress={onDismiss} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-        <X size={15} color="#94a3b8" />
+        <X size={15} color={colors.textFaint} />
       </TouchableOpacity>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   wrap: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -62,7 +65,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
     padding: 12,
     borderRadius: 14,
-    backgroundColor: '#ffffff',
+    backgroundColor: c.surface,
     borderWidth: 1,
     borderColor: '#dcfce7',
     shadowColor: '#052e16',
@@ -75,13 +78,13 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#f0fdf4',
+    backgroundColor: c.primarySoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  title: { fontSize: 13.5, fontWeight: '700', color: '#0f172a' },
-  sub: { fontSize: 11.5, fontWeight: '500', color: '#64748b', marginTop: 1 },
+  title: { fontSize: 13.5, fontWeight: '700', color: c.text },
+  sub: { fontSize: 11.5, fontWeight: '500', color: c.textMuted, marginTop: 1 },
   cta: { backgroundColor: '#15803d', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10 },
   ctaText: { color: '#ffffff', fontSize: 12.5, fontWeight: '700' },
   close: { padding: 2 },
-});
+}));
