@@ -1,4 +1,5 @@
 import api from './api';
+import { extractList } from '../utils/apiList';
 
 export const profileService = {
   // Update demographics during signup or from profile edit
@@ -114,7 +115,9 @@ export const profileService = {
   getTransactionHistory: async () => {
     try {
       const response = await api.get('/api/v1/transactions/history');
-      return response.data.data || response.data || [];
+      // Robust to any wrapper shape (see extractList) so the wallet list never
+      // silently shows empty when the backend changes the transactions shape.
+      return extractList(response.data);
     } catch (error) {
       console.error('Get Transactions Error:', error);
       throw error;

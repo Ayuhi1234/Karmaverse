@@ -1,4 +1,5 @@
 import api from './api';
+import { extractList } from '../utils/apiList';
 
 export const bookingService = {
   createBooking: async (data: {
@@ -36,16 +37,10 @@ export const bookingService = {
   getMyBookings: async () => {
     try {
       const response = await api.get('/api/v1/bookings/my-bookings');
-      // Always return an array. The backend has returned bookings under different
-      // shapes over time (a bare array, { data: [...] }, { bookings: [...] }, or a
-      // paginated { data: { bookings: [...] } }); a non-array here makes callers'
-      // .map/.filter throw and blanks the screen, so normalise every known shape.
-      const d = response.data;
-      if (Array.isArray(d)) return d;
-      if (Array.isArray(d?.data)) return d.data;
-      if (Array.isArray(d?.bookings)) return d.bookings;
-      if (Array.isArray(d?.data?.bookings)) return d.data.bookings;
-      return [];
+      // Backend has changed this response's shape without notice (array,
+      // { data: [...] }, { bookings: [...] }, paginated { data: { docs: [...] } });
+      // extractList finds the array in any of them so Orders never blanks or shows empty.
+      return extractList(response.data);
     } catch (error) {
       console.error('Get Bookings Error:', error);
       throw error;
