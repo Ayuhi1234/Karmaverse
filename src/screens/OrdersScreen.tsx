@@ -24,7 +24,7 @@ export function OrdersScreen({ navigation, route }: any) {
       try {
         setIsLoading(true);
         const data = await bookingService.getMyBookings();
-        setOrders(data || []);
+        setOrders(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('Failed to fetch orders', error);
       } finally {
@@ -86,7 +86,7 @@ export function OrdersScreen({ navigation, route }: any) {
     };
   };
 
-  const formattedOrders = orders.map(formatOrder);
+  const formattedOrders = (Array.isArray(orders) ? orders : []).map(formatOrder);
 
   const filteredOrders = formattedOrders.filter(order => {
     if (activeTab === 'Active') return order.status === 'Scheduled' || order.status === 'In Transit';

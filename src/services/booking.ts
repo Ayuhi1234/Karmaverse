@@ -36,7 +36,16 @@ export const bookingService = {
   getMyBookings: async () => {
     try {
       const response = await api.get('/api/v1/bookings/my-bookings');
-      return response.data.data || response.data;
+      // Always return an array. The backend has returned bookings under different
+      // shapes over time (a bare array, { data: [...] }, { bookings: [...] }, or a
+      // paginated { data: { bookings: [...] } }); a non-array here makes callers'
+      // .map/.filter throw and blanks the screen, so normalise every known shape.
+      const d = response.data;
+      if (Array.isArray(d)) return d;
+      if (Array.isArray(d?.data)) return d.data;
+      if (Array.isArray(d?.bookings)) return d.bookings;
+      if (Array.isArray(d?.data?.bookings)) return d.data.bookings;
+      return [];
     } catch (error) {
       console.error('Get Bookings Error:', error);
       throw error;
