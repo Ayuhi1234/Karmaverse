@@ -7,6 +7,7 @@ import { UserSocketProvider } from './src/context/UserSocketContext';
 import { NotificationProvider } from './src/context/NotificationContext';
 import { ResponsiveContainer } from './src/components/shared/ResponsiveContainer';
 import { AlertHost } from './src/components/shared/AlertHost';
+import { RootErrorBoundary } from './src/components/shared/RootErrorBoundary';
 import {
   registerForPushNotifications,
   sendTokenToBackend,
@@ -78,15 +79,17 @@ export default function App() {
   }, []);
 
   return (
-    <SafeAreaProvider>
-      <ThemeProvider>
-        <NotificationProvider>
-          <UserSocketProvider>
-            <RootNavigator />
-            <AlertHost />
-          </UserSocketProvider>
-        </NotificationProvider>
-      </ThemeProvider>
-    </SafeAreaProvider>
+    <RootErrorBoundary>
+      <SafeAreaProvider>
+        <ThemeProvider>
+          <NotificationProvider>
+            <UserSocketProvider>
+              <RootNavigator />
+              <AlertHost />
+            </UserSocketProvider>
+          </NotificationProvider>
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </RootErrorBoundary>
   );
 }
