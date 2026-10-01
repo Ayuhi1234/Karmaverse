@@ -35,12 +35,11 @@ try {
   FBAccessToken = fb.AccessToken;
 } catch (_) {}
 
-// Apple authentication — iOS-only native module; lazy-required so it's a no-op
-// on Android/web and in Expo Go where the native module isn't present.
+// Apple authentication is iOS-only. The native module (expo-apple-authentication)
+// is temporarily removed from the Android build — re-add it for the iOS build and
+// restore the require here. Until then this stays null and the Apple button, which
+// only renders on iOS anyway, is inert.
 let AppleAuthentication: any = null;
-try {
-  AppleAuthentication = require('expo-apple-authentication');
-} catch (_) {}
 
 // Web OAuth client (karmaverse.earth) — configured for Google Identity Services on web only.
 // Native (Android/iOS) still uses the separate webClientId passed to GoogleSignin.configure in App.tsx.
