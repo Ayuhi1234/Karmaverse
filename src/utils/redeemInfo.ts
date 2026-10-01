@@ -3,13 +3,13 @@ import { showAlert } from './alert';
 
 // Fixed copy for persistent banners (Wallet screen, Home wallet widget) — kept static
 // so the text doesn't visibly change on every re-render/focus.
-export const REDEEM_INFO_TITLE = 'Redemption opens 1 October 🎉';
+export const REDEEM_INFO_TITLE = 'Redemption opens 31 December 🎉';
 export const REDEEM_INFO_MESSAGE =
-  'From 1 October, cash out your KarmaCoins XP — 10 XP = ₹1. Keep earning till then!';
+  'From 31 December, cash out your KarmaCoins XP — 10 XP = ₹1. Keep earning till then!';
 
 // Single switch that flips the Wallet screen's Redeem button from the countdown
 // popup over to the real redeem flow — flip the date (or the flow) here only.
-export const REDEEM_LAUNCH_DATE = new Date('2026-10-01T00:00:00');
+export const REDEEM_LAUNCH_DATE = new Date('2026-12-31T00:00:00');
 export function isRedeemLive() {
   return true;
 }
@@ -18,8 +18,8 @@ export function isRedeemLive() {
 // between the two short paragraphs gives them room to breathe in the popup.
 function buildPopupContent() {
   return {
-    title: 'Redemption opens 1 October 🎉',
-    message: 'From 1 October, your KarmaCoins XP turn into real cash — 10 XP = ₹1.\n\nKeep earning with every sustainable action! ♻️',
+    title: 'Redemption opens 31 December 🎉',
+    message: 'From 31 December, your KarmaCoins XP turn into real cash — 10 XP = ₹1.\n\nKeep earning with every sustainable action! ♻️',
   };
 }
 
