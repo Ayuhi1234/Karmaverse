@@ -93,6 +93,17 @@ export function RootNavigator() {
       const bookingId = data?.bookingId;
       const booking = bookingId ? { _id: bookingId } : undefined;
 
+      // Marketing / engagement pushes name a target in `data.screen`; map it to the
+      // right tab or stack route, ignoring anything not on the whitelist.
+      const TAB_SCREENS = ['Dashboard', 'Orders', 'Wallet', 'Store'];
+      const STACK_SCREENS = ['Quiz', 'Redeem', 'RedeemHistory', 'Referral', 'SchedulePickup', 'KnowledgeHub', 'Donation', 'Transfer', 'AboutUs', 'Profile'];
+      const goToScreen = (screen?: string): boolean => {
+        if (!screen) return false;
+        if (TAB_SCREENS.includes(screen)) { (nav as any).navigate('App', { screen }); return true; }
+        if (STACK_SCREENS.includes(screen)) { (nav as any).navigate(screen); return true; }
+        return false;
+      };
+
       // An action button was tapped — route by the button, not the default target.
       if (actionIdentifier && actionIdentifier !== DEFAULT_ACTION) {
         switch (actionIdentifier) {
@@ -106,6 +117,13 @@ export function RootNavigator() {
           case 'orders':
             nav.navigate('App', { screen: 'Orders' });
             return;
+          case 'open_quiz': nav.navigate('Quiz'); return;
+          case 'open_redeem': nav.navigate('Redeem'); return;
+          case 'open_pickup': nav.navigate('SchedulePickup'); return;
+          case 'open_referral': nav.navigate('Referral'); return;
+          case 'open':
+            if (goToScreen(data?.screen)) return;
+            break;
         }
       }
 
@@ -125,6 +143,9 @@ export function RootNavigator() {
           nav.navigate('App', { screen: 'Orders' });
           return;
       }
+
+      // Non-transactional (marketing / engagement) push — route by the named screen.
+      if (goToScreen(data?.screen)) return;
 
       // Fallback: any booking-linked push with no/unknown type → booking details.
       if (booking) nav.navigate('BookingDetails', { booking });

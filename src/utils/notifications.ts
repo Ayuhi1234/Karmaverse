@@ -50,6 +50,11 @@ export async function setupAndroidChannels(): Promise<void> {
     await Notifications.setNotificationChannelAsync('rewards', {
       name: 'Coins & rewards', importance: Notifications.AndroidImportance.HIGH, ...base,
     });
+    // Marketing / engagement pushes — a separate, quieter channel so a user can mute
+    // promos in system settings without losing transactional pickup updates.
+    await Notifications.setNotificationChannelAsync('promotions', {
+      name: 'Offers & reminders', importance: Notifications.AndroidImportance.DEFAULT, ...base,
+    });
   } catch (_) { /* channel setup is best-effort */ }
 }
 
@@ -70,6 +75,20 @@ export async function setupNotificationCategories(): Promise<void> {
     ]);
     await Notifications.setNotificationCategoryAsync('booking_cancelled', [
       { identifier: 'orders', buttonTitle: 'View orders', options: fg },
+    ]);
+    // Non-transactional (marketing / engagement) nudges. The deep-link target also
+    // rides in data.screen, so a plain tap still routes even without these buttons.
+    await Notifications.setNotificationCategoryAsync('promo_quiz', [
+      { identifier: 'open_quiz', buttonTitle: 'Play quiz', options: fg },
+    ]);
+    await Notifications.setNotificationCategoryAsync('promo_redeem', [
+      { identifier: 'open_redeem', buttonTitle: 'Redeem now', options: fg },
+    ]);
+    await Notifications.setNotificationCategoryAsync('promo_pickup', [
+      { identifier: 'open_pickup', buttonTitle: 'Schedule pickup', options: fg },
+    ]);
+    await Notifications.setNotificationCategoryAsync('promo_referral', [
+      { identifier: 'open_referral', buttonTitle: 'Invite friends', options: fg },
     ]);
   } catch (_) { /* categories are best-effort */ }
 }
