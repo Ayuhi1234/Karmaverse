@@ -240,7 +240,7 @@ export function SplashScreen({ navigation, route }: any) {
                 out the same way as the original artwork (icon left, wordmark on
                 top, tagline underneath) — the tagline is real text here instead
                 of the tiny raster copy, so it stays crisp at navbar scale. */}
-            <Image source={require('../../assets/logo-icon.png')} resizeMode="contain" style={[s.navIconImg, isMobile && { width: 48, height: 50 }]} />
+            <Image source={require('../../assets/logo-icon.webp')} resizeMode="contain" style={[s.navIconImg, isMobile && { width: 48, height: 50 }]} />
             <View>
               {/* Solid crisp text instead of the hollow/outlined wordmark image
                   (the raster "Karma" was outline-only and read faintly on dark). */}
