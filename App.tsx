@@ -12,6 +12,8 @@ import {
   registerForPushNotifications,
   sendTokenToBackend,
   addPushTokenRefreshListener,
+  setupAndroidChannels,
+  setupNotificationCategories,
 } from './src/utils/notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -46,6 +48,12 @@ function extractReferralCode(url: string): string | null {
 
 export default function App() {
   useEffect(() => {
+    // Set up Android notification channels and the action-button categories once,
+    // up front, so transactional pushes land on the right channel and (where the OS
+    // supports it) show their action buttons. Fire-and-forget — both are idempotent.
+    setupAndroidChannels();
+    setupNotificationCategories();
+
     // Deep link — cold start (app was closed)
     Linking.getInitialURL().then(url => {
       if (!url) return;

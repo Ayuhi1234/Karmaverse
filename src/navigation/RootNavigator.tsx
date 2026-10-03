@@ -80,20 +80,61 @@ export function RootNavigator() {
   }, []);
 
   useEffect(() => {
-    const handleNotificationData = (data: any) => {
+    // A plain body tap arrives as the DEFAULT action; action buttons send their own id.
+    const DEFAULT_ACTION = 'expo.modules.notifications.actions.DEFAULT';
+
+    const routeNotification = (data: any, actionIdentifier?: string) => {
       // Report the open for EVERY tapped push (not just booking ones), before any
       // navigation guard. Fire-and-forget — never await, never block navigation.
       if (data?.notificationId) markNotificationOpened(data.notificationId);
 
-      if (!data?.bookingId || !navRef.current) return;
-      navRef.current.navigate('BookingDetails', { booking: { _id: data.bookingId } });
+      const nav = navRef.current;
+      if (!nav) return;
+      const bookingId = data?.bookingId;
+      const booking = bookingId ? { _id: bookingId } : undefined;
+
+      // An action button was tapped — route by the button, not the default target.
+      if (actionIdentifier && actionIdentifier !== DEFAULT_ACTION) {
+        switch (actionIdentifier) {
+          case 'track':
+            if (booking) nav.navigate('OrderTracking', { booking });
+            return;
+          case 'rate':
+          case 'view':
+            if (booking) nav.navigate('BookingDetails', { booking });
+            return;
+          case 'orders':
+            nav.navigate('App', { screen: 'Orders' });
+            return;
+        }
+      }
+
+      // Plain tap — route by the event type. In-progress states open live tracking,
+      // a completed pickup opens its details, a cancellation opens the orders list.
+      switch (data?.type) {
+        case 'BOOKING_ACCEPTED':
+        case 'AGENT_REACHED':
+        case 'BOOKING_PICKED_UP':
+        case 'BOOKING_IN_POOL':
+          if (booking) { nav.navigate('OrderTracking', { booking }); return; }
+          break;
+        case 'BOOKING_COMPLETED':
+          if (booking) { nav.navigate('BookingDetails', { booking }); return; }
+          break;
+        case 'BOOKING_CANCEL_SUCCESS':
+          nav.navigate('App', { screen: 'Orders' });
+          return;
+      }
+
+      // Fallback: any booking-linked push with no/unknown type → booking details.
+      if (booking) nav.navigate('BookingDetails', { booking });
     };
 
-    getLastNotificationResponse().then(data => {
-      if (data) handleNotificationData(data);
+    getLastNotificationResponse().then(res => {
+      if (res) routeNotification(res.data, res.actionIdentifier);
     });
 
-    const sub = addNotificationResponseListener(handleNotificationData);
+    const sub = addNotificationResponseListener(routeNotification);
     return () => sub.remove();
   }, []);
 
