@@ -366,8 +366,8 @@ export function QuizScreen({ navigation }: any) {
 
   const handleStartQuiz = async () => {
     setIsFetching(true);
-    try {
-      const data = await quizService.start();
+
+    const applyQuizData = (data: any) => {
       setQuestions(data.questions || []);
       setStreak(data.streak?.currentStreak || 0);
       setCurrentQ(0);
@@ -381,7 +381,28 @@ export function QuizScreen({ navigation }: any) {
       setAnswerResult(null);
       setTimeLeft(TIMER_DURATION);
       setScreenState('playing');
+    };
+
+    try {
+      applyQuizData(await quizService.start());
     } catch (err: any) {
+      // Cold-start / transient network failure: the backend free tier can sleep and
+      // the first request times out while it wakes. Retry silently a couple of times
+      // (the Start button keeps spinning) so the quiz just opens once the server is up,
+      // instead of making the user dismiss "Server is waking up" and tap Start again.
+      // Mirrors the login flow's cold-start handling. Skipped when the device is truly
+      // offline, or when the error is a real HTTP response (429/5xx) handled below.
+      const isColdStart = !err?.response || err?.code === 'ECONNABORTED' || err?.message?.includes('Network');
+      const deviceOffline = typeof navigator !== 'undefined' && navigator.onLine === false;
+      if (isColdStart && !deviceOffline) {
+        for (let attempt = 0; attempt < 2; attempt++) {
+          await new Promise((r) => setTimeout(r, 2500));
+          try {
+            applyQuizData(await quizService.start());
+            return; // finally still clears isFetching
+          } catch (_) { /* still waking — keep trying */ }
+        }
+      }
       // A 429 can mean "you've already played today" OR a generic rate-limit —
       // only treat it as the daily lock when the message actually says so, otherwise
       // this would falsely lock a user out of a quiz they never played (see bug where

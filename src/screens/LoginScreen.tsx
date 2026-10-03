@@ -229,7 +229,7 @@ function SignupJourneyProgress({ stage }: { stage: 0 | 1 | 2 }) {
 
 export function LoginScreen({ navigation }: any) {
   const styles = useStyles();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets(); // bottom inset so "Skip for now" clears the Android gesture pill
   const { reconnect } = useUserSocket();
   const [step, setStep] = useState<Step>('entry');
@@ -1035,9 +1035,9 @@ export function LoginScreen({ navigation }: any) {
           <View>
             <Text style={styles.title}>Welcome back 👋</Text>
             <Text style={styles.subtitle}>Account found. Enter your password to continue.</Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#f0fdf4', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, marginTop: 10, borderWidth: 1, borderColor: '#bbf7d0' }}>
-              <CheckCircle2 size={16} color="#16a34a" />
-              <Text style={{ color: '#15803d', fontSize: 13, fontWeight: '700', flex: 1 }}>{identifier}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: colors.primarySoft, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, marginTop: 10, borderWidth: 1, borderColor: colors.border }}>
+              <CheckCircle2 size={16} color={colors.primary} />
+              <Text style={{ color: colors.primary, fontSize: 13, fontWeight: '700', flex: 1 }}>{identifier}</Text>
             </View>
           </View>
           <InputField
@@ -1059,7 +1059,7 @@ export function LoginScreen({ navigation }: any) {
                <Text style={{ color: colors.textMuted, fontWeight: 'bold' }}>Change account</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => { const id = identifier.trim(); const prefill = linkedPhone || (/^[6-9]\d{9}$/.test(id) ? id : (id.includes('@') ? id : '')); setForgotPhone(prefill); setResetSubStep('send_otp'); setOtpValue(''); setNewPassword(''); setConfirmPassword(''); setStep('reset_password'); }}>
-               <Text style={{ color: '#16a34a', fontWeight: 'bold' }}>Forgot password?</Text>
+               <Text style={{ color: colors.primary, fontWeight: 'bold' }}>Forgot password?</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -1197,7 +1197,7 @@ export function LoginScreen({ navigation }: any) {
                 }
               }}
             >
-              <Text style={{ color: resendTimer > 0 ? '#94a3b8' : '#16a34a', fontWeight: 'bold' }}>
+              <Text style={{ color: resendTimer > 0 ? colors.textFaint : colors.primary, fontWeight: 'bold' }}>
                 {resendTimer > 0 ? `Resend OTP in ${resendTimer}s` : 'Resend OTP'}
               </Text>
             </TouchableOpacity>
@@ -1302,8 +1302,8 @@ export function LoginScreen({ navigation }: any) {
             {signupErrors.password ? <Text style={styles.fieldError}>{signupErrors.password}</Text> : null}
             {!signupErrors.password && password.length > 0 && (
               (password.length >= 8 && /\d/.test(password))
-                ? <Text style={[styles.referralHint, { color: '#16a34a' }]}>✓ Password looks good</Text>
-                : <Text style={[styles.referralHint, { color: '#dc2626' }]}>Use at least 8 characters including 1 number</Text>
+                ? <Text style={[styles.referralHint, { color: colors.success }]}>✓ Password looks good</Text>
+                : <Text style={[styles.referralHint, { color: colors.danger }]}>Use at least 8 characters including 1 number</Text>
             )}
             <InputField
               placeholder="Referral code (optional)"
@@ -1316,12 +1316,12 @@ export function LoginScreen({ navigation }: any) {
               <Text style={styles.referralHint}>Checking code...</Text>
             )}
             {referralStatus === 'valid' && (
-              <Text style={[styles.referralHint, { color: '#16a34a' }]}>
+              <Text style={[styles.referralHint, { color: colors.success }]}>
                 ✓ Referred by {referralValidName} — you'll both get 1,000 KarmaCoins XP!
               </Text>
             )}
             {referralStatus === 'invalid' && (
-              <Text style={[styles.referralHint, { color: '#dc2626' }]}>Invalid referral code</Text>
+              <Text style={[styles.referralHint, { color: colors.danger }]}>Invalid referral code</Text>
             )}
             {signupErrors.general ? <Text style={styles.fieldError}>{signupErrors.general}</Text> : null}
 
@@ -1360,7 +1360,7 @@ export function LoginScreen({ navigation }: any) {
           <View style={styles.otpContainer}>
             <SignupJourneyProgress stage={0} />
             <View style={styles.otpIconBg}>
-              <Lock size={28} color="#15803d" />
+              <Lock size={28} color={colors.primary} />
             </View>
             <Text style={styles.otpTitle}>Verify your mobile number</Text>
             <Text style={styles.otpSubtitle}>We've sent a 6-digit OTP to</Text>
@@ -1431,10 +1431,10 @@ export function LoginScreen({ navigation }: any) {
 
           <SignupJourneyProgress stage={1} />
 
-          <Text style={{ fontSize: 26, fontWeight: '900', color: '#064e3b', textAlign: 'center', marginBottom: 8 }}>
+          <Text style={{ fontSize: 26, fontWeight: '900', color: colors.primaryDeep, textAlign: 'center', marginBottom: 8 }}>
             🎉 Congratulations!{'\n'}You're officially a KarmaVerse Early Bird.
           </Text>
-          <Text style={{ fontSize: 15, color: '#166534', fontWeight: '600', textAlign: 'center', marginBottom: 32 }}>
+          <Text style={{ fontSize: 15, color: colors.primary, fontWeight: '600', textAlign: 'center', marginBottom: 32 }}>
             {scratched
               ? `✅ ${EARLY_BIRD_COINS.toLocaleString()} Karma Coins Successfully Added!`
               : `As a welcome reward, you've earned ${EARLY_BIRD_COINS.toLocaleString()} Karma Coins. Scratch your reward card to reveal and claim your bonus.`}
@@ -1484,14 +1484,14 @@ export function LoginScreen({ navigation }: any) {
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24, paddingVertical: 40 }}>
           <SignupJourneyProgress stage={2} />
 
-          <View style={{ width: 96, height: 96, borderRadius: 48, backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center', marginBottom: 24, borderWidth: 2, borderColor: '#bbf7d0' }}>
+          <View style={{ width: 96, height: 96, borderRadius: 48, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center', marginBottom: 24, borderWidth: 2, borderColor: colors.border }}>
             <KarmaCoin size={56} glow animated />
           </View>
 
-          <Text style={{ fontSize: 28, fontWeight: '900', color: '#064e3b', textAlign: 'center', marginBottom: 8 }}>
+          <Text style={{ fontSize: 28, fontWeight: '900', color: colors.primaryDeep, textAlign: 'center', marginBottom: 8 }}>
             Welcome gift unlocked!
           </Text>
-          <Text style={{ fontSize: 16, color: '#166534', fontWeight: '700', textAlign: 'center', marginBottom: 4 }}>
+          <Text style={{ fontSize: 16, color: colors.primary, fontWeight: '700', textAlign: 'center', marginBottom: 4 }}>
             +1,000 KarmaCoins XP added to your wallet
           </Text>
           {referralValidName ? (
@@ -1504,22 +1504,22 @@ export function LoginScreen({ navigation }: any) {
             </Text>
           )}
 
-          <View style={{ width: '100%', backgroundColor: '#f0fdf4', borderRadius: 20, padding: 20, borderWidth: 1, borderColor: '#bbf7d0', marginBottom: 32, gap: 14 }}>
+          <View style={{ width: '100%', backgroundColor: colors.surface, borderRadius: 20, padding: 20, borderWidth: 1, borderColor: colors.border, marginBottom: 32, gap: 14 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-              <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: '#dcfce7', alignItems: 'center', justifyContent: 'center' }}>
+              <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' }}>
                 <KarmaCoin size={20} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 13, fontWeight: '800', color: '#064e3b' }}>Your starting balance</Text>
+                <Text style={{ fontSize: 13, fontWeight: '800', color: colors.text }}>Your starting balance</Text>
                 <Text style={{ fontSize: 11, color: colors.textMuted, fontWeight: '500' }}>1,000 coins waiting in your wallet</Text>
               </View>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-              <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: '#dcfce7', alignItems: 'center', justifyContent: 'center' }}>
+              <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' }}>
                 <Text style={{ fontSize: 18 }}>♻️</Text>
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 13, fontWeight: '800', color: '#064e3b' }}>Schedule your first pickup</Text>
+                <Text style={{ fontSize: 13, fontWeight: '800', color: colors.text }}>Schedule your first pickup</Text>
                 <Text style={{ fontSize: 11, color: colors.textMuted, fontWeight: '500' }}>Recycle & earn even more coins</Text>
               </View>
             </View>
@@ -1647,7 +1647,7 @@ export function LoginScreen({ navigation }: any) {
 
   return (
     <KeyboardAvoidingView
-      style={[styles.rootContainer, { backgroundColor: (step === 'demographics' || step === 'referral_bonus' || step === 'welcome_celebration') ? '#f0fdf4' : '#ffffff' }]}
+      style={[styles.rootContainer, { backgroundColor: isDark ? colors.bg : ((step === 'demographics' || step === 'referral_bonus' || step === 'welcome_celebration') ? '#f0fdf4' : '#ffffff') }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
@@ -1694,11 +1694,11 @@ const useStyles = makeStyles((c) => ({
   rootContainer: { flex: 1, backgroundColor: '#064e3b' },
   journeyProgress: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: 6, marginBottom: 20 },
   journeyStage: { fontSize: 11, fontWeight: '700', color: c.textFaint },
-  journeyStageActive: { color: '#15803d' },
+  journeyStageActive: { color: c.primary },
   journeyArrow: { fontSize: 11, fontWeight: '700', color: c.borderStrong },
-  offlineBanner: { backgroundColor: '#fef2f2', borderWidth: 1, borderColor: '#fecaca', borderRadius: 12, padding: 12, marginBottom: 8 },
-  offlineBannerText: { color: '#dc2626', fontSize: 13, fontWeight: '700', textAlign: 'center' },
-  fieldError: { color: '#dc2626', fontSize: 12, fontWeight: '600', marginTop: -16, paddingLeft: 4 },
+  offlineBanner: { backgroundColor: c.dangerSoft, borderWidth: 1, borderColor: c.danger, borderRadius: 12, padding: 12, marginBottom: 8 },
+  offlineBannerText: { color: c.danger, fontSize: 13, fontWeight: '700', textAlign: 'center' },
+  fieldError: { color: c.danger, fontSize: 12, fontWeight: '600', marginTop: -16, paddingLeft: 4 },
   referralHint: { fontSize: 12, fontWeight: '600', marginTop: -16, paddingLeft: 4, color: c.textMuted },
   topNotchFiller: { position: 'absolute', top: 0, left: 0, right: 0, height: 100, backgroundColor: '#064e3b' },
   container: { flex: 1, backgroundColor: c.bg, maxWidth: 900, width: '100%', alignSelf: 'center' },
@@ -1723,7 +1723,7 @@ const useStyles = makeStyles((c) => ({
   checkbox: { width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: c.borderStrong, alignItems: 'center', justifyContent: 'center', marginTop: 1 },
   checkboxOn: { backgroundColor: '#16a34a', borderColor: '#16a34a' },
   termsText: { flex: 1, fontSize: 13, color: c.textMuted, lineHeight: 19, fontWeight: '500' },
-  termsLink: { color: '#16a34a', fontWeight: '800' },
+  termsLink: { color: c.primary, fontWeight: '800' },
   
   // 460 keeps the form a comfortable centred column on desktop — at 800 the
   // input/button stretched the full width and the page read as sparse. Mobile
@@ -1736,7 +1736,7 @@ const useStyles = makeStyles((c) => ({
   title: { fontSize: 24, fontWeight: '900', color: c.text },
   subtitle: { fontSize: 13, color: c.textMuted, marginTop: 6, lineHeight: 20, fontWeight: '500' },
   successTagRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
-  successTagText: { fontSize: 12, color: '#16a34a', fontWeight: '800' },
+  successTagText: { fontSize: 12, color: c.success, fontWeight: '800' },
 
   inputContainer: { position: 'relative', justifyContent: 'center' },
   iconWrapper: { position: 'absolute', left: 16, zIndex: 1 },
@@ -1903,12 +1903,12 @@ const useStyles = makeStyles((c) => ({
   otpIconBg: { width: 64, height: 64, borderRadius: 20, backgroundColor: c.primarySoft, alignItems: 'center', justifyContent: 'center', marginBottom: 20, borderWidth: 1.5, borderColor: '#86efac' },
   otpTitle: { fontSize: 24, fontWeight: '900', color: c.text, marginBottom: 8, textAlign: 'center' },
   otpSubtitle: { fontSize: 14, color: c.textMuted, fontWeight: '500', textAlign: 'center' },
-  otpEmail: { fontSize: 15, color: '#15803d', fontWeight: '800', marginBottom: 28, textAlign: 'center' },
+  otpEmail: { fontSize: 15, color: c.primary, fontWeight: '800', marginBottom: 28, textAlign: 'center' },
   // Boxes flex down on narrow phones (6 fixed 48px boxes + gaps need ~390px,
   // small screens are 320-360) — maxWidth keeps them at 48px on wide screens.
   otpBoxRow: { flexDirection: 'row', gap: 8, marginBottom: 28, justifyContent: 'center', width: '100%', maxWidth: 360, alignSelf: 'center' },
   otpBox: { flex: 1, minWidth: 0, maxWidth: 48, height: 56, borderRadius: 14, borderWidth: 2, borderColor: c.border, backgroundColor: c.inputBg, textAlign: 'center', fontSize: 22, fontWeight: '900', color: c.text },
   otpBoxFilled: { borderColor: '#15803d', backgroundColor: c.primarySoft },
   otpResendBtn: { marginTop: 16 },
-  otpResendText: { color: '#15803d', fontWeight: '700', fontSize: 14 },
+  otpResendText: { color: c.primary, fontWeight: '700', fontSize: 14 },
 }));
