@@ -43,7 +43,7 @@ export function StoreScreen({ navigation }: any) {
             onPress={() => navigation.navigate('SchedulePickup')}
             activeOpacity={0.85}
           >
-            <Text style={styles.actionBtnText}>Keep recycling to earn coins</Text>
+            <Text style={styles.actionBtnText}>Keep making an impact to earn coins</Text>
             <ArrowRight size={20} color="white" />
           </TouchableOpacity>
         </View>
