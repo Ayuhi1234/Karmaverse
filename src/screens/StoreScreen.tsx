@@ -68,8 +68,8 @@ const useStyles = makeStyles((c) => ({
   headerSubtitle: { color: '#86efac', fontSize: 13, fontWeight: '800', letterSpacing: 1.5, marginBottom: 4 },
   headerIconBox: { width: 52, height: 52, borderRadius: 26, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },
   
-  content: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, paddingBottom: 60, maxWidth: 600, width: '100%', alignSelf: 'center' },
-  coinWrap: { marginBottom: 32, alignItems: 'center', justifyContent: 'center' },
+  content: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, paddingTop: 64, paddingBottom: 60, maxWidth: 600, width: '100%', alignSelf: 'center' },
+  coinWrap: { marginTop: 8, marginBottom: 32, alignItems: 'center', justifyContent: 'center' },
   giftBadge: { position: 'absolute', top: -6, right: -14, backgroundColor: c.surface, padding: 8, borderRadius: 20, elevation: 5, shadowColor: c.shadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.12, shadowRadius: 6 },
   comingSoonText: { fontSize: 32, fontWeight: '900', color: c.text, marginBottom: 16 },
   descText: { fontSize: 15, color: c.textMuted, textAlign: 'center', fontWeight: '500', lineHeight: 24, marginBottom: 40 },
