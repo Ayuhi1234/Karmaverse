@@ -339,6 +339,14 @@ export function SplashScreen({ navigation, route }: any) {
                 <Gift size={16} color="#4ade80" />
                 <Text style={s.ctaSecondaryText}>Explore rewards</Text>
               </TouchableOpacity>
+              <TouchableOpacity
+                style={{ alignItems: 'flex-start', justifyContent: 'center', backgroundColor: '#000000', borderRadius: 12, paddingHorizontal: 18, paddingVertical: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.22)' }}
+                onPress={() => { const u = 'https://play.google.com/store/apps/details?id=com.karmacredits.app'; if (typeof window !== 'undefined') window.open(u, '_blank', 'noopener'); else Linking.openURL(u); }}
+                activeOpacity={0.85}
+              >
+                <Text style={{ color: 'rgba(255,255,255,0.65)', fontSize: 9, fontWeight: '700', letterSpacing: 1.2 }}>GET IT ON</Text>
+                <Text style={{ color: '#ffffff', fontSize: 15, fontWeight: '800' }}>Google Play</Text>
+              </TouchableOpacity>
             </View>
 
             {/* Highlights: Act → Earn → Redeem */}
