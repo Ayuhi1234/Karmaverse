@@ -76,13 +76,22 @@ function relativeTime(ts: number): string {
 
 function NotifCard({ notif, onOpen }: { notif: AppNotification; onOpen: (n: AppNotification) => void }) {
   const styles = useStyles();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const cfg = TYPE_CONFIG[notif.type] || DEFAULT_CFG;
+
+  // The type gradients are light tints that only read under dark text. In dark mode
+  // the text is light, so an unread card uses a subtle dark tint of the type colour
+  // instead — keeping the title/body readable while still hinting at the type.
+  const cardBg: [string, string] = notif.read
+    ? [colors.surface, colors.surface]
+    : isDark
+      ? [`${cfg.color}26`, colors.surface]
+      : cfg.gradientBg;
 
   return (
     <TouchableOpacity activeOpacity={0.75} onPress={() => onOpen(notif)}>
     <LinearGradient
-      colors={notif.read ? [colors.surface, colors.surface] : cfg.gradientBg}
+      colors={cardBg}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={styles.card}
