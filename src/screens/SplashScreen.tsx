@@ -12,7 +12,7 @@ const SLIDES = [
     bg: ['#064e3b', '#0f766e'],
     accent: '#4ade80',
     title: '',
-    subtitle: "India's first circular economy rewards platform — free recycling pickups for everyone.",
+    subtitle: "India's first circular economy rewards platform — free sustainable pickups for everyone.",
     buttonText: 'Next',
   },
   {
@@ -64,7 +64,7 @@ const WASTE_WORDS = [
 ];
 
 const EARN_WORDS = [
-  { word: 'recycling',       color: '#fbbf24' },
+  { word: 'recovering',      color: '#fbbf24' },
   { word: 'upcycling',       color: '#4ade80' },
   { word: 'going green',     color: '#86efac' },
   { word: 'giving back',     color: '#60a5fa' },

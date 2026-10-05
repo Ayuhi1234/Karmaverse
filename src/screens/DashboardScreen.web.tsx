@@ -29,8 +29,8 @@ const FEATURE_DETAILS = [
   },
   {
     id: 'knowledge', title: 'Knowledge hub', emoji: '📚', icon: BookOpen,
-    desc: 'Learn about sustainable living with curated articles, tips, and guides on recycling and the circular economy.',
-    steps: ['Browse eco articles', 'Learn recycling tips', 'Share with friends', 'Make better choices'],
+    desc: 'Learn about sustainable living with curated articles, tips, and guides on the circular economy and greener everyday choices.',
+    steps: ['Browse eco articles', 'Learn sustainability tips', 'Share with friends', 'Make better choices'],
     benefit: 'Become an eco expert',
     gradient: ['#164e63', '#0891b2'] as [string, string],
     accent: '#22d3ee',
@@ -38,7 +38,7 @@ const FEATURE_DETAILS = [
   {
     id: 'pickup', title: 'Schedule a pickup', emoji: '🚛', icon: Truck,
     desc: 'Give your old items a second life — book a sustainable pickup in 3 taps and earn KarmaCoins for going green.',
-    steps: ['Pick what you want to recycle', 'Choose date & time slot', 'Agent comes to your door', 'Earn KarmaCoins XP instantly'],
+    steps: ['Pick the items to hand over', 'Choose date & time slot', 'Agent comes to your door', 'Earn KarmaCoins XP instantly'],
     benefit: 'Earn coins on every pickup',
     gradient: ['#052e16', '#15803d'] as [string, string],
     accent: '#4ade80',
@@ -53,7 +53,7 @@ const FEATURE_DETAILS = [
   },
   {
     id: 'instant', title: 'Instant credit', emoji: '⚡', icon: Zap,
-    desc: 'No waiting — KarmaCoins XP are credited to your wallet immediately after the agent verifies and collects your recyclables.',
+    desc: 'No waiting — KarmaCoins XP are credited to your wallet immediately after the agent verifies and collects your materials.',
     steps: ['Agent weighs items at door', 'Verification done on spot', 'Coins added instantly', 'Check wallet in real-time'],
     benefit: 'Zero wait for rewards',
     gradient: ['#312e81', '#4f46e5'] as [string, string],

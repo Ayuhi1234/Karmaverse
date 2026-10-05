@@ -129,7 +129,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
       'Agent assigned — a pickup partner is on the way to you.\n\n' +
       'Agent reached — they’ve arrived at your location.\n\n' +
       'Verification — items are checked and your KarmaCoins XP are credited.\n\n' +
-      'Completed — pickup done. Thank you for recycling!'
+      'Completed — pickup done. Thank you for making an impact!'
     );
   };
 
@@ -402,7 +402,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
           </View>
           <View style={styles.agentInfo}>
             <Text style={[styles.agentName, { color: colors.primary, fontWeight: '700' }]}>Finding agent...</Text>
-            <Text style={styles.agentDistance}>Searching for nearest active recycling partner</Text>
+            <Text style={styles.agentDistance}>Searching for the nearest active pickup partner</Text>
           </View>
         </View>
       )}

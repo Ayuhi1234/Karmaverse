@@ -1520,7 +1520,7 @@ export function LoginScreen({ navigation }: any) {
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={{ fontSize: 13, fontWeight: '800', color: colors.text }}>Schedule your first pickup</Text>
-                <Text style={{ fontSize: 11, color: colors.textMuted, fontWeight: '500' }}>Recycle & earn even more coins</Text>
+                <Text style={{ fontSize: 11, color: colors.textMuted, fontWeight: '500' }}>Make an impact & earn even more coins</Text>
               </View>
             </View>
           </View>

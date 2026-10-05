@@ -9,8 +9,8 @@ const MAX_SHOWS_PER_VISIT = 3;
 
 const MESSAGES = [
   "Hi! I'm Planet Buddy 👋",
-  "Let's recycle together!",
-  'Every kg you recycle helps me breathe easier.',
+  "Let's make an impact together!",
+  'Every kg you recover helps me breathe easier.',
   'Ready to earn KarmaCoins XP?',
 ];
 

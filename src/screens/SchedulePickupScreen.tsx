@@ -515,7 +515,7 @@ export function SchedulePickupScreen({ navigation }: any) {
       <View style={styles.successContainer}>
         <CheckCircle2 size={100} color="#16a34a" />
         <Text style={styles.successTitle}>Pickup scheduled!</Text>
-        <Text style={styles.successSub}>Thank you for recycling {cartCalculations.totalItems} {cartCalculations.totalItems === 1 ? 'item' : 'items'}.</Text>
+        <Text style={styles.successSub}>Thank you for giving {cartCalculations.totalItems} {cartCalculations.totalItems === 1 ? 'item' : 'items'} a new life.</Text>
       </View>
     );
   }

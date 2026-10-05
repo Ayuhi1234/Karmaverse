@@ -14,7 +14,7 @@ function TopBar() {
         </View>
         <Text style={tb.title}>KarmaVer$e</Text>
       </View>
-      <Text style={tb.tagline}>Recycle. Earn. Repeat.</Text>
+      <Text style={tb.tagline}>Recover. Earn. Repeat.</Text>
     </View>
   );
 }
