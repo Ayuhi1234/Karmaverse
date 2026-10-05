@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { X, Trash2, Truck, MapPin, Coins, CheckCircle2, Clock, XCircle, Brain, Bell } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppNotification } from '../../context/NotificationContext';
+import { routeNotification } from '../../utils/notificationRoute';
 import { SCREEN_WIDTH } from '../../utils/layout';
 import { useTheme, makeStyles } from '../../theme';
 
@@ -73,13 +74,13 @@ function relativeTime(ts: number): string {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-function NotifCard({ notif, onMarkRead }: { notif: AppNotification; onMarkRead: (id: string) => void }) {
+function NotifCard({ notif, onOpen }: { notif: AppNotification; onOpen: (n: AppNotification) => void }) {
   const styles = useStyles();
   const { colors } = useTheme();
   const cfg = TYPE_CONFIG[notif.type] || DEFAULT_CFG;
 
   return (
-    <TouchableOpacity activeOpacity={notif.read ? 1 : 0.75} onPress={() => { if (!notif.read) onMarkRead(notif.id); }}>
+    <TouchableOpacity activeOpacity={0.75} onPress={() => onOpen(notif)}>
     <LinearGradient
       colors={notif.read ? [colors.surface, colors.surface] : cfg.gradientBg}
       start={{ x: 0, y: 0 }}
@@ -116,6 +117,15 @@ export function NotificationPanel({ visible, onClose, notifications, unreadCount
   const styles = useStyles();
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
+
+  // Tapping a card deep-links to the right screen (same router as a push tap),
+  // marks it read, and closes the panel.
+  const handleOpen = (n: AppNotification) => {
+    onMarkRead(n.id);
+    routeNotification({ type: n.type, bookingId: n.bookingId });
+    onClose();
+  };
+
   const slideAnim = useRef(new Animated.Value(PANEL_WIDTH)).current;
   const backdropAnim = useRef(new Animated.Value(0)).current;
   const [modalVisible, setModalVisible] = useState(false);
@@ -179,7 +189,7 @@ export function NotificationPanel({ visible, onClose, notifications, unreadCount
             bounces={false}
             contentContainerStyle={{ padding: 14, gap: 10, paddingBottom: insets.bottom + 20 }}
           >
-            {notifications.map(n => <NotifCard key={n.id} notif={n} onMarkRead={onMarkRead} />)}
+            {notifications.map(n => <NotifCard key={n.id} notif={n} onOpen={handleOpen} />)}
 
             <TouchableOpacity style={styles.clearBtn} onPress={onClearAll}>
               <Trash2 size={14} color={colors.textFaint} />

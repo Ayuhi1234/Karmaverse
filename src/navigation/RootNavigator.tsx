@@ -27,6 +27,7 @@ import { NotFoundScreen } from '../screens/NotFoundScreen';
 import { TabNavigator } from './TabNavigator';
 import { navigationRef } from './navRef';
 import { capturePendingDeepLink, clearPendingDeepLink, hasPendingDeepLink, hasPendingReferral } from '../utils/deepLink';
+import { routeNotification } from '../utils/notificationRoute';
 
 // Runs at import, before the NavigationContainer resolves the URL — remembers a
 // protected deep link (e.g. an email "Track pickup" link) opened while logged out,
@@ -80,82 +81,19 @@ export function RootNavigator() {
   }, []);
 
   useEffect(() => {
-    // A plain body tap arrives as the DEFAULT action; action buttons send their own id.
-    const DEFAULT_ACTION = 'expo.modules.notifications.actions.DEFAULT';
-
-    const routeNotification = (data: any, actionIdentifier?: string) => {
-      // Report the open for EVERY tapped push (not just booking ones), before any
-      // navigation guard. Fire-and-forget — never await, never block navigation.
+    // A tapped push/notification routes to the right screen via the shared router
+    // (used by the in-app panel too). Report the open for EVERY tap first —
+    // fire-and-forget, never awaited, never blocking navigation.
+    const handleResponse = (data: any, actionIdentifier?: string) => {
       if (data?.notificationId) markNotificationOpened(data.notificationId);
-
-      const nav = navRef.current;
-      if (!nav) return;
-      const bookingId = data?.bookingId;
-      const booking = bookingId ? { _id: bookingId } : undefined;
-
-      // Marketing / engagement pushes name a target in `data.screen`; map it to the
-      // right tab or stack route, ignoring anything not on the whitelist.
-      const TAB_SCREENS = ['Dashboard', 'Orders', 'Wallet', 'Store'];
-      const STACK_SCREENS = ['Quiz', 'Redeem', 'RedeemHistory', 'Referral', 'SchedulePickup', 'KnowledgeHub', 'Donation', 'Transfer', 'AboutUs', 'Profile'];
-      const goToScreen = (screen?: string): boolean => {
-        if (!screen) return false;
-        if (TAB_SCREENS.includes(screen)) { (nav as any).navigate('App', { screen }); return true; }
-        if (STACK_SCREENS.includes(screen)) { (nav as any).navigate(screen); return true; }
-        return false;
-      };
-
-      // An action button was tapped — route by the button, not the default target.
-      if (actionIdentifier && actionIdentifier !== DEFAULT_ACTION) {
-        switch (actionIdentifier) {
-          case 'track':
-            if (booking) nav.navigate('OrderTracking', { booking });
-            return;
-          case 'rate':
-          case 'view':
-            if (booking) nav.navigate('BookingDetails', { booking });
-            return;
-          case 'orders':
-            nav.navigate('App', { screen: 'Orders' });
-            return;
-          case 'open_quiz': nav.navigate('Quiz'); return;
-          case 'open_redeem': nav.navigate('Redeem'); return;
-          case 'open_pickup': nav.navigate('SchedulePickup'); return;
-          case 'open_referral': nav.navigate('Referral'); return;
-          case 'open':
-            if (goToScreen(data?.screen)) return;
-            break;
-        }
-      }
-
-      // Plain tap — route by the event type. In-progress states open live tracking,
-      // a completed pickup opens its details, a cancellation opens the orders list.
-      switch (data?.type) {
-        case 'BOOKING_ACCEPTED':
-        case 'AGENT_REACHED':
-        case 'BOOKING_PICKED_UP':
-        case 'BOOKING_IN_POOL':
-          if (booking) { nav.navigate('OrderTracking', { booking }); return; }
-          break;
-        case 'BOOKING_COMPLETED':
-          if (booking) { nav.navigate('BookingDetails', { booking }); return; }
-          break;
-        case 'BOOKING_CANCEL_SUCCESS':
-          nav.navigate('App', { screen: 'Orders' });
-          return;
-      }
-
-      // Non-transactional (marketing / engagement) push — route by the named screen.
-      if (goToScreen(data?.screen)) return;
-
-      // Fallback: any booking-linked push with no/unknown type → booking details.
-      if (booking) nav.navigate('BookingDetails', { booking });
+      routeNotification(data, actionIdentifier);
     };
 
     getLastNotificationResponse().then(res => {
-      if (res) routeNotification(res.data, res.actionIdentifier);
+      if (res) handleResponse(res.data, res.actionIdentifier);
     });
 
-    const sub = addNotificationResponseListener(routeNotification);
+    const sub = addNotificationResponseListener(handleResponse);
     return () => sub.remove();
   }, []);
 
