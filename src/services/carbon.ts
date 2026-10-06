@@ -5,8 +5,8 @@ import api from './api';
 //
 // TODO(backend): the carbon endpoints below DO NOT EXIST on the backend yet.
 // Everything in this file is a PROPOSED contract, taken from the Carbon
-// Footprint feature spec (6 fixed categories, free-text answers, AI extraction
-// + deterministic formulas on the server, results stored with the conversion
+// Footprint feature spec (fixed categories, option or free-text answers, AI
+// extraction of free text + deterministic formulas on the server, results stored with the conversion
 // factor version, past assessments never overwritten). Confirm paths and field
 // names with the backend team before enabling.
 //
@@ -24,9 +24,15 @@ export class CarbonApiNotReadyError extends Error {
   }
 }
 
-// The six assessment categories, in the fixed order the spec requires.
-export type CarbonCategoryKey = 'transport' | 'electricity' | 'diet' | 'waste' | 'water' | 'flights';
-export const CARBON_CATEGORY_ORDER: CarbonCategoryKey[] = ['transport', 'electricity', 'diet', 'waste', 'water', 'flights'];
+// Assessment categories in display order. The spec's six, plus `shopping`
+// (added after review — TODO(product): confirm). The breakdown only shows the
+// categories the backend actually returns.
+export type CarbonCategoryKey = 'transport' | 'electricity' | 'diet' | 'waste' | 'water' | 'flights' | 'shopping';
+export const CARBON_CATEGORY_ORDER: CarbonCategoryKey[] = ['transport', 'electricity', 'diet', 'waste', 'water', 'flights', 'shopping'];
+
+// One answer: the option ids the user tapped, or their own words (typed or
+// spoken). Only `text` answers go through AI extraction on the server.
+export type CarbonAnswer = { optionIds?: string[]; text?: string };
 
 // One stored assessment result. All numbers are calculated by the backend.
 export interface CarbonAssessment {
@@ -72,12 +78,14 @@ export const carbonService = {
     }
   },
 
-  // Sends the six free-text answers. The backend extracts structured values,
-  // applies the configured conversion factors and stores a NEW historical record.
-  submitAssessment: async (answers: Record<CarbonCategoryKey, string>): Promise<CarbonAssessment> => {
+  // Sends the answers keyed by question id, plus the question-set version so the
+  // backend maps option ids to the right factors. The backend applies the
+  // configured conversion factors (AI only reads free-text answers) and stores a
+  // NEW historical record.
+  submitAssessment: async (answers: Record<string, CarbonAnswer>, questionSetVersion: string): Promise<CarbonAssessment> => {
     if (!CARBON_API_READY) return notReady();
     try {
-      const response = await api.post('/api/v1/carbon/assessments', { answers });
+      const response = await api.post('/api/v1/carbon/assessments', { questionSetVersion, answers });
       return response.data.data || response.data;
     } catch (error) {
       console.error('Submit Carbon Assessment Error:', error);

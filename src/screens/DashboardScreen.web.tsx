@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Truck, Gamepad2, Coins, ChevronRight, Package, Users, Gift, BookOpen, Star, Flame, ArrowRight, Zap, Sparkles, Trophy, Calendar, X, CheckCircle2, BadgeCheck, ShieldCheck, Leaf } from 'lucide-react-native';
+import { Truck, Gamepad2, Coins, ChevronRight, Package, Users, Gift, BookOpen, Star, Flame, ArrowRight, Zap, Sparkles, Trophy, Calendar, X, CheckCircle2, BadgeCheck, ShieldCheck, Leaf, Bell } from 'lucide-react-native';
+import { NotificationPanel } from '../components/shared/NotificationPanel';
+import { useNotifications } from '../context/NotificationContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getToken } from '../utils/tokenStore';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
@@ -25,6 +27,14 @@ const FEATURE_DETAILS = [
     benefit: 'Bonus coins for every friend',
     gradient: ['#881337', '#e11d48'] as [string, string],
     accent: '#fb7185',
+  },
+  {
+    id: 'carbon', title: 'Carbon footprint', emoji: '🌱', icon: Leaf, route: 'CarbonFootprint',
+    desc: 'Answer a few quick questions to see your carbon footprint, where it comes from, and simple ways to cut it.',
+    steps: ['Tap your answers', 'See your footprint', 'Get tips to cut it', 'Track it month by month'],
+    benefit: 'Know and cut your CO₂',
+    gradient: ['#365314', '#4d7c0f'] as [string, string],
+    accent: '#bef264',
   },
   {
     id: 'knowledge', title: 'Knowledge hub', emoji: '📚', icon: BookOpen,
@@ -93,6 +103,8 @@ export function DashboardScreen({ navigation, route }: any) {
   const [selectedFeature, setSelectedFeature] = useState<typeof FEATURE_DETAILS[0] | null>(null);
   const [showLaunchPopup, setShowLaunchPopup] = useState(false);
   const [showWelcomeBonusBanner, setShowWelcomeBonusBanner] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const { notifications, unreadCount, markRead, markAllRead, clearAll } = useNotifications();
 
   // New signup arriving straight from the Welcome Celebration scratch card —
   // show the "coins added" banner once, then clear the param so it doesn't
@@ -180,8 +192,23 @@ export function DashboardScreen({ navigation, route }: any) {
           <View style={[z.heroGrid, isMobile && { flexDirection: 'column', gap: 20, alignItems: 'stretch' }]}>
             {/* Left: Greeting + Balance */}
             <View style={z.heroLeft}>
-              <Text style={z.heroGreet}>{getGreeting()},</Text>
-              <Text style={[z.heroName, isMobile && { fontSize: 20 }]}>{userName || '...'}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <View style={{ flexShrink: 1 }}>
+                  <Text style={z.heroGreet}>{getGreeting()},</Text>
+                  <Text style={[z.heroName, isMobile && { fontSize: 20 }]}>{userName || '...'}</Text>
+                </View>
+                {/* On phones the bell lives here (as on native), keeping the bottom bar to 5 tabs. */}
+                {isMobile && (
+                  <TouchableOpacity style={z.bellButton} onPress={() => setShowNotifications(true)} activeOpacity={0.8} accessibilityRole="button" accessibilityLabel={unreadCount > 0 ? `Alerts, ${unreadCount} unread` : 'Alerts'}>
+                    <Bell size={20} color="white" />
+                    {unreadCount > 0 && (
+                      <View style={z.bellBadge}>
+                        <Text style={z.bellBadgeText}>{unreadCount > 99 ? '99+' : unreadCount}</Text>
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                )}
+              </View>
               <View style={z.heroBalance}>
                 <View style={z.heroCoinGlow}>
                   <KarmaCoin size={isMobile ? 52 : 64} glow animated />
@@ -459,6 +486,16 @@ export function DashboardScreen({ navigation, route }: any) {
       <View style={{ height: 60 }} />
       <WebFooter />
 
+      <NotificationPanel
+        visible={showNotifications}
+        onClose={() => setShowNotifications(false)}
+        notifications={notifications}
+        unreadCount={unreadCount}
+        onMarkRead={markRead}
+        onMarkAllRead={markAllRead}
+        onClearAll={clearAll}
+      />
+
       {/* ════════ FEATURE DETAIL MODAL ════════ */}
       {selectedFeature && (
         <Modal visible transparent animationType="fade" onRequestClose={() => setSelectedFeature(null)}>
@@ -511,6 +548,9 @@ const z = StyleSheet.create({
   heroDecor2: { position: 'absolute', bottom: -50, left: '25%', width: 150, height: 150, borderRadius: 75, backgroundColor: 'rgba(255,255,255,0.02)' },
   heroGrid: { flexDirection: 'row', gap: 32, alignItems: 'center' },
   heroLeft: { flex: 1 },
+  bellButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' },
+  bellBadge: { position: 'absolute', top: -4, right: -4, minWidth: 18, height: 18, borderRadius: 9, backgroundColor: '#ef4444', borderWidth: 2, borderColor: '#052e16', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 3 },
+  bellBadgeText: { fontSize: 10, fontWeight: '800', color: 'white' },
   heroGreet: { color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: '600', letterSpacing: 1, textTransform: 'uppercase' },
   heroName: { color: 'white', fontSize: 22, fontWeight: '900', letterSpacing: -0.3, marginBottom: 16 },
   heroBalance: { flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 16 },

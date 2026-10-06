@@ -24,6 +24,9 @@ const PROTECTED = [
   '/quiz',
   '/referral',
   '/schedulepickup',
+  '/carbonfootprint',
+  '/carbonassessment',
+  '/carbonjourney',
 ];
 
 // Capture as early as possible (before the router rewrites the URL). No-op unless
@@ -48,6 +51,12 @@ export function capturePendingDeepLink(): void {
   if (PROTECTED.some((p) => path === p || path.startsWith(p + '/'))) {
     pendingUrl = window.location.pathname + window.location.search;
   }
+}
+
+// Remember a protected screen to open after login — used by logged-out teasers
+// (e.g. the landing page's carbon footprint card) that send the visitor to Login.
+export function setPendingDeepLink(path: string): void {
+  pendingUrl = path;
 }
 
 export function hasPendingReferral(): boolean {

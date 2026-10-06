@@ -224,7 +224,7 @@ export function CarbonFootprintScreen({ navigation }: any) {
                 <View style={[styles.iconTile, { backgroundColor: '#f0fdf4' }]}><Calculator size={20} color="#16a34a" /></View>
                 <View style={{ flex: 1, marginLeft: 12 }}>
                   <Text style={styles.rowTitle}>Find out your footprint</Text>
-                  <Text style={styles.rowMeta}>6 quick questions about your day · about 3 minutes</Text>
+                  <Text style={styles.rowMeta}>Tap through a quick chat about your day · about 4 minutes</Text>
                 </View>
               </View>
               <TouchableOpacity style={styles.primaryPill} onPress={startAssessment} activeOpacity={0.8} accessibilityRole="button">

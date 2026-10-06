@@ -3,6 +3,7 @@ import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated, Dimensions, Image, Linking, NativeSyntheticEvent, NativeScrollEvent
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { setPendingDeepLink } from '../utils/deepLink';
 import {
   Truck, Gift, Shield,
   Recycle, Users, Coins, ArrowRight,
@@ -455,6 +456,38 @@ export function SplashScreen({ navigation, route }: any) {
           </View>
         </View>
 
+        {/* ── CARBON FOOTPRINT teaser (logged out) ── */}
+        <View style={[s.section, { backgroundColor: 'white' }]}>
+          <View style={[s.container, isMobile && { paddingHorizontal: 20 }]}>
+            <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={[s.carbonTeaser, isMobile && { padding: 24 }]}>
+              <View style={{ flex: 1, minWidth: isMobile ? undefined : 320 }}>
+                <Text style={[s.sectionLabel, { color: '#86efac' }]}>NEW · CARBON FOOTPRINT</Text>
+                <Text style={[s.carbonTitle, isMobile && { fontSize: 26, lineHeight: 32 }]}>What's your carbon footprint?</Text>
+                <Text style={s.carbonText}>
+                  Tap through a 4-minute chat about how you travel, eat and live. See your footprint in kg CO₂e,
+                  where it comes from, and simple ways to cut it — then track it month by month.
+                </Text>
+                <TouchableOpacity
+                  style={[s.ctaPrimary, { alignSelf: 'flex-start', marginTop: 22 }]}
+                  onPress={() => { setPendingDeepLink('/CarbonFootprint'); navigation.navigate('Login'); }}
+                  accessibilityRole="button"
+                >
+                  <Text style={s.ctaPrimaryText}>Calculate my footprint</Text>
+                </TouchableOpacity>
+                <Text style={s.carbonFine}>Free. Log in or sign up to save your results and earn KarmaCoins XP for green actions.</Text>
+              </View>
+              {!isMobile && (
+                <View style={s.carbonStat}>
+                  <Text style={s.carbonStatLabel}>Sample result</Text>
+                  <Text style={s.carbonStatValue}>184</Text>
+                  <Text style={s.carbonStatUnit}>kg CO₂e / month</Text>
+                  <Text style={s.carbonStatSub}>Biggest source: transport</Text>
+                </View>
+              )}
+            </LinearGradient>
+          </View>
+        </View>
+
         {/* ── LEARNING & ENGAGEMENT ── */}
         <View style={[s.section, { backgroundColor: '#f8fafc' }]} onLayout={(e) => { sectionY.current.learning = e.nativeEvent.layout.y; }}>
           <View style={[s.container, isMobile && { paddingHorizontal: 20 }]}>
@@ -649,6 +682,15 @@ const s = StyleSheet.create({
   container: { maxWidth: MAX, width: '100%', alignSelf: 'center', paddingHorizontal: 32 },
   sectionLabel: { fontSize: 12, fontWeight: '900', color: '#16a34a', letterSpacing: 2, marginBottom: 10 },
   sectionTitle: { fontSize: 36, fontWeight: '900', color: '#0f172a', letterSpacing: -1, marginBottom: 40, lineHeight: 44 },
+  carbonTeaser: { borderRadius: 24, padding: 40, flexDirection: 'row', alignItems: 'center', gap: 32, flexWrap: 'wrap' },
+  carbonTitle: { fontSize: 34, lineHeight: 40, fontWeight: '900', color: 'white', letterSpacing: -0.8, marginBottom: 12 },
+  carbonText: { fontSize: 16, lineHeight: 25, color: 'rgba(255,255,255,0.75)', fontWeight: '500', maxWidth: 560 },
+  carbonFine: { fontSize: 12.5, color: 'rgba(255,255,255,0.6)', fontWeight: '600', marginTop: 12 },
+  carbonStat: { width: 240, borderRadius: 24, padding: 22, backgroundColor: 'rgba(255,255,255,0.1)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)' },
+  carbonStatLabel: { color: 'rgba(255,255,255,0.6)', fontSize: 13, fontWeight: '700' },
+  carbonStatValue: { color: 'white', fontSize: 44, fontWeight: '900', letterSpacing: -1, marginTop: 6 },
+  carbonStatUnit: { color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: '600' },
+  carbonStatSub: { color: '#86efac', fontSize: 12, fontWeight: '700', marginTop: 12 },
   sectionIntro: { fontSize: 16, color: '#475569', fontWeight: '500', lineHeight: 26, maxWidth: 680 },
 
   // Steps

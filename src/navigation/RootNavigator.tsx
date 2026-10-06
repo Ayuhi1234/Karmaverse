@@ -38,6 +38,10 @@ capturePendingDeepLink();
 
 const Stack = createNativeStackNavigator();
 
+// Screens a push notification's `data.route` may open.
+const TAB_ROUTES = ['Dashboard', 'Orders', 'Wallet', 'Store'];
+const STACK_ROUTES = ['Profile', 'SchedulePickup', 'KnowledgeHub', 'Quiz', 'Referral', 'RedeemHistory', 'CarbonFootprint', 'CarbonJourney'];
+
 // GA4 tracking (web only) — gtag.js is loaded in public/index.html with
 // send_page_view disabled, so every screen change (not just the first load) is
 // reported here as its own page_view, using the React Navigation route name.
@@ -88,8 +92,20 @@ export function RootNavigator() {
       // navigation guard. Fire-and-forget — never await, never block navigation.
       if (data?.notificationId) markNotificationOpened(data.notificationId);
 
-      if (!data?.bookingId || !navRef.current) return;
-      navRef.current.navigate('BookingDetails', { booking: { _id: data.bookingId } });
+      if (!navRef.current) return;
+      if (data?.bookingId) {
+        navRef.current.navigate('BookingDetails', { booking: { _id: data.bookingId } });
+        return;
+      }
+      // Engagement pushes (backend-email-service/templates/pushTemplates.js) carry
+      // `data.route` — open that screen. Allow-listed, and only when logged in.
+      const route = typeof data?.route === 'string' ? data.route : '';
+      if (!TAB_ROUTES.includes(route) && !STACK_ROUTES.includes(route)) return;
+      getToken().then((token) => {
+        if (!token || !navRef.current) return;
+        if (TAB_ROUTES.includes(route)) navRef.current.navigate('App', { screen: route });
+        else navRef.current.navigate(route);
+      }).catch(() => {});
     };
 
     getLastNotificationResponse().then(data => {

@@ -2,249 +2,415 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, TextInput, StyleSheet, StatusBar, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { X, Leaf, CheckCircle2 } from 'lucide-react-native';
-import { carbonService, CarbonAssessment, CarbonCategoryKey, CARBON_CATEGORY_ORDER, CarbonApiNotReadyError } from '../services/carbon';
+import { X, Leaf, Mic, Send, CheckCircle2, Check } from 'lucide-react-native';
+import { carbonService, CarbonAssessment, CarbonCategoryKey, CarbonApiNotReadyError, CARBON_CATEGORY_ORDER } from '../services/carbon';
+import { profileService } from '../services/profile';
 import { CARBON_CATEGORIES, formatKg, formatDate, showCarbonError } from '../utils/carbon';
+import { QUESTION_SET_VERSION, Question, AnswerMap, UserContext, visibleQuestions, answerLabel } from '../utils/carbonQuestions';
 import { showAlert } from '../utils/alert';
 
-type Step = 'intro' | number | 'calculating' | 'result';
-const EMPTY_ANSWERS = CARBON_CATEGORY_ORDER.reduce((acc, k) => ({ ...acc, [k]: '' }), {} as Record<CarbonCategoryKey, string>);
-const TOTAL = CARBON_CATEGORY_ORDER.length; // always 6, fixed order
+type Phase = 'chat' | 'calculating' | 'result';
 
-// One screen with steps, the same way QuizScreen runs its states. Header and
-// progress track follow the quiz; the answer box and buttons follow FeedbackScreen.
+// Web Speech API (Chrome, Edge, Safari). On native the keyboard's own mic is used.
+// TODO(native): add in-app voice with expo-speech-recognition (needs a dev build).
+const SpeechRecognition: any = Platform.OS === 'web' && typeof window !== 'undefined'
+  ? (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+  : null;
+
+function BotBubble({ children, live }: { children: React.ReactNode; live?: boolean }) {
+  return (
+    <View style={styles.botRow} accessibilityLiveRegion={live ? 'polite' : 'none'}>
+      <View style={styles.avatar}><Leaf size={14} color="#15803d" /></View>
+      <View style={styles.botBubble}>{children}</View>
+    </View>
+  );
+}
+
+function SectionLabel({ category }: { category: CarbonCategoryKey }) {
+  const c = CARBON_CATEGORIES[category];
+  return (
+    <View style={styles.sectionRow} accessibilityRole="header">
+      <View style={[styles.sectionTile, { backgroundColor: c.bg }]}><c.Icon size={13} color={c.color} /></View>
+      <Text style={[styles.sectionText, { color: c.color }]}>{c.label}</Text>
+    </View>
+  );
+}
+
+// Conversational assessment: the app asks, the user taps an option — or types or
+// speaks in their own words. Header follows the quiz; bubbles and chips use the
+// same greens, radii and card shadow as Wallet.
 export function CarbonAssessmentScreen({ navigation }: any) {
-  const [step, setStep] = useState<Step>('intro');
-  const [answers, setAnswers] = useState<Record<CarbonCategoryKey, string>>(EMPTY_ANSWERS);
+  const [ctx, setCtx] = useState<UserContext>({});
+  const [started, setStarted] = useState(false);
+  const [answers, setAnswers] = useState<AnswerMap>({});
+  const [multi, setMulti] = useState<string[]>([]);
+  const [input, setInput] = useState('');
+  const [listening, setListening] = useState(false);
+  const [voiceHint, setVoiceHint] = useState(false);
+  const [phase, setPhase] = useState<Phase>('chat');
   const [result, setResult] = useState<CarbonAssessment | null>(null);
+  const scrollRef = useRef<ScrollView>(null);
+  const inputRef = useRef<TextInput>(null);
+  const recRef = useRef<any>(null);
   const allowLeave = useRef(false);
 
-  const hasAnswers = Object.values(answers).some((a) => a.trim().length > 0);
+  // Personalise the conversation from the profile the user already filled in.
+  useEffect(() => {
+    profileService.getProfile()
+      .then((p: any) => setCtx({
+        firstName: (p?.name || '').trim().split(' ')[0] || undefined,
+        city: p?.demographics?.city || p?.city || p?.address?.city || undefined,
+        employment: p?.demographics?.employment || p?.employment || undefined,
+      }))
+      .catch(() => {});
+    return () => recRef.current?.stop?.();
+  }, []);
 
-  // Confirm before leaving (close button, Android back, browser back) with typed answers.
-  // TODO(backend): answers are not saved as you go yet, so they are lost on exit.
+  const vis = visibleQuestions(answers);
+  const answered = vis.filter((q) => answers[q.id]);
+  const current: Question | undefined = started ? vis.find((q) => !answers[q.id]) : undefined;
+  const allDone = started && !current;
+  const hasAnswers = answered.length > 0;
+
+  // Confirm before leaving (close, Android back, browser back) mid-way.
+  // TODO(backend): answers aren't saved as you go yet, so leaving loses them.
   useEffect(() => {
     return navigation.addListener('beforeRemove', (e: any) => {
-      if (allowLeave.current || !hasAnswers || step === 'result') return;
+      if (allowLeave.current || !hasAnswers || phase === 'result') return;
       e.preventDefault();
-      showAlert('Leave assessment?', 'Your answers on this screen will be lost.', [
+      showAlert('Leave assessment?', 'Your answers so far will be lost.', [
         { text: 'Keep going', style: 'cancel' },
         { text: 'Leave', style: 'destructive', onPress: () => { allowLeave.current = true; navigation.dispatch(e.data.action); } },
       ]);
     });
-  }, [navigation, hasAnswers, step]);
+  }, [navigation, hasAnswers, phase]);
 
   const close = () => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('CarbonFootprint'));
 
-  const calculate = async () => {
-    setStep('calculating');
+  const answer = (q: Question, a: { optionIds?: string[]; text?: string }) => {
+    setAnswers((prev) => ({ ...prev, [q.id]: a }));
+    setMulti([]);
+    setInput('');
+    setVoiceHint(false);
+  };
+
+  const sendText = () => {
+    const text = input.trim();
+    if (!current || text.length < 2) return;
+    answer(current, { text });
+  };
+
+  // Undo the most recent answer so it can be picked again.
+  const changeLast = () => {
+    const last = answered[answered.length - 1];
+    if (!last) return;
+    setAnswers((prev) => { const next = { ...prev }; delete next[last.id]; return next; });
+    setMulti([]);
+  };
+
+  const toggleVoice = () => {
+    if (!SpeechRecognition) {
+      setVoiceHint(true);
+      inputRef.current?.focus();
+      return;
+    }
+    if (listening) { recRef.current?.stop(); return; }
     try {
-      const saved = await carbonService.submitAssessment(answers);
-      setResult(saved);
-      setStep('result');
-    } catch (error) {
-      showCarbonError("Couldn't calculate your footprint", error);
-      setStep(TOTAL - 1); // back to the last question, answers intact
-      if (!(error instanceof CarbonApiNotReadyError)) console.error('Carbon assessment error:', error);
+      const rec = new SpeechRecognition();
+      rec.lang = 'en-IN';
+      rec.interimResults = true;
+      rec.onresult = (e: any) => setInput(Array.from(e.results).map((r: any) => r[0].transcript).join(''));
+      rec.onerror = () => showAlert("Couldn't hear you", 'Check that the microphone is allowed for this site, then try again.');
+      rec.onend = () => setListening(false);
+      recRef.current = rec;
+      rec.start();
+      setListening(true);
+    } catch {
+      setListening(false);
+      showAlert("Couldn't start the mic", 'Please type your answer instead.');
     }
   };
 
-  const qIndex = typeof step === 'number' ? step : -1;
-  const key = qIndex >= 0 ? CARBON_CATEGORY_ORDER[qIndex] : null;
-  const cat = key ? CARBON_CATEGORIES[key] : null;
-  const answer = key ? answers[key] : '';
-  const canContinue = answer.trim().length >= 2;
-  const progressPct = qIndex >= 0 ? (qIndex / TOTAL) * 100 : step === 'calculating' || step === 'result' ? 100 : 0;
+  const calculate = async () => {
+    setPhase('calculating');
+    const payload: AnswerMap = {};
+    vis.forEach((q) => { if (answers[q.id]) payload[q.id] = answers[q.id]; }); // only questions that applied
+    try {
+      const saved = await carbonService.submitAssessment(payload, QUESTION_SET_VERSION);
+      setResult(saved);
+      setPhase('result');
+    } catch (error) {
+      showCarbonError("Couldn't calculate your footprint", error);
+      if (!(error instanceof CarbonApiNotReadyError)) console.error('Carbon assessment error:', error);
+      setPhase('chat');
+    }
+  };
 
+  const total = vis.length;
+  const progressPct = started ? (answered.length / total) * 100 : 0;
+  // Header counts topics, not questions: follow-ups (e.g. fuel type) appear only
+  // after some answers, so a question count would jump around.
+  const topics = CARBON_CATEGORY_ORDER.filter((k) => vis.some((q) => q.category === k));
+  const topicNo = current ? topics.indexOf(current.category) + 1 : topics.length;
   const top = result?.categories.reduce<{ key: CarbonCategoryKey; kgCo2e: number } | null>(
     (best, c) => (c.kgCo2e > (best?.kgCo2e ?? 0) ? c : best), null,
   );
 
+  // Transcript: one section label whenever the category changes.
+  let lastCategory: CarbonCategoryKey | null = null;
+  const sectionFor = (q: Question) => {
+    const show = q.category !== lastCategory;
+    lastCategory = q.category;
+    return show ? <SectionLabel category={q.category} /> : null;
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar barStyle="light-content" backgroundColor="#064e3b" />
-      <LinearGradient colors={['#064e3b', '#166534']} style={styles.topBg} />
-
-      {/* Header — same as the quiz */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.closeBtn} onPress={close} activeOpacity={0.8} accessibilityRole="button" accessibilityLabel="Close assessment">
-          <X size={22} color="white" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Carbon footprint</Text>
-        <View style={{ width: 42 }} />
-      </View>
-
-      {step !== 'intro' && (
-        <>
-          <View style={styles.progressTrack} accessible accessibilityLabel={qIndex >= 0 ? `Question ${qIndex + 1} of ${TOTAL}` : 'All questions answered'}>
-            <View style={[styles.progressFill, { width: `${progressPct}%` }]} />
-          </View>
-          {qIndex >= 0 && (
-            <View style={styles.metaRow}>
-              <Text style={styles.qCounter}>Question {qIndex + 1} of {TOTAL}</Text>
-            </View>
-          )}
-        </>
-      )}
+      <LinearGradient colors={['#064e3b', '#166534']} style={styles.headerBg}>
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.closeBtn} onPress={close} activeOpacity={0.8} accessibilityRole="button" accessibilityLabel="Close assessment">
+            <X size={22} color="white" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Carbon footprint</Text>
+          <Text style={styles.headerCount}>{started ? `${topicNo} of ${topics.length}` : ''}</Text>
+        </View>
+        <View style={styles.progressTrack} accessible accessibilityLabel={started ? `Topic ${topicNo} of ${topics.length}${current ? `, ${CARBON_CATEGORIES[current.category].label}` : ''}` : 'Not started'}>
+          <View style={[styles.progressFill, { width: `${progressPct}%` }]} />
+        </View>
+      </LinearGradient>
 
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+        <ScrollView
+          ref={scrollRef}
+          contentContainerStyle={styles.thread}
+          keyboardShouldPersistTaps="handled"
+          onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: true })}
+          showsVerticalScrollIndicator={false}
+        >
+          <BotBubble>
+            <Text style={styles.botText}>
+              Hi{ctx.firstName ? ` ${ctx.firstName}` : ''}! Let's work out your carbon footprint{ctx.city ? ` in ${ctx.city}` : ''}.
+            </Text>
+          </BotBubble>
+          <BotBubble>
+            <Text style={styles.botText}>
+              I'll ask about travel, home energy, food, waste, water, flights and shopping — about 4 minutes. Just tap an answer, or type or speak if that's easier.
+            </Text>
+            <Text style={styles.botFine}>AI only reads what you type or say. Your footprint is worked out with fixed formulas and standard conversion factors.</Text>
+          </BotBubble>
 
-          {step === 'intro' && (
-            <View style={styles.card}>
-              <View style={styles.introIcon}><Leaf size={28} color="#16a34a" /></View>
-              <Text style={styles.title}>Calculate my footprint</Text>
-              <Text style={styles.body}>
-                Your carbon footprint is the greenhouse gas your daily life adds to the air, measured in kg CO₂e.
-                Answer 6 quick questions in your own words — rough guesses are fine.
-              </Text>
+          {!started && (
+            <View style={styles.chips}>
+              <TouchableOpacity style={[styles.chip, styles.chipPrimary]} onPress={() => setStarted(true)} activeOpacity={0.8} accessibilityRole="button">
+                <Text style={[styles.chipText, styles.chipTextPrimary]}>Let's start</Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
-              <View style={styles.catGrid}>
-                {CARBON_CATEGORY_ORDER.map((k) => {
-                  const c = CARBON_CATEGORIES[k];
+          {answered.map((q, i) => (
+            <React.Fragment key={q.id}>
+              {sectionFor(q)}
+              <BotBubble><Text style={styles.botText}>{q.ask(ctx, answers)}</Text></BotBubble>
+              <View style={styles.userRow}>
+                <View style={styles.userBubble}><Text style={styles.userText}>{answerLabel(q, answers[q.id])}</Text></View>
+                {i === answered.length - 1 && phase === 'chat' && (
+                  <TouchableOpacity onPress={changeLast} activeOpacity={0.8} accessibilityRole="button" accessibilityLabel="Change this answer" style={styles.changeBtn}>
+                    <Text style={styles.changeText}>Change</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </React.Fragment>
+          ))}
+
+          {current && phase === 'chat' && (
+            <>
+              {sectionFor(current)}
+              <BotBubble live><Text style={styles.botText}>{current.ask(ctx, answers)}</Text></BotBubble>
+              <View style={styles.chips}>
+                {current.options.map((o) => {
+                  const on = multi.includes(o.id);
                   return (
-                    <View key={k} style={styles.catCell}>
-                      <View style={[styles.catTile, { backgroundColor: c.bg }]}><c.Icon size={18} color={c.color} /></View>
-                      <Text style={styles.catLabel}>{c.label}</Text>
-                    </View>
+                    <TouchableOpacity
+                      key={o.id}
+                      style={[styles.chip, on && styles.chipOn]}
+                      onPress={() => {
+                        if (!current.multi) return answer(current, { optionIds: [o.id] });
+                        setMulti((m) => (o.id === 'none' ? ['none'] : on ? m.filter((x) => x !== o.id) : [...m.filter((x) => x !== 'none'), o.id]));
+                      }}
+                      activeOpacity={0.8}
+                      accessibilityRole="button"
+                      accessibilityState={current.multi ? { selected: on } : undefined}
+                    >
+                      <View style={styles.chipInner}>
+                        {on && <Check size={14} color="#15803d" strokeWidth={3} />}
+                        <Text style={[styles.chipText, on && styles.chipTextOn]}>{o.label}</Text>
+                      </View>
+                    </TouchableOpacity>
                   );
                 })}
+                {current.multi && (
+                  <TouchableOpacity
+                    style={[styles.chip, styles.chipPrimary, multi.length === 0 && styles.chipDisabled]}
+                    onPress={() => answer(current, { optionIds: multi })}
+                    disabled={multi.length === 0}
+                    activeOpacity={0.8}
+                    accessibilityRole="button"
+                    accessibilityState={{ disabled: multi.length === 0 }}
+                  >
+                    <Text style={[styles.chipText, styles.chipTextPrimary]}>Done</Text>
+                  </TouchableOpacity>
+                )}
               </View>
-
-              <Text style={styles.fine}>6 questions · about 3 minutes</Text>
-              <Text style={styles.fine}>
-                AI only reads your answers. Your footprint is worked out with fixed formulas and standard conversion factors.
-              </Text>
-
-              <TouchableOpacity style={styles.primaryBtn} onPress={() => setStep(0)} activeOpacity={0.8} accessibilityRole="button">
-                <Text style={styles.primaryBtnText}>Let's start</Text>
-              </TouchableOpacity>
-            </View>
+            </>
           )}
 
-          {cat && key && (
-            <View style={styles.card}>
-              <View style={styles.catChip}>
-                <View style={[styles.catTile, { backgroundColor: cat.bg }]}><cat.Icon size={18} color={cat.color} /></View>
-                <Text style={[styles.catChipText, { color: cat.color }]}>{cat.label}</Text>
+          {allDone && phase === 'chat' && (
+            <>
+              <BotBubble live><Text style={styles.botText}>That's everything! Ready to see your footprint?</Text></BotBubble>
+              <TouchableOpacity style={styles.primaryBtn} onPress={calculate} activeOpacity={0.8} accessibilityRole="button">
+                <Text style={styles.primaryBtnText}>Calculate my footprint</Text>
+              </TouchableOpacity>
+            </>
+          )}
+
+          {phase === 'calculating' && (
+            <BotBubble live>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <ActivityIndicator size="small" color="#16a34a" accessibilityLabel="Calculating" />
+                <Text style={styles.botText}>Calculating your footprint…</Text>
               </View>
-              <Text style={styles.question} accessibilityRole="header">{cat.question}</Text>
-              <Text style={styles.body}>{cat.support}</Text>
-
-              <TextInput
-                key={key}
-                style={styles.textarea}
-                placeholder={cat.placeholder}
-                placeholderTextColor="#94a3b8"
-                value={answer}
-                onChangeText={(t) => setAnswers((prev) => ({ ...prev, [key]: t }))}
-                multiline
-                maxLength={500}
-                textAlignVertical="top"
-                accessibilityLabel={cat.question}
-                accessibilityHint="Answer in your own words"
-                autoFocus={Platform.OS === 'web'}
-              />
-              <Text style={styles.hint}>Rough is fine — write it however you like.</Text>
-
-              <TouchableOpacity
-                style={[styles.primaryBtn, !canContinue && styles.primaryBtnDisabled]}
-                onPress={qIndex === TOTAL - 1 ? calculate : () => setStep(qIndex + 1)}
-                disabled={!canContinue}
-                activeOpacity={0.8}
-                accessibilityRole="button"
-                accessibilityState={{ disabled: !canContinue }}
-              >
-                <Text style={styles.primaryBtnText}>{qIndex === TOTAL - 1 ? 'Calculate my footprint' : 'Continue'}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.ghostBtn} onPress={() => setStep(qIndex === 0 ? 'intro' : qIndex - 1)} activeOpacity={0.8} accessibilityRole="button">
-                <Text style={styles.ghostBtnText}>Back</Text>
-              </TouchableOpacity>
-            </View>
+            </BotBubble>
           )}
 
-          {step === 'calculating' && (
-            <View style={[styles.card, { alignItems: 'center', paddingVertical: 40 }]} accessibilityLiveRegion="polite">
-              <ActivityIndicator size="large" color="#16a34a" accessibilityLabel="Calculating" />
-              <Text style={[styles.title, { marginTop: 16, textAlign: 'center' }]}>Calculating your footprint…</Text>
-              <Text style={[styles.body, { textAlign: 'center' }]}>Reading your answers and applying standard conversion factors.</Text>
-            </View>
-          )}
-
-          {step === 'result' && result && (
-            <View style={[styles.card, { alignItems: 'center' }]}>
-              <View style={styles.tick}><CheckCircle2 size={30} color="#16a34a" /></View>
-              <Text style={styles.resultLabel}>Your carbon footprint</Text>
-              <Text style={styles.resultValue}>{formatKg(result.totalKgPerMonth)}</Text>
-              <Text style={styles.resultUnit}>kg CO₂e / month</Text>
-              {top && (
-                <Text style={[styles.body, { textAlign: 'center', marginTop: 12 }]}>
-                  Your biggest source is <Text style={{ fontWeight: '800', color: '#0f172a' }}>{CARBON_CATEGORIES[top.key].label.toLowerCase()}</Text> — {formatKg(top.kgCo2e)} kg.
+          {phase === 'result' && result && (
+            <>
+              <BotBubble live><Text style={styles.botText}>Here's your carbon footprint.</Text></BotBubble>
+              <View style={styles.resultCard}>
+                <View style={styles.tick}><CheckCircle2 size={28} color="#16a34a" /></View>
+                <Text style={styles.resultValue}>{formatKg(result.totalKgPerMonth)}</Text>
+                <Text style={styles.resultUnit}>kg CO₂e / month</Text>
+                {top && (
+                  <Text style={styles.resultBody}>
+                    Your biggest source is <Text style={{ fontWeight: '800', color: '#0f172a' }}>{CARBON_CATEGORIES[top.key].label.toLowerCase()}</Text> — {formatKg(top.kgCo2e)} kg.
+                  </Text>
+                )}
+                <Text style={styles.fine}>
+                  Calculated {formatDate(result.createdAt)}{result.factorVersion ? ` · conversion factors v${result.factorVersion}` : ''}
                 </Text>
-              )}
-              <Text style={styles.fine}>
-                Calculated {formatDate(result.createdAt)}{result.factorVersion ? ` · conversion factors v${result.factorVersion}` : ''}
-              </Text>
-
-              <TouchableOpacity
-                style={[styles.primaryBtn, { alignSelf: 'stretch' }]}
-                onPress={() => { allowLeave.current = true; navigation.replace('CarbonJourney'); }}
-                activeOpacity={0.8}
-                accessibilityRole="button"
-              >
-                <Text style={styles.primaryBtnText}>View my journey</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.ghostBtn, { alignSelf: 'stretch' }]} onPress={() => { allowLeave.current = true; close(); }} activeOpacity={0.8} accessibilityRole="button">
-                <Text style={styles.ghostBtnText}>Done</Text>
-              </TouchableOpacity>
-            </View>
+                <TouchableOpacity style={[styles.primaryBtn, { alignSelf: 'stretch' }]} onPress={() => { allowLeave.current = true; navigation.replace('CarbonJourney'); }} activeOpacity={0.8} accessibilityRole="button">
+                  <Text style={styles.primaryBtnText}>View my journey</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.ghostBtn, { alignSelf: 'stretch' }]} onPress={() => { allowLeave.current = true; close(); }} activeOpacity={0.8} accessibilityRole="button">
+                  <Text style={styles.ghostBtnText}>Done</Text>
+                </TouchableOpacity>
+              </View>
+            </>
           )}
         </ScrollView>
+
+        {/* Composer — answer in your own words, typed or spoken */}
+        {current && phase === 'chat' && (
+          <View style={styles.composer}>
+            {(voiceHint || listening) && (
+              <Text style={styles.voiceHint}>
+                {listening ? 'Listening… tap the mic again to stop.' : 'Tap the mic on your keyboard to speak your answer.'}
+              </Text>
+            )}
+            <View style={styles.composerRow}>
+              <TextInput
+                ref={inputRef}
+                style={styles.input}
+                placeholder="Or type your own answer…"
+                placeholderTextColor="#94a3b8"
+                value={input}
+                onChangeText={setInput}
+                onSubmitEditing={sendText}
+                returnKeyType="send"
+                maxLength={300}
+                accessibilityLabel={`Your answer to: ${current.ask(ctx, answers)}`}
+              />
+              <TouchableOpacity
+                style={[styles.roundBtn, listening && styles.roundBtnLive]}
+                onPress={toggleVoice}
+                activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel={listening ? 'Stop listening' : 'Speak your answer'}
+              >
+                <Mic size={18} color={listening ? 'white' : '#16a34a'} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.roundBtn, styles.sendBtn, input.trim().length < 2 && styles.sendBtnOff]}
+                onPress={sendText}
+                disabled={input.trim().length < 2}
+                activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel="Send answer"
+              >
+                <Send size={16} color="white" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8fafc' },
-  topBg: { position: 'absolute', top: 0, left: 0, right: 0, height: 280, borderBottomLeftRadius: 36, borderBottomRightRadius: 36 },
-
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 12, paddingBottom: 16, maxWidth: 800, width: '100%', alignSelf: 'center' },
+  container: { flex: 1, backgroundColor: '#f0fdf6' },
+  headerBg: { borderBottomLeftRadius: 24, borderBottomRightRadius: 24, paddingBottom: 16 },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 12, paddingBottom: 12, maxWidth: 800, width: '100%', alignSelf: 'center' },
   headerTitle: { fontSize: 17, fontWeight: '800', color: 'white' },
+  headerCount: { width: 56, textAlign: 'right', fontSize: 12, fontWeight: '700', color: 'rgba(255,255,255,0.8)' },
   closeBtn: { width: 42, height: 42, borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.25)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)' },
-
   progressTrack: { marginHorizontal: 20, height: 5, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 3, overflow: 'hidden', maxWidth: 760, width: '100%', alignSelf: 'center' },
   progressFill: { height: '100%', backgroundColor: '#86efac', borderRadius: 3 },
-  metaRow: { paddingHorizontal: 20, marginTop: 10, maxWidth: 800, width: '100%', alignSelf: 'center' },
-  qCounter: { fontSize: 12, fontWeight: '700', color: 'rgba(255,255,255,0.8)' },
 
-  scroll: { paddingBottom: 40 },
-  card: { marginHorizontal: 16, marginTop: 20, backgroundColor: 'white', borderRadius: 24, padding: 20, elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 16, maxWidth: 600, width: '100%', alignSelf: 'center' },
+  thread: { padding: 16, paddingBottom: 24, gap: 10, maxWidth: 640, width: '100%', alignSelf: 'center' },
+  botRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, maxWidth: '90%' },
+  avatar: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#dcfce7', alignItems: 'center', justifyContent: 'center' },
+  botBubble: { flexShrink: 1, backgroundColor: 'white', borderRadius: 16, borderBottomLeftRadius: 4, paddingVertical: 10, paddingHorizontal: 14, borderWidth: 1, borderColor: '#f1f5f9', elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8 },
+  botText: { fontSize: 15, lineHeight: 21, fontWeight: '600', color: '#0f172a' },
+  botFine: { fontSize: 11.5, lineHeight: 16, fontWeight: '500', color: '#64748b', marginTop: 6 },
+  userRow: { alignItems: 'flex-end', gap: 2 },
+  userBubble: { maxWidth: '80%', backgroundColor: '#16a34a', borderRadius: 16, borderBottomRightRadius: 4, paddingVertical: 10, paddingHorizontal: 14 },
+  userText: { fontSize: 14, lineHeight: 20, fontWeight: '700', color: 'white' },
+  changeBtn: { paddingVertical: 4, paddingHorizontal: 6 },
+  changeText: { fontSize: 12, fontWeight: '700', color: '#16a34a' },
 
-  introIcon: { width: 56, height: 56, borderRadius: 16, backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center', marginBottom: 14, borderWidth: 1.5, borderColor: '#bbf7d0' },
-  title: { fontSize: 22, fontWeight: '900', color: '#0f172a', marginBottom: 8 },
-  body: { fontSize: 14, color: '#64748b', lineHeight: 21 },
-  fine: { fontSize: 12, color: '#94a3b8', marginTop: 12, textAlign: 'center' },
+  sectionRow: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'center', marginTop: 10 },
+  sectionTile: { width: 22, height: 22, borderRadius: 7, alignItems: 'center', justifyContent: 'center' },
+  sectionText: { fontSize: 11, fontWeight: '900', letterSpacing: 0.8, textTransform: 'uppercase' },
 
-  catGrid: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 18, rowGap: 14 },
-  catCell: { width: '33.33%', alignItems: 'center', gap: 6 },
-  catTile: { width: 36, height: 36, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  catLabel: { fontSize: 12, fontWeight: '700', color: '#475569' },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingLeft: 36 },
+  chip: { borderWidth: 1.5, borderColor: '#86efac', backgroundColor: 'white', borderRadius: 100, paddingVertical: 10, paddingHorizontal: 14, minHeight: 44, justifyContent: 'center' },
+  chipText: { fontSize: 13, fontWeight: '800', color: '#15803d' },
+  chipInner: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  chipOn: { backgroundColor: '#dcfce7', borderColor: '#16a34a', borderWidth: 2 },
+  chipTextOn: { color: '#15803d' },
+  chipPrimary: { backgroundColor: '#16a34a', borderColor: '#16a34a' },
+  chipTextPrimary: { color: 'white' },
+  chipDisabled: { backgroundColor: '#9cccb0', borderColor: '#9cccb0' },
 
-  catChip: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
-  catChipText: { fontSize: 12, fontWeight: '900', letterSpacing: 0.6, textTransform: 'uppercase' },
-  question: { fontSize: 20, fontWeight: '800', color: '#0f172a', lineHeight: 27, marginBottom: 6 },
-  textarea: { minHeight: 120, borderWidth: 1, borderColor: '#cbd5e1', borderRadius: 12, padding: 12, fontSize: 15, color: '#0f172a', backgroundColor: 'white', marginTop: 16 },
-  hint: { fontSize: 12, color: '#94a3b8', marginTop: 8 },
-
-  primaryBtn: { marginTop: 18, backgroundColor: '#16a34a', borderRadius: 12, paddingVertical: 15, alignItems: 'center', justifyContent: 'center' },
-  primaryBtnDisabled: { backgroundColor: '#9cccb0' },
+  primaryBtn: { marginTop: 8, backgroundColor: '#16a34a', borderRadius: 12, paddingVertical: 15, alignItems: 'center', justifyContent: 'center' },
   primaryBtnText: { color: 'white', fontSize: 15, fontWeight: '800' },
   ghostBtn: { marginTop: 10, borderWidth: 1, borderColor: '#cbd5e1', borderRadius: 12, paddingVertical: 13, alignItems: 'center' },
   ghostBtnText: { color: '#15803d', fontSize: 14.5, fontWeight: '800' },
 
-  tick: { width: 64, height: 64, borderRadius: 32, backgroundColor: '#e7f4ec', alignItems: 'center', justifyContent: 'center', marginBottom: 14 },
-  resultLabel: { fontSize: 13, fontWeight: '700', color: '#64748b' },
-  resultValue: { fontSize: 44, fontWeight: '900', color: '#0f172a', letterSpacing: -1, marginTop: 4 },
+  resultCard: { backgroundColor: 'white', borderRadius: 24, padding: 20, alignItems: 'center', elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 16 },
+  tick: { width: 56, height: 56, borderRadius: 28, backgroundColor: '#e7f4ec', alignItems: 'center', justifyContent: 'center', marginBottom: 10 },
+  resultValue: { fontSize: 44, fontWeight: '900', color: '#0f172a', letterSpacing: -1 },
   resultUnit: { fontSize: 13, fontWeight: '600', color: '#64748b' },
+  resultBody: { fontSize: 14, color: '#64748b', lineHeight: 21, textAlign: 'center', marginTop: 10 },
+  fine: { fontSize: 12, color: '#94a3b8', marginTop: 10, textAlign: 'center' },
+
+  composer: { backgroundColor: 'white', borderTopWidth: 1, borderTopColor: '#f1f5f9', paddingHorizontal: 12, paddingTop: 10, paddingBottom: Platform.OS === 'ios' ? 28 : 12 },
+  composerRow: { flexDirection: 'row', alignItems: 'center', gap: 8, maxWidth: 640, width: '100%', alignSelf: 'center' },
+  input: { flex: 1, minHeight: 44, borderRadius: 100, backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#e2e8f0', paddingHorizontal: 16, fontSize: 14, color: '#0f172a' },
+  roundBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: '#86efac', backgroundColor: 'white' },
+  roundBtnLive: { backgroundColor: '#e11d48', borderColor: '#e11d48' },
+  sendBtn: { backgroundColor: '#16a34a', borderColor: '#16a34a' },
+  sendBtnOff: { backgroundColor: '#9cccb0', borderColor: '#9cccb0' },
+  voiceHint: { fontSize: 12, fontWeight: '600', color: '#64748b', textAlign: 'center', marginBottom: 8 },
 });

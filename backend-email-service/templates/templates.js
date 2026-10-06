@@ -638,6 +638,47 @@ const templates = {
     };
   },
 
+  // Carbon footprint discovery — to users who have never calculated it.
+  CARBON_FOOTPRINT_INVITE: ({ name, city, unsubscribeUrl }) => {
+    const where = has0(city) ? ` in ${safe(city)}` : '';
+    const ticks = ['Just tap your answers — no forms, no maths', 'See where your CO₂ comes from', 'Get simple tips that fit your day', 'Track your progress month by month']
+      .map((b) => `<tr><td style="padding:4px 0;font-size:14px;color:${BRAND.colors.body};"><span style="color:${BRAND.colors.green};font-weight:800;">&#10003;</span>&nbsp;&nbsp;${b}</td></tr>`).join('');
+    return {
+      subject: `What's your carbon footprint? — ${BRAND.namePlain}`,
+      html: wrapEmail({
+        unsubscribeUrl: unsub(unsubscribeUrl),
+        preheader: 'Find out in about 4 minutes — just tap your answers.',
+        heading: 'Know your carbon footprint',
+        greetingName: name,
+        bodyHtml: `<p style="margin:0 0 12px;">Tap through a quick chat about how you travel, eat and live${where}, and see your footprint in kg CO₂e — plus simple ways to cut it.</p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:6px 0 14px;">${ticks}</table>`,
+        ctaLabel: 'Calculate my footprint',
+        ctaUrl: `${SITE}/CarbonFootprint`,
+      }),
+    };
+  },
+
+  // Monthly carbon check-in — to users whose latest assessment is 30+ days old.
+  CARBON_FOOTPRINT_CHECKIN: ({ name, lastKg, lastDate, unsubscribeUrl }) => {
+    const hasKg = has0(lastKg) && Number(String(lastKg).replace(/[^\d.]/g, '')) > 0;
+    return {
+      subject: `Your monthly carbon check-in — ${BRAND.namePlain}`,
+      html: wrapEmail({
+        unsubscribeUrl: unsub(unsubscribeUrl),
+        preheader: hasKg ? `Last time you were at ${escapeHtml(comma(lastKg))} kg CO₂e a month. See if you've cut it.` : 'See how your footprint has changed this month.',
+        heading: "How's your footprint this month?",
+        greetingName: name,
+        bodyHtml: `${hasKg ? detailTable([
+            ['Your last footprint', `${escapeHtml(comma(lastKg))} kg CO₂e / month`],
+            ...(has0(lastDate) ? [['Calculated on', safe(lastDate)]] : []),
+          ]) : ''}
+          <p style="margin:14px 0 0;">Take the quick chat again to see if your changes are paying off. Every result is saved, so you can watch your progress over time.</p>`,
+        ctaLabel: 'Check my footprint',
+        ctaUrl: `${SITE}/CarbonFootprint`,
+      }),
+    };
+  },
+
   // Feedback / NPS survey request. `surveyUrl` links to the survey form.
   FEEDBACK_SURVEY: ({ name, surveyUrl, unsubscribeUrl }) => ({
     subject: `We'd love your feedback on ${BRAND.namePlain}`,

@@ -9,7 +9,7 @@
 //
 // `data.route` is the in-app screen to open when the user taps the push — it maps
 // to the app's navigation routes (Wallet / Quiz / Referral / SchedulePickup /
-// OrderTracking), the same targets the email CTAs deep-link to. `data.type` lets
+// OrderTracking / CarbonFootprint), the same targets the email CTAs deep-link to. `data.type` lets
 // the client/analytics identify the campaign.
 //
 // Keys + their variable sets are a FIXED contract with the backend — don't rename.
@@ -112,6 +112,23 @@ const pushTemplates = {
     body: 'See what your pickups added up to this month.',
     data: { route: 'Wallet', type: 'IMPACT_REPORT' },
   }),
+
+  // Carbon footprint discovery — to users who have never calculated it.
+  CARBON_FOOTPRINT_INVITE: () => ({
+    title: "What's your carbon footprint?",
+    body: 'Find out in about 4 minutes — just tap your answers.',
+    data: { route: 'CarbonFootprint', type: 'CARBON_FOOTPRINT_INVITE' },
+  }),
+
+  // Monthly carbon check-in — to users whose latest assessment is 30+ days old.
+  CARBON_FOOTPRINT_CHECKIN: ({ lastKg }) => {
+    const k = fmt(lastKg);
+    return {
+      title: 'Your monthly carbon check-in',
+      body: k ? `Last time: ${k} kg CO₂e a month. See if you've cut it.` : "See how your footprint has changed this month.",
+      data: { route: 'CarbonFootprint', type: 'CARBON_FOOTPRINT_CHECKIN' },
+    };
+  },
 
   // Cumulative lifetime impact milestone.
   IMPACT_MILESTONE: ({ kg }) => {

@@ -31,6 +31,8 @@ const GROUPS = [
     ['Limited-time offer', 'Time-bound promo / bonus-coins campaign.', 'LIMITED_OFFER', 'LIMITED_OFFER'],
   ]],
   ['Sustainability & impact', [
+    ['Carbon footprint invite', 'Never calculated a footprint — discover the feature.', 'CARBON_FOOTPRINT_INVITE', 'CARBON_FOOTPRINT_INVITE'],
+    ['Monthly carbon check-in', 'Latest assessment is 30+ days old — retake to track progress.', 'CARBON_FOOTPRINT_CHECKIN', 'CARBON_FOOTPRINT_CHECKIN'],
     ['Lifetime impact milestone', 'Cumulative achievement — total kg recovered, CO₂ saved.', 'IMPACT_MILESTONE', 'IMPACT_MILESTONE'],
     ['Monthly impact report', 'Once-a-month recap of the user’s recycling impact.', 'IMPACT_REPORT', 'IMPACT_REPORT'],
     ['Monthly newsletter', 'Sustainability stories from the Knowledge Hub.', 'NEWSLETTER', 'NEWSLETTER'],
@@ -68,7 +70,7 @@ const sample = {
   month: 'September', occasion: 'happy diwali', xp: 320, minRedeem: 1000,
   balance: 6170, coinsSpent: 1500, pickups: 6, kg: 12, joinedThisMonth: false, bonus: 500,
   eligible: true, area: 'DLF Cyber City', code: 'PRIYA500', co2: 38, endDate: '30 Sep',
-  surveyUrl: '#',
+  surveyUrl: '#', city: 'Gurugram', lastKg: 184, lastDate: '28 Sep 2026',
   // Real Knowledge Hub articles (from src/data/articles.ts): real ids so "Read more"
   // deep-links to /ArticleDetail?id=<id>. The `image` field carries the article's
   // real hosted photo URL in production (commented per row); for THIS browser preview

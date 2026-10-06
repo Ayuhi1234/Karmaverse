@@ -78,17 +78,7 @@ function TopNavbar({ state, navigation }: any) {
               </TouchableOpacity>
             );
           })}
-          <TouchableOpacity style={s.bottomTab} onPress={() => setShowNotifications(true)} activeOpacity={0.7}>
-            <View style={{ position: 'relative' }}>
-              <Bell size={22} color="rgba(255,255,255,0.4)" />
-              {unreadCount > 0 && (
-                <View style={s.bellBadgeMobile}>
-                  <Text style={s.bellBadgeText}>{unreadCount > 9 ? '9+' : String(unreadCount)}</Text>
-                </View>
-              )}
-            </View>
-            <Text style={s.bottomTabText}>Alerts</Text>
-          </TouchableOpacity>
+          {/* Alerts moved to the Home header bell — Material caps bottom navigation at 5 destinations. */}
           <TouchableOpacity style={s.bottomTab} onPress={() => navigationRef.current?.navigate('Profile')} activeOpacity={0.7}>
             {avatarId ? <Avatar avatarId={avatarId} size={24} /> : <User size={22} color="rgba(255,255,255,0.4)" />}
             <Text style={s.bottomTabText}>Profile</Text>
