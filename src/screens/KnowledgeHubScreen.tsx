@@ -1,11 +1,14 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ChevronLeft, Clock } from 'lucide-react-native';
 import { ARTICLES } from '../data/articles';
+import { useTheme, makeStyles } from '../theme';
 
 export function KnowledgeHubScreen({ navigation }: any) {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const [featured, ...rest] = ARTICLES;
 
   return (
@@ -13,7 +16,7 @@ export function KnowledgeHubScreen({ navigation }: any) {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('App')}>
-          <ChevronLeft size={24} color="#0f172a" />
+          <ChevronLeft size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Knowledge hub</Text>
         <View style={styles.placeholderBox} />
@@ -59,7 +62,7 @@ export function KnowledgeHubScreen({ navigation }: any) {
                 <Text style={[styles.categoryLabel, { color: article.categoryColor }]}>{article.category}</Text>
                 <Text style={styles.articleTitle} numberOfLines={2}>{article.title}</Text>
                 <View style={styles.metaRow}>
-                  <Clock size={11} color="#94a3b8" />
+                  <Clock size={11} color={colors.textFaint} />
                   <Text style={styles.articleMeta}>{article.readTime} • {article.date}</Text>
                 </View>
               </View>
@@ -71,11 +74,11 @@ export function KnowledgeHubScreen({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8fafc' },
+const useStyles = makeStyles((c) => ({
+  container: { flex: 1, backgroundColor: c.bg },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 40, paddingBottom: 16, maxWidth: 800, width: '100%', alignSelf: 'center' },
-  backBtn: { padding: 8, backgroundColor: 'white', borderRadius: 12, elevation: 1 },
-  headerTitle: { fontSize: 20, fontWeight: '800', color: '#0f172a' },
+  backBtn: { padding: 8, backgroundColor: c.surface, borderRadius: 12, elevation: 1 },
+  headerTitle: { fontSize: 20, fontWeight: '800', color: c.text },
   placeholderBox: { width: 40 },
   scrollContent: { paddingHorizontal: 20, paddingBottom: 40, maxWidth: 800, width: '100%', alignSelf: 'center' },
 
@@ -89,12 +92,12 @@ const styles = StyleSheet.create({
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   featuredMeta: { fontSize: 12, color: 'rgba(255,255,255,0.75)', fontWeight: '600' },
 
-  sectionTitle: { fontSize: 18, fontWeight: '800', color: '#1e293b', marginBottom: 14 },
+  sectionTitle: { fontSize: 18, fontWeight: '800', color: c.text, marginBottom: 14 },
   listContainer: { gap: 14 },
-  articleRow: { flexDirection: 'row', backgroundColor: 'white', padding: 10, borderRadius: 18, alignItems: 'center', elevation: 1, borderWidth: 1, borderColor: '#f1f5f9' },
-  articleThumbnail: { width: 86, height: 86, borderRadius: 14, marginRight: 14, backgroundColor: '#f0fdf4' },
+  articleRow: { flexDirection: 'row', backgroundColor: c.surface, padding: 10, borderRadius: 18, alignItems: 'center', elevation: 1, borderWidth: 1, borderColor: c.border },
+  articleThumbnail: { width: 86, height: 86, borderRadius: 14, marginRight: 14, backgroundColor: c.surfaceAlt },
   articleInfo: { flex: 1, paddingRight: 4 },
   categoryLabel: { fontSize: 10, fontWeight: '800', letterSpacing: 0.6, marginBottom: 4 },
-  articleTitle: { fontSize: 15, fontWeight: '700', color: '#0f172a', marginBottom: 6, lineHeight: 20 },
-  articleMeta: { fontSize: 11.5, color: '#94a3b8', fontWeight: '500' },
-});
+  articleTitle: { fontSize: 15, fontWeight: '700', color: c.text, marginBottom: 6, lineHeight: 20 },
+  articleMeta: { fontSize: 11.5, color: c.textFaint, fontWeight: '500' },
+}));

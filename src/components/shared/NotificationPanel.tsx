@@ -7,7 +7,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { X, Trash2, Truck, MapPin, Coins, CheckCircle2, Clock, XCircle, Brain, Bell } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppNotification } from '../../context/NotificationContext';
+import { routeNotification } from '../../utils/notificationRoute';
 import { SCREEN_WIDTH } from '../../utils/layout';
+import { useTheme, makeStyles } from '../../theme';
 
 interface Props {
   visible: boolean;
@@ -72,13 +74,24 @@ function relativeTime(ts: number): string {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-function NotifCard({ notif, onMarkRead }: { notif: AppNotification; onMarkRead: (id: string) => void }) {
+function NotifCard({ notif, onOpen }: { notif: AppNotification; onOpen: (n: AppNotification) => void }) {
+  const styles = useStyles();
+  const { colors, isDark } = useTheme();
   const cfg = TYPE_CONFIG[notif.type] || DEFAULT_CFG;
 
+  // The type gradients are light tints that only read under dark text. In dark mode
+  // the text is light, so an unread card uses a subtle dark tint of the type colour
+  // instead — keeping the title/body readable while still hinting at the type.
+  const cardBg: [string, string] = notif.read
+    ? [colors.surface, colors.surface]
+    : isDark
+      ? [`${cfg.color}26`, colors.surface]
+      : cfg.gradientBg;
+
   return (
-    <TouchableOpacity activeOpacity={notif.read ? 1 : 0.75} onPress={() => { if (!notif.read) onMarkRead(notif.id); }}>
+    <TouchableOpacity activeOpacity={0.75} onPress={() => onOpen(notif)}>
     <LinearGradient
-      colors={notif.read ? ['#ffffff', '#fafafa'] : cfg.gradientBg}
+      colors={cardBg}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={styles.card}
@@ -110,7 +123,18 @@ function NotifCard({ notif, onMarkRead }: { notif: AppNotification; onMarkRead: 
 }
 
 export function NotificationPanel({ visible, onClose, notifications, unreadCount, onMarkRead, onMarkAllRead, onClearAll }: Props) {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
+
+  // Tapping a card deep-links to the right screen (same router as a push tap),
+  // marks it read, and closes the panel.
+  const handleOpen = (n: AppNotification) => {
+    onMarkRead(n.id);
+    routeNotification({ type: n.type, bookingId: n.bookingId });
+    onClose();
+  };
+
   const slideAnim = useRef(new Animated.Value(PANEL_WIDTH)).current;
   const backdropAnim = useRef(new Animated.Value(0)).current;
   const [modalVisible, setModalVisible] = useState(false);
@@ -163,7 +187,7 @@ export function NotificationPanel({ visible, onClose, notifications, unreadCount
         {notifications.length === 0 ? (
           <View style={styles.emptyState}>
             <View style={styles.emptyIconCircle}>
-              <Bell size={32} color="#94a3b8" />
+              <Bell size={32} color={colors.textFaint} />
             </View>
             <Text style={styles.emptyTitle}>All caught up!</Text>
             <Text style={styles.emptySub}>Booking updates and quiz activity{'\n'}will appear here</Text>
@@ -174,10 +198,10 @@ export function NotificationPanel({ visible, onClose, notifications, unreadCount
             bounces={false}
             contentContainerStyle={{ padding: 14, gap: 10, paddingBottom: insets.bottom + 20 }}
           >
-            {notifications.map(n => <NotifCard key={n.id} notif={n} onMarkRead={onMarkRead} />)}
+            {notifications.map(n => <NotifCard key={n.id} notif={n} onOpen={handleOpen} />)}
 
             <TouchableOpacity style={styles.clearBtn} onPress={onClearAll}>
-              <Trash2 size={14} color="#94a3b8" />
+              <Trash2 size={14} color={colors.textFaint} />
               <Text style={styles.clearBtnText}>Clear all notifications</Text>
             </TouchableOpacity>
           </ScrollView>
@@ -188,13 +212,13 @@ export function NotificationPanel({ visible, onClose, notifications, unreadCount
   );
 }
 
-const styles = StyleSheet.create({
-  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.5)' },
+const useStyles = makeStyles((c) => ({
+  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: c.overlay },
 
   panel: {
     position: 'absolute', top: 0, right: 0, bottom: 0,
     width: PANEL_WIDTH,
-    backgroundColor: '#f1f5f9',
+    backgroundColor: c.bg,
     borderTopLeftRadius: 24,
     borderBottomLeftRadius: 24,
     overflow: 'hidden',
@@ -227,8 +251,8 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row', alignItems: 'flex-start',
     borderRadius: 18, padding: 14, gap: 12,
-    borderWidth: 1, borderColor: 'rgba(0,0,0,0.05)',
-    shadowColor: '#000',
+    borderWidth: 1, borderColor: c.border,
+    shadowColor: c.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
@@ -240,35 +264,35 @@ const styles = StyleSheet.create({
   },
   cardBody: { flex: 1 },
   cardTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 },
-  cardTitle: { fontSize: 15, fontWeight: '800', color: '#0f172a', flex: 1 },
-  cardTitleRead: { fontWeight: '600', color: '#475569' },
+  cardTitle: { fontSize: 15, fontWeight: '800', color: c.text, flex: 1 },
+  cardTitleRead: { fontWeight: '600', color: c.textMuted },
   unreadDot: { width: 8, height: 8, borderRadius: 4, marginLeft: 6, flexShrink: 0 },
-  cardMsg: { fontSize: 13, color: '#64748b', lineHeight: 19, marginBottom: 10 },
+  cardMsg: { fontSize: 13, color: c.textMuted, lineHeight: 19, marginBottom: 10 },
   cardBottomRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   tagPill: {
     paddingHorizontal: 10, paddingVertical: 4,
     borderRadius: 20,
   },
   tagText: { fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5 },
-  cardTime: { fontSize: 11, color: '#94a3b8', fontWeight: '600' },
+  cardTime: { fontSize: 11, color: c.textFaint, fontWeight: '600' },
 
   // Empty state
   emptyState: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
   emptyIconCircle: {
     width: 80, height: 80, borderRadius: 40,
-    backgroundColor: '#f1f5f9',
+    backgroundColor: c.surfaceAlt,
     alignItems: 'center', justifyContent: 'center',
     marginBottom: 20,
-    borderWidth: 2, borderColor: '#e2e8f0',
+    borderWidth: 2, borderColor: c.border,
   },
-  emptyTitle: { fontSize: 18, fontWeight: '800', color: '#0f172a', marginBottom: 8 },
-  emptySub: { fontSize: 13, color: '#94a3b8', textAlign: 'center', lineHeight: 20 },
+  emptyTitle: { fontSize: 18, fontWeight: '800', color: c.text, marginBottom: 8 },
+  emptySub: { fontSize: 13, color: c.textFaint, textAlign: 'center', lineHeight: 20 },
 
   clearBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 6, paddingVertical: 13, borderRadius: 14,
-    borderWidth: 1, borderColor: '#e2e8f0',
-    backgroundColor: 'white',
+    borderWidth: 1, borderColor: c.border,
+    backgroundColor: c.surface,
   },
-  clearBtnText: { fontSize: 12, fontWeight: '600', color: '#94a3b8' },
-});
+  clearBtnText: { fontSize: 12, fontWeight: '600', color: c.textFaint },
+}));

@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, ScrollView, TextInput, TouchableOpacity, StyleSheet, StatusBar, KeyboardAvoidingView, Platform, ActivityIndicator, Modal } from 'react-native';
+import { View, Text, ScrollView, TextInput, TouchableOpacity, StatusBar, KeyboardAvoidingView, Platform, ActivityIndicator, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, Phone, Coins, CheckCircle2, Info, Recycle, Gift, ArrowDown } from 'lucide-react-native';
+import { useTheme, makeStyles } from '../theme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { transferService, CoinType, TransferQuote } from '../services/transfer';
@@ -34,6 +35,8 @@ function mapTransferError(error: any, coinLabel: string): FieldErrors | 'unautho
 }
 
 export function TransferScreen({ navigation, route }: any) {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const [pickupCoins, setPickupCoins] = useState<number>(route?.params?.pickupCoins ?? 0);
   const [rewardCoins, setRewardCoins] = useState<number>(route?.params?.rewardCoins ?? 0);
 
@@ -141,7 +144,7 @@ export function TransferScreen({ navigation, route }: any) {
         <StatusBar barStyle="light-content" backgroundColor="#064e3b" />
         <View style={styles.successScreen}>
           <View style={styles.successIconBg}>
-            <CheckCircle2 size={48} color="#16a34a" />
+            <CheckCircle2 size={48} color={colors.primary} />
           </View>
           <Text style={styles.successTitle}>Coins sent!</Text>
           <Text style={styles.successSub}>
@@ -159,7 +162,7 @@ export function TransferScreen({ navigation, route }: any) {
             {!sameCount && (
               <View style={styles.receiptRow}>
                 <Text style={styles.receiptLabel}>Value transferred</Text>
-                <Text style={[styles.receiptValue, { color: '#16a34a' }]}>{formatRupees(receipt.received.value)}</Text>
+                <Text style={[styles.receiptValue, { color: colors.primary }]}>{formatRupees(receipt.received.value)}</Text>
               </View>
             )}
           </View>
@@ -203,14 +206,14 @@ export function TransferScreen({ navigation, route }: any) {
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Recipient's mobile number</Text>
             <View style={[styles.inputWrapper, phoneError && styles.inputWrapperError]}>
-              <Phone size={18} color="#94a3b8" style={styles.inputIcon} />
+              <Phone size={18} color={colors.textFaint} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 value={phone}
                 onChangeText={(t) => setPhone(t.replace(/[^0-9]/g, '').slice(0, 10))}
                 keyboardType="number-pad"
                 placeholder="10-digit KarmaCoin user number"
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor={colors.textFaint}
                 maxLength={10}
               />
             </View>
@@ -226,7 +229,7 @@ export function TransferScreen({ navigation, route }: any) {
                 onPress={() => setCoinType('PICKUP')}
                 activeOpacity={0.85}
               >
-                <Recycle size={16} color={!isReward ? '#15803d' : '#94a3b8'} />
+                <Recycle size={16} color={!isReward ? colors.primary : colors.textFaint} />
                 <Text style={[styles.toggleText, !isReward && styles.toggleTextActive]}>Pickup</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -234,7 +237,7 @@ export function TransferScreen({ navigation, route }: any) {
                 onPress={() => setCoinType('REWARD')}
                 activeOpacity={0.85}
               >
-                <Gift size={16} color={isReward ? '#15803d' : '#94a3b8'} />
+                <Gift size={16} color={isReward ? colors.primary : colors.textFaint} />
                 <Text style={[styles.toggleText, isReward && styles.toggleTextActive]}>Reward</Text>
               </TouchableOpacity>
             </View>
@@ -244,14 +247,14 @@ export function TransferScreen({ navigation, route }: any) {
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Amount to send</Text>
             <View style={[styles.inputWrapper, amountError && styles.inputWrapperError]}>
-              <Coins size={18} color="#94a3b8" style={styles.inputIcon} />
+              <Coins size={18} color={colors.textFaint} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 value={amountInput}
                 onChangeText={(t) => setAmountInput(t.replace(/[^0-9]/g, ''))}
                 keyboardType="number-pad"
                 placeholder="e.g. 500"
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor={colors.textFaint}
               />
             </View>
             <View style={styles.quickRow}>
@@ -285,7 +288,7 @@ export function TransferScreen({ navigation, route }: any) {
           {/* Live quote preview */}
           {quoting && (
             <View style={styles.quoteLoading}>
-              <ActivityIndicator size="small" color="#16a34a" />
+              <ActivityIndicator size="small" color={colors.primary} />
               <Text style={styles.quoteLoadingText}>Checking recipient…</Text>
             </View>
           )}
@@ -302,10 +305,10 @@ export function TransferScreen({ navigation, route }: any) {
                   <Text style={styles.quoteSideCoins}>{quote.sent.coins.toLocaleString()}</Text>
                   {isReward && <Text style={styles.quoteSideValue}>{formatRupees(quote.sent.value)}</Text>}
                 </View>
-                <ArrowDown size={18} color="#94a3b8" />
+                <ArrowDown size={18} color={colors.textFaint} />
                 <View style={styles.quoteSide}>
                   <Text style={styles.quoteSideLabel}>They receive</Text>
-                  <Text style={[styles.quoteSideCoins, { color: '#15803d' }]}>{quote.received.coins.toLocaleString()}</Text>
+                  <Text style={[styles.quoteSideCoins, { color: colors.primary }]}>{quote.received.coins.toLocaleString()}</Text>
                   {isReward && <Text style={styles.quoteSideValue}>{formatRupees(quote.received.value)}</Text>}
                 </View>
               </View>
@@ -359,8 +362,8 @@ export function TransferScreen({ navigation, route }: any) {
                     <Text style={styles.confirmSub}>{quote.received.coins.toLocaleString()} {coinLabel} coins</Text>
                   </View>
                   {isReward
-                    ? <Text style={[styles.confirmAmount, { color: '#16a34a' }]}>{formatRupees(quote.received.value)}</Text>
-                    : <Text style={[styles.confirmAmount, { color: '#16a34a' }]}>{quote.received.coins.toLocaleString()}</Text>}
+                    ? <Text style={[styles.confirmAmount, { color: colors.primary }]}>{formatRupees(quote.received.value)}</Text>
+                    : <Text style={[styles.confirmAmount, { color: colors.primary }]}>{quote.received.coins.toLocaleString()}</Text>}
                 </View>
                 {isReward && (
                   <View style={styles.infoNote}>
@@ -377,7 +380,7 @@ export function TransferScreen({ navigation, route }: any) {
               disabled={submitting}
               activeOpacity={0.8}
             >
-              {submitting ? <ActivityIndicator color="white" /> : <Text style={styles.primaryActionText}>Confirm and send</Text>}
+              {submitting ? <ActivityIndicator color={colors.onPrimary} /> : <Text style={styles.primaryActionText}>Confirm and send</Text>}
             </TouchableOpacity>
             <TouchableOpacity style={styles.secondaryActionBtn} onPress={() => !submitting && setConfirmVisible(false)} disabled={submitting}>
               <Text style={styles.secondaryActionText}>Go back</Text>
@@ -389,8 +392,8 @@ export function TransferScreen({ navigation, route }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f4f4f5' },
+const useStyles = makeStyles((c) => ({
+  container: { flex: 1, backgroundColor: c.bg },
   topNotchFiller: { position: 'absolute', top: 0, left: 0, right: 0, height: 60, backgroundColor: '#064e3b' },
   scroll: { flex: 1 },
 
@@ -403,69 +406,69 @@ const styles = StyleSheet.create({
 
   formContainer: { padding: 20, maxWidth: 800, width: '100%', alignSelf: 'center' },
   inputGroup: { marginBottom: 16 },
-  inputLabel: { fontSize: 13, fontWeight: '700', color: '#475569', marginBottom: 6, marginLeft: 4 },
-  inputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 16, paddingHorizontal: 16, height: 56 },
+  inputLabel: { fontSize: 13, fontWeight: '700', color: c.textMuted, marginBottom: 6, marginLeft: 4 },
+  inputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.surfaceAlt, borderWidth: 1, borderColor: c.border, borderRadius: 16, paddingHorizontal: 16, height: 56 },
   inputWrapperError: { borderColor: '#fca5a5', backgroundColor: '#fef2f2' },
   inputIcon: { marginRight: 12 },
-  input: { flex: 1, fontSize: 16, color: '#0f172a', fontWeight: '600', height: '100%' },
-  errorText: { fontSize: 12, color: '#dc2626', fontWeight: '600', marginTop: 8, marginLeft: 4 },
+  input: { flex: 1, fontSize: 16, color: c.text, fontWeight: '600', height: '100%' },
+  errorText: { fontSize: 12, color: c.danger, fontWeight: '600', marginTop: 8, marginLeft: 4 },
 
   toggleRow: { flexDirection: 'row', gap: 10 },
-  toggleBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, height: 50, borderRadius: 14, borderWidth: 1.5, borderColor: '#e2e8f0', backgroundColor: 'white' },
-  toggleBtnActive: { borderColor: '#15803d', backgroundColor: '#f0fdf4' },
-  toggleText: { fontSize: 14, fontWeight: '800', color: '#64748b' },
-  toggleTextActive: { color: '#15803d' },
+  toggleBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, height: 50, borderRadius: 14, borderWidth: 1.5, borderColor: c.border, backgroundColor: c.surface },
+  toggleBtnActive: { borderColor: c.primary, backgroundColor: c.primarySoft },
+  toggleText: { fontSize: 14, fontWeight: '800', color: c.textMuted },
+  toggleTextActive: { color: c.primary },
 
   quickRow: { flexDirection: 'row', gap: 8, marginTop: 10 },
-  quickChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 100, borderWidth: 1.5, borderColor: '#e2e8f0', backgroundColor: 'white' },
-  quickChipActive: { borderColor: '#15803d', backgroundColor: '#f0fdf4' },
-  quickChipText: { fontSize: 13, fontWeight: '700', color: '#64748b' },
-  quickChipTextActive: { color: '#15803d' },
+  quickChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 100, borderWidth: 1.5, borderColor: c.border, backgroundColor: c.surface },
+  quickChipActive: { borderColor: c.primary, backgroundColor: c.primarySoft },
+  quickChipText: { fontSize: 13, fontWeight: '700', color: c.textMuted },
+  quickChipTextActive: { color: c.primary },
 
   generalError: { backgroundColor: '#fef2f2', borderWidth: 1, borderColor: '#fecaca', borderRadius: 14, padding: 14, marginBottom: 16 },
   generalErrorText: { fontSize: 13, color: '#b91c1c', fontWeight: '700' },
 
   quoteLoading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 18 },
-  quoteLoadingText: { color: '#64748b', fontWeight: '600', fontSize: 13 },
+  quoteLoadingText: { color: c.textMuted, fontWeight: '600', fontSize: 13 },
 
-  quoteCard: { backgroundColor: 'white', borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 20, padding: 18, marginBottom: 18 },
+  quoteCard: { backgroundColor: c.surface, borderWidth: 1, borderColor: c.border, borderRadius: 20, padding: 18, marginBottom: 18 },
   quoteHeadRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
-  quoteRecipient: { fontSize: 16, fontWeight: '900', color: '#0f172a' },
-  quoteRecipientPhone: { fontSize: 12, fontWeight: '600', color: '#94a3b8' },
+  quoteRecipient: { fontSize: 16, fontWeight: '900', color: c.text },
+  quoteRecipientPhone: { fontSize: 12, fontWeight: '600', color: c.textFaint },
   quoteBody: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around' },
   quoteSide: { alignItems: 'center', flex: 1 },
-  quoteSideLabel: { fontSize: 11, fontWeight: '700', color: '#94a3b8', marginBottom: 4 },
-  quoteSideCoins: { fontSize: 24, fontWeight: '900', color: '#0f172a', letterSpacing: -0.5 },
-  quoteSideValue: { fontSize: 12, fontWeight: '700', color: '#64748b', marginTop: 2 },
+  quoteSideLabel: { fontSize: 11, fontWeight: '700', color: c.textFaint, marginBottom: 4 },
+  quoteSideCoins: { fontSize: 24, fontWeight: '900', color: c.text, letterSpacing: -0.5 },
+  quoteSideValue: { fontSize: 12, fontWeight: '700', color: c.textMuted, marginTop: 2 },
 
   infoNote: { flexDirection: 'row', alignItems: 'flex-start', gap: 6, backgroundColor: '#f0f9ff', borderRadius: 12, padding: 10, marginTop: 14 },
   infoNoteText: { flex: 1, fontSize: 11.5, color: '#0c4a6e', fontWeight: '600', lineHeight: 16 },
 
-  primaryActionBtn: { backgroundColor: '#15803d', paddingVertical: 15, paddingHorizontal: 44, borderRadius: 16, alignItems: 'center', justifyContent: 'center', alignSelf: 'center', minWidth: 240, marginTop: 10, shadowColor: '#16a34a', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 5 },
-  primaryActionBtnDisabled: { backgroundColor: '#94a3b8', shadowOpacity: 0, elevation: 0 },
-  primaryActionText: { color: 'white', fontSize: 16, fontWeight: '900' },
-  securityNote: { textAlign: 'center', color: '#94a3b8', fontSize: 11, fontWeight: '500', marginTop: 12, paddingHorizontal: 8 },
+  primaryActionBtn: { backgroundColor: c.primary, paddingVertical: 15, paddingHorizontal: 44, borderRadius: 16, alignItems: 'center', justifyContent: 'center', alignSelf: 'center', minWidth: 240, marginTop: 10, shadowColor: c.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 5 },
+  primaryActionBtnDisabled: { backgroundColor: c.textFaint, shadowOpacity: 0, elevation: 0 },
+  primaryActionText: { color: c.onPrimary, fontSize: 16, fontWeight: '900' },
+  securityNote: { textAlign: 'center', color: c.textFaint, fontSize: 11, fontWeight: '500', marginTop: 12, paddingHorizontal: 8 },
   secondaryActionBtn: { marginTop: 14, alignItems: 'center' },
-  secondaryActionText: { color: '#64748b', fontWeight: '700', fontSize: 13 },
+  secondaryActionText: { color: c.textMuted, fontWeight: '700', fontSize: 13 },
 
   // Confirm sheet
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(15,23,42,0.55)', justifyContent: Platform.OS === 'web' ? 'center' : 'flex-end', alignItems: 'center', padding: Platform.OS === 'web' ? 20 : 0 },
-  sheet: { backgroundColor: 'white', borderTopLeftRadius: 24, borderTopRightRadius: 24, borderBottomLeftRadius: Platform.OS === 'web' ? 24 : 0, borderBottomRightRadius: Platform.OS === 'web' ? 24 : 0, padding: 22, paddingBottom: Platform.OS === 'web' ? 22 : 34, maxWidth: 560, width: '100%', alignSelf: 'center' },
-  sheetHandle: { width: 44, height: 5, borderRadius: 3, backgroundColor: '#e2e8f0', alignSelf: 'center', marginBottom: 16 },
-  sheetTitle: { fontSize: 18, fontWeight: '900', color: '#0f172a', marginBottom: 10 },
+  modalOverlay: { flex: 1, backgroundColor: c.overlay, justifyContent: Platform.OS === 'web' ? 'center' : 'flex-end', alignItems: 'center', padding: Platform.OS === 'web' ? 20 : 0 },
+  sheet: { backgroundColor: c.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, borderBottomLeftRadius: Platform.OS === 'web' ? 24 : 0, borderBottomRightRadius: Platform.OS === 'web' ? 24 : 0, padding: 22, paddingBottom: Platform.OS === 'web' ? 22 : 34, maxWidth: 560, width: '100%', alignSelf: 'center' },
+  sheetHandle: { width: 44, height: 5, borderRadius: 3, backgroundColor: c.border, alignSelf: 'center', marginBottom: 16 },
+  sheetTitle: { fontSize: 18, fontWeight: '900', color: c.text, marginBottom: 10 },
   confirmBlock: { marginTop: 6 },
   confirmRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10 },
-  confirmLabel: { fontSize: 14, fontWeight: '800', color: '#0f172a' },
-  confirmSub: { fontSize: 12, fontWeight: '600', color: '#94a3b8', marginTop: 2 },
-  confirmAmount: { fontSize: 22, fontWeight: '900', color: '#0f172a', letterSpacing: -0.5 },
-  confirmDivider: { height: 1, backgroundColor: '#f1f5f9' },
+  confirmLabel: { fontSize: 14, fontWeight: '800', color: c.text },
+  confirmSub: { fontSize: 12, fontWeight: '600', color: c.textFaint, marginTop: 2 },
+  confirmAmount: { fontSize: 22, fontWeight: '900', color: c.text, letterSpacing: -0.5 },
+  confirmDivider: { height: 1, backgroundColor: c.border },
 
   successScreen: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 30 },
-  successIconBg: { width: 96, height: 96, borderRadius: 48, backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center', marginBottom: 20, borderWidth: 1.5, borderColor: '#bbf7d0' },
-  successTitle: { fontSize: 24, fontWeight: '900', color: '#0f172a', marginBottom: 10 },
-  successSub: { fontSize: 14, color: '#64748b', textAlign: 'center', fontWeight: '500', lineHeight: 20, marginBottom: 20 },
-  receiptCard: { backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 16, padding: 16, width: '100%', maxWidth: 420, marginBottom: 24 },
+  successIconBg: { width: 96, height: 96, borderRadius: 48, backgroundColor: c.primarySoft, alignItems: 'center', justifyContent: 'center', marginBottom: 20, borderWidth: 1.5, borderColor: c.border },
+  successTitle: { fontSize: 24, fontWeight: '900', color: c.text, marginBottom: 10 },
+  successSub: { fontSize: 14, color: c.textMuted, textAlign: 'center', fontWeight: '500', lineHeight: 20, marginBottom: 20 },
+  receiptCard: { backgroundColor: c.surfaceAlt, borderWidth: 1, borderColor: c.border, borderRadius: 16, padding: 16, width: '100%', maxWidth: 420, marginBottom: 24 },
   receiptRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 6 },
-  receiptLabel: { fontSize: 13, color: '#64748b', fontWeight: '600' },
-  receiptValue: { fontSize: 14, color: '#0f172a', fontWeight: '800' },
-});
+  receiptLabel: { fontSize: 13, color: c.textMuted, fontWeight: '600' },
+  receiptValue: { fontSize: 14, color: c.text, fontWeight: '800' },
+}));

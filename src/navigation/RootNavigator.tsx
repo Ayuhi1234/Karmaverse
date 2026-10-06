@@ -30,6 +30,7 @@ import { CarbonJourneyScreen } from '../screens/CarbonJourneyScreen';
 import { TabNavigator } from './TabNavigator';
 import { navigationRef } from './navRef';
 import { capturePendingDeepLink, clearPendingDeepLink, hasPendingDeepLink, hasPendingReferral } from '../utils/deepLink';
+import { routeNotification } from '../utils/notificationRoute';
 
 // Runs at import, before the NavigationContainer resolves the URL — remembers a
 // protected deep link (e.g. an email "Track pickup" link) opened while logged out,
@@ -37,10 +38,6 @@ import { capturePendingDeepLink, clearPendingDeepLink, hasPendingDeepLink, hasPe
 capturePendingDeepLink();
 
 const Stack = createNativeStackNavigator();
-
-// Screens a push notification's `data.route` may open.
-const TAB_ROUTES = ['Dashboard', 'Orders', 'Wallet', 'Store'];
-const STACK_ROUTES = ['Profile', 'SchedulePickup', 'KnowledgeHub', 'Quiz', 'Referral', 'RedeemHistory', 'CarbonFootprint', 'CarbonJourney'];
 
 // GA4 tracking (web only) — gtag.js is loaded in public/index.html with
 // send_page_view disabled, so every screen change (not just the first load) is
@@ -87,32 +84,19 @@ export function RootNavigator() {
   }, []);
 
   useEffect(() => {
-    const handleNotificationData = (data: any) => {
-      // Report the open for EVERY tapped push (not just booking ones), before any
-      // navigation guard. Fire-and-forget — never await, never block navigation.
+    // A tapped push/notification routes to the right screen via the shared router
+    // (used by the in-app panel too). Report the open for EVERY tap first —
+    // fire-and-forget, never awaited, never blocking navigation.
+    const handleResponse = (data: any, actionIdentifier?: string) => {
       if (data?.notificationId) markNotificationOpened(data.notificationId);
-
-      if (!navRef.current) return;
-      if (data?.bookingId) {
-        navRef.current.navigate('BookingDetails', { booking: { _id: data.bookingId } });
-        return;
-      }
-      // Engagement pushes (backend-email-service/templates/pushTemplates.js) carry
-      // `data.route` — open that screen. Allow-listed, and only when logged in.
-      const route = typeof data?.route === 'string' ? data.route : '';
-      if (!TAB_ROUTES.includes(route) && !STACK_ROUTES.includes(route)) return;
-      getToken().then((token) => {
-        if (!token || !navRef.current) return;
-        if (TAB_ROUTES.includes(route)) navRef.current.navigate('App', { screen: route });
-        else navRef.current.navigate(route);
-      }).catch(() => {});
+      routeNotification(data, actionIdentifier);
     };
 
-    getLastNotificationResponse().then(data => {
-      if (data) handleNotificationData(data);
+    getLastNotificationResponse().then(res => {
+      if (res) handleResponse(res.data, res.actionIdentifier);
     });
 
-    const sub = addNotificationResponseListener(handleNotificationData);
+    const sub = addNotificationResponseListener(handleResponse);
     return () => sub.remove();
   }, []);
 

@@ -1,4 +1,5 @@
 import api from './api';
+import { extractList } from '../utils/apiList';
 
 export const profileService = {
   // Update demographics during signup or from profile edit
@@ -94,11 +95,29 @@ export const profileService = {
     }
   },
 
+  // Permanently delete the signed-in user's account and personal data.
+  // Required by Apple (apps with account creation must offer in-app deletion) and
+  // by India's DPDP right to erasure.
+  // Backend TODO: DELETE /api/v1/users/account — remove the user and related
+  // records, invalidate all tokens, return 200.
+  deleteAccount: async () => {
+    try {
+      const response = await api.delete('/api/v1/users/account');
+      return response.data;
+    } catch (error: any) {
+      // Safe message only — the raw axios error carries the JWT (Authorization header).
+      console.error('Delete account failed:', error?.response?.data?.message || error?.message);
+      throw error;
+    }
+  },
+
   // Get Transaction History
   getTransactionHistory: async () => {
     try {
       const response = await api.get('/api/v1/transactions/history');
-      return response.data.data || response.data || [];
+      // Robust to any wrapper shape (see extractList) so the wallet list never
+      // silently shows empty when the backend changes the transactions shape.
+      return extractList(response.data);
     } catch (error) {
       console.error('Get Transactions Error:', error);
       throw error;

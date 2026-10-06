@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Leaf, Flame, ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { StatModal } from './StatModal';
+import { useTheme, makeStyles } from '../../theme';
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -17,6 +18,8 @@ function ymd(y: number, m: number, d: number) {
 export function QuizCalendarModal({ visible, onClose, playedDates, streak }: {
   visible: boolean; onClose: () => void; playedDates: string[]; streak: number;
 }) {
+  const s = useStyles();
+  const { colors } = useTheme();
   const today = new Date();
   const [view, setView] = useState({ y: today.getFullYear(), m: today.getMonth() });
 
@@ -42,7 +45,7 @@ export function QuizCalendarModal({ visible, onClose, playedDates, streak }: {
         <TouchableOpacity onPress={goPrev} hitSlop={HITSLOP}><ChevronLeft size={20} color="#15803d" /></TouchableOpacity>
         <Text style={s.monthLabel}>{MONTHS[view.m]} {view.y}</Text>
         <TouchableOpacity onPress={goNext} disabled={isCurrentMonth} hitSlop={HITSLOP}>
-          <ChevronRight size={20} color={isCurrentMonth ? '#cbd5e1' : '#15803d'} />
+          <ChevronRight size={20} color={isCurrentMonth ? colors.border : '#15803d'} />
         </TouchableOpacity>
       </View>
 
@@ -87,11 +90,11 @@ export function QuizCalendarModal({ visible, onClose, playedDates, streak }: {
   );
 }
 
-const s = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   navRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
-  monthLabel: { fontSize: 15, fontWeight: '800', color: '#0f172a' },
+  monthLabel: { fontSize: 15, fontWeight: '800', color: c.text },
   weekRow: { flexDirection: 'row', marginBottom: 6 },
-  weekDay: { flex: 1, textAlign: 'center', fontSize: 11, fontWeight: '700', color: '#94a3b8' },
+  weekDay: { flex: 1, textAlign: 'center', fontSize: 11, fontWeight: '700', color: c.textFaint },
   grid: { flexDirection: 'row', flexWrap: 'wrap' },
   cell: { width: '14.2857%', height: 42, alignItems: 'center', justifyContent: 'center' },
   dayInner: { width: 38, height: 38, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
@@ -99,8 +102,8 @@ const s = StyleSheet.create({
   leafWrap: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center' },
   leafAbs: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
   leafDate: { fontSize: 12, fontWeight: '900', color: '#14532d' },
-  plainDate: { fontSize: 13, fontWeight: '600', color: '#cbd5e1' },
-  footer: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 14, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#f1f5f9' },
+  plainDate: { fontSize: 13, fontWeight: '600', color: c.textFaint },
+  footer: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 14, paddingTop: 12, borderTopWidth: 1, borderTopColor: c.border },
   footerItem: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  footerText: { fontSize: 12, fontWeight: '700', color: '#475569' },
-});
+  footerText: { fontSize: 12, fontWeight: '700', color: c.textMuted },
+}));

@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, StatusBar, Activi
 import { LinearGradient } from 'expo-linear-gradient';
 import { ChevronLeft, LineChart, TrendingDown, TrendingUp, History, Clock } from 'lucide-react-native';
 import { WebFooter } from '../components/shared/WebFooter';
+import { useTheme, makeStyles } from '../theme';
 import { carbonService, CarbonAssessment } from '../services/carbon';
 import { formatKg, formatDate } from '../utils/carbon';
 
@@ -11,9 +12,10 @@ import { formatKg, formatDate } from '../utils/carbon';
 const pctChange = (current: number, previous: number) => (previous > 0 ? Math.round(((current - previous) / previous) * 100) : null);
 
 function ChangeText({ pct, light }: { pct: number | null; light?: boolean }) {
+  const { colors } = useTheme();
   if (pct === null) return null;
   const down = pct <= 0;
-  const color = light ? 'white' : down ? '#16a34a' : '#e11d48';
+  const color = light ? 'white' : down ? colors.success : colors.danger;
   const Icon = down ? TrendingDown : TrendingUp;
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
@@ -24,6 +26,10 @@ function ChangeText({ pct, light }: { pct: number | null; light?: boolean }) {
 }
 
 export function CarbonJourneyScreen({ navigation }: any) {
+  const styles = useStyles();
+  const { colors, isDark } = useTheme();
+  // Pastel category tiles read as glare on dark surfaces; use the raised surface there.
+  const tint = (bg: string) => (isDark ? colors.surfaceAlt : bg);
   const [assessments, setAssessments] = useState<CarbonAssessment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -60,7 +66,7 @@ export function CarbonJourneyScreen({ navigation }: any) {
   const trendMax = Math.max(0, ...trend.map((a) => a.totalKgPerMonth));
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#f0fdf6' }}>
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <StatusBar barStyle="light-content" />
       <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: Platform.OS === 'web' ? 0 : 100 }} showsVerticalScrollIndicator={false}>
 
@@ -110,14 +116,14 @@ export function CarbonJourneyScreen({ navigation }: any) {
         {isLoading ? (
           <View style={styles.section}>
             <View style={styles.stateBox}>
-              <ActivityIndicator size="large" color="#16a34a" accessibilityLabel="Loading" />
-              <Text style={{ color: '#64748b', marginTop: 12 }}>Loading…</Text>
+              <ActivityIndicator size="large" color={colors.primary} accessibilityLabel="Loading" />
+              <Text style={{ color: colors.textMuted, marginTop: 12 }}>Loading…</Text>
             </View>
           </View>
         ) : assessments.length === 0 ? (
           <View style={styles.section}>
             <View style={styles.stateBox}>
-              <History size={48} color="#cbd5e1" />
+              <History size={48} color={colors.textFaint} />
               <Text style={styles.emptyTitle}>No assessments yet.</Text>
               <Text style={styles.emptyHint}>Calculate your footprint to start your journey.</Text>
               <TouchableOpacity style={[styles.primaryPill, { marginTop: 20, paddingHorizontal: 24 }]} onPress={calculate} activeOpacity={0.8} accessibilityRole="button">
@@ -145,8 +151,8 @@ export function CarbonJourneyScreen({ navigation }: any) {
                     const h = trendMax > 0 ? Math.max((a.totalKgPerMonth / trendMax) * 110, 6) : 6;
                     return (
                       <View key={a._id} style={styles.barCol}>
-                        <Text style={[styles.barValue, latest && { color: '#0f172a' }]}>{formatKg(a.totalKgPerMonth)}</Text>
-                        <View style={[styles.bar, { height: h, backgroundColor: latest ? '#16a34a' : '#bbf7d0' }]} />
+                        <Text style={[styles.barValue, latest && { color: colors.text }]}>{formatKg(a.totalKgPerMonth)}</Text>
+                        <View style={[styles.bar, { height: h, backgroundColor: colors.primary, opacity: latest ? 1 : 0.35 }]} />
                         <Text style={styles.barLabel} numberOfLines={1}>
                           {new Date(a.createdAt).toLocaleDateString('en-US', { month: 'short' })}
                         </Text>
@@ -166,13 +172,13 @@ export function CarbonJourneyScreen({ navigation }: any) {
                   const pct = older ? pctChange(a.totalKgPerMonth, older.totalKgPerMonth) : null;
                   return (
                     <View key={a._id} style={styles.rowCard}>
-                      <View style={[styles.iconTile, { backgroundColor: '#f0fdf4' }]}>
+                      <View style={[styles.iconTile, { backgroundColor: tint('#f0fdf4') }]}>
                         <LineChart size={20} color="#16a34a" />
                       </View>
                       <View style={styles.rowContent}>
                         <Text style={styles.rowTitle}>{formatKg(a.totalKgPerMonth)} kg CO₂e / month</Text>
                         <View style={styles.timeRow}>
-                          <Clock size={12} color="#9ca3af" />
+                          <Clock size={12} color={colors.textFaint} />
                           <Text style={styles.rowMeta}>{formatDate(a.createdAt)}</Text>
                         </View>
                       </View>
@@ -195,8 +201,8 @@ export function CarbonJourneyScreen({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f0fdf6' },
+const useStyles = makeStyles((c) => ({
+  container: { flex: 1, backgroundColor: c.bg },
 
   header: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 24, borderBottomLeftRadius: 24, borderBottomRightRadius: 24 },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 20, maxWidth: 800, width: '100%', alignSelf: 'center' },
@@ -219,27 +225,27 @@ const styles = StyleSheet.create({
   colSub: { color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: '600', marginTop: 4 },
 
   section: { paddingHorizontal: 16, marginTop: 28, maxWidth: 800, width: '100%', alignSelf: 'center' },
-  sectionTitle: { fontSize: 18, fontWeight: '800', color: '#0f172a', marginBottom: 16 },
+  sectionTitle: { fontSize: 18, fontWeight: '800', color: c.text, marginBottom: 16 },
   stateBox: { alignItems: 'center', paddingVertical: 40 },
-  emptyTitle: { color: '#94a3b8', marginTop: 12, fontWeight: '600' },
-  emptyHint: { color: '#cbd5e1', fontSize: 12, marginTop: 4, textAlign: 'center' },
+  emptyTitle: { color: c.textFaint, marginTop: 12, fontWeight: '600' },
+  emptyHint: { color: c.textFaint, fontSize: 12, marginTop: 4, textAlign: 'center' },
 
   list: { gap: 10 },
-  rowCard: { flexDirection: 'row', alignItems: 'center', padding: 14, backgroundColor: 'white', borderRadius: 16, borderWidth: 1, borderColor: '#f1f5f9', elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8 },
+  rowCard: { flexDirection: 'row', alignItems: 'center', padding: 14, backgroundColor: c.surface, borderRadius: 16, borderWidth: 1, borderColor: c.border, elevation: 2, shadowColor: c.shadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8 },
   iconTile: { width: 42, height: 42, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   rowContent: { flex: 1, marginLeft: 12, marginRight: 10 },
-  rowTitle: { fontSize: 14, fontWeight: '800', color: '#0f172a', marginBottom: 3 },
-  rowMeta: { fontSize: 11, color: '#64748b', fontWeight: '500' },
+  rowTitle: { fontSize: 14, fontWeight: '800', color: c.text, marginBottom: 3 },
+  rowMeta: { fontSize: 11, color: c.textMuted, fontWeight: '500' },
   timeRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  firstTag: { fontSize: 12, fontWeight: '800', color: '#64748b' },
+  firstTag: { fontSize: 12, fontWeight: '800', color: c.textMuted },
 
   chartCard: { alignItems: 'flex-end', justifyContent: 'space-around', paddingTop: 18, gap: 8 },
   barCol: { flex: 1, alignItems: 'center', maxWidth: 64 },
-  barValue: { fontSize: 11, fontWeight: '800', color: '#64748b', marginBottom: 4 },
+  barValue: { fontSize: 11, fontWeight: '800', color: c.textMuted, marginBottom: 4 },
   bar: { width: '70%', maxWidth: 36, borderRadius: 6 },
-  barLabel: { fontSize: 11, fontWeight: '600', color: '#94a3b8', marginTop: 6 },
+  barLabel: { fontSize: 11, fontWeight: '600', color: c.textFaint, marginTop: 6 },
 
   primaryPill: { backgroundColor: '#16a34a', borderRadius: 100, paddingVertical: 13, alignItems: 'center' },
   primaryPillText: { color: 'white', fontWeight: '800', fontSize: 14 },
-  footnote: { fontSize: 12, color: '#94a3b8', marginTop: 12, textAlign: 'center' },
-});
+  footnote: { fontSize: 12, color: c.textFaint, marginTop: 12, textAlign: 'center' },
+}));

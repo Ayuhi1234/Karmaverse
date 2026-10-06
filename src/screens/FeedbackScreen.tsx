@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, StatusBar, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, StatusBar, ActivityIndicator, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MessageSquareHeart, Check, AlertCircle } from 'lucide-react-native';
 import { submitFeedback } from '../services/emailPrefs';
 import { BACKEND_BASE } from '../services/api';
+import { useTheme, makeStyles } from '../theme';
 
 const SUPPORT = 'info@0waste.co.in';
 
@@ -18,6 +19,8 @@ function goHome(navigation: any) {
 }
 
 export function FeedbackScreen({ route, navigation }: any) {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const token: string | undefined = route?.params?.token;
   const [score, setScore] = useState<number | null>(null);
   const [comment, setComment] = useState('');
@@ -97,7 +100,7 @@ export function FeedbackScreen({ route, navigation }: any) {
             <TextInput
               style={styles.textarea}
               placeholder="What's working, what isn't, what you'd love to see next…"
-              placeholderTextColor="#94a3b8"
+              placeholderTextColor={colors.textFaint}
               value={comment}
               onChangeText={setComment}
               multiline
@@ -123,8 +126,8 @@ export function FeedbackScreen({ route, navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#f8fafc' },
+const useStyles = makeStyles((c) => ({
+  root: { flex: 1, backgroundColor: c.bg },
   header: { borderBottomLeftRadius: 24, borderBottomRightRadius: 24 },
   headerInner: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 24, maxWidth: 640, width: '100%', alignSelf: 'center' },
   headerIconBox: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center', marginBottom: 14 },
@@ -134,31 +137,31 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   scrollContent: { paddingHorizontal: 20, paddingTop: 24, paddingBottom: 60, maxWidth: 640, width: '100%', alignSelf: 'center' },
 
-  q: { fontSize: 20, fontWeight: '800', color: '#0f172a', lineHeight: 27 },
-  sub: { fontSize: 14, color: '#64748b', marginTop: 6, marginBottom: 18 },
+  q: { fontSize: 20, fontWeight: '800', color: c.text, lineHeight: 27 },
+  sub: { fontSize: 14, color: c.textMuted, marginTop: 6, marginBottom: 18 },
 
   npsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  npsBtn: { width: 40, height: 40, borderRadius: 10, borderWidth: 1, borderColor: '#cbd5e1', backgroundColor: '#f1f5f9', alignItems: 'center', justifyContent: 'center' },
+  npsBtn: { width: 40, height: 40, borderRadius: 10, borderWidth: 1, borderColor: c.borderStrong, backgroundColor: c.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
   npsBtnOn: { backgroundColor: '#16a34a', borderColor: '#16a34a' },
-  npsText: { fontSize: 15, fontWeight: '700', color: '#64748b' },
+  npsText: { fontSize: 15, fontWeight: '700', color: c.textMuted },
   npsTextOn: { color: 'white' },
   endsRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8, marginBottom: 22 },
-  endText: { fontSize: 12, color: '#94a3b8' },
+  endText: { fontSize: 12, color: c.textFaint },
 
-  label: { fontSize: 14, fontWeight: '700', color: '#0f172a', marginBottom: 9 },
-  optional: { fontWeight: '500', color: '#94a3b8' },
-  textarea: { minHeight: 96, borderWidth: 1, borderColor: '#cbd5e1', borderRadius: 12, padding: 12, fontSize: 14, color: '#0f172a', backgroundColor: 'white' },
+  label: { fontSize: 14, fontWeight: '700', color: c.text, marginBottom: 9 },
+  optional: { fontWeight: '500', color: c.textFaint },
+  textarea: { minHeight: 96, borderWidth: 1, borderColor: c.border, borderRadius: 12, padding: 12, fontSize: 14, color: c.text, backgroundColor: c.inputBg },
 
   primaryBtn: { marginTop: 18, backgroundColor: '#16a34a', borderRadius: 12, paddingVertical: 15, alignItems: 'center', justifyContent: 'center' },
   primaryBtnDisabled: { backgroundColor: '#9cccb0' },
   primaryBtnText: { color: 'white', fontSize: 15, fontWeight: '800' },
-  fine: { fontSize: 12, color: '#94a3b8', marginTop: 14, textAlign: 'center' },
+  fine: { fontSize: 12, color: c.textFaint, marginTop: 14, textAlign: 'center' },
 
   centerCard: { alignItems: 'center', paddingTop: 24 },
-  tick: { width: 64, height: 64, borderRadius: 32, backgroundColor: '#e7f4ec', alignItems: 'center', justifyContent: 'center', marginBottom: 18 },
-  tickErr: { backgroundColor: '#fdecec' },
-  doneTitle: { fontSize: 22, fontWeight: '900', color: '#0f172a', marginBottom: 8 },
-  doneText: { fontSize: 14.5, color: '#64748b', textAlign: 'center', lineHeight: 22, maxWidth: 340 },
-  ghostBtn: { marginTop: 22, borderWidth: 1, borderColor: '#cbd5e1', borderRadius: 12, paddingVertical: 13, paddingHorizontal: 24 },
-  ghostBtnText: { color: '#15803d', fontSize: 14.5, fontWeight: '800' },
-});
+  tick: { width: 64, height: 64, borderRadius: 32, backgroundColor: c.primarySoft, alignItems: 'center', justifyContent: 'center', marginBottom: 18 },
+  tickErr: { backgroundColor: c.dangerSoft },
+  doneTitle: { fontSize: 22, fontWeight: '900', color: c.text, marginBottom: 8 },
+  doneText: { fontSize: 14.5, color: c.textMuted, textAlign: 'center', lineHeight: 22, maxWidth: 340 },
+  ghostBtn: { marginTop: 22, borderWidth: 1, borderColor: c.borderStrong, borderRadius: 12, paddingVertical: 13, paddingHorizontal: 24 },
+  ghostBtnText: { color: c.primary, fontSize: 14.5, fontWeight: '800' },
+}));

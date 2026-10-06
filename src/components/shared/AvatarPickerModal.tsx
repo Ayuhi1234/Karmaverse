@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, Platform } from 'react-native';
+import { View, Text, Modal, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import { X } from 'lucide-react-native';
 import { Avatar, AVATAR_IDS, PERSON_AVATAR_IDS } from './Avatar';
+import { useTheme, makeStyles } from '../../theme';
 
 // Lets the user pick a profile avatar — the illustrated people first, then the
 // eco-creatures. Selection is immediate: tapping an avatar calls onSelect and
@@ -12,6 +13,8 @@ export function AvatarPickerModal({ visible, currentId, onSelect, onClose }: {
   onSelect: (id: string) => void;
   onClose: () => void;
 }) {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const pick = (id: string) => {
     onSelect(id);
     onClose();
@@ -38,7 +41,7 @@ export function AvatarPickerModal({ visible, currentId, onSelect, onClose }: {
           <View style={styles.titleRow}>
             <Text style={styles.title}>Choose your avatar</Text>
             <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <X size={22} color="#64748b" />
+              <X size={22} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
 
@@ -55,21 +58,21 @@ export function AvatarPickerModal({ visible, currentId, onSelect, onClose }: {
   );
 }
 
-const styles = StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: 'rgba(15,23,42,0.55)', justifyContent: Platform.OS === 'web' ? 'center' : 'flex-end', alignItems: 'center', padding: Platform.OS === 'web' ? 20 : 0 },
+const useStyles = makeStyles((c) => ({
+  overlay: { flex: 1, backgroundColor: c.overlay, justifyContent: Platform.OS === 'web' ? 'center' : 'flex-end', alignItems: 'center', padding: Platform.OS === 'web' ? 20 : 0 },
   sheet: {
-    backgroundColor: 'white',
+    backgroundColor: c.surface,
     borderTopLeftRadius: 24, borderTopRightRadius: 24,
     borderBottomLeftRadius: Platform.OS === 'web' ? 24 : 0,
     borderBottomRightRadius: Platform.OS === 'web' ? 24 : 0,
     padding: 22, paddingBottom: Platform.OS === 'web' ? 22 : 34,
     maxWidth: 520, width: '100%', alignSelf: 'center',
   },
-  handle: { width: 44, height: 5, borderRadius: 3, backgroundColor: '#e2e8f0', alignSelf: 'center', marginBottom: 14 },
+  handle: { width: 44, height: 5, borderRadius: 3, backgroundColor: c.border, alignSelf: 'center', marginBottom: 14 },
   titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  title: { fontSize: 18, fontWeight: '900', color: '#0f172a' },
-  section: { fontSize: 13, fontWeight: '800', color: '#64748b', marginTop: 14, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.4 },
+  title: { fontSize: 18, fontWeight: '900', color: c.text },
+  section: { fontSize: 13, fontWeight: '800', color: c.textMuted, marginTop: 14, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.4 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   cell: { borderRadius: 40, padding: 3, borderWidth: 3, borderColor: 'transparent' },
-  cellActive: { borderColor: '#16a34a', backgroundColor: '#f0fdf4' },
-});
+  cellActive: { borderColor: '#16a34a', backgroundColor: c.primarySoft },
+}));

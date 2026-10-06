@@ -8,6 +8,7 @@ import { profileService } from '../services/profile';
 import { CARBON_CATEGORIES, formatKg, formatDate, showCarbonError } from '../utils/carbon';
 import { QUESTION_SET_VERSION, Question, AnswerMap, UserContext, visibleQuestions, answerLabel } from '../utils/carbonQuestions';
 import { showAlert } from '../utils/alert';
+import { useTheme, makeStyles } from '../theme';
 
 type Phase = 'chat' | 'calculating' | 'result';
 
@@ -18,19 +19,23 @@ const SpeechRecognition: any = Platform.OS === 'web' && typeof window !== 'undef
   : null;
 
 function BotBubble({ children, live }: { children: React.ReactNode; live?: boolean }) {
+  const styles = useStyles();
+  const { colors } = useTheme();
   return (
     <View style={styles.botRow} accessibilityLiveRegion={live ? 'polite' : 'none'}>
-      <View style={styles.avatar}><Leaf size={14} color="#15803d" /></View>
+      <View style={styles.avatar}><Leaf size={14} color={colors.primary} /></View>
       <View style={styles.botBubble}>{children}</View>
     </View>
   );
 }
 
 function SectionLabel({ category }: { category: CarbonCategoryKey }) {
+  const styles = useStyles();
+  const { colors, isDark } = useTheme();
   const c = CARBON_CATEGORIES[category];
   return (
     <View style={styles.sectionRow} accessibilityRole="header">
-      <View style={[styles.sectionTile, { backgroundColor: c.bg }]}><c.Icon size={13} color={c.color} /></View>
+      <View style={[styles.sectionTile, { backgroundColor: isDark ? colors.surfaceAlt : c.bg }]}><c.Icon size={13} color={c.color} /></View>
       <Text style={[styles.sectionText, { color: c.color }]}>{c.label}</Text>
     </View>
   );
@@ -40,6 +45,10 @@ function SectionLabel({ category }: { category: CarbonCategoryKey }) {
 // speaks in their own words. Header follows the quiz; bubbles and chips use the
 // same greens, radii and card shadow as Wallet.
 export function CarbonAssessmentScreen({ navigation }: any) {
+  const styles = useStyles();
+  const { colors, isDark } = useTheme();
+  // Pastel category tiles read as glare on dark surfaces; use the raised surface there.
+  const tint = (bg: string) => (isDark ? colors.surfaceAlt : bg);
   const [ctx, setCtx] = useState<UserContext>({});
   const [started, setStarted] = useState(false);
   const [answers, setAnswers] = useState<AnswerMap>({});
@@ -243,7 +252,7 @@ export function CarbonAssessmentScreen({ navigation }: any) {
                       accessibilityState={current.multi ? { selected: on } : undefined}
                     >
                       <View style={styles.chipInner}>
-                        {on && <Check size={14} color="#15803d" strokeWidth={3} />}
+                        {on && <Check size={14} color={colors.primary} strokeWidth={3} />}
                         <Text style={[styles.chipText, on && styles.chipTextOn]}>{o.label}</Text>
                       </View>
                     </TouchableOpacity>
@@ -277,7 +286,7 @@ export function CarbonAssessmentScreen({ navigation }: any) {
           {phase === 'calculating' && (
             <BotBubble live>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                <ActivityIndicator size="small" color="#16a34a" accessibilityLabel="Calculating" />
+                <ActivityIndicator size="small" color={colors.primary} accessibilityLabel="Calculating" />
                 <Text style={styles.botText}>Calculating your footprint…</Text>
               </View>
             </BotBubble>
@@ -292,7 +301,7 @@ export function CarbonAssessmentScreen({ navigation }: any) {
                 <Text style={styles.resultUnit}>kg CO₂e / month</Text>
                 {top && (
                   <Text style={styles.resultBody}>
-                    Your biggest source is <Text style={{ fontWeight: '800', color: '#0f172a' }}>{CARBON_CATEGORIES[top.key].label.toLowerCase()}</Text> — {formatKg(top.kgCo2e)} kg.
+                    Your biggest source is <Text style={{ fontWeight: '800', color: colors.text }}>{CARBON_CATEGORIES[top.key].label.toLowerCase()}</Text> — {formatKg(top.kgCo2e)} kg.
                   </Text>
                 )}
                 <Text style={styles.fine}>
@@ -322,7 +331,7 @@ export function CarbonAssessmentScreen({ navigation }: any) {
                 ref={inputRef}
                 style={styles.input}
                 placeholder="Or type your own answer…"
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor={colors.textFaint}
                 value={input}
                 onChangeText={setInput}
                 onSubmitEditing={sendText}
@@ -337,7 +346,7 @@ export function CarbonAssessmentScreen({ navigation }: any) {
                 accessibilityRole="button"
                 accessibilityLabel={listening ? 'Stop listening' : 'Speak your answer'}
               >
-                <Mic size={18} color={listening ? 'white' : '#16a34a'} />
+                <Mic size={18} color={listening ? 'white' : colors.primary} />
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.roundBtn, styles.sendBtn, input.trim().length < 2 && styles.sendBtnOff]}
@@ -357,8 +366,8 @@ export function CarbonAssessmentScreen({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f0fdf6' },
+const useStyles = makeStyles((c) => ({
+  container: { flex: 1, backgroundColor: c.bg },
   headerBg: { borderBottomLeftRadius: 24, borderBottomRightRadius: 24, paddingBottom: 16 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 12, paddingBottom: 12, maxWidth: 800, width: '100%', alignSelf: 'center' },
   headerTitle: { fontSize: 17, fontWeight: '800', color: 'white' },
@@ -369,48 +378,48 @@ const styles = StyleSheet.create({
 
   thread: { padding: 16, paddingBottom: 24, gap: 10, maxWidth: 640, width: '100%', alignSelf: 'center' },
   botRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, maxWidth: '90%' },
-  avatar: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#dcfce7', alignItems: 'center', justifyContent: 'center' },
-  botBubble: { flexShrink: 1, backgroundColor: 'white', borderRadius: 16, borderBottomLeftRadius: 4, paddingVertical: 10, paddingHorizontal: 14, borderWidth: 1, borderColor: '#f1f5f9', elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8 },
-  botText: { fontSize: 15, lineHeight: 21, fontWeight: '600', color: '#0f172a' },
-  botFine: { fontSize: 11.5, lineHeight: 16, fontWeight: '500', color: '#64748b', marginTop: 6 },
+  avatar: { width: 28, height: 28, borderRadius: 14, backgroundColor: c.primarySoft, alignItems: 'center', justifyContent: 'center' },
+  botBubble: { flexShrink: 1, backgroundColor: c.surface, borderRadius: 16, borderBottomLeftRadius: 4, paddingVertical: 10, paddingHorizontal: 14, borderWidth: 1, borderColor: c.border, elevation: 2, shadowColor: c.shadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8 },
+  botText: { fontSize: 15, lineHeight: 21, fontWeight: '600', color: c.text },
+  botFine: { fontSize: 11.5, lineHeight: 16, fontWeight: '500', color: c.textMuted, marginTop: 6 },
   userRow: { alignItems: 'flex-end', gap: 2 },
   userBubble: { maxWidth: '80%', backgroundColor: '#16a34a', borderRadius: 16, borderBottomRightRadius: 4, paddingVertical: 10, paddingHorizontal: 14 },
   userText: { fontSize: 14, lineHeight: 20, fontWeight: '700', color: 'white' },
   changeBtn: { paddingVertical: 4, paddingHorizontal: 6 },
-  changeText: { fontSize: 12, fontWeight: '700', color: '#16a34a' },
+  changeText: { fontSize: 12, fontWeight: '700', color: c.primary },
 
   sectionRow: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'center', marginTop: 10 },
   sectionTile: { width: 22, height: 22, borderRadius: 7, alignItems: 'center', justifyContent: 'center' },
   sectionText: { fontSize: 11, fontWeight: '900', letterSpacing: 0.8, textTransform: 'uppercase' },
 
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingLeft: 36 },
-  chip: { borderWidth: 1.5, borderColor: '#86efac', backgroundColor: 'white', borderRadius: 100, paddingVertical: 10, paddingHorizontal: 14, minHeight: 44, justifyContent: 'center' },
-  chipText: { fontSize: 13, fontWeight: '800', color: '#15803d' },
+  chip: { borderWidth: 1.5, borderColor: '#86efac', backgroundColor: c.surface, borderRadius: 100, paddingVertical: 10, paddingHorizontal: 14, minHeight: 44, justifyContent: 'center' },
+  chipText: { fontSize: 13, fontWeight: '800', color: c.primary },
   chipInner: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  chipOn: { backgroundColor: '#dcfce7', borderColor: '#16a34a', borderWidth: 2 },
-  chipTextOn: { color: '#15803d' },
+  chipOn: { backgroundColor: c.primarySoft, borderColor: '#16a34a', borderWidth: 2 },
+  chipTextOn: { color: c.primary },
   chipPrimary: { backgroundColor: '#16a34a', borderColor: '#16a34a' },
   chipTextPrimary: { color: 'white' },
   chipDisabled: { backgroundColor: '#9cccb0', borderColor: '#9cccb0' },
 
   primaryBtn: { marginTop: 8, backgroundColor: '#16a34a', borderRadius: 12, paddingVertical: 15, alignItems: 'center', justifyContent: 'center' },
   primaryBtnText: { color: 'white', fontSize: 15, fontWeight: '800' },
-  ghostBtn: { marginTop: 10, borderWidth: 1, borderColor: '#cbd5e1', borderRadius: 12, paddingVertical: 13, alignItems: 'center' },
-  ghostBtnText: { color: '#15803d', fontSize: 14.5, fontWeight: '800' },
+  ghostBtn: { marginTop: 10, borderWidth: 1, borderColor: c.borderStrong, borderRadius: 12, paddingVertical: 13, alignItems: 'center' },
+  ghostBtnText: { color: c.primary, fontSize: 14.5, fontWeight: '800' },
 
-  resultCard: { backgroundColor: 'white', borderRadius: 24, padding: 20, alignItems: 'center', elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 16 },
-  tick: { width: 56, height: 56, borderRadius: 28, backgroundColor: '#e7f4ec', alignItems: 'center', justifyContent: 'center', marginBottom: 10 },
-  resultValue: { fontSize: 44, fontWeight: '900', color: '#0f172a', letterSpacing: -1 },
-  resultUnit: { fontSize: 13, fontWeight: '600', color: '#64748b' },
-  resultBody: { fontSize: 14, color: '#64748b', lineHeight: 21, textAlign: 'center', marginTop: 10 },
-  fine: { fontSize: 12, color: '#94a3b8', marginTop: 10, textAlign: 'center' },
+  resultCard: { backgroundColor: c.surface, borderRadius: 24, padding: 20, alignItems: 'center', elevation: 8, shadowColor: c.shadow, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 16 },
+  tick: { width: 56, height: 56, borderRadius: 28, backgroundColor: c.primarySoft, alignItems: 'center', justifyContent: 'center', marginBottom: 10 },
+  resultValue: { fontSize: 44, fontWeight: '900', color: c.text, letterSpacing: -1 },
+  resultUnit: { fontSize: 13, fontWeight: '600', color: c.textMuted },
+  resultBody: { fontSize: 14, color: c.textMuted, lineHeight: 21, textAlign: 'center', marginTop: 10 },
+  fine: { fontSize: 12, color: c.textFaint, marginTop: 10, textAlign: 'center' },
 
-  composer: { backgroundColor: 'white', borderTopWidth: 1, borderTopColor: '#f1f5f9', paddingHorizontal: 12, paddingTop: 10, paddingBottom: Platform.OS === 'ios' ? 28 : 12 },
+  composer: { backgroundColor: c.surface, borderTopWidth: 1, borderTopColor: c.border, paddingHorizontal: 12, paddingTop: 10, paddingBottom: Platform.OS === 'ios' ? 28 : 12 },
   composerRow: { flexDirection: 'row', alignItems: 'center', gap: 8, maxWidth: 640, width: '100%', alignSelf: 'center' },
-  input: { flex: 1, minHeight: 44, borderRadius: 100, backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#e2e8f0', paddingHorizontal: 16, fontSize: 14, color: '#0f172a' },
-  roundBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: '#86efac', backgroundColor: 'white' },
+  input: { flex: 1, minHeight: 44, borderRadius: 100, backgroundColor: c.inputBg, borderWidth: 1, borderColor: c.border, paddingHorizontal: 16, fontSize: 14, color: c.text },
+  roundBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: '#86efac', backgroundColor: c.surface },
   roundBtnLive: { backgroundColor: '#e11d48', borderColor: '#e11d48' },
   sendBtn: { backgroundColor: '#16a34a', borderColor: '#16a34a' },
   sendBtnOff: { backgroundColor: '#9cccb0', borderColor: '#9cccb0' },
-  voiceHint: { fontSize: 12, fontWeight: '600', color: '#64748b', textAlign: 'center', marginBottom: 8 },
-});
+  voiceHint: { fontSize: 12, fontWeight: '600', color: c.textMuted, textAlign: 'center', marginBottom: 8 },
+}));

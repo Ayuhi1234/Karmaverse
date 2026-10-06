@@ -132,6 +132,28 @@ export const authService = {
     }
   },
 
+  // Apple Sign-In — send Apple's identityToken (+ name on first authorization only)
+  // to backend, receive our JWT (mirrors googleLogin/facebookLogin above).
+  // Backend TODO: POST /api/v1/auth/apple-login — verify identityToken against
+  // Apple's public keys, create/find the user, return our JWT.
+  appleLogin: async (identityToken: string, fullName?: string | null) => {
+    try {
+      const response = await api.post('/api/v1/auth/apple-login', { identityToken, fullName });
+      const token = extractToken(response.data);
+      if (!token) throw new Error('No token received');
+      await setToken(token);
+
+      registerForPushNotifications().then(fcmToken => {
+        if (fcmToken) sendTokenToBackend(fcmToken);
+      }).catch(() => {});
+
+      return response.data;
+    } catch (error: any) {
+      console.error('Apple Login Error:', error?.response?.data || error);
+      throw error;
+    }
+  },
+
   sendOtp: async (phone: string, purpose: string) => {
     const response = await api.post('/api/v1/auth/send-otp', { phone, purpose });
     return response.data;

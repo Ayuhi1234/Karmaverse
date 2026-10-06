@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, useWindowDimensions } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Modal, Animated, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Truck, Gamepad2, Coins, ChevronRight, Package, Users, Gift, BookOpen, Star, Flame, ArrowRight, Zap, Sparkles, Trophy, Calendar, X, CheckCircle2, BadgeCheck, ShieldCheck, Leaf, Bell } from 'lucide-react-native';
 import { NotificationPanel } from '../components/shared/NotificationPanel';
@@ -16,6 +16,7 @@ import { REDEEM_INFO_MESSAGE, showRedeemInfoOnce } from '../utils/redeemInfo';
 import { getStableUserSuffix } from '../utils/userId';
 import { isLaunchDay } from '../utils/launchDay';
 import { EARLY_BIRD_COINS } from '../utils/earlyBird';
+import { useTheme, makeStyles } from '../theme';
 
 const MAX = 1200;
 
@@ -38,8 +39,8 @@ const FEATURE_DETAILS = [
   },
   {
     id: 'knowledge', title: 'Knowledge hub', emoji: '📚', icon: BookOpen,
-    desc: 'Learn about sustainable living with curated articles, tips, and guides on recycling and the circular economy.',
-    steps: ['Browse eco articles', 'Learn recycling tips', 'Share with friends', 'Make better choices'],
+    desc: 'Learn about sustainable living with curated articles, tips, and guides on the circular economy and greener everyday choices.',
+    steps: ['Browse eco articles', 'Learn sustainability tips', 'Share with friends', 'Make better choices'],
     benefit: 'Become an eco expert',
     gradient: ['#164e63', '#0891b2'] as [string, string],
     accent: '#22d3ee',
@@ -47,7 +48,7 @@ const FEATURE_DETAILS = [
   {
     id: 'pickup', title: 'Schedule a pickup', emoji: '🚛', icon: Truck,
     desc: 'Give your old items a second life — book a sustainable pickup in 3 taps and earn KarmaCoins for going green.',
-    steps: ['Pick what you want to recycle', 'Choose date & time slot', 'Agent comes to your door', 'Earn KarmaCoins XP instantly'],
+    steps: ['Pick the items to hand over', 'Choose date & time slot', 'Agent comes to your door', 'Earn KarmaCoins XP instantly'],
     benefit: 'Earn coins on every pickup',
     gradient: ['#052e16', '#15803d'] as [string, string],
     accent: '#4ade80',
@@ -62,7 +63,7 @@ const FEATURE_DETAILS = [
   },
   {
     id: 'instant', title: 'Instant credit', emoji: '⚡', icon: Zap,
-    desc: 'No waiting — KarmaCoins XP are credited to your wallet immediately after the agent verifies and collects your recyclables.',
+    desc: 'No waiting — KarmaCoins XP are credited to your wallet immediately after the agent verifies and collects your materials.',
     steps: ['Agent weighs items at door', 'Verification done on spot', 'Coins added instantly', 'Check wallet in real-time'],
     benefit: 'Zero wait for rewards',
     gradient: ['#312e81', '#4f46e5'] as [string, string],
@@ -87,6 +88,8 @@ const getGreeting = () => {
 };
 
 export function DashboardScreen({ navigation, route }: any) {
+  const z = useStyles();
+  const { colors } = useTheme();
   const { width } = useWindowDimensions();
   // 900 (not 768) so iPad portrait (~810px) uses the clean stacked layout —
   // the desktop row squeezes the redeem banner into a tall unreadable sliver.
@@ -358,12 +361,12 @@ export function DashboardScreen({ navigation, route }: any) {
           accessibilityRole="button"
           accessibilityLabel="Carbon footprint. Track and reduce your impact"
         >
-          <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center' }}>
-            <Leaf size={20} color="#16a34a" />
+          <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' }}>
+            <Leaf size={20} color={colors.primary} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 14, fontWeight: '800', color: '#0f172a' }}>Carbon footprint</Text>
-            <Text style={{ fontSize: 12, fontWeight: '500', color: '#64748b', marginTop: 2 }}>Track and reduce your impact</Text>
+            <Text style={{ fontSize: 14, fontWeight: '800', color: colors.text }}>Carbon footprint</Text>
+            <Text style={{ fontSize: 12, fontWeight: '500', color: colors.textMuted, marginTop: 2 }}>Track and reduce your impact</Text>
           </View>
           <Text style={z.viewAll}>View →</Text>
         </TouchableOpacity>
@@ -420,7 +423,7 @@ export function DashboardScreen({ navigation, route }: any) {
 
         {recentOrders.length === 0 ? (
           <View style={z.emptyOrders}>
-            <Package size={44} color="#e2e8f0" />
+            <Package size={44} color={colors.border} />
             <Text style={z.emptyText}>No orders yet</Text>
             <TouchableOpacity style={z.emptyBtn} onPress={() => nav('SchedulePickup')}>
               <Text style={z.emptyBtnText}>Schedule your first pickup</Text>
@@ -462,7 +465,7 @@ export function DashboardScreen({ navigation, route }: any) {
             {recentOrders.map((order, i) => {
               const sc = STATUS_CLR[order.status] || STATUS_CLR.Scheduled;
               return (
-                <TouchableOpacity key={i} style={[z.ordersRow, i % 2 === 0 && { backgroundColor: '#fafafa' }]} onPress={() => nav('BookingDetails', { booking: order.raw })} activeOpacity={0.7}>
+                <TouchableOpacity key={i} style={[z.ordersRow, i % 2 === 0 && { backgroundColor: colors.surfaceAlt }]} onPress={() => nav('BookingDetails', { booking: order.raw })} activeOpacity={0.7}>
                   <View style={[z.ordersCell, { flex: 2, flexDirection: 'row', alignItems: 'center', gap: 10 }]}>
                     <View style={z.orderDot}><Package size={14} color="#15803d" /></View>
                     <Text style={z.orderItemText}>{order.type}</Text>
@@ -475,7 +478,7 @@ export function DashboardScreen({ navigation, route }: any) {
                     </View>
                   </View>
                   <Text style={[z.orderCoinsText, { flex: 1, textAlign: 'right' }]}>{order.credits > 0 ? `+${order.credits}` : '—'}</Text>
-                  <ChevronRight size={14} color="#cbd5e1" />
+                  <ChevronRight size={14} color={colors.borderStrong} />
                 </TouchableOpacity>
               );
             })}
@@ -538,8 +541,8 @@ export function DashboardScreen({ navigation, route }: any) {
   );
 }
 
-const z = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#f8fafc' },
+const useStyles = makeStyles((c) => ({
+  root: { flex: 1, backgroundColor: c.bg },
   container: { maxWidth: MAX, width: '100%', alignSelf: 'center', paddingHorizontal: 32 },
 
   // Hero — compact
@@ -587,7 +590,7 @@ const z = StyleSheet.create({
   // Section headers
   sectionHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 20 },
   sectionLabel: { fontSize: 10, fontWeight: '900', color: '#16a34a', letterSpacing: 2, marginBottom: 3 },
-  sectionTitle: { fontSize: 20, fontWeight: '900', color: '#0f172a', letterSpacing: -0.3 },
+  sectionTitle: { fontSize: 20, fontWeight: '900', color: c.text, letterSpacing: -0.3 },
   viewAll: { color: '#16a34a', fontWeight: '700', fontSize: 14 },
 
   // Discover
@@ -601,21 +604,21 @@ const z = StyleSheet.create({
   discoverCardArrow: { position: 'absolute', bottom: 16, right: 16, width: 24, height: 24, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' },
 
   // Orders table
-  ordersTable: { backgroundColor: 'white', borderRadius: 20, overflow: 'hidden', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.04, shadowRadius: 12, elevation: 2, borderWidth: 1, borderColor: '#e2e8f0' },
-  ordersHead: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 14, backgroundColor: '#f8fafc', borderBottomWidth: 1, borderBottomColor: '#e2e8f0' },
-  ordersHeadText: { fontSize: 11, fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.5 },
-  ordersRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: '#f1f5f9' },
+  ordersTable: { backgroundColor: c.surface, borderRadius: 20, overflow: 'hidden', shadowColor: c.shadow, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.04, shadowRadius: 12, elevation: 2, borderWidth: 1, borderColor: c.border },
+  ordersHead: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 14, backgroundColor: c.surfaceAlt, borderBottomWidth: 1, borderBottomColor: c.border },
+  ordersHeadText: { fontSize: 11, fontWeight: '800', color: c.textFaint, textTransform: 'uppercase', letterSpacing: 0.5 },
+  ordersRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: c.border },
   ordersCell: {},
-  ordersCellText: { fontSize: 13, fontWeight: '600', color: '#64748b' },
-  orderDot: { width: 32, height: 32, borderRadius: 10, backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center' },
-  orderItemText: { fontSize: 14, fontWeight: '700', color: '#0f172a' },
+  ordersCellText: { fontSize: 13, fontWeight: '600', color: c.textMuted },
+  orderDot: { width: 32, height: 32, borderRadius: 10, backgroundColor: c.primarySoft, alignItems: 'center', justifyContent: 'center' },
+  orderItemText: { fontSize: 14, fontWeight: '700', color: c.text },
   statusPill: { alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
   statusPillText: { fontSize: 11, fontWeight: '800' },
   orderCoinsText: { fontSize: 14, fontWeight: '800', color: '#16a34a' },
 
-  mobileOrderCard: { backgroundColor: 'white', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#e2e8f0', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 1 },
-  emptyOrders: { backgroundColor: 'white', borderRadius: 20, padding: 50, alignItems: 'center', gap: 12, borderWidth: 1, borderColor: '#e2e8f0' },
-  emptyText: { color: '#94a3b8', fontSize: 15, fontWeight: '600' },
+  mobileOrderCard: { backgroundColor: c.surface, borderRadius: 16, padding: 16, borderWidth: 1, borderColor: c.border, shadowColor: c.shadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 1 },
+  emptyOrders: { backgroundColor: c.surface, borderRadius: 20, padding: 50, alignItems: 'center', gap: 12, borderWidth: 1, borderColor: c.border },
+  emptyText: { color: c.textFaint, fontSize: 15, fontWeight: '600' },
   emptyBtn: { backgroundColor: '#15803d', borderRadius: 14, paddingHorizontal: 24, paddingVertical: 14, marginTop: 8 },
   emptyBtnText: { color: 'white', fontWeight: '800', fontSize: 14 },
 
@@ -629,7 +632,7 @@ const z = StyleSheet.create({
 
   // Modal
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', alignItems: 'center', justifyContent: 'center', padding: 24 },
-  modalCard: { width: '100%', maxWidth: 460, backgroundColor: 'white', borderRadius: 24, overflow: 'hidden', shadowColor: '#000', shadowOffset: { width: 0, height: 20 }, shadowOpacity: 0.25, shadowRadius: 40, elevation: 20 },
+  modalCard: { width: '100%', maxWidth: 460, backgroundColor: c.surface, borderRadius: 24, overflow: 'hidden', shadowColor: c.shadow, shadowOffset: { width: 0, height: 20 }, shadowOpacity: 0.25, shadowRadius: 40, elevation: 20 },
   modalHeader: { padding: 28, paddingTop: 32, position: 'relative', overflow: 'hidden' },
   modalHeaderDecor: { position: 'absolute', top: -30, right: -30, width: 120, height: 120, borderRadius: 60, backgroundColor: 'rgba(255,255,255,0.08)' },
   modalCloseBtn: { position: 'absolute', top: 16, right: 16, width: 32, height: 32, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },
@@ -637,11 +640,11 @@ const z = StyleSheet.create({
   modalTitle: { color: 'white', fontSize: 24, fontWeight: '900', marginBottom: 8, letterSpacing: -0.5 },
   modalDesc: { color: 'rgba(255,255,255,0.75)', fontSize: 14, fontWeight: '500', lineHeight: 22 },
   modalBody: { padding: 28 },
-  modalStepsTitle: { fontSize: 14, fontWeight: '800', color: '#0f172a', marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1 },
+  modalStepsTitle: { fontSize: 14, fontWeight: '800', color: c.text, marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1 },
   modalStep: { flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 14 },
   modalStepNum: { width: 32, height: 32, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
   modalStepNumText: { fontSize: 14, fontWeight: '900' },
-  modalStepText: { fontSize: 15, fontWeight: '600', color: '#334155', flex: 1 },
+  modalStepText: { fontSize: 15, fontWeight: '600', color: c.textMuted, flex: 1 },
   modalBenefit: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 8, padding: 14, borderRadius: 14, borderWidth: 1 },
   modalBenefitText: { fontSize: 14, fontWeight: '800' },
 
@@ -657,4 +660,4 @@ const z = StyleSheet.create({
   rewardCardLabel: { color: 'rgba(255,255,255,0.75)', fontSize: 11, fontWeight: '600', lineHeight: 15 },
   firstPickupCta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: '#15803d', borderRadius: 16, paddingVertical: 16, marginTop: 18 },
   firstPickupCtaText: { color: 'white', fontSize: 15, fontWeight: '900' },
-});
+}));

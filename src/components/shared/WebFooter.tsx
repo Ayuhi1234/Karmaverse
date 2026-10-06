@@ -7,6 +7,7 @@ import { useNavigation } from '@react-navigation/native';
 const MAX = 1200;
 const ADDRESS = 'Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051';
 const MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ADDRESS)}`;
+const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.karmacredits.app';
 
 const SOCIALS = [
   { key: 'instagram', Icon: Instagram, url: 'https://www.instagram.com/mykarmaverse/' },
@@ -87,7 +88,7 @@ export function WebFooter() {
               <Image source={require('../../../assets/logo-nav.png')} style={{ height: 68, width: 144, resizeMode: 'contain' }} />
             </View>
             <Text style={s.aboutText}>
-              India's rewarding recycling platform. Turn your waste into KarmaCoins XP — schedule free sustainable pickups and earn rewards for every kg recycled.
+              India's rewarding sustainability platform. Turn your everyday materials into KarmaCoins XP — schedule free sustainable pickups and earn rewards for every kg recovered.
             </Text>
             <SocialRow />
           </View>
@@ -127,11 +128,10 @@ export function WebFooter() {
           <View style={[s.col, isMobile && s.colMobile]}>
             <Text style={s.colTitle}>Get the app</Text>
             <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap' }}>
-              <View style={[s.storeBtn, s.storeBtnDisabled, { flexGrow: 1 }]}>
+              <TouchableOpacity style={[s.storeBtn, { flexGrow: 1 }]} onPress={() => openExternal(PLAY_STORE_URL)} activeOpacity={0.85}>
                 <Text style={s.storeBtnSub}>GET IT ON</Text>
                 <Text style={s.storeBtnText}>Google Play</Text>
-                <Text style={s.comingSoonInline}>Coming soon</Text>
-              </View>
+              </TouchableOpacity>
               <View style={[s.storeBtn, s.storeBtnDisabled, { flexGrow: 1 }]}>
                 <Text style={s.storeBtnSub}>DOWNLOAD ON</Text>
                 <Text style={s.storeBtnText}>App Store</Text>

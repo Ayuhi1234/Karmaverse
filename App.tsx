@@ -1,15 +1,19 @@
 import React, { useEffect } from 'react';
 import { Linking } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ThemeProvider } from './src/theme';
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { UserSocketProvider } from './src/context/UserSocketContext';
 import { NotificationProvider } from './src/context/NotificationContext';
 import { ResponsiveContainer } from './src/components/shared/ResponsiveContainer';
 import { AlertHost } from './src/components/shared/AlertHost';
+import { RootErrorBoundary } from './src/components/shared/RootErrorBoundary';
 import {
   registerForPushNotifications,
   sendTokenToBackend,
   addPushTokenRefreshListener,
+  setupAndroidChannels,
+  setupNotificationCategories,
 } from './src/utils/notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -44,6 +48,12 @@ function extractReferralCode(url: string): string | null {
 
 export default function App() {
   useEffect(() => {
+    // Set up Android notification channels and the action-button categories once,
+    // up front, so transactional pushes land on the right channel and (where the OS
+    // supports it) show their action buttons. Fire-and-forget — both are idempotent.
+    setupAndroidChannels();
+    setupNotificationCategories();
+
     // Deep link — cold start (app was closed)
     Linking.getInitialURL().then(url => {
       if (!url) return;
@@ -77,13 +87,17 @@ export default function App() {
   }, []);
 
   return (
-    <SafeAreaProvider>
-      <NotificationProvider>
-        <UserSocketProvider>
-          <RootNavigator />
-          <AlertHost />
-        </UserSocketProvider>
-      </NotificationProvider>
-    </SafeAreaProvider>
+    <RootErrorBoundary>
+      <SafeAreaProvider>
+        <ThemeProvider>
+          <NotificationProvider>
+            <UserSocketProvider>
+              <RootNavigator />
+              <AlertHost />
+            </UserSocketProvider>
+          </NotificationProvider>
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </RootErrorBoundary>
   );
 }

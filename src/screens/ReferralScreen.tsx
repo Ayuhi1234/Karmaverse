@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Share, ActivityIndicator, StatusBar, Platform, Modal, Linking } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Share, ActivityIndicator, StatusBar, Platform, Modal, Linking } from 'react-native';
 import { showAlert } from '../utils/alert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, Share2, Copy, Users, Gift, CheckCircle2, Clock, X, MessageCircle, Linkedin, Facebook, Twitter, Instagram, Mail, Link2 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { referralService } from '../services/referral';
+import { useTheme, makeStyles } from '../theme';
 
 export function ReferralScreen({ navigation }: any) {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const [loading, setLoading] = useState(true);
   const [referralCode, setReferralCode] = useState('');
   const [totalReferrals, setTotalReferrals] = useState(0);
@@ -198,7 +201,7 @@ export function ReferralScreen({ navigation }: any) {
               <ActivityIndicator color="#7c3aed" style={{ marginTop: 20 }} />
             ) : referrals.length === 0 ? (
               <View style={styles.emptyState}>
-                <Users size={40} color="#e2e8f0" />
+                <Users size={40} color={colors.textFaint} />
                 <Text style={styles.emptyTitle}>No referrals yet</Text>
                 <Text style={styles.emptyText}>Share your code — when a friend joins, both of you earn coins.</Text>
                 <TouchableOpacity style={styles.emptyShareBtn} onPress={handleShare} disabled={!referralCode}>
@@ -222,7 +225,7 @@ export function ReferralScreen({ navigation }: any) {
                       )}
                     </View>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 }}>
-                      <Clock size={12} color="#94a3b8" />
+                      <Clock size={12} color={colors.textFaint} />
                       <Text style={styles.referralDate}>{formatDate(ref.createdAt)}</Text>
                     </View>
                   </View>
@@ -265,18 +268,18 @@ export function ReferralScreen({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  shareBackdrop: { flex: 1, backgroundColor: 'rgba(15,23,42,0.5)', alignItems: 'center', justifyContent: 'center', padding: 20 },
-  shareSheet: { backgroundColor: 'white', borderRadius: 24, padding: 22, width: '100%', maxWidth: 420, shadowColor: '#000', shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.2, shadowRadius: 30, elevation: 12 },
+const useStyles = makeStyles((c) => ({
+  shareBackdrop: { flex: 1, backgroundColor: c.overlay, alignItems: 'center', justifyContent: 'center', padding: 20 },
+  shareSheet: { backgroundColor: c.surface, borderRadius: 24, padding: 22, width: '100%', maxWidth: 420, shadowColor: '#000', shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.2, shadowRadius: 30, elevation: 12 },
   shareHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 },
-  shareTitle: { fontSize: 18, fontWeight: '800', color: '#0f172a' },
+  shareTitle: { fontSize: 18, fontWeight: '800', color: c.text },
   shareGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8 },
   shareOption: { width: 84, alignItems: 'center', paddingVertical: 10, gap: 8 },
   shareOptionIcon: { width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center' },
-  shareOptionLabel: { fontSize: 12, fontWeight: '600', color: '#475569' },
+  shareOptionLabel: { fontSize: 12, fontWeight: '600', color: c.textMuted },
 
   rootContainer: { flex: 1, backgroundColor: '#7e22ce' },
-  scrollBg: { flex: 1, backgroundColor: '#f8fafc' },
+  scrollBg: { flex: 1, backgroundColor: c.bg },
   topNotchFiller: { position: 'absolute', top: 0, left: 0, right: 0, height: 60, backgroundColor: '#7e22ce' },
   container: { flex: 1, maxWidth: 900, width: '100%', alignSelf: 'center' },
 
@@ -299,30 +302,30 @@ const styles = StyleSheet.create({
   shareBtn: { flexDirection: 'row', backgroundColor: 'rgba(255,255,255,0.2)', width: '100%', height: 56, borderRadius: 16, alignItems: 'center', justifyContent: 'center', gap: 12, borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.3)' },
   shareBtnText: { color: 'white', fontSize: 16, fontWeight: '800' },
 
-  statsWidget: { marginHorizontal: 20, marginTop: -30, backgroundColor: 'white', borderRadius: 20, padding: 20, elevation: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.1, shadowRadius: 16 },
+  statsWidget: { marginHorizontal: 20, marginTop: -30, backgroundColor: c.surface, borderRadius: 20, padding: 20, elevation: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.1, shadowRadius: 16, borderWidth: 1, borderColor: c.border },
   statsRow: { flexDirection: 'row', alignItems: 'center' },
   statsDataBox: { flex: 1 },
-  statsDataLabel: { fontSize: 12, color: '#64748b', fontWeight: '600', marginBottom: 6 },
+  statsDataLabel: { fontSize: 12, color: c.textMuted, fontWeight: '600', marginBottom: 6 },
   statsDataNumRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   statsDataNum: { fontSize: 28, fontWeight: '900' },
-  statsDivider: { width: 1, height: 40, backgroundColor: '#e2e8f0', marginHorizontal: 20 },
+  statsDivider: { width: 1, height: 40, backgroundColor: c.border, marginHorizontal: 20 },
 
   historySection: { paddingHorizontal: 20, marginTop: 32 },
-  sectionTitle: { fontSize: 20, fontWeight: '800', color: '#0f172a', marginBottom: 16 },
+  sectionTitle: { fontSize: 20, fontWeight: '800', color: c.text, marginBottom: 16 },
 
   emptyState: { alignItems: 'center', paddingVertical: 40, gap: 10 },
-  emptyTitle: { fontSize: 16, fontWeight: '800', color: '#374151' },
-  emptyText: { fontSize: 13, color: '#64748b', textAlign: 'center', lineHeight: 20, maxWidth: 280 },
+  emptyTitle: { fontSize: 16, fontWeight: '800', color: c.text },
+  emptyText: { fontSize: 13, color: c.textMuted, textAlign: 'center', lineHeight: 20, maxWidth: 280 },
   emptyShareBtn: { flexDirection: 'row', backgroundColor: '#7c3aed', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12, alignItems: 'center', gap: 8, marginTop: 8 },
   emptyShareText: { color: 'white', fontWeight: '800', fontSize: 14 },
 
-  referralCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'white', padding: 16, borderRadius: 16, marginBottom: 10, elevation: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4 },
-  referralAvatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#fdf4ff', alignItems: 'center', justifyContent: 'center', marginRight: 14 },
+  referralCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.surface, padding: 16, borderRadius: 16, marginBottom: 10, elevation: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, borderWidth: 1, borderColor: c.border },
+  referralAvatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: c.surfaceAlt, alignItems: 'center', justifyContent: 'center', marginRight: 14 },
   referralAvatarText: { fontSize: 18, fontWeight: '900', color: '#7c3aed' },
-  referralName: { fontSize: 15, fontWeight: '700', color: '#1e293b' },
-  referralNumBadge: { backgroundColor: '#fdf4ff', paddingHorizontal: 7, paddingVertical: 2, borderRadius: 8 },
+  referralName: { fontSize: 15, fontWeight: '700', color: c.text },
+  referralNumBadge: { backgroundColor: c.surfaceAlt, paddingHorizontal: 7, paddingVertical: 2, borderRadius: 8 },
   referralNumText: { fontSize: 11, fontWeight: '800', color: '#7c3aed' },
-  referralDate: { fontSize: 12, color: '#94a3b8', fontWeight: '500' },
-  referralCoins: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fffbeb', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, gap: 4 },
+  referralDate: { fontSize: 12, color: c.textFaint, fontWeight: '500' },
+  referralCoins: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.surfaceAlt, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, gap: 4 },
   referralCoinsText: { fontSize: 14, fontWeight: '800', color: '#d97706' },
-});
+}));

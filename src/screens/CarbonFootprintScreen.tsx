@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, StatusBar, Activi
 import { LinearGradient } from 'expo-linear-gradient';
 import { Leaf, Info, History, ChevronLeft, ChevronRight, Clock, X, Target, Plus, Lightbulb, Recycle, Calculator, LineChart } from 'lucide-react-native';
 import { WebFooter } from '../components/shared/WebFooter';
+import { useTheme, makeStyles } from '../theme';
 import {
   carbonService, CarbonSummary, CarbonActivity, CarbonAssessment, LoggableActivity, CARBON_CATEGORY_ORDER,
 } from '../services/carbon';
@@ -13,6 +14,10 @@ const GOAL_OPTIONS = [5, 10, 20];
 
 // Layout, cards, banner, action row and sheets deliberately mirror WalletScreen.
 export function CarbonFootprintScreen({ navigation }: any) {
+  const styles = useStyles();
+  const { colors, isDark } = useTheme();
+  // Pastel category tiles read as glare on dark surfaces; use the raised surface there.
+  const tint = (bg: string) => (isDark ? colors.surfaceAlt : bg);
   const [summary, setSummary] = useState<CarbonSummary | null>(null);
   const [latest, setLatest] = useState<CarbonAssessment | null>(null);
   const [activities, setActivities] = useState<CarbonActivity[]>([]);
@@ -98,7 +103,7 @@ export function CarbonFootprintScreen({ navigation }: any) {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#f0fdf6' }}>
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <StatusBar barStyle="light-content" />
       <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: Platform.OS === 'web' ? 0 : 100 }} showsVerticalScrollIndicator={false}>
 
@@ -208,20 +213,20 @@ export function CarbonFootprintScreen({ navigation }: any) {
             {latest && (
               <TouchableOpacity style={styles.linkBtn} onPress={startAssessment} activeOpacity={0.8} accessibilityRole="button">
                 <Text style={styles.linkText}>Recalculate</Text>
-                <ChevronRight size={14} color="#16a34a" />
+                <ChevronRight size={14} color={colors.primary} />
               </TouchableOpacity>
             )}
           </View>
 
           {isLoading ? (
             <View style={styles.stateBox}>
-              <ActivityIndicator size="large" color="#16a34a" accessibilityLabel="Loading" />
-              <Text style={{ color: '#64748b', marginTop: 12 }}>Loading…</Text>
+              <ActivityIndicator size="large" color={colors.primary} accessibilityLabel="Loading" />
+              <Text style={{ color: colors.textMuted, marginTop: 12 }}>Loading…</Text>
             </View>
           ) : !latest ? (
             <View style={styles.ctaCard}>
               <View style={styles.ctaTop}>
-                <View style={[styles.iconTile, { backgroundColor: '#f0fdf4' }]}><Calculator size={20} color="#16a34a" /></View>
+                <View style={[styles.iconTile, { backgroundColor: tint('#f0fdf4') }]}><Calculator size={20} color="#16a34a" /></View>
                 <View style={{ flex: 1, marginLeft: 12 }}>
                   <Text style={styles.rowTitle}>Find out your footprint</Text>
                   <Text style={styles.rowMeta}>Tap through a quick chat about your day · about 4 minutes</Text>
@@ -233,7 +238,7 @@ export function CarbonFootprintScreen({ navigation }: any) {
             </View>
           ) : rows.length === 0 ? (
             <View style={styles.stateBox}>
-              <Leaf size={48} color="#cbd5e1" />
+              <Leaf size={48} color={colors.textFaint} />
               <Text style={styles.emptyTitle}>No breakdown yet.</Text>
               <Text style={styles.emptyHint}>Your category details will show here.</Text>
             </View>
@@ -246,7 +251,7 @@ export function CarbonFootprintScreen({ navigation }: any) {
                 const width = maxKg > 0 ? `${Math.max((r.kg / maxKg) * 100, r.kg > 0 ? 4 : 0)}%` : '0%';
                 return (
                   <View key={r.key} style={styles.rowCard} accessible accessibilityLabel={`${cat.label}, ${formatKg(r.kg)} kilograms CO2e, ${pct} percent`}>
-                    <View style={[styles.iconTile, { backgroundColor: cat.bg }]}>
+                    <View style={[styles.iconTile, { backgroundColor: tint(cat.bg) }]}>
                       <cat.Icon size={20} color={cat.color} />
                     </View>
                     <View style={styles.rowContent}>
@@ -269,12 +274,12 @@ export function CarbonFootprintScreen({ navigation }: any) {
           <Text style={[styles.sectionTitle, { marginBottom: 16 }]}>Recent activity</Text>
           {isLoading ? (
             <View style={styles.stateBox}>
-              <ActivityIndicator size="large" color="#16a34a" accessibilityLabel="Loading" />
-              <Text style={{ color: '#64748b', marginTop: 12 }}>Loading…</Text>
+              <ActivityIndicator size="large" color={colors.primary} accessibilityLabel="Loading" />
+              <Text style={{ color: colors.textMuted, marginTop: 12 }}>Loading…</Text>
             </View>
           ) : activities.length === 0 ? (
             <View style={styles.stateBox}>
-              <History size={48} color="#cbd5e1" />
+              <History size={48} color={colors.textFaint} />
               <Text style={styles.emptyTitle}>No activity yet.</Text>
               <Text style={styles.emptyHint}>Log a green action or schedule a pickup to see it here.</Text>
             </View>
@@ -284,13 +289,13 @@ export function CarbonFootprintScreen({ navigation }: any) {
                 const ic = activityIcon(a.type);
                 return (
                   <View key={a._id} style={styles.rowCard}>
-                    <View style={[styles.iconTile, { backgroundColor: ic.bg }]}>
+                    <View style={[styles.iconTile, { backgroundColor: tint(ic.bg) }]}>
                       <ic.Icon size={20} color={ic.color} />
                     </View>
                     <View style={styles.rowContent}>
                       <Text style={styles.rowTitle}>{a.title}</Text>
                       <View style={styles.timeRow}>
-                        <Clock size={12} color="#9ca3af" />
+                        <Clock size={12} color={colors.textFaint} />
                         <Text style={styles.rowMeta}>{formatDate(a.createdAt)}</Text>
                       </View>
                     </View>
@@ -313,7 +318,7 @@ export function CarbonFootprintScreen({ navigation }: any) {
             <View style={styles.sheetTitleRow}>
               <Text style={styles.sheetTitle}>{level?.name}</Text>
               <TouchableOpacity onPress={() => setLevelModalVisible(false)} activeOpacity={0.8} accessibilityRole="button" accessibilityLabel="Close">
-                <X size={22} color="#64748b" />
+                <X size={22} color={colors.textMuted} />
               </TouchableOpacity>
             </View>
             <Text style={styles.levelSub}>Level {level?.level}</Text>
@@ -344,22 +349,22 @@ export function CarbonFootprintScreen({ navigation }: any) {
 
             {LOG_OPTIONS.map((o) => (
               <TouchableOpacity key={o.type} style={styles.option} onPress={() => handleLog(o.type)} activeOpacity={0.8} disabled={logging !== null} accessibilityRole="button">
-                <View style={[styles.optionIcon, { backgroundColor: o.bg }]}><o.Icon size={22} color={o.color} /></View>
+                <View style={[styles.optionIcon, { backgroundColor: tint(o.bg) }]}><o.Icon size={22} color={o.color} /></View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.optionName}>{o.title}</Text>
                   <Text style={styles.optionMeta}>{o.meta}</Text>
                 </View>
-                {logging === o.type ? <ActivityIndicator size="small" color="#16a34a" /> : <ChevronRight size={20} color="#94a3b8" />}
+                {logging === o.type ? <ActivityIndicator size="small" color={colors.primary} /> : <ChevronRight size={20} color={colors.textFaint} />}
               </TouchableOpacity>
             ))}
 
             <TouchableOpacity style={styles.option} onPress={goSchedulePickup} activeOpacity={0.8} disabled={logging !== null} accessibilityRole="button">
-              <View style={[styles.optionIcon, { backgroundColor: '#f0fdf4' }]}><Recycle size={22} color="#16a34a" /></View>
+              <View style={[styles.optionIcon, { backgroundColor: tint('#f0fdf4') }]}><Recycle size={22} color="#16a34a" /></View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.optionName}>Recycled waste</Text>
                 <Text style={styles.optionMeta}>Schedule a KarmaVerse pickup</Text>
               </View>
-              <ChevronRight size={20} color="#94a3b8" />
+              <ChevronRight size={20} color={colors.textFaint} />
             </TouchableOpacity>
           </TouchableOpacity>
         </TouchableOpacity>
@@ -378,19 +383,19 @@ export function CarbonFootprintScreen({ navigation }: any) {
               return (
                 <TouchableOpacity
                   key={p}
-                  style={[styles.option, active && { backgroundColor: '#fffbeb', borderColor: '#fcd34d' }]}
+                  style={[styles.option, active && { backgroundColor: tint('#fffbeb'), borderColor: '#fcd34d' }]}
                   onPress={() => handleGoal(p)}
                   activeOpacity={0.8}
                   disabled={savingGoal !== null}
                   accessibilityRole="button"
                   accessibilityState={{ selected: active }}
                 >
-                  <View style={[styles.optionIcon, { backgroundColor: '#fffbeb' }]}><Target size={22} color="#d97706" /></View>
+                  <View style={[styles.optionIcon, { backgroundColor: tint('#fffbeb') }]}><Target size={22} color="#d97706" /></View>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.optionName}>Cut {p}%</Text>
                     <Text style={styles.optionMeta}>{active ? 'Your current goal' : p === 5 ? 'A gentle start' : p === 10 ? 'A steady push' : 'A big stretch'}</Text>
                   </View>
-                  {savingGoal === p ? <ActivityIndicator size="small" color="#d97706" /> : <ChevronRight size={20} color="#94a3b8" />}
+                  {savingGoal === p ? <ActivityIndicator size="small" color="#d97706" /> : <ChevronRight size={20} color={colors.textFaint} />}
                 </TouchableOpacity>
               );
             })}
@@ -401,8 +406,8 @@ export function CarbonFootprintScreen({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f0fdf6' },
+const useStyles = makeStyles((c) => ({
+  container: { flex: 1, backgroundColor: c.bg },
 
   header: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 24, borderBottomLeftRadius: 24, borderBottomRightRadius: 24 },
   titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, maxWidth: 800, width: '100%', alignSelf: 'center', gap: 10 },
@@ -442,7 +447,7 @@ const styles = StyleSheet.create({
   tipBtnText: { color: 'white', fontWeight: '800', fontSize: 13 },
 
   actionRow: { flexDirection: 'row', paddingHorizontal: 16, gap: 10, marginTop: 20, maxWidth: 800, width: '100%', alignSelf: 'center' },
-  actionBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12, paddingHorizontal: 6, borderRadius: 100, borderWidth: 1.5, backgroundColor: 'white' },
+  actionBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12, paddingHorizontal: 6, borderRadius: 100, borderWidth: 1.5, backgroundColor: c.surface },
   actionBtnGreen: { borderColor: '#86efac' },
   actionBtnAmber: { borderColor: '#fcd34d' },
   actionBtnSky: { borderColor: '#bae6fd' },
@@ -450,47 +455,47 @@ const styles = StyleSheet.create({
 
   section: { paddingHorizontal: 16, marginTop: 28, maxWidth: 800, width: '100%', alignSelf: 'center' },
   sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-  sectionTitle: { fontSize: 18, fontWeight: '800', color: '#0f172a' },
+  sectionTitle: { fontSize: 18, fontWeight: '800', color: c.text },
   linkBtn: { flexDirection: 'row', alignItems: 'center', paddingVertical: 6 },
-  linkText: { fontSize: 12, color: '#16a34a', fontWeight: '600' },
+  linkText: { fontSize: 12, color: c.primary, fontWeight: '600' },
   stateBox: { alignItems: 'center', paddingVertical: 40 },
-  emptyTitle: { color: '#94a3b8', marginTop: 12, fontWeight: '600' },
-  emptyHint: { color: '#cbd5e1', fontSize: 12, marginTop: 4, textAlign: 'center' },
+  emptyTitle: { color: c.textFaint, marginTop: 12, fontWeight: '600' },
+  emptyHint: { color: c.textFaint, fontSize: 12, marginTop: 4, textAlign: 'center' },
 
   list: { gap: 10 },
-  rowCard: { flexDirection: 'row', alignItems: 'center', padding: 14, backgroundColor: 'white', borderRadius: 16, borderWidth: 1, borderColor: '#f1f5f9', elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8 },
+  rowCard: { flexDirection: 'row', alignItems: 'center', padding: 14, backgroundColor: c.surface, borderRadius: 16, borderWidth: 1, borderColor: c.border, elevation: 2, shadowColor: c.shadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8 },
   iconTile: { width: 42, height: 42, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   rowContent: { flex: 1, marginLeft: 12, marginRight: 10 },
-  rowTitle: { fontSize: 14, fontWeight: '800', color: '#0f172a', marginBottom: 3 },
-  rowMeta: { fontSize: 11, color: '#64748b', fontWeight: '500' },
+  rowTitle: { fontSize: 14, fontWeight: '800', color: c.text, marginBottom: 3 },
+  rowMeta: { fontSize: 11, color: c.textMuted, fontWeight: '500' },
   rowValue: { fontSize: 15, fontWeight: '900' },
   timeRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  barTrack: { height: 6, borderRadius: 3, backgroundColor: '#f1f5f9', marginTop: 3, marginBottom: 5, overflow: 'hidden' },
+  barTrack: { height: 6, borderRadius: 3, backgroundColor: c.surfaceAlt, marginTop: 3, marginBottom: 5, overflow: 'hidden' },
   barFill: { height: 6, borderRadius: 3 },
 
-  ctaCard: { padding: 14, backgroundColor: 'white', borderRadius: 16, borderWidth: 1, borderColor: '#f1f5f9', elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, gap: 14 },
+  ctaCard: { padding: 14, backgroundColor: c.surface, borderRadius: 16, borderWidth: 1, borderColor: c.border, elevation: 2, shadowColor: c.shadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, gap: 14 },
   ctaTop: { flexDirection: 'row', alignItems: 'center' },
   primaryPill: { backgroundColor: '#16a34a', borderRadius: 100, paddingVertical: 13, alignItems: 'center' },
   primaryPillText: { color: 'white', fontWeight: '800', fontSize: 14 },
 
   // Modals — web: centred dialog; native: bottom sheet (same as Wallet)
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(15,23,42,0.55)', justifyContent: Platform.OS === 'web' ? 'center' : 'flex-end', alignItems: 'center', padding: Platform.OS === 'web' ? 20 : 0 },
+  modalOverlay: { flex: 1, backgroundColor: c.overlay, justifyContent: Platform.OS === 'web' ? 'center' : 'flex-end', alignItems: 'center', padding: Platform.OS === 'web' ? 20 : 0 },
   sheet: {
-    backgroundColor: 'white',
+    backgroundColor: c.surface,
     borderTopLeftRadius: 24, borderTopRightRadius: 24,
     borderBottomLeftRadius: Platform.OS === 'web' ? 24 : 0, borderBottomRightRadius: Platform.OS === 'web' ? 24 : 0,
     padding: 22, paddingBottom: Platform.OS === 'web' ? 22 : 34, maxWidth: 560, width: '100%', alignSelf: 'center',
   },
-  sheetHandle: { width: 44, height: 5, borderRadius: 3, backgroundColor: '#e2e8f0', alignSelf: 'center', marginBottom: 16 },
+  sheetHandle: { width: 44, height: 5, borderRadius: 3, backgroundColor: c.border, alignSelf: 'center', marginBottom: 16 },
   sheetTitleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  sheetTitle: { fontSize: 18, fontWeight: '900', color: '#0f172a', marginBottom: 4 },
-  sheetHint: { fontSize: 12.5, color: '#64748b', fontWeight: '600', lineHeight: 18, marginTop: 6 },
-  option: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: 16, borderWidth: 1, borderColor: '#f1f5f9', backgroundColor: '#fbfdff', marginTop: 12 },
+  sheetTitle: { fontSize: 18, fontWeight: '900', color: c.text, marginBottom: 4 },
+  sheetHint: { fontSize: 12.5, color: c.textMuted, fontWeight: '600', lineHeight: 18, marginTop: 6 },
+  option: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: 16, borderWidth: 1, borderColor: c.border, backgroundColor: c.surfaceAlt, marginTop: 12 },
   optionIcon: { width: 46, height: 46, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  optionName: { fontSize: 15, fontWeight: '800', color: '#0f172a', marginBottom: 2 },
-  optionMeta: { fontSize: 12, color: '#64748b', fontWeight: '600' },
-  levelSub: { fontSize: 13, color: '#15803d', fontWeight: '800' },
-  levelTrack: { height: 8, borderRadius: 4, backgroundColor: '#f1f5f9', marginTop: 12, overflow: 'hidden' },
+  optionName: { fontSize: 15, fontWeight: '800', color: c.text, marginBottom: 2 },
+  optionMeta: { fontSize: 12, color: c.textMuted, fontWeight: '600' },
+  levelSub: { fontSize: 13, color: c.primary, fontWeight: '800' },
+  levelTrack: { height: 8, borderRadius: 4, backgroundColor: c.surfaceAlt, marginTop: 12, overflow: 'hidden' },
   levelFill: { height: 8, borderRadius: 4, backgroundColor: '#16a34a' },
-  levelFooter: { fontSize: 12.5, color: '#15803d', fontWeight: '700', marginTop: 14, textAlign: 'center' },
-});
+  levelFooter: { fontSize: 12.5, color: c.primary, fontWeight: '700', marginTop: 14, textAlign: 'center' },
+}));

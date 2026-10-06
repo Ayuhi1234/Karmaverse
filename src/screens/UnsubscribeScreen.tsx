@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StatusBar, ActivityIndicator, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MailX, Check, AlertCircle, Sprout } from 'lucide-react-native';
 import { unsubscribeAll, resubscribe } from '../services/emailPrefs';
+import { makeStyles } from '../theme';
 
 const SUPPORT = 'info@0waste.co.in';
 
@@ -14,6 +15,7 @@ function goHome(navigation: any) {
 }
 
 export function UnsubscribeScreen({ route, navigation }: any) {
+  const styles = useStyles();
   const token: string | undefined = route?.params?.token;
   const [state, setState] = useState<'working' | 'done' | 'error' | 'resubscribed'>('working');
   const [busy, setBusy] = useState(false);
@@ -107,8 +109,8 @@ export function UnsubscribeScreen({ route, navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#f8fafc' },
+const useStyles = makeStyles((c) => ({
+  root: { flex: 1, backgroundColor: c.bg },
   header: { borderBottomLeftRadius: 24, borderBottomRightRadius: 24 },
   headerInner: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 24, maxWidth: 560, width: '100%', alignSelf: 'center' },
   headerIconBox: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center', marginBottom: 14 },
@@ -119,15 +121,15 @@ const styles = StyleSheet.create({
   scrollContent: { paddingHorizontal: 20, paddingTop: 34, paddingBottom: 60, maxWidth: 560, width: '100%', alignSelf: 'center' },
 
   centerCard: { alignItems: 'center' },
-  workText: { marginTop: 16, fontSize: 14.5, color: '#64748b', fontWeight: '600' },
-  tick: { width: 64, height: 64, borderRadius: 32, backgroundColor: '#e7f4ec', alignItems: 'center', justifyContent: 'center', marginBottom: 18 },
-  tickErr: { backgroundColor: '#fdecec' },
-  doneTitle: { fontSize: 22, fontWeight: '900', color: '#0f172a', marginBottom: 8, textAlign: 'center' },
-  doneText: { fontSize: 14.5, color: '#64748b', textAlign: 'center', lineHeight: 22, maxWidth: 360 },
-  fine: { fontSize: 12.5, color: '#94a3b8', marginTop: 14, textAlign: 'center', lineHeight: 19, maxWidth: 360 },
+  workText: { marginTop: 16, fontSize: 14.5, color: c.textMuted, fontWeight: '600' },
+  tick: { width: 64, height: 64, borderRadius: 32, backgroundColor: c.primarySoft, alignItems: 'center', justifyContent: 'center', marginBottom: 18 },
+  tickErr: { backgroundColor: c.dangerSoft },
+  doneTitle: { fontSize: 22, fontWeight: '900', color: c.text, marginBottom: 8, textAlign: 'center' },
+  doneText: { fontSize: 14.5, color: c.textMuted, textAlign: 'center', lineHeight: 22, maxWidth: 360 },
+  fine: { fontSize: 12.5, color: c.textFaint, marginTop: 14, textAlign: 'center', lineHeight: 19, maxWidth: 360 },
 
   primaryBtn: { marginTop: 24, backgroundColor: '#16a34a', borderRadius: 12, paddingVertical: 14, paddingHorizontal: 22, alignItems: 'center', alignSelf: 'stretch' },
   primaryBtnText: { color: 'white', fontSize: 15, fontWeight: '800' },
-  ghostBtn: { marginTop: 12, borderWidth: 1, borderColor: '#cbd5e1', borderRadius: 12, paddingVertical: 13, paddingHorizontal: 24, alignItems: 'center', alignSelf: 'stretch' },
-  ghostBtnText: { color: '#15803d', fontSize: 14.5, fontWeight: '800' },
-});
+  ghostBtn: { marginTop: 12, borderWidth: 1, borderColor: c.borderStrong, borderRadius: 12, paddingVertical: 13, paddingHorizontal: 24, alignItems: 'center', alignSelf: 'stretch' },
+  ghostBtnText: { color: c.primary, fontSize: 14.5, fontWeight: '800' },
+}));
