@@ -306,13 +306,21 @@ export function SplashScreen({ navigation, route }: any) {
               <Text style={s.heroBadgeText}>AI-Powered Sustainability Platform</Text>
             </View>
 
-            <Text style={[s.heroTitle, isMobile && { fontSize: 34 }]}>
-              {typedHeadline.length <= KARMA_SPLIT ? typedHeadline : HEADLINE_TEXT.slice(0, KARMA_SPLIT)}
-              {typedHeadline.length > KARMA_SPLIT && (
-                <Animated.Text style={{ color: coinsColor }}>{typedHeadline.slice(KARMA_SPLIT)}</Animated.Text>
-              )}
-              <Animated.Text style={[s.heroCursor, { opacity: cursorBlink }]}>|</Animated.Text>
-            </Text>
+            {/* The headline types out character by character. A full-text, invisible
+                ghost reserves its final height so the tagline/CTA below never shift as
+                it types (fixes the hero CLS / layout shift). */}
+            <View style={s.heroTitleWrap}>
+              <Text style={[s.heroTitle, isMobile && { fontSize: 34 }, s.heroTitleGhost]}>
+                {HEADLINE_TEXT}
+              </Text>
+              <Text style={[s.heroTitle, isMobile && { fontSize: 34 }, s.heroTitleLive]} aria-hidden>
+                {typedHeadline.length <= KARMA_SPLIT ? typedHeadline : HEADLINE_TEXT.slice(0, KARMA_SPLIT)}
+                {typedHeadline.length > KARMA_SPLIT && (
+                  <Animated.Text style={{ color: coinsColor }}>{typedHeadline.slice(KARMA_SPLIT)}</Animated.Text>
+                )}
+                <Animated.Text style={[s.heroCursor, { opacity: cursorBlink }]}>|</Animated.Text>
+              </Text>
+            </View>
 
             <Text style={[s.heroTagline, isMobile && { fontSize: 18 }]}>“Kar Bhala Toh Ho Bhala.” 🌱</Text>
 
@@ -626,6 +634,11 @@ const s = StyleSheet.create({
   heroBadgeDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#4ade80' },
   heroBadgeText: { color: 'rgba(255,255,255,0.8)', fontSize: 16, fontWeight: '700' },
   heroTitle: { fontSize: 50, fontWeight: '900', color: 'white', letterSpacing: -1.5, lineHeight: 60, marginBottom: 12 },
+  // Headline layout-shift guard: the ghost (full text) holds the height in-flow,
+  // the live (typing) text overlays it absolutely so nothing below moves.
+  heroTitleWrap: { position: 'relative', marginBottom: 12 },
+  heroTitleGhost: { opacity: 0, marginBottom: 0 },
+  heroTitleLive: { position: 'absolute', top: 0, left: 0, right: 0, marginBottom: 0 },
   heroTagline: { fontSize: 22, fontWeight: '700', fontStyle: 'italic', color: '#4ade80', marginBottom: 18 },
   heroCursor: { color: '#4ade80', fontWeight: '400' },
   heroSub: { fontSize: 18, color: 'rgba(255,255,255,0.7)', fontWeight: '500', lineHeight: 28, maxWidth: 620, marginBottom: 32 },
