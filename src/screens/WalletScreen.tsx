@@ -67,11 +67,6 @@ export function WalletScreen({ navigation }: any) {
 
   const rewardRate = streak?.rewardRate ?? 100;
   const tierMeta = tierByName(streak?.tier);
-  // What the user can actually cash out right now: pickup coins at the fixed best
-  // rate + reward coins at the current streak tier's rate. The big "Total earned"
-  // figure above is lifetime and never drops on redeem, so this is the real
-  // spendable value — the number people actually want to see.
-  const redeemableNow = rupeesFor(pickupCoins, PICKUP_RATE) + rupeesFor(rewardCoins, rewardRate);
 
   const handleFreeze = async () => {
     if (freezing) return;
@@ -161,16 +156,6 @@ export function WalletScreen({ navigation }: any) {
                 <Text style={styles.balanceText}>{lifetime.toLocaleString()}</Text>
                 <Text style={styles.unitTag} numberOfLines={1}>KarmaCoins XP</Text>
               </View>
-            </View>
-
-            {/* The headline the user actually wants: what's cashable right now —
-                pickup coins at the best rate + reward coins at the current streak tier. */}
-            <View style={styles.redeemRow}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.redeemLabel}>Redeemable now</Text>
-                <Text style={styles.redeemHint} numberOfLines={1}>Pickup {PICKUP_RATE}:1 + reward at {tierMeta.name} {rewardRate}:1</Text>
-              </View>
-              <Text style={styles.redeemValue}>{formatRupees(redeemableNow)}</Text>
             </View>
 
             <View style={styles.cardDivider} />
@@ -399,10 +384,6 @@ const useStyles = makeStyles((c) => ({
   balanceRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   balanceText: { fontSize: 44, fontWeight: '900', color: 'white', letterSpacing: -1 },
   cardDivider: { height: 1, backgroundColor: 'rgba(255,255,255,0.12)', marginVertical: 16 },
-  redeemRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 14, paddingHorizontal: 14, paddingVertical: 11, marginTop: 14 },
-  redeemLabel: { color: 'white', fontSize: 14, fontWeight: '800', letterSpacing: 0.2 },
-  redeemHint: { color: 'rgba(255,255,255,0.6)', fontSize: 10.5, fontWeight: '600', marginTop: 2 },
-  redeemValue: { color: '#4ade80', fontSize: 22, fontWeight: '900', letterSpacing: -0.5 },
 
   walletsRow: { flexDirection: 'row', alignItems: 'stretch' },
   walletCol: { flex: 1 },
