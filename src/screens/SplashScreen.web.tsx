@@ -472,7 +472,7 @@ export function SplashScreen({ navigation, route }: any) {
                 <Text style={[s.sectionLabel, { color: '#86efac' }]}>NEW · CARBON FOOTPRINT</Text>
                 <Text style={[s.carbonTitle, isMobile && { fontSize: 26, lineHeight: 32 }]}>What's your carbon footprint?</Text>
                 <Text style={s.carbonText}>
-                  Tap through a 4-minute chat about how you travel, eat and live. See your footprint in kg CO₂e,
+                  Tap through a 2-minute chat about how you travel, eat and live. See your footprint in kg CO₂e,
                   where it comes from, and simple ways to cut it — then track it month by month.
                 </Text>
                 <TouchableOpacity
@@ -482,7 +482,7 @@ export function SplashScreen({ navigation, route }: any) {
                 >
                   <Text style={s.ctaPrimaryText}>Calculate my footprint</Text>
                 </TouchableOpacity>
-                <Text style={s.carbonFine}>Free. Log in or sign up to save your results and earn KarmaCoins XP for green actions.</Text>
+                <Text style={s.carbonFine}>Free. Log in or sign up to save your results and see how they change each month.</Text>
               </View>
               {!isMobile && (
                 <View style={s.carbonStat}>
