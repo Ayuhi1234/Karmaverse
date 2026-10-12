@@ -29,6 +29,7 @@ const PROTECTED_ROUTES: Record<string, string> = {
   '/carbonfootprint': 'CarbonFootprint',
   '/carbonassessment': 'CarbonAssessment',
   '/carbonjourney': 'CarbonJourney',
+  '/carboninsights': 'CarbonInsights',
 };
 const PROTECTED = Object.keys(PROTECTED_ROUTES);
 

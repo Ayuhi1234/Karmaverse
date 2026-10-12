@@ -82,6 +82,7 @@ const TransferScreen = lazyScreen(() => import('../screens/TransferScreen'), (m)
 const CarbonFootprintScreen = lazyScreen(() => import('../screens/CarbonFootprintScreen'), (m) => m.CarbonFootprintScreen);
 const CarbonAssessmentScreen = lazyScreen(() => import('../screens/CarbonAssessmentScreen'), (m) => m.CarbonAssessmentScreen);
 const CarbonJourneyScreen = lazyScreen(() => import('../screens/CarbonJourneyScreen'), (m) => m.CarbonJourneyScreen);
+const CarbonInsightsScreen = lazyScreen(() => import('../screens/CarbonInsightsScreen'), (m) => m.CarbonInsightsScreen);
 
 export function RootNavigator() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
@@ -167,6 +168,7 @@ export function RootNavigator() {
             CarbonFootprint: 'CarbonFootprint',
             CarbonAssessment: 'CarbonAssessment',
             CarbonJourney: 'CarbonJourney',
+            CarbonInsights: 'CarbonInsights',
             NotFound: '*',
           }
         : {
@@ -235,6 +237,7 @@ export function RootNavigator() {
         <Stack.Screen name="CarbonFootprint" component={CarbonFootprintScreen} />
         <Stack.Screen name="CarbonAssessment" component={CarbonAssessmentScreen} />
         <Stack.Screen name="CarbonJourney" component={CarbonJourneyScreen} />
+        <Stack.Screen name="CarbonInsights" component={CarbonInsightsScreen} />
         <Stack.Screen name="NotFound" component={NotFoundScreen} />
       </Stack.Navigator>
     </NavigationContainer>
