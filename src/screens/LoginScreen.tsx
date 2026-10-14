@@ -407,7 +407,11 @@ export function LoginScreen({ navigation }: any) {
       // them on to it now (e.g. the specific booking's tracking page).
       consumePendingDeepLink(navigation);
     } catch (error: any) {
-      showAlert('Google sign-in failed', error?.response?.data?.message || 'Please try again.');
+      // Dev builds show the underlying reason (e.g. "Network Error", "No token received")
+      // instead of the generic message, so a failed sign-in can be diagnosed.
+      const reason = error?.response?.data?.message || (__DEV__ && error?.message ? `${error.message} (dev detail)` : '');
+      console.error('Google sign-in failed after Google returned a credential:', error?.message, error?.response?.status);
+      showAlert('Google sign-in failed', reason || 'Please try again.');
     } finally {
       setGoogleLoading(false);
     }
@@ -465,7 +469,10 @@ export function LoginScreen({ navigation }: any) {
           client_id: GOOGLE_WEB_CLIENT_ID,
           callback: (resp: any) => {
             if (resp?.credential) finishGoogleLogin(resp.credential);
-            else showAlert('Google sign-in failed', 'Please try again.');
+            else {
+              console.error('Google Identity Services returned no credential:', resp);
+              showAlert('Google sign-in failed', __DEV__ ? 'Google returned no credential (dev detail).' : 'Please try again.');
+            }
           },
           log_level: 'debug',
         });

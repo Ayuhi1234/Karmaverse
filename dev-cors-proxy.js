@@ -7,12 +7,14 @@
 //
 // USE ONLY FOR LOCAL DEV. Production still needs CORS fixed on the backend.
 //
-// Run:  node dev-cors-proxy.js   (keep it running alongside `npm run web`)
+// Run:  node dev-cors-proxy.js   (keep it running alongside `npm run web:local`)
 
 const http = require('http');
 const https = require('https');
 
-const TARGET = 'karmacoin-backend-productionn.onrender.com';
+// The live backend only allows https://karmaverse.earth as a browser origin, so a
+// locally run web app (http://localhost:8081) needs this proxy to log in at all.
+const TARGET = 'api.karmaverse.earth';
 const PORT = 8899; // kept clear of Expo's 8081/8082/8083 range
 
 const server = http.createServer((req, res) => {
