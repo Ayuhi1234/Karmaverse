@@ -64,6 +64,11 @@ function SelectionPills({ options, selected, onSelect }: { options: string[], se
 
 // Social logins (Facebook/Google) provide no phone, so the backend stores a dummy
 // number. Anything that isn't a real Indian mobile counts as "not added yet".
+// Hidden until the backend ships DELETE /api/v1/users/account (it returns 404 today,
+// so the button could only ever fail). Flip to true once it's live — Apple requires
+// in-app account deletion before the iOS app can pass review.
+const ACCOUNT_DELETION_LIVE = false;
+
 const cleanPhone = (p?: string) => String(p || '').replace(/\D/g, '').replace(/^91(?=\d{10}$)/, '');
 const isRealPhone = (p?: string) => /^[6-9]\d{9}$/.test(cleanPhone(p));
 
@@ -822,21 +827,23 @@ export function ProfileScreen({ navigation }: any) {
               </TouchableOpacity>
 
               {/* Delete account — permanent, required by Apple / DPDP */}
-              <TouchableOpacity
-                style={styles.deleteAccountBtn}
-                onPress={confirmDeleteAccount}
-                disabled={deletingAccount}
-                activeOpacity={0.7}
-              >
-                {deletingAccount ? (
-                  <ActivityIndicator size="small" color={colors.textFaint} />
-                ) : (
-                  <>
-                    <Trash2 size={16} color={colors.textFaint} />
-                    <Text style={styles.deleteAccountText}>Delete account</Text>
-                  </>
-                )}
-              </TouchableOpacity>
+              {ACCOUNT_DELETION_LIVE && (
+                <TouchableOpacity
+                  style={styles.deleteAccountBtn}
+                  onPress={confirmDeleteAccount}
+                  disabled={deletingAccount}
+                  activeOpacity={0.7}
+                >
+                  {deletingAccount ? (
+                    <ActivityIndicator size="small" color={colors.textFaint} />
+                  ) : (
+                    <>
+                      <Trash2 size={16} color={colors.textFaint} />
+                      <Text style={styles.deleteAccountText}>Delete account</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              )}
             </>
           )}
         </View>
