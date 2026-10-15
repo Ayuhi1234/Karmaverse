@@ -799,10 +799,7 @@ export function ProfileScreen({ navigation }: any) {
                   icon={<HeartHandshake size={18} color={colors.textMuted} />}
                   bg={colors.surfaceAlt}
                   title="Help & support"
-                  onPress={() => showAlert(
-                    'Help & support',
-                    'Reach out to us anytime:\n\nEmail: cto.team@0waste.co.in\nAddress: Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051'
-                  )}
+                  onPress={() => navigation.navigate('Support')}
                 />
                 <View style={styles.divider} />
                 <OptionRow icon={<FileText size={18} color={colors.textMuted} />} bg={colors.surfaceAlt} title="Terms & conditions" onPress={() => navigation.navigate('Legal', { type: 'terms' })} />

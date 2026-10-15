@@ -10,6 +10,7 @@ import { OrdersScreen } from '../screens/OrdersScreen';
 import { StoreScreen } from '../screens/StoreScreen';
 import { SCREEN_WIDTH } from '../utils/layout';
 import { useTheme, makeStyles } from '../theme';
+import { VideoHelpButton } from '../components/support/VideoHelpButton';
 
 const isTablet = SCREEN_WIDTH >= 768;
 const Tab = createBottomTabNavigator();
@@ -21,6 +22,7 @@ export function TabNavigator() {
   const { colors } = useTheme();
 
   return (
+    <View style={{ flex: 1 }}>
     <Tab.Navigator
         screenOptions={({ route }) => ({
           headerShown: false,
@@ -68,6 +70,8 @@ export function TabNavigator() {
         <Tab.Screen name="Wallet" component={WalletScreen} />
         <Tab.Screen name="Store" component={StoreScreen} />
       </Tab.Navigator>
+      <VideoHelpButton bottom={baseHeight + insets.bottom + 14} />
+    </View>
   );
 }
 

@@ -1,0 +1,5 @@
+# Never commit keys: .env holds HEYGEN_API_KEY / ANTHROPIC_API_KEY.
+.env
+.env.*
+!.env.example
+node_modules/

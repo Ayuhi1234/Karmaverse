@@ -1,0 +1,20 @@
+{
+  "name": "karmaverse-support-service",
+  "version": "1.0.0",
+  "private": true,
+  "description": "KarmaVerse AI Support Assistant API: reference module to drop into the api.karmaverse.earth backend. Zero-cost FAQ answers by default; optional Claude and HeyGen providers.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node --env-file-if-exists=.env server.js",
+    "test": "node --test",
+    "heygen:check": "node --env-file-if-exists=.env scripts/heygen-setup.js check",
+    "heygen:avatar": "node --env-file-if-exists=.env scripts/heygen-setup.js avatar",
+    "heygen:test": "node --env-file-if-exists=.env scripts/heygen-setup.js test"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
