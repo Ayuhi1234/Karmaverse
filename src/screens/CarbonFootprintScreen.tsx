@@ -121,6 +121,8 @@ export function CarbonFootprintScreen({ navigation }: any) {
   const checkInDue = daysSince !== null && daysSince >= CHECK_IN_DAYS;
   const daysLeft = daysSince !== null ? CHECK_IN_DAYS - daysSince : null;
 
+  const delta = comparison?.deltaKgCO2ePerMonth;
+
   // What Earth Buddy says in the hero card. Words only; every number comes from the backend.
   const buddySays = !latest
     ? (inProgress ? "You're partway through. Let's finish it together!" : "Hi! Let's find out your footprint together.")
@@ -131,7 +133,6 @@ export function CarbonFootprintScreen({ navigation }: any) {
     : latest.category === 'low' ? 'Your footprint is low. Keep it up! 🌱'
     : latest.category === 'high' ? "Let's bring this down together, one step at a time."
     : 'Nice start! Small changes add up.';
-  const delta = comparison?.deltaKgCO2ePerMonth;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
