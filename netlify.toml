@@ -5,6 +5,14 @@
 [build.environment]
   NODE_VERSION = "20"
 
+# The `staging` branch and PR previews build against the testing backend; the
+# production branch keeps the default (https://api.karmaverse.earth).
+[context.staging.environment]
+  EXPO_PUBLIC_API_URL = "https://karmacoin-backend-11.onrender.com"
+
+[context.deploy-preview.environment]
+  EXPO_PUBLIC_API_URL = "https://karmacoin-backend-11.onrender.com"
+
 # Expo's JS bundles and bundled assets carry a content hash in their file names, so a
 # changed file always gets a new URL — safe to cache for a year instead of Netlify's
 # default max-age=0, which made every visit revalidate every file.
