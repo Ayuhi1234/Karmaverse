@@ -452,12 +452,12 @@ export function SplashScreen({ navigation, route }: any) {
 
             <View style={[s.featGrid, { marginTop: 28 }, isMobile && { flexDirection: 'column' }]}>
               {[
-                { img: require('../../assets/rewards/green-store.jpg'), title: 'Green Store', desc: 'Sustainable goods that give back to the planet' },
-                { img: require('../../assets/rewards/gift-cards.jpg'), title: 'Eco Gift Cards', desc: 'Green vouchers from your favourite brands' },
-                { img: require('../../assets/rewards/savings.jpg'), title: 'Conscious Savings', desc: 'Save on the everyday things you already buy' },
-                { img: require('../../assets/rewards/experiences.jpg'), title: 'Eco Experiences', desc: 'Unlock green experiences money can\'t buy' },
-                { img: require('../../assets/rewards/partners.jpg'), title: 'Impact Partners', desc: 'Curated offers from our sustainable partners' },
-                { img: require('../../assets/rewards/plant-tree.jpg'), title: 'Plant a Tree', desc: 'Convert coins into real trees, real impact' },
+                { img: require('../../assets/rewards/green-store.webp'), title: 'Green Store', desc: 'Sustainable goods that give back to the planet' },
+                { img: require('../../assets/rewards/gift-cards.webp'), title: 'Eco Gift Cards', desc: 'Green vouchers from your favourite brands' },
+                { img: require('../../assets/rewards/savings.webp'), title: 'Conscious Savings', desc: 'Save on the everyday things you already buy' },
+                { img: require('../../assets/rewards/experiences.webp'), title: 'Eco Experiences', desc: 'Unlock green experiences money can\'t buy' },
+                { img: require('../../assets/rewards/partners.webp'), title: 'Impact Partners', desc: 'Curated offers from our sustainable partners' },
+                { img: require('../../assets/rewards/plant-tree.webp'), title: 'Plant a Tree', desc: 'Convert coins into real trees, real impact' },
               ].map((r, i) => (
                 <Card key={i} delay={i * 70} style={[s.rewardCard, { width: isMobile ? '100%' : '31%' }]}>
                   <Image source={r.img} resizeMode="cover" style={s.rewardImg} />
