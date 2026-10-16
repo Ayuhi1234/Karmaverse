@@ -99,6 +99,35 @@ export interface CarbonGoalProgress {
 
 export type CarbonGoalState = { goal: CarbonGoal; progress: CarbonGoalProgress };
 
+// ── Green-action log ─────────────────────────────────────────────────────────
+// PROPOSED contract: it isn't in the backend guide yet, so it has its own switch
+// (EXPO_PUBLIC_CARBON_ACTIVITY_API=true). Only the local mock serves it for now.
+//   POST /activity  { type, quantity }  (+ Idempotency-Key header)
+//     → { activity, month }             400 bad type/quantity
+//   GET  /activity?limit=5              → { activities[], month }
+// Activities never change assessment results; they're a separate monthly tally.
+export const CARBON_ACTIVITY_API_READY = CARBON_API_READY && process.env.EXPO_PUBLIC_CARBON_ACTIVITY_API === 'true';
+
+export type CarbonActivityType = 'walk_cycle_km' | 'public_transport_km' | 'plant_based_meal' | 'recycled_kg' | 'ac_off_hours';
+
+export interface CarbonActivity {
+  _id: string;
+  type: CarbonActivityType;
+  quantity: number;
+  savedKgCO2e: number; // worked out by the backend
+  periodLabel: string; // "YYYY-MM"
+  createdAt: string;
+}
+
+export interface CarbonActivityMonth {
+  periodLabel: string;
+  count: number;
+  totalSavedKgCO2e: number;
+}
+
+export type CarbonActivityLogged = { activity: CarbonActivity; month: CarbonActivityMonth };
+export type CarbonActivityList = { activities: CarbonActivity[]; month: CarbonActivityMonth | null };
+
 export type AnswerResponse =
   | { completed: false; nextQuestion: CarbonQuestion }
   | { completed: true; result: CarbonResult };
@@ -205,6 +234,23 @@ export const carbonService = {
     return unwrap(await api.post(`${BASE}/goal`, { reductionPercent }));
   },
 
-  // TODO(backend): no endpoint yet for logging green actions — the hub shows
-  // "Coming soon!" for Log activity.
+  // Logs one green action. The backend works out the CO₂e it avoided, so the app
+  // never does that maths. The Idempotency-Key makes a retried save count once.
+  logActivity: async (type: CarbonActivityType, quantity: number): Promise<CarbonActivityLogged> => {
+    if (!CARBON_ACTIVITY_API_READY) return notReady();
+    const key = `act-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+    return unwrap(await api.post(`${BASE}/activity`, { type, quantity }, { headers: { 'Idempotency-Key': key } }));
+  },
+
+  // This month's green actions (newest first) and their total; null when the API is off.
+  getActivities: async (limit = 5): Promise<CarbonActivityList | null> => {
+    if (!CARBON_ACTIVITY_API_READY) return null;
+    try {
+      const data = unwrap(await api.get(`${BASE}/activity`, { params: { limit } }));
+      return { activities: Array.isArray(data?.activities) ? data.activities : [], month: data?.month ?? null };
+    } catch (error: any) {
+      if (!is404(error)) console.error('Get Carbon Activities Error:', error);
+      return null;
+    }
+  },
 };

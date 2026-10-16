@@ -8,7 +8,7 @@
 //
 // Carbon footprint is ON by default, answered by a local test mock because the
 // live backend doesn't have its routes yet (scripts/dev-carbon-mock.js):
-//   npm run web:local                 carbon on, local mock (placeholder numbers)
+//   npm run web:local                 carbon on, local mock (placeholder numbers, incl. Log activity)
 //   CARBON=live npm run web:local     carbon on, real backend routes (once deployed)
 //   CARBON=off npm run web:local      carbon off ("Coming soon!")
 
@@ -26,6 +26,8 @@ const proxy = run('node', ['dev-cors-proxy.js'], { CARBON_MOCK: carbon === 'off'
 const web = run('npx', ['expo', 'start', '--web', '--port', '8081', '-c'], {
   EXPO_PUBLIC_API_URL: PROXY_URL,
   ...(carbon === 'off' ? {} : { EXPO_PUBLIC_CARBON_API: 'true' }),
+  // Log activity: only the mock has the (proposed) activity routes so far.
+  ...(carbon === 'mock' ? { EXPO_PUBLIC_CARBON_ACTIVITY_API: 'true' } : {}),
 });
 
 // Stop both together.
