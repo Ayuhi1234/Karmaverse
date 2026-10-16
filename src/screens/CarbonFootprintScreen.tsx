@@ -1,36 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StatusBar, ActivityIndicator, Platform, Modal } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Leaf, History, ChevronLeft, ChevronRight, Target, Plus, Lightbulb, Calculator, LineChart, TrendingDown, TrendingUp, Award, BarChart3, CheckCircle2, CalendarClock, Share2, Bike, Bus, Salad, Recycle, Fan, Sprout } from 'lucide-react-native';
+import { Leaf, History, ChevronLeft, ChevronRight, Target, Lightbulb, Calculator, LineChart, TrendingDown, TrendingUp, Award, BarChart3, CheckCircle2, CalendarClock, Share2 } from 'lucide-react-native';
 import { WebFooter } from '../components/shared/WebFooter';
 import { useTheme, makeStyles } from '../theme';
 import {
-  carbonService, CarbonResult, CarbonComparison, CarbonSummary, CarbonGoalState, CarbonApiNotReadyError, CARBON_CATEGORY_ORDER, CarbonCategoryKey,
-  CARBON_ACTIVITY_API_READY, CarbonActivityType, CarbonActivityList,
+  carbonService, CarbonResult, CarbonComparison, CarbonSummary, CarbonGoalState, CARBON_CATEGORY_ORDER, CarbonCategoryKey,
 } from '../services/carbon';
 import { CARBON_CATEGORIES, BAND_LABELS, formatKg, formatAssessed, formatPeriod, showCarbonError } from '../utils/carbon';
 import { showAlert } from '../utils/alert';
 import { CarbonDonut, useCountUp } from '../components/carbon/CarbonVisuals';
 import { EarthBuddy } from '../components/carbon/EarthBuddy';
 import { ShareSheet } from '../components/carbon/ShareSheet';
-
-// Shown for Log activity until the backend has the activity routes.
-const comingSoon = () => showCarbonError('', new CarbonApiNotReadyError());
-
-// Green actions the user can log, with tap-to-pick amounts (no typing). The
-// backend works out the CO₂e each one avoided.
-const ACTIVITY_OPTIONS: { type: CarbonActivityType; label: string; unit: [string, string]; presets: number[]; Icon: any; color: string; bg: string }[] = [
-  { type: 'walk_cycle_km', label: 'Walked or cycled instead of driving', unit: ['km', 'km'], presets: [2, 5, 10], Icon: Bike, color: '#16a34a', bg: '#f0fdf4' },
-  { type: 'public_transport_km', label: 'Took a bus or metro instead of driving', unit: ['km', 'km'], presets: [5, 10, 20], Icon: Bus, color: '#0284c7', bg: '#f0f9ff' },
-  { type: 'plant_based_meal', label: 'Had a plant-based meal', unit: ['meal', 'meals'], presets: [1, 2, 3], Icon: Salad, color: '#65a30d', bg: '#f7fee7' },
-  { type: 'recycled_kg', label: 'Recycled or segregated waste', unit: ['kg', 'kg'], presets: [1, 3, 5], Icon: Recycle, color: '#0d9488', bg: '#f0fdfa' },
-  { type: 'ac_off_hours', label: 'Kept the AC or heater off', unit: ['hour', 'hours'], presets: [1, 3, 6], Icon: Fan, color: '#7c3aed', bg: '#f5f3ff' },
-];
-const activityOption = (type: CarbonActivityType) => ACTIVITY_OPTIONS.find((o) => o.type === type);
-const amountText = (type: CarbonActivityType, n: number) => {
-  const unit = activityOption(type)?.unit ?? ['', ''];
-  return `${n} ${n === 1 ? unit[0] : unit[1]}`;
-};
 
 // Results are monthly; after this many days the hub invites a fresh check-in.
 const CHECK_IN_DAYS = 30;
@@ -55,22 +36,16 @@ export function CarbonFootprintScreen({ navigation }: any) {
   const [goalSheet, setGoalSheet] = useState(false);
   const [savingGoal, setSavingGoal] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [activities, setActivities] = useState<CarbonActivityList | null>(null);
-  const [logSheet, setLogSheet] = useState(false);
-  const [logType, setLogType] = useState<CarbonActivityType | null>(null);
-  const [savingQty, setSavingQty] = useState<number | null>(null);
 
   const fetchData = async () => {
     try {
-      const [latestData, summaryData, session, goalData, activityData] = await Promise.all([
+      const [latestData, summaryData, session, goalData] = await Promise.all([
         carbonService.getLatestResult(),
         carbonService.getSummary(),
         carbonService.getSession(),
         carbonService.getGoal(), // read-only; never POST just to refresh progress
-        carbonService.getActivities(3),
       ]);
       setGoalState(goalData);
-      setActivities(activityData);
       setLatest(latestData?.result ?? null);
       setComparison(latestData?.comparison ?? null);
       setSummary(summaryData);
@@ -118,34 +93,6 @@ export function CarbonFootprintScreen({ navigation }: any) {
       else showCarbonError("Couldn't set your goal", error);
     } finally {
       setSavingGoal(null);
-    }
-  };
-
-  const openLogSheet = () => {
-    if (!CARBON_ACTIVITY_API_READY) return comingSoon();
-    setLogType(null);
-    setLogSheet(true);
-  };
-  const closeLogSheet = () => {
-    if (savingQty !== null) return;
-    setLogSheet(false);
-  };
-
-  const handleLog = async (type: CarbonActivityType, quantity: number) => {
-    if (savingQty !== null) return; // one save at a time
-    setSavingQty(quantity);
-    try {
-      const { activity, month } = await carbonService.logActivity(type, quantity);
-      setActivities((prev) => ({ activities: [activity, ...(prev?.activities ?? [])].slice(0, 3), month }));
-      setLogSheet(false);
-      showAlert(
-        'Activity logged 🌱',
-        `${amountText(type, quantity)}: about ${formatKg(activity.savedKgCO2e)} kg CO₂e avoided. This month: ${formatKg(month.totalSavedKgCO2e)} kg from ${month.count} ${month.count === 1 ? 'action' : 'actions'}.`,
-      );
-    } catch (error) {
-      showCarbonError("Couldn't log your activity", error);
-    } finally {
-      setSavingQty(null);
     }
   };
 
@@ -309,10 +256,6 @@ export function CarbonFootprintScreen({ navigation }: any) {
 
         {/* Action buttons — same pills as Wallet */}
         <View style={styles.actionRow}>
-          <TouchableOpacity style={[styles.actionBtn, styles.actionBtnGreen]} onPress={openLogSheet} activeOpacity={0.8} accessibilityRole="button">
-            <Plus size={18} color="#16a34a" />
-            <Text style={[styles.actionLabel, { color: '#16a34a' }]} numberOfLines={1}>Log activity</Text>
-          </TouchableOpacity>
           <TouchableOpacity style={[styles.actionBtn, styles.actionBtnAmber]} onPress={openGoalSheet} activeOpacity={0.8} accessibilityRole="button">
             <Target size={18} color="#d97706" />
             <Text style={[styles.actionLabel, { color: '#d97706' }]} numberOfLines={1}>{goalState ? 'My goal' : 'Set goal'}</Text>
@@ -345,32 +288,6 @@ export function CarbonFootprintScreen({ navigation }: any) {
             <View style={styles.barTrack}>
               <View style={[styles.barFill, { width: `${Math.min(Math.max(goalState.progress.progressPercent, 0), 100)}%` as any, backgroundColor: goalState.progress.achieved ? '#16a34a' : '#d97706' }]} />
             </View>
-          </TouchableOpacity>
-        )}
-
-        {/* Green actions this month — from GET /activity; separate from assessment results */}
-        {!isLoading && !!activities?.month?.count && (
-          <TouchableOpacity style={styles.goalCard} onPress={openLogSheet} activeOpacity={0.8} accessibilityRole="button" accessibilityLabel={`Green actions this month: ${activities.month.count}, about ${formatKg(activities.month.totalSavedKgCO2e)} kilograms CO2e avoided. Log another`}>
-            <View style={styles.goalTop}>
-              <Sprout size={20} color="#16a34a" />
-              <View style={{ flex: 1 }}>
-                <Text style={styles.rowTitle}>Green actions this month</Text>
-                <Text style={styles.rowMeta}>
-                  {activities.month.count} {activities.month.count === 1 ? 'action' : 'actions'} · about {formatKg(activities.month.totalSavedKgCO2e)} kg CO₂e avoided
-                </Text>
-              </View>
-              <Plus size={18} color="#16a34a" />
-            </View>
-            {activities.activities.map((a) => {
-              const o = activityOption(a.type);
-              return (
-                <View key={a._id} style={styles.activityRow}>
-                  {o && <o.Icon size={14} color={o.color} />}
-                  <Text style={styles.activityText} numberOfLines={1}>{o?.label ?? a.type} · {amountText(a.type, a.quantity)}</Text>
-                  <Text style={styles.activitySaved}>−{formatKg(a.savedKgCO2e)} kg</Text>
-                </View>
-              );
-            })}
           </TouchableOpacity>
         )}
 
@@ -492,52 +409,6 @@ export function CarbonFootprintScreen({ navigation }: any) {
           </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
-
-      {/* Log activity — step 1: pick an action; step 2: pick how much */}
-      <Modal visible={logSheet} transparent animationType="fade" onRequestClose={closeLogSheet}>
-        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={closeLogSheet}>
-          <TouchableOpacity style={styles.sheet} activeOpacity={1}>
-            <View style={styles.sheetHandle} />
-            {logType === null ? (
-              <>
-                <Text style={styles.sheetTitle}>Log a green action</Text>
-                <Text style={styles.sheetHint}>What did you do today?</Text>
-                {ACTIVITY_OPTIONS.map((o) => (
-                  <TouchableOpacity key={o.type} style={styles.option} onPress={() => setLogType(o.type)} activeOpacity={0.8} accessibilityRole="button">
-                    <View style={[styles.optionIcon, { backgroundColor: tint(o.bg) }]}><o.Icon size={22} color={o.color} /></View>
-                    <Text style={[styles.optionName, { flex: 1, marginBottom: 0 }]}>{o.label}</Text>
-                    <ChevronRight size={20} color={colors.textFaint} />
-                  </TouchableOpacity>
-                ))}
-              </>
-            ) : (
-              <>
-                <TouchableOpacity style={styles.linkBtn} onPress={() => setLogType(null)} disabled={savingQty !== null} accessibilityRole="button" accessibilityLabel="Back to actions">
-                  <ChevronLeft size={14} color={colors.primary} />
-                  <Text style={styles.linkText}>All actions</Text>
-                </TouchableOpacity>
-                <Text style={styles.sheetTitle}>{activityOption(logType)?.label}</Text>
-                <Text style={styles.sheetHint}>How much?</Text>
-                <View style={styles.qtyRow}>
-                  {activityOption(logType)?.presets.map((n) => (
-                    <TouchableOpacity
-                      key={n}
-                      style={[styles.qtyBtn, savingQty === n && { borderColor: '#16a34a' }]}
-                      onPress={() => handleLog(logType, n)}
-                      disabled={savingQty !== null}
-                      activeOpacity={0.8}
-                      accessibilityRole="button"
-                      accessibilityLabel={`Log ${amountText(logType, n)}`}
-                    >
-                      {savingQty === n ? <ActivityIndicator size="small" color="#16a34a" /> : <Text style={styles.qtyText}>{amountText(logType, n)}</Text>}
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </>
-            )}
-          </TouchableOpacity>
-        </TouchableOpacity>
-      </Modal>
     </View>
   );
 }
@@ -590,7 +461,6 @@ const useStyles = makeStyles((c) => ({
 
   actionRow: { flexDirection: 'row', paddingHorizontal: 16, gap: 10, marginTop: 20, maxWidth: 800, width: '100%', alignSelf: 'center' },
   actionBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12, paddingHorizontal: 6, borderRadius: 100, borderWidth: 1.5, backgroundColor: c.surface },
-  actionBtnGreen: { borderColor: '#86efac' },
   actionBtnAmber: { borderColor: '#fcd34d' },
   actionBtnSky: { borderColor: '#bae6fd' },
   actionLabel: { fontWeight: '800', fontSize: 13, flexShrink: 1 },
@@ -639,12 +509,6 @@ const useStyles = makeStyles((c) => ({
   goalCard: { marginTop: 16, marginHorizontal: 16, padding: 14, borderRadius: 16, backgroundColor: c.surface, borderWidth: 1, borderColor: c.border, maxWidth: 800, width: '100%', alignSelf: 'center', gap: 8 },
   goalTop: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   goalPct: { fontSize: 16, fontWeight: '900', color: c.text },
-  activityRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingLeft: 32 },
-  activityText: { flex: 1, fontSize: 12, color: c.textMuted, fontWeight: '600' },
-  activitySaved: { fontSize: 12, color: '#16a34a', fontWeight: '800', fontVariant: ['tabular-nums'] },
-  qtyRow: { flexDirection: 'row', gap: 10, marginTop: 14 },
-  qtyBtn: { flex: 1, alignItems: 'center', justifyContent: 'center', minHeight: 52, borderRadius: 16, borderWidth: 1.5, borderColor: c.border, backgroundColor: c.surfaceAlt },
-  qtyText: { fontSize: 15, fontWeight: '800', color: c.text },
 
   // Modal — web: centred dialog; native: bottom sheet (same as Wallet)
   modalOverlay: { flex: 1, backgroundColor: c.overlay, justifyContent: Platform.OS === 'web' ? 'center' : 'flex-end', alignItems: 'center', padding: Platform.OS === 'web' ? 20 : 0 },

@@ -37,17 +37,6 @@ const DIET_PER_DAY = { vegan: 2.9, vegetarian: 3.8, eggetarian: 4.2, non_veg_mod
 const SOURCE_SHARE = { grid: 1, mixed: 0.5, solar: 0.1 };
 const r2 = (n) => Math.round(n * 100) / 100;
 
-// Green-action log (PROPOSED contract, see src/services/carbon.ts).
-// Placeholder kg CO₂e avoided per unit, and the largest quantity accepted.
-const ACTIVITIES = {
-  walk_cycle_km: { perUnit: 0.17, max: 200 },       // vs a petrol car
-  public_transport_km: { perUnit: 0.14, max: 500 }, // vs a petrol car
-  plant_based_meal: { perUnit: 1.2, max: 10 },
-  recycled_kg: { perUnit: 0.6, max: 200 },
-  ac_off_hours: { perUnit: 1.0, max: 24 },
-};
-const periodOf = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-
 function assessedAt(d) {
   const ist = new Date(d.getTime() + 330 * 60000);
   const pad = (n) => String(n).padStart(2, '0');
@@ -93,7 +82,7 @@ function createCarbonMock() {
   const users = new Map(); // auth hash -> { session, results, goal }
   const user = (req) => {
     const key = crypto.createHash('sha256').update(req.headers.authorization || '').digest('hex');
-    if (!users.has(key)) users.set(key, { session: null, results: [], goal: null, activities: [], idem: new Map() });
+    if (!users.has(key)) users.set(key, { session: null, results: [], goal: null });
     return users.get(key);
   };
   const goalView = (u) => {
@@ -181,37 +170,6 @@ function createCarbonMock() {
       if (req.method === 'GET' && p === '/goal') {
         if (!u.goal || !u.results.length) return send(404, null, 'No goal set');
         return send(200, goalView(u));
-      }
-      const monthView = (u) => {
-        const period = periodOf(new Date());
-        const mine = u.activities.filter((x) => x.periodLabel === period);
-        return { periodLabel: period, count: mine.length, totalSavedKgCO2e: r2(mine.reduce((s, x) => s + x.savedKgCO2e, 0)) };
-      };
-      if (req.method === 'POST' && p === '/activity') {
-        const idemKey = req.headers['idempotency-key'];
-        if (idemKey && u.idem.has(idemKey)) return send(201, u.idem.get(idemKey), 'Activity logged');
-        const { type, quantity } = body;
-        const spec = ACTIVITIES[type];
-        if (!spec) return send(400, null, `type must be one of ${Object.keys(ACTIVITIES).join(', ')}`);
-        if (typeof quantity !== 'number' || !Number.isFinite(quantity) || quantity <= 0 || quantity > spec.max) {
-          return send(400, null, `quantity must be a number above 0 and at most ${spec.max}`);
-        }
-        const now = new Date();
-        const activity = {
-          _id: `mock-activity-${crypto.randomUUID().slice(0, 8)}`,
-          type, quantity, savedKgCO2e: r2(quantity * spec.perUnit),
-          periodLabel: periodOf(now), createdAt: now.toISOString(),
-        };
-        u.activities.unshift(activity);
-        const data = { activity, month: monthView(u) };
-        if (idemKey) u.idem.set(idemKey, data);
-        return send(201, data, 'Activity logged');
-      }
-      if (req.method === 'GET' && p === '/activity') {
-        const limit = parseInt(url.searchParams.get('limit') || '5', 10);
-        if (!(limit >= 1 && limit <= 50)) return send(400, null, 'Invalid limit');
-        const period = periodOf(new Date());
-        return send(200, { activities: u.activities.filter((x) => x.periodLabel === period).slice(0, limit), month: monthView(u) });
       }
       return send(404, null, 'Not found');
     });
