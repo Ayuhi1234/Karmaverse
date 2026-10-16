@@ -8,15 +8,14 @@ import { DashboardScreen } from '../screens/DashboardScreen';
 import { WalletScreen } from '../screens/WalletScreen';
 import { OrdersScreen } from '../screens/OrdersScreen';
 import { StoreScreen } from '../screens/StoreScreen';
-import { SCREEN_WIDTH } from '../utils/layout';
+import { TAB_BAR_BASE_HEIGHT } from '../utils/layout';
 import { useTheme, makeStyles } from '../theme';
 
-const isTablet = SCREEN_WIDTH >= 768;
 const Tab = createBottomTabNavigator();
 
 export function TabNavigator() {
   const insets = useSafeAreaInsets();
-  const baseHeight = isTablet ? 80 : 70;
+  const baseHeight = TAB_BAR_BASE_HEIGHT;
   const styles = useStyles();
   const { colors } = useTheme();
 
