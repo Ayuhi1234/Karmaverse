@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, StatusBar, TouchableOpacity, TextIn
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { showAlert } from '../utils/alert';
 import { showRedeemInfoOnce } from '../utils/redeemInfo';
+import { trackEvent } from '../utils/analytics';
 import { getStableUserSuffix } from '../utils/userId';
 import { AddressSearch, AddressDetails } from '../components/shared/AddressSearch';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -475,6 +476,11 @@ export function SchedulePickupScreen({ navigation }: any) {
       const res = await bookingService.createBooking(payload);
       const createdBooking = res?.data || res;
       console.log('[Confirm Pickup] Created booking:', createdBooking);
+      // Counts only — never the address, date, instructions or booking ID.
+      trackEvent('schedule_pickup', {
+        category_count: new Set(payloadCategories.map((c) => c.category)).size,
+        item_quantity: payloadCategories.reduce((sum, c) => sum + (Number(c.quantity) || 0), 0),
+      });
 
       setIsSubmitted(true);
       const token = await AsyncStorage.getItem('userToken');

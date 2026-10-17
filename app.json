@@ -28,7 +28,7 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png",
+      "favicon": "./assets/favicon-web.png",
       "name": "KarmaVerse — Recycle & Earn Rewards in India",
       "shortName": "KarmaVerse",
       "lang": "en",

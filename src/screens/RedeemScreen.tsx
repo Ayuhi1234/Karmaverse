@@ -8,6 +8,7 @@ import { profileService } from '../services/profile';
 import { streakService } from '../services/streak';
 import { showAlert } from '../utils/alert';
 import { REDEEM_INFO_MESSAGE } from '../utils/redeemInfo';
+import { trackEvent } from '../utils/analytics';
 import { LedgerType, PICKUP_RATE, rupeesFor, formatRupees } from '../utils/streakTiers';
 
 const MIN_COINS = 10;
@@ -34,6 +35,10 @@ export function RedeemScreen({ navigation, route }: any) {
   const [ifscCode, setIfscCode] = useState('');
   const [branchName, setBranchName] = useState('');
   const [coinsInput, setCoinsInput] = useState('');
+
+  useEffect(() => {
+    trackEvent('reward_view', { reward_context: 'redeem', ledger });
+  }, [ledger]);
 
   useEffect(() => {
     profileService.getProfile()
@@ -75,6 +80,14 @@ export function RedeemScreen({ navigation, route }: any) {
         branchName: branchName.trim(),
         ledger,
         coinsToRedeem,
+      });
+      // Amounts and wallet type only — never the account holder, account number, IFSC or branch.
+      trackEvent('reward_redeemed', {
+        redemption_type: 'bank_transfer',
+        ledger,
+        coins_redeemed: coinsToRedeem,
+        value: Math.round(rupees * 100) / 100,
+        currency: 'INR',
       });
       setBalance((prev) => prev - coinsToRedeem);
       setIsSuccess(true);

@@ -11,6 +11,7 @@ import {
 import { bookingService } from '../services/booking';
 import { showAlert } from '../utils/alert';
 import { useUserSocket } from '../context/UserSocketContext';
+import { trackPickupCompleted } from '../utils/analytics';
 import { RatingModal } from '../components/shared/RatingModal';
 import { TrackingMap } from '../components/shared/TrackingMap';
 
@@ -247,6 +248,12 @@ export function OrderTrackingScreen({ route, navigation }: any) {
       })
       .catch(() => {});
   }, [rawBookingId]);
+
+  // Catches completions whose socket event this device missed (seen via the status poll).
+  // Bookings opened already-completed from history are not counted again.
+  useEffect(() => {
+    if (currentStatus === 'COMPLETED' && !openedFromHistory) trackPickupCompleted(rawBookingId);
+  }, [currentStatus, openedFromHistory, rawBookingId]);
 
   useEffect(() => {
     if (currentStatus === 'COMPLETED' && !isRated && !openedFromHistory) {

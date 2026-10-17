@@ -3,6 +3,7 @@ import { io, Socket } from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNotifications } from './NotificationContext';
 import { BACKEND_BASE } from '../services/api';
+import { trackPickupCompleted } from '../utils/analytics';
 
 const SOCKET_URL = BACKEND_BASE;
 
@@ -109,6 +110,7 @@ export function UserSocketProvider({ children }: { children: React.ReactNode }) 
       const msg = data.message || 'Your booking is completed. Thank you!';
       setLatestUpdate({ event: 'BOOKING_COMPLETED', bookingId: data.bookingId, message: msg });
       addNotification({ type: 'BOOKING_COMPLETED', title: 'Pickup complete', message: msg, bookingId: data.bookingId });
+      trackPickupCompleted(data.bookingId);
     });
 
     socket.on('BOOKING_CANCEL_SUCCESS', (data: any) => {

@@ -20,16 +20,8 @@
     <!-- Google Search Console ownership verification -->
     <meta name="google-site-verification" content="hjZP0SOm9CiCTAiAiNG_4-GoW_5mUQR9h-N4wdxMJng" />
 
-    <!-- Google tag (gtag.js) — send_page_view is off; RootNavigator.tsx fires page_view
-         events itself on every screen change so in-app navigation is tracked too, not
-         just the initial load. -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8Z7CRL6KKG"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-8Z7CRL6KKG', { send_page_view: false });
-    </script>
+    <!-- Google Analytics 4 is loaded by src/utils/analytics.ts from the
+         EXPO_PUBLIC_GA_MEASUREMENT_ID env var (see .env), not hardcoded here. -->
 
     <!-- Canonical + robots -->
     <link rel="canonical" href="https://karmaverse.earth/" />
@@ -55,6 +47,7 @@
     <meta name="twitter:image" content="https://karmaverse.earth/og-image.png" />
 
     <!-- Icons + manifest -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.json" />
 

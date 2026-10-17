@@ -2,6 +2,7 @@
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, SafeAreaView, StatusBar, ScrollView, Platform, KeyboardAvoidingView, Image, Animated, Easing, PanResponder } from 'react-native';
 import { showAlert } from '../utils/alert';
 import { consumePendingDeepLink } from '../utils/deepLink';
+import { trackEvent } from '../utils/analytics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -386,6 +387,7 @@ export function LoginScreen({ navigation }: any) {
     setGoogleLoading(true);
     try {
       await authService.googleLogin(idToken);
+      trackEvent('login', { method: 'google' });
       reconnect();
       navigation.replace('App');
       // If they arrived from a protected email/share link while logged out, send
@@ -473,6 +475,7 @@ export function LoginScreen({ navigation }: any) {
     setFacebookLoading(true);
     try {
       await authService.facebookLogin(accessToken);
+      trackEvent('login', { method: 'facebook' });
       reconnect();
       navigation.replace('App');
       // If they arrived from a protected email/share link while logged out, send
@@ -670,6 +673,8 @@ export function LoginScreen({ navigation }: any) {
         name, email, phone: phone.trim(), password, otpToken: token,
         ...(referralStatus === 'valid' && referralCode.trim() ? { referralCode: referralCode.trim().toUpperCase() } : {}),
       });
+      // The automatic login below is part of sign-up, so it deliberately sends no login event.
+      trackEvent('sign_up', { method: 'phone_otp' });
       try {
         await authService.login(email, password);
         setStep('welcome_celebration');
@@ -739,6 +744,7 @@ export function LoginScreen({ navigation }: any) {
     setIsLoading(true);
     try {
       await authService.login(identifier, password);
+      trackEvent('login', { method: 'password' });
       reconnect();
       navigation.replace('App');
       // If they arrived from a protected email/share link while logged out, send

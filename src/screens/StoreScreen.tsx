@@ -1,11 +1,18 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, StatusBar, ScrollView, Platform } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { WebFooter } from '../components/shared/WebFooter';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ShoppingBag, Gift, ArrowRight } from 'lucide-react-native';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
+import { trackEvent } from '../utils/analytics';
 
 export function StoreScreen({ navigation }: any) {
+  // Tab screens stay mounted, so count each time the tab is focused rather than on mount.
+  useFocusEffect(useCallback(() => {
+    trackEvent('reward_view', { reward_context: 'store' });
+  }, []));
+
   return (
     <View style={styles.rootContainer}>
       <StatusBar barStyle="light-content" />

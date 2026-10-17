@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, ActivityIndicator, StyleSheet, Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -23,6 +23,7 @@ import { NotFoundScreen } from '../screens/NotFoundScreen';
 import { TabNavigator } from './TabNavigator';
 import { navigationRef } from './navRef';
 import { capturePendingDeepLink, clearPendingDeepLink, hasPendingDeepLink } from '../utils/deepLink';
+import { initAnalytics, trackPageView } from '../utils/analytics';
 
 // Runs at import, before the NavigationContainer resolves the URL — remembers a
 // protected deep link (e.g. an email "Track pickup" link) opened while logged out,
@@ -31,19 +32,9 @@ capturePendingDeepLink();
 
 const Stack = createNativeStackNavigator();
 
-// GA4 tracking (web only) — gtag.js is loaded in public/index.html with
-// send_page_view disabled, so every screen change (not just the first load) is
-// reported here as its own page_view, using the React Navigation route name.
-function trackPageView(routeName: string | undefined) {
-  if (Platform.OS !== 'web' || !routeName || typeof window === 'undefined') return;
-  const gtag = (window as any).gtag;
-  if (typeof gtag !== 'function') return;
-  gtag('event', 'page_view', {
-    page_title: routeName,
-    page_path: `/${routeName}`,
-    page_location: window.location.href,
-  });
-}
+// GA4 (web only): loads gtag with automatic page views off. Every screen change,
+// including the first load, is reported by trackPageView in onReady/onStateChange.
+initAnalytics();
 
 function AuthLoadingScreen() {
   return (
@@ -56,7 +47,6 @@ function AuthLoadingScreen() {
 export function RootNavigator() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const navRef = navigationRef;
-  const routeNameRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     const checkAuthStatus = async () => {
@@ -153,16 +143,12 @@ export function RootNavigator() {
         if (!isLoggedIn && hasPendingDeepLink()) {
           navRef.current?.reset({ index: 0, routes: [{ name: 'Login' }] });
         }
-        routeNameRef.current = navRef.current?.getCurrentRoute()?.name;
-        trackPageView(routeNameRef.current);
+        trackPageView(navRef.current?.getCurrentRoute());
       }}
       onStateChange={() => {
-        const previousRouteName = routeNameRef.current;
-        const currentRouteName = navRef.current?.getCurrentRoute()?.name;
-        if (currentRouteName && currentRouteName !== previousRouteName) {
-          trackPageView(currentRouteName);
-        }
-        routeNameRef.current = currentRouteName;
+        // De-duplicated inside trackPageView: a state change that stays on the same
+        // screen sends nothing.
+        trackPageView(navRef.current?.getCurrentRoute());
       }}
     >
       <Stack.Navigator
