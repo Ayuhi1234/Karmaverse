@@ -2,13 +2,13 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, StatusBar } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Compass, Home } from 'lucide-react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getToken } from '../utils/tokenStore';
 
 export function NotFoundScreen({ navigation }: any) {
   const goHome = async () => {
     // Reset (not navigate) so the dead URL doesn't linger in the back stack. Send
     // logged-in users to the app home, guests to the landing page.
-    const token = await AsyncStorage.getItem('userToken');
+    const token = await getToken();
     navigation.reset({ index: 0, routes: [{ name: token ? 'App' : 'Splash' }] });
   };
 

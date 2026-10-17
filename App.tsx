@@ -1,15 +1,19 @@
 import React, { useEffect } from 'react';
 import { Linking } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ThemeProvider } from './src/theme';
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { UserSocketProvider } from './src/context/UserSocketContext';
 import { NotificationProvider } from './src/context/NotificationContext';
 import { ResponsiveContainer } from './src/components/shared/ResponsiveContainer';
 import { AlertHost } from './src/components/shared/AlertHost';
+import { RootErrorBoundary } from './src/components/shared/RootErrorBoundary';
 import {
   registerForPushNotifications,
   sendTokenToBackend,
   addPushTokenRefreshListener,
+  setupAndroidChannels,
+  setupNotificationCategories,
 } from './src/utils/notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -29,15 +33,27 @@ try {
   });
 } catch (_) {}
 
-// Extract referral code from deep link URL
-// Handles: karmacoin://r/KARMA-XXXXXX  and  https://karmacoin.app/r/KARMA-XXXXXX
+// Extract a referral code from a deep link URL.
+// Path style:  karmacoin://r/CODE,  https://karmaverse.earth/r/CODE
+// Query style: https://karmaverse.earth/login?ref=CODE  (what the share sheet builds)
+// Codes look like NAME-KARMA-XXXX — letters, digits and hyphens, not just KARMA-*.
 function extractReferralCode(url: string): string | null {
-  const match = url.match(/\/r\/(KARMA-[A-Z0-9]+)/i);
-  return match ? match[1].toUpperCase() : null;
+  if (!url) return null;
+  const q = url.match(/[?&]ref=([A-Za-z0-9-]+)/);
+  if (q) return q[1].toUpperCase();
+  const p = url.match(/\/r\/([A-Za-z0-9-]+)/);
+  if (p) return p[1].toUpperCase();
+  return null;
 }
 
 export default function App() {
   useEffect(() => {
+    // Set up Android notification channels and the action-button categories once,
+    // up front, so transactional pushes land on the right channel and (where the OS
+    // supports it) show their action buttons. Fire-and-forget — both are idempotent.
+    setupAndroidChannels();
+    setupNotificationCategories();
+
     // Deep link — cold start (app was closed)
     Linking.getInitialURL().then(url => {
       if (!url) return;
@@ -71,13 +87,17 @@ export default function App() {
   }, []);
 
   return (
-    <SafeAreaProvider>
-      <NotificationProvider>
-        <UserSocketProvider>
-          <RootNavigator />
-          <AlertHost />
-        </UserSocketProvider>
-      </NotificationProvider>
-    </SafeAreaProvider>
+    <RootErrorBoundary>
+      <SafeAreaProvider>
+        <ThemeProvider>
+          <NotificationProvider>
+            <UserSocketProvider>
+              <RootNavigator />
+              <AlertHost />
+            </UserSocketProvider>
+          </NotificationProvider>
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </RootErrorBoundary>
   );
 }

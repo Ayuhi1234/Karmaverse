@@ -1,4 +1,5 @@
 import api from './api';
+import { extractList } from '../utils/apiList';
 
 export const profileService = {
   // Update demographics during signup or from profile edit
@@ -19,6 +20,18 @@ export const profileService = {
       return response.data;
     } catch (error) {
       console.error('Update Name Error:', error);
+      throw error;
+    }
+  },
+
+  // Persist the chosen preset-avatar id on the profile. Stored locally too, so the
+  // pick shows instantly and survives even if the backend hasn't wired the field yet.
+  updateAvatar: async (avatarId: string) => {
+    try {
+      const response = await api.patch('/api/v1/users/profile', { avatarId });
+      return response.data;
+    } catch (error) {
+      console.error('Update Avatar Error:', error);
       throw error;
     }
   },
@@ -61,8 +74,10 @@ export const profileService = {
     try {
       const response = await api.put('/api/v1/users/change-email', { newEmail, otpToken });
       return response.data;
-    } catch (error) {
-      console.error('Change Email Error:', error);
+    } catch (error: any) {
+      // Log only a safe message — never the raw axios error, which carries the
+      // Authorization header (JWT) and the request body in error.config.
+      console.error('Change email failed:', error?.response?.data?.message || error?.message);
       throw error;
     }
   },
@@ -72,8 +87,26 @@ export const profileService = {
     try {
       const response = await api.put('/api/v1/users/change-phone', { newPhone, otpToken });
       return response.data;
-    } catch (error) {
-      console.error('Change Phone Error:', error);
+    } catch (error: any) {
+      // Safe message only — the raw axios error leaks the JWT (Authorization
+      // header) and the new phone number via error.config.
+      console.error('Change phone failed:', error?.response?.data?.message || error?.message);
+      throw error;
+    }
+  },
+
+  // Permanently delete the signed-in user's account and personal data.
+  // Required by Apple (apps with account creation must offer in-app deletion) and
+  // by India's DPDP right to erasure.
+  // Backend TODO: DELETE /api/v1/users/account — remove the user and related
+  // records, invalidate all tokens, return 200.
+  deleteAccount: async () => {
+    try {
+      const response = await api.delete('/api/v1/users/account');
+      return response.data;
+    } catch (error: any) {
+      // Safe message only — the raw axios error carries the JWT (Authorization header).
+      console.error('Delete account failed:', error?.response?.data?.message || error?.message);
       throw error;
     }
   },
@@ -82,7 +115,9 @@ export const profileService = {
   getTransactionHistory: async () => {
     try {
       const response = await api.get('/api/v1/transactions/history');
-      return response.data.data || response.data || [];
+      // Robust to any wrapper shape (see extractList) so the wallet list never
+      // silently shows empty when the backend changes the transactions shape.
+      return extractList(response.data);
     } catch (error) {
       console.error('Get Transactions Error:', error);
       throw error;

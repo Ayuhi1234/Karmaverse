@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, StatusBar, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Image, Animated, ActivityIndicator } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { View, Text, ScrollView, StatusBar, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Image, Animated, ActivityIndicator } from 'react-native';
+import { getToken } from '../utils/tokenStore';
 import { showAlert } from '../utils/alert';
 import { showRedeemInfoOnce } from '../utils/redeemInfo';
 import { trackEvent } from '../utils/analytics';
@@ -12,11 +12,12 @@ import { ChevronLeft, MapPin, CheckCircle2, PackageOpen, Plus, FileText, Magnet,
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { PhoneVerificationModal } from '../components/shared/PhoneVerificationModal';
 import { LinearGradient } from 'expo-linear-gradient';
-import { CupSoda, ShoppingBag, Archive, Newspaper as NewsIcon, BookOpen, Database, Cog, Utensils, Activity, Laptop, Cable, Tv, Battery, Shirt, Fan, AirVent, WashingMachine, Refrigerator, Flame, Home as HomeIcon, Briefcase, Watch } from 'lucide-react-native';
+import { CupSoda, ShoppingBag, Archive, Newspaper as NewsIcon, BookOpen, Database, Cog, Utensils, Activity, Laptop, Cable, Tv, Battery, Shirt, Fan, AirVent, WashingMachine, Refrigerator, Flame, Home as HomeIcon, Briefcase } from 'lucide-react-native';
 import { addressService, SavedAddress, AddressLabel } from '../services/address';
 import { bookingService } from '../services/booking';
 import * as Location from 'expo-location';
 import { SCREEN_WIDTH as width } from '../utils/layout';
+import { useTheme, makeStyles } from '../theme';
 
 const CARD_MARGIN = 8;
 const COLS = Platform.OS === 'web' && width > 768 ? 4 : 2;
@@ -71,19 +72,15 @@ const ALL_ITEMS: CatalogueItem[] = [
   { id: 'pc1', catId: '1', subCategory: 'Laptop', unit: 'piece', hasCondition: true, coinsWorking: 10000, coinsNotWorking: 3000, itemIcon: Laptop, image: require('../../assets/catalogue/laptop.jpg') },
   { id: 'pc2', catId: '1', subCategory: 'Desktop', unit: 'piece', hasCondition: true, coinsWorking: 2000, coinsNotWorking: 1000, itemIcon: Cog, image: require('../../assets/catalogue/desktop.jpg') },
   { id: 'pc3', catId: '1', subCategory: 'Monitor (LCD/LED)', unit: 'piece', hasCondition: true, coinsWorking: 4000, coinsNotWorking: 1000, itemIcon: Tv, image: require('../../assets/catalogue/monitor.jpg') },
-  { id: 'pc4a', catId: '1', subCategory: 'Printer (Inkjet)', unit: 'piece', hasCondition: true, coinsWorking: 6000, coinsNotWorking: 1000, itemIcon: Archive, image: require('../../assets/catalogue/printer.jpg') },
-  { id: 'pc4b', catId: '1', subCategory: 'Printer (LaserJet)', unit: 'piece', hasCondition: true, coinsWorking: 10000, coinsNotWorking: 2000, itemIcon: Archive, image: require('../../assets/catalogue/printer.jpg') },
+  // Printer split (Inkjet/LaserJet) disabled until backend seeds them — backend has single 'Printer'.
+  { id: 'pc4', catId: '1', subCategory: 'Printer', unit: 'piece', hasCondition: true, coinsWorking: 6000, coinsNotWorking: 1000, itemIcon: Archive, image: require('../../assets/catalogue/printer.jpg') },
   { id: 'pc5', catId: '1', subCategory: 'Tablet', unit: 'piece', hasCondition: true, coinsWorking: 2000, coinsNotWorking: 1000, itemIcon: Smartphone, image: require('../../assets/catalogue/tablet.jpg') },
   { id: 'pc6', catId: '1', subCategory: 'Branded Smartphone', unit: 'piece', hasCondition: true, coinsWorking: 10000, coinsNotWorking: 1000, itemIcon: Smartphone, image: require('../../assets/catalogue/branded-smartphone.jpg') },
   { id: 'pc7', catId: '1', subCategory: 'Non-Branded Smartphone', unit: 'piece', hasCondition: true, coinsWorking: 5000, coinsNotWorking: 1000, itemIcon: Smartphone, image: require('../../assets/catalogue/non-branded-smartphone.jpg') },
   { id: 'pc8', catId: '1', subCategory: 'Keyboard', unit: 'piece', hasCondition: true, coinsWorking: 100, coinsNotWorking: 50, itemIcon: Cable, image: require('../../assets/catalogue/keyboard.jpg') },
   { id: 'pc9', catId: '1', subCategory: 'Mouse', unit: 'piece', hasCondition: true, coinsWorking: 100, coinsNotWorking: 10, itemIcon: Cable, image: require('../../assets/catalogue/mouse.jpg') },
   { id: 'pc10', catId: '1', subCategory: 'Touchpad Phone', unit: 'piece', hasCondition: true, coinsWorking: 200, coinsNotWorking: 100, itemIcon: Smartphone, image: require('../../assets/catalogue/touchpad-phone.jpg') },
-  // Smartwatch / wearables — temporary photos (closest existing gadget shots) until real product images arrive.
-  { id: 'sw1', catId: '1', subCategory: 'Branded Smartwatch', unit: 'piece', hasCondition: true, coinsWorking: 3000, coinsNotWorking: 500, itemIcon: Watch, image: require('../../assets/catalogue/branded-smartphone.jpg') },
-  { id: 'sw2', catId: '1', subCategory: 'Non-Branded Smartwatch', unit: 'piece', hasCondition: true, coinsWorking: 1000, coinsNotWorking: 200, itemIcon: Watch, image: require('../../assets/catalogue/non-branded-smartphone.jpg') },
-  { id: 'sw3', catId: '1', subCategory: 'Fitness Band', unit: 'piece', hasCondition: true, coinsWorking: 500, coinsNotWorking: 100, itemIcon: Watch, image: require('../../assets/catalogue/touchpad-phone.jpg') },
-  { id: 'sw4', catId: '1', subCategory: 'Other Wearable', unit: 'piece', hasCondition: true, coinsWorking: 300, coinsNotWorking: 100, itemIcon: Watch, image: require('../../assets/catalogue/non-branded-smartphone.jpg') },
+  // Smartwatch / wearables disabled until backend seeds them (not in live catalogue yet).
 
   // 2. Mixed E-Waste (kg)
   { id: 'me1', catId: '2', subCategory: 'Mixed E-waste', unit: 'kg', coins: 200, itemIcon: Cable, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Keyboards_and_mice_in_pile_of_ewaste.jpg/500px-Keyboards_and_mice_in_pile_of_ewaste.jpg' } },
@@ -93,7 +90,7 @@ const ALL_ITEMS: CatalogueItem[] = [
   { id: 'gl2', catId: '3', subCategory: 'Soft Drink Bottles', unit: 'kg', coins: 20, itemIcon: CupSoda, image: require('../../assets/catalogue/soft-drink-bottles.jpg') },
   { id: 'gl3', catId: '3', subCategory: 'Wine Bottles', unit: 'kg', coins: 20, itemIcon: Wine, image: require('../../assets/catalogue/wine-bottles.jpg') },
   { id: 'gl4', catId: '3', subCategory: 'Glass Jars', unit: 'kg', coins: 20, itemIcon: Archive, image: require('../../assets/catalogue/glass-jars.jpg') },
-  { id: 'gl6', catId: '3', subCategory: 'Window Glass', unit: 'kg', coins: 15, itemIcon: Archive, image: require('../../assets/catalogue/other-glass.jpg') },
+  // Window Glass disabled until backend seeds it.
   { id: 'gl5', catId: '3', subCategory: 'Other Glass', unit: 'kg', coins: 10, itemIcon: Wine, image: require('../../assets/catalogue/other-glass.jpg') },
 
   // 4. Paper (kg)
@@ -115,9 +112,8 @@ const ALL_ITEMS: CatalogueItem[] = [
   { id: 'ap10', catId: '5', subCategory: 'Other Large Appliances', unit: 'piece', hasCondition: true, coinsWorking: 15000, coinsNotWorking: 2500, itemIcon: Cog, image: require('../../assets/catalogue/other-large-appliances.jpg') },
 
   // 6. Batteries (kg) — minimum 1 kg
-  { id: 'ba1', catId: '6', subCategory: 'Lithium-ion Battery', unit: 'kg', coins: 300, minQty: 1, itemIcon: Battery, image: require('../../assets/catalogue/battery.jpg') },
-  { id: 'ba2', catId: '6', subCategory: 'Lead-Acid Battery', unit: 'kg', coins: 200, minQty: 1, itemIcon: Battery, image: require('../../assets/catalogue/battery.jpg') },
-  { id: 'ba3', catId: '6', subCategory: 'Dry Cell / Household Battery', unit: 'kg', coins: 100, minQty: 1, itemIcon: Battery, image: require('../../assets/catalogue/battery.jpg') },
+  // Battery split (Lithium-ion/Lead-Acid/Dry Cell) disabled until backend seeds them — backend has single 'Battery'.
+  { id: 'ba1', catId: '6', subCategory: 'Battery', unit: 'kg', coins: 200, minQty: 1, itemIcon: Battery, image: require('../../assets/catalogue/battery.jpg') },
 
   // 7. Footwear (piece)
   { id: 'sh1', catId: '7', subCategory: 'Branded', unit: 'piece', coins: 2000, itemIcon: ShoppingBag, image: require('../../assets/catalogue/branded-shoes.jpg') },
@@ -128,25 +124,24 @@ const ALL_ITEMS: CatalogueItem[] = [
   { id: 'mt2', catId: '8', subCategory: 'Copper Wire', unit: 'kg', coins: 800, itemIcon: Activity, image: require('../../assets/catalogue/copper-wire.jpg') },
   { id: 'mt3', catId: '8', subCategory: 'Iron', unit: 'kg', coins: 100, itemIcon: Cog, image: require('../../assets/catalogue/iron.jpg') },
   { id: 'mt4', catId: '8', subCategory: 'Steel/Utensils', unit: 'kg', coins: 100, itemIcon: Utensils, image: require('../../assets/catalogue/steel-utensils.jpg') },
-  { id: 'mt6', catId: '8', subCategory: 'Brass', unit: 'kg', coins: 400, itemIcon: Database, image: require('../../assets/catalogue/other-metals.jpg') },
+  // Brass disabled until backend seeds it.
   { id: 'mt5', catId: '8', subCategory: 'Other Metals', unit: 'kg', coins: 100, itemIcon: Magnet, image: require('../../assets/catalogue/other-metals.jpg') },
 
   // 9. Plastic (kg)
   { id: 'pl1', catId: '9', subCategory: 'PET Bottles', unit: 'kg', coins: 100, itemIcon: CupSoda, image: require('../../assets/catalogue/pet-bottles.jpg') },
   { id: 'pl2', catId: '9', subCategory: 'Hard Plastic (HDPE/PP)', unit: 'kg', coins: 150, itemIcon: Archive, image: require('../../assets/catalogue/hard-plastic.jpg') },
   { id: 'pl5', catId: '9', subCategory: 'LDPE', unit: 'kg', coins: 200, itemIcon: Droplets, image: require('../../assets/catalogue/ldpe.jpg') },
-  { id: 'pl6', catId: '9', subCategory: 'ABS', unit: 'kg', coins: 200, itemIcon: Archive, image: require('../../assets/catalogue/hard-plastic.jpg') },
-  { id: 'pl7', catId: '9', subCategory: 'Nylon', unit: 'kg', coins: 250, itemIcon: Droplets, image: require('../../assets/catalogue/other-plastic.jpg') },
-  { id: 'pl8', catId: '9', subCategory: 'TPU', unit: 'kg', coins: 200, itemIcon: Droplets, image: require('../../assets/catalogue/hard-plastic.jpg') },
+  // ABS / Nylon / TPU disabled until backend seeds them.
   { id: 'pl3', catId: '9', subCategory: 'Thermocol', unit: 'kg', coins: 30, itemIcon: PackageOpen, image: require('../../assets/catalogue/thermocol.jpg') },
   { id: 'pl4', catId: '9', subCategory: 'Other Plastic', unit: 'kg', coins: 10, itemIcon: Droplets, image: require('../../assets/catalogue/other-plastic.jpg') },
 
-  // 10. Textile Waste (kg) — per-item rates pending exact confirmation from backend
-  { id: 'tx1', catId: '10', subCategory: 'Grade 1 Clothing', label: 'Branded Usable Clothes', unit: 'kg', coins: 500, itemIcon: Shirt, image: require('../../assets/catalogue/grade-1-clothing.jpg') },
-  { id: 'tx2', catId: '10', subCategory: 'Grade 2 Clothing', label: 'Non-Usable Clothes', unit: 'kg', coins: 200, itemIcon: Shirt, image: require('../../assets/catalogue/grade-2-clothing.jpg') },
-  { id: 'tx3', catId: '10', subCategory: 'Jeans', unit: 'kg', coins: 300, itemIcon: Shirt, image: require('../../assets/catalogue/jeans.jpg') },
+  // 10. Textile Waste (kg) — matches live backend catalogue
+  { id: 'tx1', catId: '10', subCategory: 'Grade 1 Clothing', label: 'Branded Usable Clothes', unit: 'kg', coins: 150, itemIcon: Shirt, image: require('../../assets/catalogue/grade-1-clothing.jpg') },
+  { id: 'tx2', catId: '10', subCategory: 'Grade 2 Clothing', label: 'Non-Usable Clothes', unit: 'kg', coins: 100, itemIcon: Shirt, image: require('../../assets/catalogue/grade-2-clothing.jpg') },
+  { id: 'tx3', catId: '10', subCategory: 'Jeans', unit: 'kg', coins: 100, itemIcon: Shirt, image: require('../../assets/catalogue/jeans.jpg') },
   { id: 'tx4', catId: '10', subCategory: 'Premium Sarees', unit: 'kg', coins: 500, itemIcon: Shirt, image: require('../../assets/catalogue/premium-sarees.jpg') },
-  { id: 'tx5', catId: '10', subCategory: 'Non-Premium Sarees', unit: 'kg', coins: 200, itemIcon: Shirt, image: require('../../assets/catalogue/non-premium-sarees.jpg') },
+  { id: 'tx5', catId: '10', subCategory: 'Non-Premium Sarees', unit: 'kg', coins: 100, itemIcon: Shirt, image: require('../../assets/catalogue/non-premium-sarees.jpg') },
+  { id: 'tx6', catId: '10', subCategory: 'Cartons', unit: 'kg', coins: 100, itemIcon: PackageOpen, image: require('../../assets/catalogue/cardboard.jpg') },
   { id: 'tx7', catId: '10', subCategory: 'Other Textiles', unit: 'kg', coins: 50, itemIcon: Shirt, image: require('../../assets/catalogue/other-textiles.jpg') },
 ];
 
@@ -158,6 +153,7 @@ const MIN_ORDER_VALUE = 1000;
 // Working / Not Working switch. Tapping anywhere flips it; the thumb slides to
 // the active side so the current condition is readable at a glance.
 function ConditionToggle({ value, onChange }: { value: Condition; onChange: (c: Condition) => void }) {
+  const styles = useStyles();
   const isWorking = value === 'Working';
   const slide = useRef(new Animated.Value(isWorking ? 0 : 1)).current;
 
@@ -245,6 +241,7 @@ const TIMES = [
 
 // Shows the product photo; if it fails to load, falls back to the category icon.
 function ItemImage({ image, Icon, color }: { image?: any; Icon: any; color: string }) {
+  const styles = useStyles();
   const [failed, setFailed] = useState(false);
   if (image && !failed) {
     return <Image source={image} style={styles.cardImage} resizeMode="contain" onError={() => setFailed(true)} />;
@@ -253,6 +250,8 @@ function ItemImage({ image, Icon, color }: { image?: any; Icon: any; color: stri
 }
 
 export function SchedulePickupScreen({ navigation }: any) {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets(); // bottom inset so the cart bar / Confirm button clear the Android gesture pill
   // Step Management
   const [currentStep, setCurrentStep] = useState<1 | 2>(1);
@@ -483,7 +482,7 @@ export function SchedulePickupScreen({ navigation }: any) {
       });
 
       setIsSubmitted(true);
-      const token = await AsyncStorage.getItem('userToken');
+      const token = await getToken();
       showRedeemInfoOnce(`firstBookingRedeemInfo_${getStableUserSuffix(token)}`);
       setTimeout(() => navigation.replace('OrderTracking', {
         booking: createdBooking,
@@ -522,7 +521,7 @@ export function SchedulePickupScreen({ navigation }: any) {
       <View style={styles.successContainer}>
         <CheckCircle2 size={100} color="#16a34a" />
         <Text style={styles.successTitle}>Pickup scheduled!</Text>
-        <Text style={styles.successSub}>Thank you for recycling {cartCalculations.totalItems} {cartCalculations.totalItems === 1 ? 'item' : 'items'}.</Text>
+        <Text style={styles.successSub}>Thank you for giving {cartCalculations.totalItems} {cartCalculations.totalItems === 1 ? 'item' : 'items'} a new life.</Text>
       </View>
     );
   }
@@ -545,7 +544,7 @@ export function SchedulePickupScreen({ navigation }: any) {
             }
             return (
               <TouchableOpacity key={cat.id} style={styles.filterChip} onPress={() => setActiveCategory(cat.id)}>
-                <Icon size={16} color="#64748b" style={{ marginRight: 6 }} />
+                <Icon size={16} color={colors.textMuted} style={{ marginRight: 6 }} />
                 <Text style={styles.filterText}>{cat.name}</Text>
               </TouchableOpacity>
             );
@@ -599,7 +598,7 @@ export function SchedulePickupScreen({ navigation }: any) {
 
                   {qty === 0 ? (
                     <TouchableOpacity style={styles.addBtn} onPress={() => updateQuantity(key, 1)}>
-                      <Plus size={18} color="white" />
+                      <Plus size={18} color={colors.bg} />
                       <Text style={styles.addBtnText}>ADD</Text>
                     </TouchableOpacity>
                   ) : (
@@ -721,8 +720,8 @@ export function SchedulePickupScreen({ navigation }: any) {
             </View>
             <View style={{ flex: 1 }}>
               <View style={styles.addrLabelRow}>
-                <LabelIcon size={13} color={on ? '#15803d' : '#64748b'} />
-                <Text style={[styles.addrLabel, on && { color: '#15803d' }]}>{addr.label}</Text>
+                <LabelIcon size={13} color={on ? colors.primary : colors.textMuted} />
+                <Text style={[styles.addrLabel, on && { color: colors.primary }]}>{addr.label}</Text>
                 {addr.isDefault && (
                   <View style={styles.addrDefaultTag}><Text style={styles.addrDefaultTagText}>Default</Text></View>
                 )}
@@ -744,12 +743,12 @@ export function SchedulePickupScreen({ navigation }: any) {
 
       {isSavingAddress ? (
         <View style={styles.addrAddBtn}>
-          <ActivityIndicator size="small" color="#15803d" />
+          <ActivityIndicator size="small" color={colors.primary} />
           <Text style={styles.addrAddText}>Saving address...</Text>
         </View>
       ) : (
         <TouchableOpacity style={styles.addrAddBtn} onPress={() => setIsAddingAddress(true)} activeOpacity={0.8}>
-          <Plus size={16} color="#15803d" />
+          <Plus size={16} color={colors.primary} />
           <Text style={styles.addrAddText}>Add new address</Text>
         </TouchableOpacity>
       )}
@@ -777,11 +776,11 @@ export function SchedulePickupScreen({ navigation }: any) {
         <View style={styles.estimateBigCoin}><KarmaCoin size={60} glow /></View>
       </View>
 
-      <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Special instructions <Text style={{fontWeight: '400', fontSize: 13, color: '#9ca3af'}}>(optional)</Text></Text>
+      <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Special instructions <Text style={{fontWeight: '400', fontSize: 13, color: colors.textFaint}}>(optional)</Text></Text>
       <TextInput
-        style={[styles.inputBox, { color: '#0f172a' }]}
+        style={[styles.inputBox, { color: colors.text }]}
         placeholder="E.g. Ring the bell twice, leave at the door..."
-        placeholderTextColor="#9ca3af"
+        placeholderTextColor={colors.textFaint}
         value={instructions}
         onChangeText={setInstructions}
         multiline
@@ -841,8 +840,8 @@ export function SchedulePickupScreen({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f4f4f5' },
+const useStyles = makeStyles((c) => ({
+  container: { flex: 1, backgroundColor: c.bg },
   topNotchFiller: { position: 'absolute', top: 0, left: 0, right: 0, height: 60, backgroundColor: '#064e3b' },
   header: { paddingBottom: 16, borderBottomLeftRadius: 32, borderBottomRightRadius: 32, elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 10, zIndex: 10 },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 10 },
@@ -853,8 +852,8 @@ const styles = StyleSheet.create({
   stepContainer: { flex: 1 },
   filterSection: { paddingTop: 20, paddingBottom: 10, maxWidth: 900, width: '100%', alignSelf: 'center' },
   filterList: { paddingHorizontal: 20, gap: 10 },
-  filterChip: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'white', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 100, borderWidth: 1, borderColor: '#e4e4e7' },
-  filterText: { fontSize: 13, color: '#52525b', fontWeight: '600' },
+  filterChip: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.surface, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 100, borderWidth: 1, borderColor: c.border },
+  filterText: { fontSize: 13, color: c.textMuted, fontWeight: '600' },
   filterChipActive: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 18, paddingVertical: 10, borderRadius: 100, elevation: 4 },
   filterTextActive: { fontSize: 13, color: 'white', fontWeight: '800' },
 
@@ -862,40 +861,40 @@ const styles = StyleSheet.create({
   glassNote: { marginHorizontal: 16, marginTop: 12, backgroundColor: '#fffbeb', borderWidth: 1, borderColor: '#fde68a', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10 },
   glassNoteText: { color: '#92400e', fontSize: 12.5, fontWeight: '600', lineHeight: 18 },
   gridContainer: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 12, marginTop: 10, maxWidth: 900, alignSelf: 'center', width: '100%', justifyContent: 'center' },
-  
-  cardContainer: { width: CARD_WIDTH, backgroundColor: 'white', borderRadius: 18, marginBottom: 10, marginHorizontal: CARD_MARGIN, overflow: 'hidden', elevation: 2, borderWidth: 2, borderColor: 'transparent' },
-  cardContainerActive: { borderColor: '#16a34a', backgroundColor: '#f0fdf4' },
-  cardImageArea: { height: 92, width: '100%', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', backgroundColor: '#f8fafc', padding: 10 },
+
+  cardContainer: { width: CARD_WIDTH, backgroundColor: c.surface, borderRadius: 18, marginBottom: 10, marginHorizontal: CARD_MARGIN, overflow: 'hidden', elevation: 2, borderWidth: 2, borderColor: 'transparent' },
+  cardContainerActive: { borderColor: '#16a34a', backgroundColor: c.primarySoft },
+  cardImageArea: { height: 92, width: '100%', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', backgroundColor: c.surfaceAlt, padding: 10 },
   cardImage: { width: '100%', height: '100%' },
   cardInfo: { padding: 10, flex: 1 },
   // Fixed two-line block so a one-line name and a wrapping one push the toggle,
   // rate and button down by the same amount — cards stay aligned across the grid.
-  itemName: { fontSize: 15, fontWeight: '800', color: '#0f172a', marginBottom: 2, lineHeight: 19, height: 38 },
-  itemUnit: { fontSize: 12, color: '#71717a', fontWeight: '500', marginBottom: 8 },
+  itemName: { fontSize: 15, fontWeight: '800', color: c.text, marginBottom: 2, lineHeight: 19, minHeight: 38 },
+  itemUnit: { fontSize: 12, color: c.textMuted, fontWeight: '500', marginBottom: 8 },
   coinPill: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', backgroundColor: '#fef3c7', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8, gap: 4, marginBottom: 16 },
   coinValue: { fontSize: 12, fontWeight: '800', color: '#d97706' },
   minHint: { fontSize: 11, color: '#dc2626', fontWeight: '700', marginBottom: 8 },
   toggleTrack: {
     flexDirection: 'row', height: 28, borderRadius: 14, marginBottom: 10,
-    backgroundColor: '#f1f5f9', borderWidth: 1, borderColor: '#e4e4e7',
+    backgroundColor: c.surfaceAlt, borderWidth: 1, borderColor: c.border,
     position: 'relative', overflow: 'hidden',
   },
   toggleThumb: { position: 'absolute', top: 2, bottom: 2, width: '48%', borderRadius: 12 },
   toggleHalf: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  toggleLabel: { fontSize: 9.5, fontWeight: '800', color: '#71717a' },
+  toggleLabel: { fontSize: 9.5, fontWeight: '800', color: c.textMuted },
   toggleLabelOn: { color: '#ffffff' },
   
   // `marginTop: auto` pins the button to the bottom of the card, so buttons line
   // up across a row even when the content above differs in height. Both states
   // share the same height/radius so a card doesn't shift when it's added.
-  addBtn: { marginTop: 'auto', backgroundColor: '#1e293b', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', height: 32, borderRadius: 10, gap: 4, borderWidth: 1, borderColor: 'transparent' },
-  addBtnText: { color: 'white', fontSize: 11, fontWeight: '800' },
-  addedBtn: { marginTop: 'auto', backgroundColor: '#dcfce7', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', height: 32, borderRadius: 10, gap: 4, borderWidth: 1, borderColor: '#16a34a' },
+  addBtn: { marginTop: 'auto', backgroundColor: c.text, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', height: 32, borderRadius: 10, gap: 4, borderWidth: 1, borderColor: 'transparent' },
+  addBtnText: { color: c.bg, fontSize: 11, fontWeight: '800' },
+  addedBtn: { marginTop: 'auto', backgroundColor: c.primarySoft, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', height: 32, borderRadius: 10, gap: 4, borderWidth: 1, borderColor: '#16a34a' },
   addedBtnText: { color: '#16a34a', fontSize: 12, fontWeight: '800' },
-  stepperRow: { marginTop: 'auto', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', height: 32, borderRadius: 10, backgroundColor: '#f0fdf4', borderWidth: 1, borderColor: '#16a34a', paddingHorizontal: 4 },
+  stepperRow: { marginTop: 'auto', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', height: 32, borderRadius: 10, backgroundColor: c.primarySoft, borderWidth: 1, borderColor: '#16a34a', paddingHorizontal: 4 },
   stepperBtn: { width: 26, height: 26, borderRadius: 8, backgroundColor: '#16a34a', alignItems: 'center', justifyContent: 'center' },
   stepperBtnText: { color: 'white', fontSize: 16, fontWeight: '900', lineHeight: 18 },
-  stepperValue: { flex: 1, textAlign: 'center', fontSize: 13, fontWeight: '800', color: '#166534' },
+  stepperValue: { flex: 1, textAlign: 'center', fontSize: 13, fontWeight: '800', color: c.primary },
 
   floatingCart: { position: 'absolute', bottom: 30, left: 20, right: 20, maxWidth: 860, marginHorizontal: 'auto', backgroundColor: '#1e293b', borderRadius: 24, padding: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', elevation: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10 },
   cartInfo: { flex: 1 },
@@ -907,41 +906,41 @@ const styles = StyleSheet.create({
   checkoutBtnText: { color: 'white', fontWeight: '800', fontSize: 14 },
 
   /* Step 2 Details Styles */
-  scrollContent: { padding: 20, paddingBottom: 80, backgroundColor: '#f4f4f5', maxWidth: 900, width: '100%', alignSelf: 'center' },
+  scrollContent: { padding: 20, paddingBottom: 80, backgroundColor: c.bg, maxWidth: 900, width: '100%', alignSelf: 'center' },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 16, marginTop: 12, gap: 10 },
   sectionNum: { width: 24, height: 24, borderRadius: 12, backgroundColor: '#16a34a', alignItems: 'center', justifyContent: 'center' },
   sectionNumText: { color: 'white', fontWeight: '800', fontSize: 14 },
-  sectionTitle: { fontSize: 18, fontWeight: '800', color: '#0f172a' },
-  
+  sectionTitle: { fontSize: 18, fontWeight: '800', color: c.text },
+
   dateScroller: { gap: 12, paddingBottom: 16, marginBottom: 10 },
-  dateBox: { width: 64, height: 80, backgroundColor: 'white', borderRadius: 16, alignItems: 'center', justifyContent: 'center', elevation: 1, borderWidth: 2, borderColor: 'transparent' },
+  dateBox: { width: 64, height: 80, backgroundColor: c.surface, borderRadius: 16, alignItems: 'center', justifyContent: 'center', elevation: 1, borderWidth: 2, borderColor: 'transparent' },
   dateBoxSelected: { backgroundColor: '#166534', borderColor: '#166534' },
-  dateDay: { fontSize: 13, color: '#64748b', fontWeight: '700', marginBottom: 4 },
+  dateDay: { fontSize: 13, color: c.textMuted, fontWeight: '700', marginBottom: 4 },
   dateDaySelected: { color: 'rgba(255,255,255,0.7)' },
-  dateNum: { fontSize: 24, color: '#0f172a', fontWeight: '800' },
+  dateNum: { fontSize: 24, color: c.text, fontWeight: '800' },
   dateNumSelected: { color: 'white' },
 
   timeScroller: { gap: 12, paddingBottom: 16, marginBottom: 10 },
-  timeBox: { paddingHorizontal: 20, paddingVertical: 14, backgroundColor: 'white', borderRadius: 12, elevation: 1, borderWidth: 2, borderColor: 'transparent' },
-  timeBoxSelected: { backgroundColor: '#f0fdf4', borderColor: '#16a34a' },
-  timeText: { fontSize: 13, color: '#64748b', fontWeight: '700' },
-  timeTextSelected: { color: '#16a34a', fontWeight: '800' },
+  timeBox: { paddingHorizontal: 20, paddingVertical: 14, backgroundColor: c.surface, borderRadius: 12, elevation: 1, borderWidth: 2, borderColor: 'transparent' },
+  timeBoxSelected: { backgroundColor: c.primarySoft, borderColor: '#16a34a' },
+  timeText: { fontSize: 13, color: c.textMuted, fontWeight: '700' },
+  timeTextSelected: { color: c.primary, fontWeight: '800' },
 
   // Saved-address picker
-  addrRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, backgroundColor: 'white', padding: 14, borderRadius: 16, borderWidth: 1.5, borderColor: '#f1f5f9', marginBottom: 10 },
-  addrRowOn: { borderColor: '#16a34a', backgroundColor: '#f0fdf4' },
-  addrRadio: { width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: '#cbd5e1', alignItems: 'center', justifyContent: 'center', marginTop: 1 },
+  addrRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, backgroundColor: c.surface, padding: 14, borderRadius: 16, borderWidth: 1.5, borderColor: c.border, marginBottom: 10 },
+  addrRowOn: { borderColor: '#16a34a', backgroundColor: c.primarySoft },
+  addrRadio: { width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: c.borderStrong, alignItems: 'center', justifyContent: 'center', marginTop: 1 },
   addrRadioOn: { borderColor: '#16a34a' },
   addrRadioDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: '#16a34a' },
   addrLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 3 },
-  addrLabel: { fontSize: 13, fontWeight: '800', color: '#334155' },
+  addrLabel: { fontSize: 13, fontWeight: '800', color: c.text },
   addrDefaultTag: { backgroundColor: '#dcfce7', paddingHorizontal: 7, paddingVertical: 2, borderRadius: 100, marginLeft: 4 },
   addrDefaultTagText: { fontSize: 9, fontWeight: '800', color: '#15803d', letterSpacing: 0.4 },
-  addrText: { fontSize: 12.5, color: '#64748b', fontWeight: '500', lineHeight: 18 },
-  addrReceiver: { fontSize: 11.5, color: '#94a3b8', fontWeight: '600', marginTop: 3 },
-  addrEmpty: { fontSize: 13, color: '#94a3b8', fontWeight: '500', marginBottom: 10, marginLeft: 4 },
-  addrAddBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, borderWidth: 1.5, borderColor: '#bbf7d0', borderStyle: 'dashed', backgroundColor: '#f0fdf4', paddingVertical: 12, borderRadius: 16, marginBottom: 24 },
-  addrAddText: { color: '#15803d', fontSize: 14, fontWeight: '800' },
+  addrText: { fontSize: 12.5, color: c.textMuted, fontWeight: '500', lineHeight: 18 },
+  addrReceiver: { fontSize: 11.5, color: c.textFaint, fontWeight: '600', marginTop: 3 },
+  addrEmpty: { fontSize: 13, color: c.textFaint, fontWeight: '500', marginBottom: 10, marginLeft: 4 },
+  addrAddBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, borderWidth: 1.5, borderColor: '#bbf7d0', borderStyle: 'dashed', backgroundColor: c.primarySoft, paddingVertical: 12, borderRadius: 16, marginBottom: 24 },
+  addrAddText: { color: c.primary, fontSize: 14, fontWeight: '800' },
 
   estimatesBox: { backgroundColor: '#fffbeb', borderRadius: 16, padding: 20, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#fde68a' },
   estimateLabel: { fontSize: 12, color: '#b45309', fontWeight: '700', marginBottom: 8 },
@@ -950,11 +949,11 @@ const styles = StyleSheet.create({
   estimateNote: { fontSize: 11, color: '#d97706', opacity: 0.8, fontWeight: '600', lineHeight: 16 },
   estimateBigCoin: { opacity: 0.8 },
 
-  inputBox: { backgroundColor: 'white', borderRadius: 16, padding: 16, height: 100, textAlignVertical: 'top', color: '#0f172a', fontSize: 14, fontWeight: '500', marginTop: 12, marginBottom: 24, elevation: 1, borderWidth: 1, borderColor: '#e2e8f0' },
+  inputBox: { backgroundColor: c.inputBg, borderRadius: 16, padding: 16, height: 100, textAlignVertical: 'top', color: c.text, fontSize: 14, fontWeight: '500', marginTop: 12, marginBottom: 24, elevation: 1, borderWidth: 1, borderColor: c.border },
   submitBtn: { backgroundColor: '#15803d', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 18, borderRadius: 16, gap: 10, elevation: 4 },
   submitBtnText: { color: 'white', fontSize: 16, fontWeight: '900' },
 
-  successContainer: { flex: 1, backgroundColor: '#f0fdf4', justifyContent: 'center', alignItems: 'center' },
+  successContainer: { flex: 1, backgroundColor: c.bg, justifyContent: 'center', alignItems: 'center' },
   successTitle: { fontSize: 24, fontWeight: '900', color: '#16a34a', marginTop: 24, marginBottom: 8 },
-  successSub: { fontSize: 16, color: '#15803d', fontWeight: '600' },
-});
+  successSub: { fontSize: 16, color: c.primary, fontWeight: '600' },
+}));

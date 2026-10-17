@@ -17,6 +17,15 @@
       })();
     </script>
 
+    <!-- Warm up the origins the app talks to on load (DNS + TLS handshake), so the
+         first analytics hit and the first API call don't pay full connection latency.
+         Google Sign-In / Facebook load only on the login action, so dns-prefetch is
+         enough for them. -->
+    <link rel="preconnect" href="https://www.googletagmanager.com" />
+    <link rel="preconnect" href="https://api.karmaverse.earth" crossorigin />
+    <link rel="dns-prefetch" href="https://accounts.google.com" />
+    <link rel="dns-prefetch" href="https://connect.facebook.net" />
+
     <!-- Google Search Console ownership verification -->
     <meta name="google-site-verification" content="hjZP0SOm9CiCTAiAiNG_4-GoW_5mUQR9h-N4wdxMJng" />
 

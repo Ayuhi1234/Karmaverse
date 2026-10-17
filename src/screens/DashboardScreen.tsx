@@ -1,11 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, Dimensions, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Modal, Animated, Dimensions, Platform, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getToken } from '../utils/tokenStore';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Bell, ChevronRight, Truck, Camera, Clock, Users, Package, Flame, Gamepad2, Gift, Star, ShieldCheck, Coins, BadgeCheck, ArrowRight, BookOpen, X, WifiOff, RefreshCw, Trophy } from 'lucide-react-native';
+import { Bell, ChevronRight, Truck, Camera, Clock, Users, Package, Flame, Gamepad2, Gift, Star, ShieldCheck, Coins, BadgeCheck, ArrowRight, X, WifiOff, RefreshCw, Trophy, Sparkles } from 'lucide-react-native';
+import { useTheme, makeStyles } from '../theme';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
-import { QuizCalendarModal } from '../components/shared/QuizCalendarModal';
 import { NotificationPanel } from '../components/shared/NotificationPanel';
+import NotificationPermissionBanner from '../components/shared/NotificationPermissionBanner';
+import NotificationPrimerModal from '../components/shared/NotificationPrimerModal';
+import { UserAvatar } from '../components/shared/UserAvatar';
+import { Avatar } from '../components/shared/Avatar';
+import { getStoredAvatarId, setStoredAvatarId } from '../utils/avatar';
+import { AnimatedPickupCta } from '../components/shared/AnimatedPickupCta';
+import { QuizCalendarModal } from '../components/shared/QuizCalendarModal';
+import { StreakModal } from '../components/shared/StreakModal';
 import { LaunchDayPopup } from '../components/shared/LaunchDayPopup';
 import { useNotifications } from '../context/NotificationContext';
 import { profileService } from '../services/profile';
@@ -29,40 +38,28 @@ const FEATURES = [
   {
     id: 'pickup',
     emoji: '🚛',
-    tag: 'STEP 1',
+    tag: 'PICKUP',
     title: 'Schedule a pickup',
-    desc: 'Give your old items a second life — book a doorstep pickup in 3 taps and earn KarmaCoins for going green.',
+    desc: 'Give your old items a second life — book a pickup in 3 taps and earn KarmaCoins for going green.',
     benefit: 'Earn Credits on Pickup',
     benefitIcon: <Coins size={16} color="#f59e0b" />,
     bg: ['#064e3b', '#065f46'] as [string, string],
     accent: '#4ade80',
-    steps: ['Select waste type', 'Choose time slot', 'Earn Credits ✅'],
+    steps: ['Select item type', 'Choose time slot', 'Earn Credits ✅'],
     navTarget: 'SchedulePickup',
     ctaLabel: 'Schedule now',
-  },
-  {
-    id: 'upload',
-    emoji: '📸',
-    tag: 'STEP 2',
-    title: 'Upload & earn',
-    desc: 'Click a photo of your waste. Our AI identifies the type, weight, and credits your account within minutes.',
-    benefit: 'Fast & Easy Verification',
-    benefitIcon: <BadgeCheck size={16} color="#60a5fa" />,
-    bg: ['#1c1917', '#292524'] as [string, string],
-    accent: '#60a5fa',
-    steps: ['Click photo', 'AI scans waste', 'Credits added 💰'],
   },
   {
     id: 'earn',
     emoji: '🪙',
     tag: 'EARN',
     title: 'KarmaCoins XP',
-    desc: 'Every kg of waste you recycle earns you KarmaCoins XP. Keep your streaks up for even more rewards!',
-    benefit: 'Reward for Every kg',
+    desc: 'Your coins live in two wallets — Pickup coins from every pickup (always 10 = ₹1), and Reward coins from quizzes, referrals and more that grow in value as your streak runs.',
+    benefit: 'Pickup + Reward coins',
     benefitIcon: <Star size={16} color="#fbbf24" fill="#fbbf24" />,
     bg: ['#312e81', '#4338ca'] as [string, string],
     accent: '#a78bfa',
-    steps: ['Recycle waste', 'Maintain streak 🔥', 'Get rewarded'],
+    steps: ['Earn in 2 wallets', 'Grow your streak 🔥', 'Redeem for cash'],
     navTarget: 'Wallet',
     ctaLabel: 'View my wallet',
   },
@@ -90,7 +87,7 @@ const FEATURES = [
     benefitIcon: <ShieldCheck size={16} color="#34d399" />,
     bg: ['#0c4a6e', '#0369a1'] as [string, string],
     accent: '#38bdf8',
-    steps: ['Recycle more', 'Climb ranks 📊', 'Become Eco Hero 🏆'],
+    steps: ['Recover more', 'Climb ranks 📊', 'Become Eco Hero 🏆'],
     navTarget: 'Profile',
     ctaLabel: 'See my impact',
   },
@@ -111,6 +108,7 @@ const FEATURES = [
 ];
 
 function FeatureCard({ feature, onPress }: { feature: typeof FEATURES[0], onPress: () => void }) {
+  const styles = useStyles();
   return (
     <TouchableOpacity activeOpacity={0.85} onPress={onPress}>
       <LinearGradient colors={feature.bg} style={[styles.featureCard, { width: CARD_WIDTH }]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
@@ -120,9 +118,13 @@ function FeatureCard({ feature, onPress }: { feature: typeof FEATURES[0], onPres
           </View>
         </View>
 
-        <Text style={styles.featureEmoji}>{feature.emoji}</Text>
+        <View style={styles.featureMedia}>
+          {feature.id === 'earn'
+            ? <KarmaCoin size={40} />
+            : <Text style={styles.featureEmoji}>{feature.emoji}</Text>}
+        </View>
         <Text style={styles.featureTitle} numberOfLines={2}>{feature.title}</Text>
-        
+
         <View style={styles.featureActionRow}>
           <Text style={[styles.featureActionText, { color: feature.accent }]}>Learn more</Text>
           <ArrowRight size={12} color={feature.accent} />
@@ -142,14 +144,44 @@ function getGreeting(): string {
 }
 
 export function DashboardScreen({ navigation, route }: any) {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const [userName, setUserName] = useState('Loading...');
+  const [userGender, setUserGender] = useState<string | null>(null);
+  const [avatarId, setAvatarId] = useState<string | null>(null);
   const [balance, setBalance] = useState(0);
   const [streak, setStreak] = useState(0);
   const [quizStreak, setQuizStreak] = useState(0);
   const [isOffline, setIsOffline] = useState(false);
   const offlineAnim = useRef(new Animated.Value(0)).current;
+  // Subtle shine sweep across the quiz "Play now" button.
+  const quizShine = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    const anim = Animated.loop(
+      Animated.sequence([
+        Animated.timing(quizShine, { toValue: 1, duration: 1100, delay: 900, useNativeDriver: Platform.OS !== 'web' }),
+        Animated.timing(quizShine, { toValue: 0, duration: 0, useNativeDriver: Platform.OS !== 'web' }),
+        Animated.delay(1500),
+      ])
+    );
+    anim.start();
+    return () => anim.stop();
+  }, []);
+  // Ambient twinkle for the quiz card's sparkles (visible in every state).
+  const quizTwinkle = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    const t = Animated.loop(
+      Animated.sequence([
+        Animated.timing(quizTwinkle, { toValue: 1, duration: 1200, useNativeDriver: Platform.OS !== 'web' }),
+        Animated.timing(quizTwinkle, { toValue: 0, duration: 1200, useNativeDriver: Platform.OS !== 'web' }),
+      ])
+    );
+    t.start();
+    return () => t.stop();
+  }, []);
   const [quizHistory, setQuizHistory] = useState<string[]>([]);
-  const [showQuizCalendar, setShowQuizCalendar] = useState(false);
+  const [showQuizCal, setShowQuizCal] = useState(false);
+  const [showStreak, setShowStreak] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const { notifications, unreadCount, markRead, markAllRead, clearAll } = useNotifications();
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
@@ -183,8 +215,14 @@ export function DashboardScreen({ navigation, route }: any) {
             .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
             .join(' ')
         );
+        setUserGender(profileData.demographics?.gender || profileData.gender || null);
+        const resolvedAvatar = profileData.avatarId || (await getStoredAvatarId());
+        if (resolvedAvatar) {
+          setAvatarId(resolvedAvatar);
+          if (profileData.avatarId) setStoredAvatarId(profileData.avatarId);
+        }
         setBalance(profileData.karmaCoins || profileData.coins || 0);
-        setStreak(profileData.streak || profileData.activeStreak || 0);
+        // Day streak is tracked on-device from app visits (see computeVisitStreak), not the backend.
 
         if (ordersData && Array.isArray(ordersData)) {
           const formattedOrders = ordersData.slice(0, 2).map((order: any) => {
@@ -214,7 +252,7 @@ export function DashboardScreen({ navigation, route }: any) {
     };
     
     const fetchQuizStreak = async () => {
-      const token = await AsyncStorage.getItem('userToken');
+      const token = await getToken();
       const suffix = getStableUserSuffix(token);
       const [storedDate, storedStreak, storedHistory] = await Promise.all([
         AsyncStorage.getItem(`lastQuizDate_${suffix}`),
@@ -241,15 +279,41 @@ export function DashboardScreen({ navigation, route }: any) {
       }
     };
 
+    // Day streak (on-device): +1 for each consecutive day the app is opened.
+    // Same day = no change; a missed day resets to 1. No backend involved.
+    const computeVisitStreak = async () => {
+      const token = await getToken();
+      const suffix = getStableUserSuffix(token);
+      const todayStr = getLocalDateStr();
+      const yesterdayStr = getLocalYesterdayStr();
+      const [lastVisit, storedStreak] = await Promise.all([
+        AsyncStorage.getItem(`lastVisitDate_${suffix}`),
+        AsyncStorage.getItem(`visitStreak_${suffix}`),
+      ]);
+      let streakVal = Number(storedStreak) || 0;
+      if (lastVisit === todayStr) {
+        streakVal = streakVal || 1;
+      } else {
+        streakVal = lastVisit === yesterdayStr ? streakVal + 1 : 1;
+        await AsyncStorage.multiSet([
+          [`visitStreak_${suffix}`, String(streakVal)],
+          [`lastVisitDate_${suffix}`, todayStr],
+        ]);
+      }
+      setStreak(streakVal);
+    };
+
     const unsubscribe = navigation.addListener('focus', () => {
       fetchDashboardData();
       fetchQuizStreak();
+      computeVisitStreak();
     });
     fetchDashboardData();
     fetchQuizStreak();
+    computeVisitStreak();
 
     (async () => {
-      const token = await AsyncStorage.getItem('userToken');
+      const token = await getToken();
       showRedeemInfoOnce(`firstHomeRedeemInfo_${getStableUserSuffix(token)}`);
 
       if (isLaunchDay()) {
@@ -308,7 +372,7 @@ export function DashboardScreen({ navigation, route }: any) {
 
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#f0fdf6' }}>
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
 
     {/* Offline banner */}
     {isOffline && (
@@ -332,7 +396,11 @@ export function DashboardScreen({ navigation, route }: any) {
         <View style={styles.topBar}>
           <View style={styles.userInfo}>
             <TouchableOpacity style={styles.avatar} onPress={() => navigation.navigate('Profile')}>
-              <Text style={styles.avatarText}>{userName !== 'Loading...' ? (userName.charAt(0) + (userName.split(' ')[1]?.[0] || '')) : 'RS'}</Text>
+              {avatarId ? (
+                <Avatar avatarId={avatarId} size={40} ring />
+              ) : (
+                <UserAvatar gender={userGender} size={40} ring />
+              )}
             </TouchableOpacity>
             <View>
               <Text style={styles.greetingText}>{getGreeting()},</Text>
@@ -340,10 +408,6 @@ export function DashboardScreen({ navigation, route }: any) {
             </View>
           </View>
           <View style={{ flexDirection: 'row', gap: 12 }}>
-            <TouchableOpacity style={styles.streakBadge} onPress={() => setShowQuizCalendar(true)} activeOpacity={0.75}>
-              <Flame size={16} color="#f97316" fill="#f97316" />
-              <Text style={styles.streakText}>{quizStreak}</Text>
-            </TouchableOpacity>
             <TouchableOpacity style={styles.bellButton} onPress={() => setShowNotifications(true)}>
               <Bell size={20} color="white" />
               {unreadCount > 0 && (
@@ -365,7 +429,7 @@ export function DashboardScreen({ navigation, route }: any) {
             </TouchableOpacity>
           </View>
           <View style={styles.balanceRow}>
-            <KarmaCoin size={44} glow />
+            <KarmaCoin size={44} glow animated />
             <Text style={styles.balanceText}>{balance.toLocaleString()}</Text>
           </View>
 
@@ -379,23 +443,30 @@ export function DashboardScreen({ navigation, route }: any) {
         {/* Stats grid — mirrors the web dashboard (Total Karma Coins / Day streak / Eco Quiz Streak / Sustainability Actions) */}
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 14 }}>
           {[
-            { Icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total Karma Coins' },
-            { Icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Day streak' },
-            { Icon: Trophy, color: '#c084fc', val: `${quizStreak}`, label: 'Eco Quiz Streak' },
-            { Icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Sustainability Actions' },
+            { Icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total Karma Coins', onPress: () => navigation.navigate('Wallet') },
+            { Icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Day streak', onPress: () => setShowStreak(true) },
+            { Icon: Trophy, color: '#fde68a', val: `${quizStreak}`, label: 'Eco Quiz Streak', onPress: () => setShowQuizCal(true) },
+            { Icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Sustainability Actions', onPress: () => navigation.navigate('Orders', { tab: 'History' }) },
           ].map((st, i) => (
-            <View key={i} style={styles.statTile}>
+            <TouchableOpacity key={i} style={styles.statTile} activeOpacity={0.7} onPress={st.onPress}>
               <View style={styles.statTileTop}>
                 <View style={[styles.statTileIcon, { backgroundColor: st.color + '22' }]}>
                   <st.Icon size={14} color={st.color} />
                 </View>
                 <Text style={styles.statTileLabel} numberOfLines={1}>{st.label}</Text>
+                <ChevronRight size={13} color="rgba(255,255,255,0.4)" />
               </View>
               <Text style={[styles.statTileVal, { color: st.color }]}>{st.val}</Text>
-            </View>
+            </TouchableOpacity>
           ))}
         </View>
       </LinearGradient>
+
+      <QuizCalendarModal visible={showQuizCal} onClose={() => setShowQuizCal(false)} playedDates={quizHistory} streak={quizStreak} />
+      <StreakModal visible={showStreak} onClose={() => setShowStreak(false)} streak={streak} />
+
+      {/* Notifications-off nudge — links to OS settings when the user turned push off */}
+      <NotificationPermissionBanner />
 
       {/* Welcome bonus banner — shown once, right after claiming on the scratch card */}
       {showWelcomeBonusBanner && (
@@ -412,19 +483,18 @@ export function DashboardScreen({ navigation, route }: any) {
 
       {/* Schedule pickup CTA (Featured-rewards partner cards removed to match web) */}
       <View style={styles.section}>
-        <TouchableOpacity style={[styles.firstPickupCta, { marginTop: 0 }]} onPress={() => navigation.navigate('SchedulePickup')} activeOpacity={0.85}>
-          <Truck size={18} color="white" />
-          <Text style={styles.firstPickupCtaText}>Schedule Your First Pickup</Text>
-          <ArrowRight size={16} color="white" />
-        </TouchableOpacity>
+        <AnimatedPickupCta
+          label={recentOrders.length > 0 ? 'Schedule a Pickup' : 'Schedule Your First Pickup'}
+          onPress={() => navigation.navigate('SchedulePickup')}
+        />
       </View>
 
       {/* Impact Cards */}
       {/* Feature Discovery — Swipeable Cards */}
       <View style={styles.section}>
         <View style={styles.sectionHeaderRow}>
-          <Text style={[styles.sectionTitle, { marginBottom: 0 }]}>Discover the feature ✨</Text>
-          <Text style={styles.discoverSub}>Swipe to explore →</Text>
+          <Text numberOfLines={1} style={[styles.sectionTitle, { marginBottom: 0, flexShrink: 0 }]}>Discover the feature ✨</Text>
+          <Text numberOfLines={1} style={styles.discoverSub}>Swipe to explore →</Text>
         </View>
         <ScrollView
           horizontal
@@ -443,20 +513,50 @@ export function DashboardScreen({ navigation, route }: any) {
 
       {/* Daily Eco-Quiz Banner */}
       <View style={styles.section}>
-        <LinearGradient colors={['#065f46', '#047857']} style={styles.quizCard} start={{x:0, y:0}} end={{x:1,y:1}}>
+        <LinearGradient colors={['#4c1d95', '#6d28d9', '#9333ea']} style={styles.quizCard} start={{x:0, y:0}} end={{x:1,y:1}}>
+          {/* Decorative background — coin + twinkling sparkles */}
+          <View pointerEvents="none" style={styles.quizDecor}>
+            <View style={{ position: 'absolute', top: 6, right: 14, opacity: 0.16 }}><KarmaCoin size={72} /></View>
+            <Animated.View style={{ position: 'absolute', top: 20, right: 92, opacity: quizTwinkle.interpolate({ inputRange: [0, 1], outputRange: [0.3, 0.95] }) }}>
+              <Sparkles size={16} color="#fcd34d" />
+            </Animated.View>
+            <Animated.View style={{ position: 'absolute', top: 54, right: 34, opacity: quizTwinkle.interpolate({ inputRange: [0, 1], outputRange: [0.9, 0.25] }) }}>
+              <Sparkles size={11} color="#ffffff" />
+            </Animated.View>
+            <Animated.View style={{ position: 'absolute', bottom: 62, left: 26, opacity: quizTwinkle.interpolate({ inputRange: [0, 1], outputRange: [0.2, 0.8] }) }}>
+              <Sparkles size={13} color="#e9d5ff" />
+            </Animated.View>
+          </View>
+
           <View style={styles.quizContent}>
             <View style={styles.quizIconBg}>
               <Gamepad2 size={24} color="#fbbf24" />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.quizTitle}>Daily eco-quiz 🧠</Text>
-              <Text style={styles.quizSub}>Test your green IQ. Earn KarmaCoins XP daily.</Text>
+              <Text style={styles.quizTitle}>Daily eco-quiz</Text>
+              <Text style={styles.quizSub}>Test your green IQ and earn KarmaCoins XP.</Text>
+              <View style={styles.quizChipsRow}>
+                <View style={styles.quizChip}><Text style={styles.quizChipText}>3 questions</Text></View>
+                <View style={styles.quizChip}><Text style={styles.quizChipText}>~1 min</Text></View>
+              </View>
             </View>
           </View>
 
-          <TouchableOpacity style={styles.quizBtn} onPress={() => navigation.navigate('Quiz')}>
-            <Text style={styles.quizBtnText}>Play now</Text>
-          </TouchableOpacity>
+          {quizPlayedToday ? (
+            <View style={[styles.quizBtn, styles.quizBtnDone]}>
+              <BadgeCheck size={18} color="#6d28d9" />
+              <Text style={styles.quizBtnDoneText}>Played today · unlocks 12:00 AM</Text>
+            </View>
+          ) : (
+            <TouchableOpacity style={styles.quizBtn} onPress={() => navigation.navigate('Quiz')} activeOpacity={0.9}>
+              <Animated.View
+                pointerEvents="none"
+                style={[styles.quizShine, { transform: [{ translateX: quizShine.interpolate({ inputRange: [0, 1], outputRange: [-70, 380] }) }, { skewX: '-20deg' }] }]}
+              />
+              <Text style={styles.quizBtnText}>Play now</Text>
+              <ArrowRight size={18} color="#78350f" />
+            </TouchableOpacity>
+          )}
         </LinearGradient>
       </View>
 
@@ -468,10 +568,11 @@ export function DashboardScreen({ navigation, route }: any) {
 
         if (!quizPlayedToday) picked.push({ id: 'quiz', label: "Today's\nquiz", IconComp: Gamepad2, color: '#d97706', bg: '#fffbeb', iconBg: 'rgba(217,119,6,0.1)', navTarget: 'Quiz', badge: '🔥 New' });
         if (hasActiveOrder) picked.push({ id: 'track', label: 'Track\npickup', IconComp: Truck, color: '#0891b2', bg: '#f0f9ff', iconBg: 'rgba(8,145,178,0.1)', navTarget: 'Orders', badge: '● Live' });
-        if (balance >= 1000) picked.push({ id: 'redeem', label: 'Redeem\nrewards', IconComp: Gift, color: '#db2777', bg: '#fdf2f8', iconBg: 'rgba(219,39,119,0.1)', navTarget: 'Store' });
 
+        // Redeem sits AFTER the pickup actions (never between Track and Schedule).
         const defaults: ActionConfig[] = [
           { id: 'pickup',  label: 'Schedule\npickup', IconComp: Truck,  color: '#16a34a', bg: '#f0fdf4', iconBg: 'rgba(22,163,74,0.1)',    navTarget: 'SchedulePickup' },
+          ...(balance >= 1000 ? [{ id: 'redeem', label: 'Redeem\nrewards', IconComp: Gift, color: '#db2777', bg: '#fdf2f8', iconBg: 'rgba(219,39,119,0.1)', navTarget: 'Store' }] : []),
           { id: 'refer',   label: 'Refer\n& earn',    IconComp: Users,  color: '#db2777', bg: '#fdf2f8', iconBg: 'rgba(219,39,119,0.1)',   navTarget: 'Referral' },
           { id: 'orders',  label: 'My\norders',       IconComp: Clock,  color: '#7c3aed', bg: '#faf5ff', iconBg: 'rgba(124,58,237,0.1)',   navTarget: 'Orders' },
           { id: 'wallet',  label: 'My\nwallet',       IconComp: Coins,  color: '#d97706', bg: '#fffbeb', iconBg: 'rgba(217,119,6,0.1)',    navTarget: 'Wallet' },
@@ -497,7 +598,7 @@ export function DashboardScreen({ navigation, route }: any) {
                   <View style={[styles.actionIconBg, { backgroundColor: action.iconBg }]}>
                     <action.IconComp size={20} color={action.color} />
                   </View>
-                  <Text style={styles.actionText}>{action.label}</Text>
+                  <Text style={styles.actionText} numberOfLines={2} adjustsFontSizeToFit allowFontScaling={false}>{action.label}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -511,13 +612,13 @@ export function DashboardScreen({ navigation, route }: any) {
           <Text style={[styles.sectionTitle, { marginBottom: 0 }]}>Recent orders</Text>
           <TouchableOpacity style={styles.seeAllBtn} onPress={() => navigation.navigate('Orders')}>
             <Text style={styles.seeAllText}>See all</Text>
-            <ChevronRight size={14} color="#16a34a" />
+            <ChevronRight size={14} color={colors.primary} />
           </TouchableOpacity>
         </View>
         <View style={styles.ordersList}>
           {recentOrders.length === 0 ? (
             <View style={{ padding: 20, alignItems: 'center' }}>
-              <Text style={{ color: '#9ca3af' }}>No recent orders.</Text>
+              <Text style={{ color: colors.textFaint }}>No recent orders.</Text>
             </View>
           ) : recentOrders.map((order) => {
             const sc = STATUS_COLOR[order.status] || STATUS_COLOR['Completed'];
@@ -525,7 +626,7 @@ export function DashboardScreen({ navigation, route }: any) {
               <TouchableOpacity key={order.id} style={styles.orderCard} activeOpacity={0.7}
                 onPress={() => navigation.navigate('Orders')}>
                 <View style={styles.orderIconBg}>
-                  <Package size={18} color="#16a34a" />
+                  <Package size={18} color={colors.primary} />
                 </View>
                 <View style={styles.orderContent}>
                   <View style={styles.orderRowJustify}>
@@ -555,17 +656,17 @@ export function DashboardScreen({ navigation, route }: any) {
           <Text style={[styles.sectionTitle, { marginBottom: 0 }]}>Knowledge hub</Text>
           <TouchableOpacity style={styles.seeAllBtn} onPress={() => navigation.navigate('KnowledgeHub')}>
             <Text style={styles.seeAllText}>More articles</Text>
-            <ChevronRight size={14} color="#16a34a" />
+            <ChevronRight size={14} color={colors.primary} />
           </TouchableOpacity>
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 16 }}>
           <TouchableOpacity style={styles.articleCard} activeOpacity={0.8} onPress={() => navigation.navigate('ArticleDetail', { id: 'cut-plastic-at-home' })}>
-            <View style={[styles.articleImgPlaceholder, { backgroundColor: '#dcfce7' }]}><BookOpen size={28} color="#16a34a" /></View>
+            <Image source={require('../../assets/catalogue/hard-plastic.jpg')} style={[styles.articleImgPlaceholder, { backgroundColor: '#dcfce7' }]} resizeMode="cover" />
             <Text style={styles.articleTitle}>5 easy ways to cut plastic waste at home</Text>
             <Text style={styles.articleSource}>KarmaVerse editorial</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.articleCard} activeOpacity={0.8} onPress={() => navigation.navigate('ArticleDetail', { id: 'india-ewaste' })}>
-            <View style={[styles.articleImgPlaceholder, { backgroundColor: '#e0f2fe' }]}><BookOpen size={28} color="#0284c7" /></View>
+            <Image source={require('../../assets/catalogue/desktop.jpg')} style={[styles.articleImgPlaceholder, { backgroundColor: '#e0f2fe' }]} resizeMode="cover" />
             <Text style={styles.articleTitle}>India's e-waste mountain — and the opportunity inside it</Text>
             <Text style={styles.articleSource}>KarmaVerse editorial</Text>
           </TouchableOpacity>
@@ -580,11 +681,13 @@ export function DashboardScreen({ navigation, route }: any) {
             <View style={styles.modalContent}>
               <View style={styles.modalHeader}>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.modalEmoji}>{selectedFeature.emoji}</Text>
+                  {selectedFeature.id === 'earn'
+                    ? <View style={{ marginBottom: 8 }}><KarmaCoin size={36} /></View>
+                    : <Text style={styles.modalEmoji}>{selectedFeature.emoji}</Text>}
                   <Text style={styles.modalTitle}>{selectedFeature.title}</Text>
                 </View>
                 <TouchableOpacity onPress={() => setSelectedFeature(null)} style={styles.closeBtn}>
-                  <X size={20} color="#6b7280" />
+                  <X size={20} color={colors.textMuted} />
                 </TouchableOpacity>
               </View>
 
@@ -626,12 +729,7 @@ export function DashboardScreen({ navigation, route }: any) {
 
     </ScrollView>
 
-    <QuizCalendarModal
-      visible={showQuizCalendar}
-      onClose={() => setShowQuizCalendar(false)}
-      playedDates={quizHistory}
-      streak={quizStreak}
-    />
+    <NotificationPrimerModal />
 
     <NotificationPanel
       visible={showNotifications}
@@ -648,39 +746,38 @@ export function DashboardScreen({ navigation, route }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f0fdf6' },
+const useStyles = makeStyles((c) => ({
+  container: { flex: 1, backgroundColor: c.bg },
   offlineBanner: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#ef4444', paddingVertical: 10, paddingHorizontal: 16, zIndex: 99 },
   offlineText: { flex: 1, textAlign: 'center', fontSize: 13, fontWeight: '700', color: 'white' },
   header: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 24, borderBottomLeftRadius: 24, borderBottomRightRadius: 24 },
   topBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
   userInfo: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },
-  avatarText: { color: 'white', fontWeight: 'bold' },
   greetingText: { color: 'rgba(255,255,255,0.6)', fontSize: 12, fontWeight: '500' },
   nameText: { color: 'white', fontSize: 16, fontWeight: '700' },
   bellButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' },
   bellBadge: { position: 'absolute', top: -4, right: -4, minWidth: 18, height: 18, borderRadius: 9, backgroundColor: '#ef4444', borderWidth: 2, borderColor: '#052e16', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 3 },
   bellBadgeText: { fontSize: 10, fontWeight: '800', color: 'white' },
   creditsCard: { borderRadius: 24, padding: 20, backgroundColor: 'rgba(255,255,255,0.1)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)' },
-  creditsHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
+  creditsHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 },
   creditsLabel: { fontSize: 12, color: 'rgba(255,255,255,0.6)', fontWeight: '600', letterSpacing: 1 },
   walletLink: { flexDirection: 'row', alignItems: 'center' },
   walletLinkText: { fontSize: 12, color: '#86efac', fontWeight: '600' },
-  balanceRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 16 },
+  balanceRow: { flexDirection: 'row', alignItems: 'center', gap: 16, marginBottom: 16 },
   balanceText: { fontSize: 42, color: 'white', fontWeight: '800' },
   redeemBanner: { marginTop: 14, padding: 12, borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.08)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)' },
   redeemBannerText: { color: 'rgba(255,255,255,0.75)', fontSize: 11.5, fontWeight: '600', lineHeight: 16 },
   statTile: { flexGrow: 1, flexBasis: '46%', backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 14, padding: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
   statTileTop: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 },
   statTileIcon: { width: 26, height: 26, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
-  statTileLabel: { flex: 1, fontSize: 10, color: 'rgba(255,255,255,0.55)', fontWeight: '600' },
+  statTileLabel: { flex: 1, fontSize: 10, color: 'rgba(255,255,255,0.75)', fontWeight: '600' },
   statTileVal: { fontSize: 20, fontWeight: '900' },
   section: { paddingHorizontal: 20, marginTop: 24 },
-  sectionTitle: { fontSize: 16, fontWeight: '700', color: '#111827', marginBottom: 12 },
+  sectionTitle: { fontSize: 16, fontWeight: '700', color: c.text, marginBottom: 12 },
   sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   seeAllBtn: { flexDirection: 'row', alignItems: 'center' },
-  seeAllText: { fontSize: 12, color: '#16a34a', fontWeight: '600' },
+  seeAllText: { fontSize: 12, color: c.primary, fontWeight: '600' },
   actionsGrid: { flexDirection: 'row', gap: 12, justifyContent: 'space-between' },
   actionBtn: { flex: 1, padding: 12, borderRadius: 16, alignItems: 'center', gap: 8, position: 'relative' },
   actionIconBg: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
@@ -695,60 +792,68 @@ const styles = StyleSheet.create({
   impactLabel: { fontSize: 12, fontWeight: '600', color: '#374151' },
   impactSub: { fontSize: 10, fontWeight: '500', color: '#9ca3af', marginTop: 2 },
   ordersList: { gap: 12 },
-  orderCard: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16, backgroundColor: 'white', borderRadius: 16, elevation: 2 },
-  orderIconBg: { width: 40, height: 40, borderRadius: 12, backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center' },
+  orderCard: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16, backgroundColor: c.surface, borderRadius: 16, elevation: 2, borderWidth: 1, borderColor: c.border },
+  orderIconBg: { width: 40, height: 40, borderRadius: 12, backgroundColor: c.primarySoft, alignItems: 'center', justifyContent: 'center' },
   orderContent: { flex: 1 },
   orderRowJustify: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 },
-  orderTitle: { fontSize: 14, fontWeight: '700', color: '#111827' },
+  orderTitle: { fontSize: 14, fontWeight: '700', color: c.text },
   orderStatusBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 12 },
   orderStatusDot: { width: 6, height: 6, borderRadius: 3 },
   orderStatusText: { fontSize: 11, fontWeight: '600' },
-  orderSub: { fontSize: 12, color: '#9ca3af', fontWeight: '500' },
+  orderSub: { fontSize: 12, color: c.textFaint, fontWeight: '500' },
   orderCreditsBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   orderCreditsText: { fontSize: 13, color: '#d97706', fontWeight: '700' },
-  streakBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.15)', paddingHorizontal: 12, borderRadius: 20, gap: 4 },
-  streakText: { color: 'white', fontWeight: 'bold', fontSize: 13 },
-  quizCard: { borderRadius: 24, padding: 20, elevation: 6, shadowColor: '#047857', shadowOffset: {width: 0, height: 6}, shadowOpacity: 0.3, shadowRadius: 10, borderWidth: 1, borderColor: '#10b981' },
+  quizCard: { borderRadius: 24, padding: 20, overflow: 'hidden', elevation: 6, shadowColor: '#6d28d9', shadowOffset: {width: 0, height: 6}, shadowOpacity: 0.35, shadowRadius: 12, borderWidth: 1, borderColor: '#a855f7' },
+  quizDecor: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   quizContent: { flexDirection: 'row', alignItems: 'center', gap: 16, marginBottom: 16 },
   quizIconBg: { width: 48, height: 48, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },
-  quizTitle: { fontSize: 18, fontWeight: '900', color: 'white', marginBottom: 4 },
-  quizSub: { fontSize: 13, color: '#a7f3d0', fontWeight: '600', lineHeight: 18 },
-  quizBtn: { backgroundColor: '#fbbf24', paddingVertical: 14, borderRadius: 16, alignItems: 'center', shadowColor: '#f59e0b', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.2, shadowRadius: 4, elevation: 3 },
+  quizTitle: { fontSize: 18, fontWeight: '900', color: 'white' },
+  quizSub: { fontSize: 13, color: '#e9d5ff', fontWeight: '600', lineHeight: 18, marginTop: 4 },
+  quizChipsRow: { flexDirection: 'row', gap: 8, marginTop: 10 },
+  quizChip: { backgroundColor: 'rgba(255,255,255,0.16)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
+  quizChipText: { color: '#f3e8ff', fontSize: 11, fontWeight: '700' },
+  quizBtn: { backgroundColor: '#fbbf24', paddingVertical: 14, borderRadius: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, overflow: 'hidden', shadowColor: '#f59e0b', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.2, shadowRadius: 4, elevation: 3 },
+  quizShine: { position: 'absolute', top: 0, bottom: 0, width: 40, backgroundColor: 'rgba(255,255,255,0.45)' },
   quizBtnText: { color: '#78350f', fontSize: 15, fontWeight: '900' },
+  quizBtnDone: { backgroundColor: 'rgba(255,255,255,0.92)' },
+  quizBtnDoneText: { color: '#6d28d9', fontSize: 14, fontWeight: '800' },
   quizStreakRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'rgba(0,0,0,0.15)', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, marginBottom: 14 },
   quizStreakLeft: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   quizStreakCount: { fontSize: 18, fontWeight: '900', color: 'white' },
   quizStreakLabel: { fontSize: 13, fontWeight: '600', color: 'rgba(255,255,255,0.8)' },
   quizStreakTap: { fontSize: 12, fontWeight: '700', color: 'rgba(255,255,255,0.7)' },
-  articleCard: { width: 220, backgroundColor: 'white', borderRadius: 16, overflow: 'hidden', elevation: 2 },
+  articleCard: { width: 220, backgroundColor: c.surface, borderRadius: 16, overflow: 'hidden', elevation: 2, borderWidth: 1, borderColor: c.border },
   articleImgPlaceholder: { height: 120, width: '100%', alignItems: 'center', justifyContent: 'center' },
-  articleTitle: { padding: 12, fontSize: 14, fontWeight: '700', color: '#111827', paddingBottom: 4 },
-  articleSource: { paddingHorizontal: 12, paddingBottom: 12, fontSize: 11, color: '#6b7280', fontWeight: '500' },
-  discoverSub: { fontSize: 12, color: '#9ca3af', fontWeight: '600' },
+  articleTitle: { padding: 12, fontSize: 14, fontWeight: '700', color: c.text, paddingBottom: 4 },
+  articleSource: { paddingHorizontal: 12, paddingBottom: 12, fontSize: 11, color: c.textMuted, fontWeight: '500' },
+  discoverSub: { fontSize: 12, color: c.textFaint, fontWeight: '600', flexShrink: 1, marginLeft: 8, textAlign: 'right' },
 
   // Feature Discovery Card Styles
-  featureCard: { borderRadius: 24, padding: 20, height: 180, justifyContent: 'space-between', elevation: 6, shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.2, shadowRadius: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },
+  featureCard: { borderRadius: 24, padding: 20, height: 198, justifyContent: 'space-between', elevation: 6, shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.2, shadowRadius: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },
   featureTagRow: { marginBottom: 14 },
   featureTag: { alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, borderWidth: 1 },
   featureTagText: { fontSize: 9, fontWeight: '900', letterSpacing: 1.5 },
-  featureEmoji: { fontSize: 44, marginBottom: 10 },
-  featureTitle: { fontSize: 20, fontWeight: '900', color: 'white', marginBottom: 10, letterSpacing: -0.3 },
+  // Fixed-height media slot keeps the title/action aligned across cards regardless of
+  // whether the media is an emoji or the coin (emoji metrics differ between Expo Go and a release build).
+  featureMedia: { height: 44, justifyContent: 'center', marginBottom: 10 },
+  featureEmoji: { fontSize: 40, lineHeight: 44 },
+  featureTitle: { fontSize: 18, fontWeight: '900', color: 'white', marginBottom: 10, letterSpacing: -0.3, lineHeight: 23 },
   featureDesc: { fontSize: 13, color: 'rgba(255,255,255,0.75)', lineHeight: 20, fontWeight: '500', marginBottom: 18 },
   featureActionRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 'auto' },
   featureActionText: { fontSize: 11, fontWeight: '800' },
   
   // Modal Styles
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(15, 23, 42, 0.6)', justifyContent: 'flex-end' },
-  modalContent: { backgroundColor: 'white', borderTopLeftRadius: 32, borderTopRightRadius: 32, padding: 24, paddingBottom: 40 },
+  modalOverlay: { flex: 1, backgroundColor: c.overlay, justifyContent: 'flex-end' },
+  modalContent: { backgroundColor: c.surface, borderTopLeftRadius: 32, borderTopRightRadius: 32, padding: 24, paddingBottom: 40 },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
   modalEmoji: { fontSize: 40, marginBottom: 8 },
-  modalTitle: { fontSize: 24, fontWeight: '900', color: '#111827', letterSpacing: -0.5 },
-  closeBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#f3f4f6', alignItems: 'center', justifyContent: 'center' },
-  modalDesc: { fontSize: 15, color: '#4b5563', lineHeight: 24, marginBottom: 24 },
+  modalTitle: { fontSize: 24, fontWeight: '900', color: c.text, letterSpacing: -0.5 },
+  closeBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: c.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
+  modalDesc: { fontSize: 15, color: c.textMuted, lineHeight: 24, marginBottom: 24 },
   modalStepsContainer: { gap: 16, marginBottom: 32 },
   modalStepRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   stepCircle: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  modalStepText: { fontSize: 15, fontWeight: '600', color: '#374151', flex: 1 },
+  modalStepText: { fontSize: 15, fontWeight: '600', color: c.text, flex: 1 },
   modalBenefit: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 16, borderRadius: 16, borderWidth: 1 },
   modalBenefitText: { fontSize: 15, fontWeight: '800' },
   modalCta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 16, paddingVertical: 14, borderRadius: 100 },
@@ -764,6 +869,4 @@ const styles = StyleSheet.create({
   rewardCardEmoji: { fontSize: 26, marginBottom: 8 },
   rewardCardBrand: { color: 'white', fontSize: 12, fontWeight: '900', marginBottom: 2 },
   rewardCardLabel: { color: 'rgba(255,255,255,0.75)', fontSize: 10, fontWeight: '600', lineHeight: 13 },
-  firstPickupCta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#15803d', borderRadius: 14, paddingVertical: 14, marginTop: 14 },
-  firstPickupCtaText: { color: 'white', fontSize: 14, fontWeight: '900' },
-});
+}));

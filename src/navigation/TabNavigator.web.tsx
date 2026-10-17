@@ -1,10 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text, StyleSheet, TouchableOpacity, Pressable, useWindowDimensions, Image } from 'react-native';
 import { Home, PackageCheck, Wallet, ShoppingBag, Bell, User } from 'lucide-react-native';
 import { useNotifications } from '../context/NotificationContext';
 import { NotificationPanel } from '../components/shared/NotificationPanel';
+import { Avatar } from '../components/shared/Avatar';
+import { getStoredAvatarId, subscribeAvatar } from '../utils/avatar';
 import { LinearGradient } from 'expo-linear-gradient';
+
+// Shared hook: the currently-picked avatar id, kept live via the avatar store's
+// subscription so the nav updates the moment a new avatar is chosen.
+function useCurrentAvatar() {
+  const [avatarId, setAvatarId] = useState<string | null>(null);
+  useEffect(() => {
+    getStoredAvatarId().then((id) => { if (id) setAvatarId(id); });
+    return subscribeAvatar(setAvatarId);
+  }, []);
+  return avatarId;
+}
 
 import { DashboardScreen } from '../screens/DashboardScreen';
 import { WalletScreen } from '../screens/WalletScreen';
@@ -37,6 +50,7 @@ function TopNavbar({ state, navigation }: any) {
   const { width } = useWindowDimensions();
   const { notifications, unreadCount, markRead, markAllRead, clearAll } = useNotifications();
   const isMobile = width < 768;
+  const avatarId = useCurrentAvatar();
 
   const notifPanel = (
     <NotificationPanel
@@ -76,7 +90,7 @@ function TopNavbar({ state, navigation }: any) {
             <Text style={s.bottomTabText}>Alerts</Text>
           </TouchableOpacity>
           <TouchableOpacity style={s.bottomTab} onPress={() => navigationRef.current?.navigate('Profile')} activeOpacity={0.7}>
-            <User size={22} color="rgba(255,255,255,0.4)" />
+            {avatarId ? <Avatar avatarId={avatarId} size={24} /> : <User size={22} color="rgba(255,255,255,0.4)" />}
             <Text style={s.bottomTabText}>Profile</Text>
           </TouchableOpacity>
         </View>
@@ -162,10 +176,10 @@ function TopNavbar({ state, navigation }: any) {
             )}
           </Pressable>
           <Pressable
-            style={({ hovered }: any) => [s.navAvatar, HOVER_TRANSITION, hovered && s.navAvatarHover]}
+            style={({ hovered }: any) => [s.navAvatar, avatarId && s.navAvatarImg, HOVER_TRANSITION, hovered && s.navAvatarHover]}
             onPress={() => navigationRef.current?.navigate('Profile')}
           >
-            <User size={16} color="#052e16" />
+            {avatarId ? <Avatar avatarId={avatarId} size={34} /> : <User size={16} color="#052e16" />}
           </Pressable>
         </View>
       </View>
@@ -241,6 +255,7 @@ const s = StyleSheet.create({
     shadowColor: '#4ade80', shadowOpacity: 0.5, shadowRadius: 12, shadowOffset: { width: 0, height: 0 },
   },
   navAvatar: { width: 38, height: 38, borderRadius: 19, backgroundColor: '#16a34a', alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#4ade80' },
+  navAvatarImg: { backgroundColor: 'transparent', overflow: 'hidden' },
   navAvatarHover: {
     backgroundColor: '#4ade80',
     transform: [{ translateY: -2 }, { scale: 1.06 }],

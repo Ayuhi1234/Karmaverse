@@ -1,5 +1,6 @@
 import api from './api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { removeToken, setToken } from '../utils/tokenStore';
 import { registerForPushNotifications, sendTokenToBackend, removeTokenFromBackend } from '../utils/notifications';
 
 // Pull the JWT out of a login/register/google response no matter which shape the
@@ -35,11 +36,11 @@ export const authService = {
       const token = extractToken(response.data);
 
       if (!token) {
-        console.error('Login: no token in response', JSON.stringify(response.data));
+        console.error('Login failed: no token in response');
         throw new Error('Authentication failed: No token received from server');
       }
 
-      await AsyncStorage.setItem('userToken', token);
+      await setToken(token);
 
       registerForPushNotifications().then(fcmToken => {
         if (fcmToken) sendTokenToBackend(fcmToken);
@@ -99,7 +100,7 @@ export const authService = {
       const response = await api.post('/api/v1/auth/google-login', { idToken });
       const token = extractToken(response.data);
       if (!token) throw new Error('No token received');
-      await AsyncStorage.setItem('userToken', token);
+      await setToken(token);
 
       registerForPushNotifications().then(fcmToken => {
         if (fcmToken) sendTokenToBackend(fcmToken);
@@ -118,7 +119,7 @@ export const authService = {
       const response = await api.post('/api/v1/auth/facebook-login', { accessToken });
       const token = extractToken(response.data);
       if (!token) throw new Error('No token received');
-      await AsyncStorage.setItem('userToken', token);
+      await setToken(token);
 
       registerForPushNotifications().then(fcmToken => {
         if (fcmToken) sendTokenToBackend(fcmToken);
@@ -127,6 +128,28 @@ export const authService = {
       return response.data;
     } catch (error: any) {
       console.error('Facebook Login Error:', error?.response?.data || error);
+      throw error;
+    }
+  },
+
+  // Apple Sign-In — send Apple's identityToken (+ name on first authorization only)
+  // to backend, receive our JWT (mirrors googleLogin/facebookLogin above).
+  // Backend TODO: POST /api/v1/auth/apple-login — verify identityToken against
+  // Apple's public keys, create/find the user, return our JWT.
+  appleLogin: async (identityToken: string, fullName?: string | null) => {
+    try {
+      const response = await api.post('/api/v1/auth/apple-login', { identityToken, fullName });
+      const token = extractToken(response.data);
+      if (!token) throw new Error('No token received');
+      await setToken(token);
+
+      registerForPushNotifications().then(fcmToken => {
+        if (fcmToken) sendTokenToBackend(fcmToken);
+      }).catch(() => {});
+
+      return response.data;
+    } catch (error: any) {
+      console.error('Apple Login Error:', error?.response?.data || error);
       throw error;
     }
   },
@@ -162,7 +185,25 @@ export const authService = {
     } catch (error) {
       console.log('Logout API failed, clearing local token anyway');
     } finally {
-      await AsyncStorage.removeItem('userToken');
+      await removeToken();
+      // Clear the social-login SDK sessions too. Without this, Facebook/Google
+      // keep the previous account cached, so the next login is forced back into
+      // that same account and a different ID can't sign in.
+      await clearSocialSessions();
     }
   }
+};
+
+// Sign the native Facebook and Google SDKs out so a logged-out user can pick a
+// different account next time. Wrapped in try/catch and lazy-required so it's a
+// no-op on web and in Expo Go where the native modules aren't present.
+const clearSocialSessions = async () => {
+  try {
+    const { LoginManager } = require('react-native-fbsdk-next');
+    await LoginManager.logOut();
+  } catch (_) {}
+  try {
+    const { GoogleSignin } = require('@react-native-google-signin/google-signin');
+    await GoogleSignin.signOut();
+  } catch (_) {}
 };

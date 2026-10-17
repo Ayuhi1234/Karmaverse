@@ -12,7 +12,7 @@ const SLIDES = [
     bg: ['#064e3b', '#0f766e'],
     accent: '#4ade80',
     title: '',
-    subtitle: "India's first circular economy rewards platform — doorstep recycling pickups for everyone.",
+    subtitle: "India's first circular economy rewards platform — free sustainable pickups for everyone.",
     buttonText: 'Next',
   },
   {
@@ -43,8 +43,8 @@ const SLIDES = [
     id: 'welcome',
     bg: ['#064e3b', '#065f46'],
     accent: '#4ade80',
-    title: 'Welcome to\nKarmaVerse',
-    subtitle: "You're now part of India's fastest-growing circular economy community. Let's make every kg count.",
+    title: 'Welcome to\nKarmaVer$e',
+    subtitle: "You're about to join India's fastest-growing circular economy community. Let's make every kg count.",
     buttonText: 'Get started',
   }
 ];
@@ -64,7 +64,7 @@ const WASTE_WORDS = [
 ];
 
 const EARN_WORDS = [
-  { word: 'recycling',       color: '#fbbf24' },
+  { word: 'recovering',      color: '#fbbf24' },
   { word: 'upcycling',       color: '#4ade80' },
   { word: 'going green',     color: '#86efac' },
   { word: 'giving back',     color: '#60a5fa' },
@@ -151,10 +151,6 @@ export function SplashScreen({ navigation }: any) {
       return (
         <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1 }}>
           <KarmaCoin size={140} glow animated />
-          <View style={{ backgroundColor: 'rgba(255,255,255,0.1)', paddingVertical: 6, paddingHorizontal: 16, borderRadius: 20, marginTop: 40, flexDirection: 'row', alignItems: 'center' }}>
-            <View style={{ width: 14, height: 14, borderRadius: 7, backgroundColor: '#4ade80', marginRight: 6, alignItems: 'center', justifyContent: 'center' }}><Text style={{fontSize: 6, fontWeight: '900', color: '#000'}}>3R</Text></View>
-            <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>Powered by <Text style={{ color: 'white', fontWeight: 'bold' }}>3RZeroWaste</Text></Text>
-          </View>
         </View>
       );
     }
@@ -163,7 +159,7 @@ export function SplashScreen({ navigation }: any) {
         <View style={{ paddingHorizontal: 10, width: '100%' }}>
           <View style={styles.timelineItem}>
             <View style={[styles.timelineIcon, { backgroundColor: '#3f3f46' }]}><Calendar size={16} color="#fbbf24" /></View>
-            <View style={[styles.timelineBox, { backgroundColor: 'rgba(255,255,255,0.05)' }]}><Text style={styles.timelineText}>Schedule a free doorstep pickup</Text></View>
+            <View style={[styles.timelineBox, { backgroundColor: 'rgba(255,255,255,0.05)' }]}><Text style={styles.timelineText}>Schedule a free pickup</Text></View>
             <View style={[styles.timelineLine, { height: 40, top: 40 }]} />
           </View>
           <View style={styles.timelineItem}>
@@ -175,10 +171,6 @@ export function SplashScreen({ navigation }: any) {
             <View style={[styles.timelineIcon, { backgroundColor: '#22c55e' }]}><CheckSquare size={16} color="white" /></View>
             <View style={[styles.timelineBox, { backgroundColor: 'rgba(255,255,255,0.05)' }]}><Text style={styles.timelineText}>Earn KarmaCoins XP instantly</Text></View>
           </View>
-          <View style={{ backgroundColor: 'rgba(74,222,128,0.1)', paddingVertical: 14, paddingHorizontal: 20, borderRadius: 16, marginTop: 24, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(74,222,128,0.2)' }}>
-            <KarmaCoin size={18} />
-            <Text style={{ flex: 1, flexShrink: 1, color: '#4ade80', fontWeight: '700', fontSize: 13, marginLeft: 10, textAlign: 'left' }}>Earn KarmaCoins XP on every pickup</Text>
-          </View>
         </View>
       );
     }
@@ -188,7 +180,7 @@ export function SplashScreen({ navigation }: any) {
           <View style={styles.impactCard}>
             <View style={[styles.impactIconBg, { backgroundColor: 'rgba(16,185,129,0.15)' }]}><LexIcon color="#10b981" /></View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.impactTitle}>1.855 Lakhs+</Text>
+              <Text style={styles.impactTitle}>1.86 Lakhs+</Text>
               <Text style={styles.impactDesc}>Citizens provided awareness</Text>
             </View>
           </View>
@@ -196,7 +188,7 @@ export function SplashScreen({ navigation }: any) {
             <View style={[styles.impactIconBg, { backgroundColor: 'rgba(14,165,233,0.15)' }]}><Wind color="#0ea5e9" size={24} /></View>
             <View style={{ flex: 1 }}>
               <Text style={styles.impactTitle}>100% free</Text>
-              <Text style={styles.impactDesc}>Doorstep pickup service for all</Text>
+              <Text style={styles.impactDesc}>Free pickup service for all</Text>
             </View>
           </View>
           <View style={styles.impactCard}>
@@ -206,7 +198,6 @@ export function SplashScreen({ navigation }: any) {
               <Text style={styles.impactDesc}>Circular economy network across Delhi NCR</Text>
             </View>
           </View>
-          <Text style={{ textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: 11, marginTop: 10 }}>3RZeroWaste • Haryana, India • Est. 2024</Text>
         </View>
       );
     }
@@ -241,12 +232,6 @@ export function SplashScreen({ navigation }: any) {
       return (
         <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1, gap: 24 }}>
           <KarmaCoin size={120} glow animated />
-          <View style={{ alignItems: 'center', gap: 8 }}>
-            <View style={{ backgroundColor: 'rgba(74,222,128,0.15)', paddingVertical: 6, paddingHorizontal: 20, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(74,222,128,0.3)' }}>
-              <Text style={{ color: '#4ade80', fontWeight: '800', fontSize: 12, letterSpacing: 1.5 }}>3R ZERO WASTE</Text>
-            </View>
-            <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: '500' }}>Haryana, India • Est. 2024</Text>
-          </View>
         </View>
       );
     }
@@ -276,28 +261,29 @@ export function SplashScreen({ navigation }: any) {
       >
         {SLIDES.map((slide, index) => (
           <View key={slide.id} style={styles.slide}>
+            <ScrollView style={styles.slideScroll} contentContainerStyle={styles.slideScrollInner} showsVerticalScrollIndicator={false}>
             <View style={styles.visualContainer}>
               {renderVisual(slide.id)}
             </View>
-            
+
             <View style={styles.contentContainer}>
               {slide.id === 'intro' ? (
                 <View style={{ marginBottom: 16 }}>
-                  <Text style={styles.title}>Turn your</Text>
-                  <Animated.Text style={[styles.title, {
+                  <Text style={[styles.title, styles.titleTight]}>Turn your</Text>
+                  <Animated.Text style={[styles.title, styles.titleTight, {
                     color: WASTE_WORDS[wordIndex].color,
                     opacity: wordOpacity,
                     transform: [{ translateY: wordTranslateY }],
                   }]}>
                     {WASTE_WORDS[wordIndex].word}
                   </Animated.Text>
-                  <Text style={styles.title}>into KarmaCoins XP</Text>
+                  <Text style={[styles.title, styles.titleTight]}>into KarmaCoins XP</Text>
                 </View>
               ) : slide.id === 'earn' ? (
                 <View style={{ marginBottom: 16 }}>
-                  <Text style={styles.title}>Earn KarmaCoins XP</Text>
-                  <Text style={styles.title}>by</Text>
-                  <Animated.Text style={[styles.title, {
+                  <Text style={[styles.title, styles.titleTight]}>Earn KarmaCoins XP</Text>
+                  <Text style={[styles.title, styles.titleTight]}>by</Text>
+                  <Animated.Text style={[styles.title, styles.titleTight, {
                     color: EARN_WORDS[earnWordIndex].color,
                     opacity: earnWordOpacity,
                     transform: [{ translateY: earnWordTranslateY }],
@@ -309,7 +295,10 @@ export function SplashScreen({ navigation }: any) {
                 <Text style={styles.title}>{slide.title}</Text>
               )}
               <Text style={styles.subtitle}>{slide.subtitle}</Text>
-              
+            </View>
+            </ScrollView>
+
+            <View style={styles.footerBlock}>
               <View style={styles.pagination}>
                 {SLIDES.map((_, i) => (
                   <View
@@ -357,19 +346,21 @@ const styles = StyleSheet.create({
   slide: {
     width,
     flex: 1,
-    justifyContent: 'space-between',
     paddingHorizontal: 24,
     paddingBottom: 40,
   },
+  // The visual + heading + subtitle live in a scroll view so they never collide
+  // on shorter or larger-font devices — they centre when they fit, scroll when they don't.
+  slideScroll: { flex: 1, width: '100%' },
+  slideScrollInner: { flexGrow: 1, justifyContent: 'center', paddingVertical: 10 },
   visualContainer: {
-    flex: 1.5,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingVertical: 8,
   },
-  contentContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
+  contentContainer: {},
+  // Pagination + Next button stay pinned below the scroll area.
+  footerBlock: { paddingTop: 12 },
   title: {
     fontSize: 32,
     fontWeight: '800',
@@ -377,6 +368,10 @@ const styles = StyleSheet.create({
     lineHeight: 38,
     marginBottom: 16,
     letterSpacing: -0.5,
+  },
+  // Stacked headline lines (intro/earn) sit tight; the wrapping View adds the gap before the subtitle.
+  titleTight: {
+    marginBottom: 0,
   },
   subtitle: {
     fontSize: 15,

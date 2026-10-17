@@ -1,28 +1,23 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { View, ActivityIndicator, StyleSheet, Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getToken } from '../utils/tokenStore';
 import { addNotificationResponseListener, getLastNotificationResponse, markNotificationOpened } from '../utils/notifications';
+// Eager: the landing page plus every screen a logged-out visitor can open via a
+// direct link. Everything behind auth is lazy-loaded below (see lazyScreen), so a
+// first-time visitor's bundle doesn't ship or execute the whole app.
 import { SplashScreen } from '../screens/SplashScreen';
 import { LoginScreen } from '../screens/LoginScreen';
-import { ProfileScreen } from '../screens/ProfileScreen';
-import { SchedulePickupScreen } from '../screens/SchedulePickupScreen';
-import { KnowledgeHubScreen } from '../screens/KnowledgeHubScreen';
-import { ArticleDetailScreen } from '../screens/ArticleDetailScreen';
-import { QuizScreen } from '../screens/QuizScreen';
-import { ReferralScreen } from '../screens/ReferralScreen';
-import { OrderTrackingScreen } from '../screens/OrderTrackingScreen';
-import { BookingDetailsScreen } from '../screens/BookingDetailsScreen';
 import { LegalScreen } from '../screens/LegalScreen';
-import { RedeemScreen } from '../screens/RedeemScreen';
-import { RedeemHistoryScreen } from '../screens/RedeemHistoryScreen';
-import { DonationScreen } from '../screens/DonationScreen';
 import { AboutUsScreen } from '../screens/AboutUsScreen';
+import { FeedbackScreen } from '../screens/FeedbackScreen';
+import { UnsubscribeScreen } from '../screens/UnsubscribeScreen';
+import { EmailPreferencesScreen } from '../screens/EmailPreferencesScreen';
 import { NotFoundScreen } from '../screens/NotFoundScreen';
-import { TabNavigator } from './TabNavigator';
 import { navigationRef } from './navRef';
-import { capturePendingDeepLink, clearPendingDeepLink, hasPendingDeepLink } from '../utils/deepLink';
+import { capturePendingDeepLink, clearPendingDeepLink, hasPendingDeepLink, hasPendingReferral } from '../utils/deepLink';
+import { routeNotification } from '../utils/notificationRoute';
 import { initAnalytics, trackPageView } from '../utils/analytics';
 
 // Runs at import, before the NavigationContainer resolves the URL — remembers a
@@ -44,6 +39,38 @@ function AuthLoadingScreen() {
   );
 }
 
+// ── Code-splitting ───────────────────────────────────────────────────────────
+// Each authenticated screen is loaded on first navigation instead of up front, so
+// the landing bundle stays small. The wrapper keeps the same name the navigator
+// already references, and shows the auth loader while the chunk fetches.
+function lazyScreen<T extends React.ComponentType<any>>(
+  loader: () => Promise<any>,
+  pick: (m: any) => T,
+) {
+  const C = lazy(() => loader().then((m) => ({ default: pick(m) })));
+  return function LazyScreen(props: any) {
+    return (
+      <Suspense fallback={<AuthLoadingScreen />}>
+        <C {...props} />
+      </Suspense>
+    );
+  };
+}
+
+const TabNavigator = lazyScreen(() => import('./TabNavigator'), (m) => m.TabNavigator);
+const ProfileScreen = lazyScreen(() => import('../screens/ProfileScreen'), (m) => m.ProfileScreen);
+const SchedulePickupScreen = lazyScreen(() => import('../screens/SchedulePickupScreen'), (m) => m.SchedulePickupScreen);
+const KnowledgeHubScreen = lazyScreen(() => import('../screens/KnowledgeHubScreen'), (m) => m.KnowledgeHubScreen);
+const ArticleDetailScreen = lazyScreen(() => import('../screens/ArticleDetailScreen'), (m) => m.ArticleDetailScreen);
+const QuizScreen = lazyScreen(() => import('../screens/QuizScreen'), (m) => m.QuizScreen);
+const ReferralScreen = lazyScreen(() => import('../screens/ReferralScreen'), (m) => m.ReferralScreen);
+const OrderTrackingScreen = lazyScreen(() => import('../screens/OrderTrackingScreen'), (m) => m.OrderTrackingScreen);
+const BookingDetailsScreen = lazyScreen(() => import('../screens/BookingDetailsScreen'), (m) => m.BookingDetailsScreen);
+const RedeemScreen = lazyScreen(() => import('../screens/RedeemScreen'), (m) => m.RedeemScreen);
+const RedeemHistoryScreen = lazyScreen(() => import('../screens/RedeemHistoryScreen'), (m) => m.RedeemHistoryScreen);
+const DonationScreen = lazyScreen(() => import('../screens/DonationScreen'), (m) => m.DonationScreen);
+const TransferScreen = lazyScreen(() => import('../screens/TransferScreen'), (m) => m.TransferScreen);
+
 export function RootNavigator() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const navRef = navigationRef;
@@ -51,7 +78,7 @@ export function RootNavigator() {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const token = await AsyncStorage.getItem('userToken');
+        const token = await getToken();
         const isValid = !!token && token !== 'undefined' && token !== 'null';
         // Already logged in — the router resolves the deep link directly, so drop
         // any captured URL to avoid a stale redirect on a later in-session login.
@@ -66,20 +93,19 @@ export function RootNavigator() {
   }, []);
 
   useEffect(() => {
-    const handleNotificationData = (data: any) => {
-      // Report the open for EVERY tapped push (not just booking ones), before any
-      // navigation guard. Fire-and-forget — never await, never block navigation.
+    // A tapped push/notification routes to the right screen via the shared router
+    // (used by the in-app panel too). Report the open for EVERY tap first —
+    // fire-and-forget, never awaited, never blocking navigation.
+    const handleResponse = (data: any, actionIdentifier?: string) => {
       if (data?.notificationId) markNotificationOpened(data.notificationId);
-
-      if (!data?.bookingId || !navRef.current) return;
-      navRef.current.navigate('BookingDetails', { booking: { _id: data.bookingId } });
+      routeNotification(data, actionIdentifier);
     };
 
-    getLastNotificationResponse().then(data => {
-      if (data) handleNotificationData(data);
+    getLastNotificationResponse().then(res => {
+      if (res) handleResponse(res.data, res.actionIdentifier);
     });
 
-    const sub = addNotificationResponseListener(handleNotificationData);
+    const sub = addNotificationResponseListener(handleResponse);
     return () => sub.remove();
   }, []);
 
@@ -120,10 +146,19 @@ export function RootNavigator() {
             Redeem: 'Redeem',
             RedeemHistory: 'RedeemHistory',
             Donation: 'Donation',
+            Transfer: 'Transfer',
             AboutUs: 'AboutUs',
+            Feedback: 'feedback',
+            Unsubscribe: 'unsubscribe',
+            EmailPreferences: 'preferences',
             NotFound: '*',
           }
-        : { Splash: '', Login: 'login', Legal: 'legal/:type', AboutUs: 'AboutUs', NotFound: '*' },
+        : {
+            Splash: '', Login: 'login', Legal: 'legal/:type', AboutUs: 'AboutUs',
+            // Public, token-based mailer destinations — openable while logged out.
+            Feedback: 'feedback', Unsubscribe: 'unsubscribe', EmailPreferences: 'preferences',
+            NotFound: '*',
+          },
     },
   }), [isLoggedIn]);
 
@@ -137,10 +172,12 @@ export function RootNavigator() {
       linking={linking}
       documentTitle={{ enabled: false }}
       onReady={() => {
-        // A logged-out user who opened a protected email/share link resolves to
-        // NotFound (that path isn't in the logged-out link map). Send them to
-        // Login instead — after login, consumePendingDeepLink returns them to it.
-        if (!isLoggedIn && hasPendingDeepLink()) {
+        // A logged-out user who opened a protected email/share link, or a referral
+        // link (?ref=), resolves to NotFound (those paths aren't in the logged-out
+        // link map). Send them to Login instead — after login, consumePendingDeepLink
+        // returns them to a protected link, and the signup form reads the captured
+        // referral code.
+        if (!isLoggedIn && (hasPendingDeepLink() || hasPendingReferral())) {
           navRef.current?.reset({ index: 0, routes: [{ name: 'Login' }] });
         }
         trackPageView(navRef.current?.getCurrentRoute());
@@ -170,7 +207,11 @@ export function RootNavigator() {
         <Stack.Screen name="Redeem" component={RedeemScreen} />
         <Stack.Screen name="RedeemHistory" component={RedeemHistoryScreen} />
         <Stack.Screen name="Donation" component={DonationScreen} />
+        <Stack.Screen name="Transfer" component={TransferScreen} />
         <Stack.Screen name="AboutUs" component={AboutUsScreen} />
+        <Stack.Screen name="Feedback" component={FeedbackScreen} />
+        <Stack.Screen name="Unsubscribe" component={UnsubscribeScreen} />
+        <Stack.Screen name="EmailPreferences" component={EmailPreferencesScreen} />
         <Stack.Screen name="NotFound" component={NotFoundScreen} />
       </Stack.Navigator>
     </NavigationContainer>

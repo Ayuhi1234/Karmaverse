@@ -8,7 +8,9 @@ import { Platform } from 'react-native';
 // campaign params only). Query strings can carry referral codes, deep-link tokens or
 // React Navigation route params such as the booking object with its address. Event
 // params pass an allowlist, and string values that look like an email or phone number are dropped.
-const MEASUREMENT_ID = process.env.EXPO_PUBLIC_GA_MEASUREMENT_ID;
+// Falls back to the production property when the var is absent (.env isn't committed, so
+// CI/Netlify builds rely on this). Set it to an empty string to turn analytics off.
+const MEASUREMENT_ID = process.env.EXPO_PUBLIC_GA_MEASUREMENT_ID ?? 'G-8Z7CRL6KKG';
 const IS_ENABLED =
   Platform.OS === 'web' &&
   typeof window !== 'undefined' &&

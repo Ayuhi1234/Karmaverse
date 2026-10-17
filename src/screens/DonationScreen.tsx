@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, StatusBar, SafeAreaView } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StatusBar } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, TreePine, Monitor, Laptop, HeartHandshake } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { profileService } from '../services/profile';
 import { showAlert } from '../utils/alert';
+import { makeStyles } from '../theme';
 
 // UI-only for now — no backend donation endpoint exists yet. Wire this up to a real
 // API (deduct coins, record the donation) once the backend contract is available.
@@ -39,6 +41,7 @@ const DONATION_OPTIONS = [
 ];
 
 export function DonationScreen({ navigation, route }: any) {
+  const styles = useStyles();
   const [balance, setBalance] = useState<number>(route?.params?.balance || 0);
 
   useEffect(() => {
@@ -57,7 +60,7 @@ export function DonationScreen({ navigation, route }: any) {
     }
     showAlert(
       'Donations opening soon',
-      `Thanks for supporting the 3R Waste Foundation. The "${option.title}" donation will be live shortly — check back soon.`
+      `Thanks for supporting 3R ZeroWaste. The "${option.title}" donation will be live shortly — check back soon.`
     );
   };
 
@@ -87,17 +90,17 @@ export function DonationScreen({ navigation, route }: any) {
         <View style={styles.content}>
 
           {/* Foundation branding — neutral placeholder icon, NOT the KarmaVerse
-              logo (that misrepresented the foundation). TODO: drop the real 3R Waste
-              Foundation logo into assets/ and render it here once the Founding
+              logo (that misrepresented the partner). TODO: drop the real 3R ZeroWaste
+              logo into assets/ and render it here once the Founding
               Engineer supplies the branding asset. */}
           <View style={styles.foundationCard}>
             <View style={styles.foundationLogoWrap}>
               <HeartHandshake size={30} color="#15803d" />
             </View>
             <Text style={styles.foundationLabel}>IN PARTNERSHIP WITH</Text>
-            <Text style={styles.foundationName}>3R Waste Foundation</Text>
+            <Text style={styles.foundationName}>3R ZeroWaste</Text>
             <Text style={styles.foundationDesc}>
-              Every donation goes directly to the 3R Waste Foundation, supporting environmental and
+              Every donation goes directly to 3R ZeroWaste, supporting environmental and
               community welfare initiatives.
             </Text>
           </View>
@@ -140,8 +143,8 @@ export function DonationScreen({ navigation, route }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f4f4f5' },
+const useStyles = makeStyles((c) => ({
+  container: { flex: 1, backgroundColor: c.bg },
   topNotchFiller: { position: 'absolute', top: 0, left: 0, right: 0, height: 60, backgroundColor: '#064e3b' },
   scroll: { flex: 1 },
 
@@ -159,29 +162,29 @@ const styles = StyleSheet.create({
   content: { padding: 20, maxWidth: 800, width: '100%', alignSelf: 'center' },
 
   foundationCard: {
-    backgroundColor: 'white', borderRadius: 20, padding: 22, alignItems: 'center',
-    borderWidth: 1, borderColor: '#e2e8f0', marginBottom: 28,
+    backgroundColor: c.surface, borderRadius: 20, padding: 22, alignItems: 'center',
+    borderWidth: 1, borderColor: c.border, marginBottom: 28,
   },
-  foundationLogoWrap: { width: 72, height: 72, borderRadius: 20, backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center', marginBottom: 12, borderWidth: 1, borderColor: '#dcfce7' },
-  foundationLabel: { fontSize: 11, fontWeight: '800', color: '#94a3b8', letterSpacing: 1.2, marginBottom: 4 },
-  foundationName: { fontSize: 18, fontWeight: '900', color: '#0f172a', marginBottom: 8 },
-  foundationDesc: { fontSize: 13, color: '#64748b', textAlign: 'center', lineHeight: 20, fontWeight: '500' },
+  foundationLogoWrap: { width: 72, height: 72, borderRadius: 20, backgroundColor: c.primarySoft, alignItems: 'center', justifyContent: 'center', marginBottom: 12, borderWidth: 1, borderColor: '#dcfce7' },
+  foundationLabel: { fontSize: 11, fontWeight: '800', color: c.textFaint, letterSpacing: 1.2, marginBottom: 4 },
+  foundationName: { fontSize: 18, fontWeight: '900', color: c.text, marginBottom: 8 },
+  foundationDesc: { fontSize: 13, color: c.textMuted, textAlign: 'center', lineHeight: 20, fontWeight: '500' },
 
-  sectionTitle: { fontSize: 15, fontWeight: '800', color: '#0f172a', marginBottom: 14 },
+  sectionTitle: { fontSize: 15, fontWeight: '800', color: c.text, marginBottom: 14 },
 
   optionCard: {
-    flexDirection: 'row', alignItems: 'center', backgroundColor: 'white', borderRadius: 18,
-    padding: 16, marginBottom: 12, borderWidth: 1, borderColor: '#f1f5f9',
-    elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8,
+    flexDirection: 'row', alignItems: 'center', backgroundColor: c.surface, borderRadius: 18,
+    padding: 16, marginBottom: 12, borderWidth: 1, borderColor: c.border,
+    elevation: 2, shadowColor: c.shadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8,
   },
   optionIconBg: { width: 46, height: 46, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   optionInfo: { flex: 1, marginLeft: 12, marginRight: 10 },
-  optionTitle: { fontSize: 14, fontWeight: '800', color: '#0f172a', marginBottom: 3 },
-  optionDesc: { fontSize: 12, color: '#64748b', fontWeight: '500', marginBottom: 6, lineHeight: 16 },
+  optionTitle: { fontSize: 14, fontWeight: '800', color: c.text, marginBottom: 3 },
+  optionDesc: { fontSize: 12, color: c.textMuted, fontWeight: '500', marginBottom: 6, lineHeight: 16 },
   optionCoinRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  optionCoinText: { fontSize: 12, fontWeight: '800', color: '#15803d' },
+  optionCoinText: { fontSize: 12, fontWeight: '800', color: c.primary },
   optionShortfall: { fontSize: 11, fontWeight: '700', color: '#d97706', marginTop: 4 },
 
   donateBtn: { backgroundColor: '#15803d', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 100 },
   donateBtnText: { color: 'white', fontWeight: '800', fontSize: 12 },
-});
+}));

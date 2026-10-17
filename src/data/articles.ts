@@ -46,7 +46,7 @@ export const ARTICLES: Article[] = [
         heading: 'The two-bin habit',
         paragraphs: [
           'Keep one bin for wet waste — food scraps, peels, garden trimmings — and one for dry waste: paper, plastic, metal, glass. Rinse containers once and let them dry before binning. That single rinse is the difference between recyclable and rejected.',
-          'Batteries, e-waste, and expired medicines belong in neither bin. Store them separately and hand them to a verified collector — KarmaVerse accepts batteries and every major e-waste category at your doorstep.',
+          'Batteries, e-waste, and expired medicines belong in neither bin. Store them separately and hand them to a verified collector — KarmaVerse accepts batteries and every major e-waste category for responsible recycling.',
         ],
       },
       {
@@ -172,7 +172,7 @@ export const ARTICLES: Article[] = [
     image:
       'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Sims_Sunset_Park_Material_Recovery_Facility_-4.jpg/960px-Sims_Sunset_Park_Material_Recovery_Facility_-4.jpg',
     intro:
-      'The doorstep pickup is just the first step. Here is the journey your recyclables take after the agent rides away — and why exact categories and weights matter.',
+      'The pickup is just the first step. Here is the journey your recyclables take after the agent rides away — and why exact categories and weights matter.',
     sections: [
       {
         heading: 'Step 1: verification at your door',
@@ -192,7 +192,7 @@ export const ARTICLES: Article[] = [
         paragraphs: [
           'Each material stream goes to a recycler authorized for it — paper mills, plastic reprocessors, metal smelters, and government-authorized e-waste dismantlers. There, your old newspaper becomes new paperboard, your PET bottles become fibre, and the copper from your dead charger heads back into new wiring.',
         ],
-        fact: 'This traceable chain is why KarmaVerse asks for exact categories at booking — every material has a different destination, and the right sorting starts at your doorstep.',
+        fact: 'This traceable chain is why KarmaVerse asks for exact categories at booking — every material has a different destination, and the right sorting starts at the source.',
       },
     ],
   },

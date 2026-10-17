@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Event Leaderboard — KarmaVer$e</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;700;800&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --bg-1: #052e23;
+    --bg-2: #064e3b;
+    --bg-3: #065f46;
+    --card: rgba(255,255,255,0.06);
+    --card-solid: #ffffff;
+    --ink: #ffffff;
+    --muted: rgba(255,255,255,0.62);
+    --line: rgba(255,255,255,0.10);
+    --gold: #fbbf24;
+    --gold-deep: #f59e0b;
+    --green: #4ade80;
+    --silver: #cbd5e1;
+    --bronze: #f0a868;
+    --danger: #fca5a5;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    min-height: 100dvh;
+    background:
+      radial-gradient(1200px 600px at 50% -10%, rgba(74,222,128,0.14), transparent 60%),
+      linear-gradient(180deg, var(--bg-2) 0%, var(--bg-1) 100%);
+    color: var(--ink);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: env(safe-area-inset-top) 16px calc(28px + env(safe-area-inset-bottom));
+  }
+  .wrap { max-width: 560px; margin: 0 auto; }
+
+  /* Header */
+  header { padding: 26px 4px 18px; }
+  .brandRow { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+  .coin {
+    width: 34px; height: 34px; border-radius: 50%; flex: 0 0 auto;
+    background: radial-gradient(circle at 32% 28%, #fde68a, var(--gold) 45%, var(--gold-deep) 100%);
+    display: grid; place-items: center; color: #3b2a00; font-weight: 800; font-family: "Sora", sans-serif;
+    box-shadow: 0 0 0 3px rgba(251,191,36,0.18), 0 6px 16px rgba(0,0,0,0.3);
+  }
+  .brand { font-family: "Sora", sans-serif; font-weight: 700; font-size: 15px; letter-spacing: .2px; }
+  .brand span { color: var(--gold); }
+  h1 {
+    font-family: "Sora", sans-serif; font-weight: 800; font-size: clamp(26px, 7vw, 34px);
+    margin: 0 0 6px; letter-spacing: -0.5px; line-height: 1.05;
+  }
+  .sub { color: var(--muted); font-size: 14px; margin: 0; }
+
+  .bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 18px; }
+  .updated { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); font-size: 12.5px; font-weight: 500; }
+  .live { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 0 rgba(74,222,128,0.6); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(74,222,128,0.5)} 70%{box-shadow:0 0 0 8px rgba(74,222,128,0)} 100%{box-shadow:0 0 0 0 rgba(74,222,128,0)} }
+  @media (prefers-reduced-motion: reduce){ .live{animation:none} .spin{animation:none} }
+
+  .refresh {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--gold); color: #3b2a00; border: 0; border-radius: 999px;
+    padding: 10px 18px; font-weight: 700; font-size: 14px; font-family: "Sora", sans-serif;
+    cursor: pointer; box-shadow: 0 6px 16px rgba(245,158,11,0.28);
+    transition: transform .1s ease, opacity .2s ease;
+  }
+  .refresh:active { transform: scale(0.96); }
+  .refresh:disabled { opacity: .6; cursor: default; }
+  .refresh svg { width: 16px; height: 16px; }
+  .refresh.loading .ic { animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Podium (top 3) */
+  .podium { display: flex; flex-direction: column; gap: 10px; margin: 8px 0 14px; }
+  .top {
+    display: flex; align-items: center; gap: 14px; padding: 14px 16px;
+    border-radius: 18px; border: 1px solid var(--line);
+    background: linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
+    position: relative; overflow: hidden;
+  }
+  .top.g1 { background: linear-gradient(135deg, rgba(251,191,36,0.26), rgba(245,158,11,0.10)); border-color: rgba(251,191,36,0.5); }
+  .top.g2 { background: linear-gradient(135deg, rgba(203,213,225,0.20), rgba(148,163,184,0.06)); border-color: rgba(203,213,225,0.34); }
+  .top.g3 { background: linear-gradient(135deg, rgba(240,168,104,0.22), rgba(217,119,6,0.06)); border-color: rgba(240,168,104,0.38); }
+  .medal { font-size: 30px; width: 40px; text-align: center; flex: 0 0 auto; }
+  .top .who { flex: 1; min-width: 0; }
+  .top .name { font-family: "Sora", sans-serif; font-weight: 700; font-size: 17px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .top .rank { color: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: .3px; text-transform: uppercase; }
+  .amt { display: flex; align-items: center; gap: 7px; font-family: "Sora", sans-serif; font-weight: 800; font-size: 18px; font-variant-numeric: tabular-nums; flex: 0 0 auto; }
+  .amt .dot { width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(circle at 32% 28%, #fde68a, var(--gold) 50%, var(--gold-deep)); }
+  .amt small { font-size: 11px; font-weight: 600; color: var(--muted); font-family: "Inter", sans-serif; }
+
+  /* Rest list (4-10) */
+  .list { display: flex; flex-direction: column; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); background: var(--card); }
+  .row { display: flex; align-items: center; gap: 14px; padding: 13px 16px; border-bottom: 1px solid var(--line); }
+  .row:last-child { border-bottom: 0; }
+  .num { width: 26px; text-align: center; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; font-family: "Sora", sans-serif; flex: 0 0 auto; }
+  .row .name { flex: 1; min-width: 0; font-weight: 600; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .row .amt { font-size: 15px; }
+
+  /* States */
+  .state { text-align: center; padding: 54px 20px; color: var(--muted); }
+  .state .big { font-size: 42px; margin-bottom: 12px; }
+  .state .msg { font-size: 15px; font-weight: 500; line-height: 1.5; color: var(--ink); }
+  .state .hint { font-size: 13px; margin-top: 6px; }
+  .state .retry { margin-top: 18px; }
+  .skeleton { display: flex; flex-direction: column; gap: 10px; }
+  .sk { height: 62px; border-radius: 16px; background: linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.11), rgba(255,255,255,0.05)); background-size: 200% 100%; animation: shimmer 1.3s infinite; }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+
+  footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 26px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brandRow">
+        <div class="coin">K</div>
+        <div class="brand">KarmaVer<span>$</span>e</div>
+      </div>
+      <h1>Event Leaderboard</h1>
+      <p class="sub">Top 10 changemakers by Karma Coins earned.</p>
+      <div class="bar">
+        <span class="updated"><span class="live"></span><span id="updated">Loading…</span></span>
+        <button class="refresh" id="refreshBtn" type="button" aria-label="Refresh leaderboard">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+          <span>Refresh</span>
+        </button>
+      </div>
+    </header>
+
+    <main id="main" aria-live="polite">
+      <!-- Loading skeleton -->
+      <div id="loading" class="skeleton">
+        <div class="sk"></div><div class="sk"></div><div class="sk"></div>
+        <div class="sk" style="height:52px"></div><div class="sk" style="height:52px"></div>
+      </div>
+
+      <!-- Podium (top 3) + rest -->
+      <div id="content" hidden>
+        <div class="podium" id="podium"></div>
+        <div class="list" id="list"></div>
+      </div>
+
+      <!-- Empty -->
+      <div id="empty" class="state" hidden>
+        <div class="big">🌱</div>
+        <div class="msg">Abhi tak koi ranking nahi.</div>
+        <div class="hint">Jaise hi log coins kamana shuru karenge, top 10 yahan aa jayenge.</div>
+      </div>
+
+      <!-- Error -->
+      <div id="error" class="state" hidden>
+        <div class="big">⚠️</div>
+        <div class="msg">Leaderboard load nahi ho paya.</div>
+        <div class="hint" id="errorHint">Apna connection check karke dobara try karein.</div>
+        <button class="refresh retry" id="retryBtn" type="button">Retry</button>
+      </div>
+    </main>
+
+    <footer>Live event leaderboard · KarmaVer$e</footer>
+  </div>
+
+<script>
+(function () {
+  "use strict";
+  // ── Config ──────────────────────────────────────────────────────────────
+  // Production backend is the default. Override without editing the file by
+  // adding ?api=https://your-host to the URL (handy for dev/staging).
+  var API_BASE = new URLSearchParams(location.search).get("api")
+    || "https://karmacoin-backend-productionn.onrender.com";
+  var ENDPOINT = API_BASE.replace(/\/$/, "") + "/api/v1/leaderboard/event";
+  var AUTO_REFRESH_MS = 60000; // silent background refresh (no force). Rate-limit friendly.
+  var MEDALS = ["🥇", "🥈", "🥉"];
+
+  var el = function (id) { return document.getElementById(id); };
+  var loadingEl = el("loading"), contentEl = el("content"), emptyEl = el("empty"),
+      errorEl = el("error"), podiumEl = el("podium"), listEl = el("list"),
+      updatedEl = el("updated"), refreshBtn = el("refreshBtn"), retryBtn = el("retryBtn"),
+      errorHint = el("errorHint");
+
+  var isFetching = false;
+
+  function show(which) {
+    loadingEl.hidden = which !== "loading";
+    contentEl.hidden = which !== "content";
+    emptyEl.hidden = which !== "empty";
+    errorEl.hidden = which !== "error";
+  }
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function fmt(n) { return (Number(n) || 0).toLocaleString("en-IN"); }
+
+  function setUpdatedNow() {
+    var t = new Date();
+    updatedEl.textContent = "Updated " + t.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  }
+
+  function render(rows) {
+    if (!rows || rows.length === 0) { show("empty"); return; }
+
+    var top = rows.slice(0, 3), rest = rows.slice(3, 10);
+
+    podiumEl.innerHTML = top.map(function (r, i) {
+      return '<div class="top g' + (i + 1) + '">' +
+        '<div class="medal">' + MEDALS[i] + '</div>' +
+        '<div class="who"><div class="rank">Rank ' + esc(r.rank != null ? r.rank : i + 1) + '</div>' +
+        '<div class="name">' + esc(r.name) + '</div></div>' +
+        '<div class="amt"><span class="dot"></span>' + fmt(r.coins) + ' <small>coins</small></div>' +
+      '</div>';
+    }).join("");
+
+    listEl.innerHTML = rest.map(function (r, i) {
+      return '<div class="row">' +
+        '<div class="num">' + esc(r.rank != null ? r.rank : i + 4) + '</div>' +
+        '<div class="name">' + esc(r.name) + '</div>' +
+        '<div class="amt"><span class="dot"></span>' + fmt(r.coins) + '</div>' +
+      '</div>';
+    }).join("");
+    listEl.hidden = rest.length === 0;
+
+    show("content");
+  }
+
+  function load(opts) {
+    opts = opts || {};
+    if (isFetching) return;
+    isFetching = true;
+
+    if (opts.force) {
+      refreshBtn.classList.add("loading");
+      refreshBtn.disabled = true;
+    }
+    if (opts.initial) show("loading");
+
+    var url = ENDPOINT + (opts.force ? "?force=true" : "");
+
+    fetch(url, { method: "GET", headers: { "Accept": "application/json" } })
+      .then(function (res) {
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        return res.json();
+      })
+      .then(function (body) {
+        if (!body || body.success === false) {
+          throw new Error((body && body.message) || "Request failed");
+        }
+        render(Array.isArray(body.data) ? body.data : []);
+        setUpdatedNow();
+      })
+      .catch(function (err) {
+        // Only surface a hard error when we have nothing on screen already.
+        if (contentEl.hidden && emptyEl.hidden) {
+          errorHint.textContent = (err && err.message)
+            ? "Details: " + err.message + ". Dobara try karein."
+            : "Apna connection check karke dobara try karein.";
+          show("error");
+        }
+      })
+      .then(function () {
+        isFetching = false;
+        refreshBtn.classList.remove("loading");
+        refreshBtn.disabled = false;
+      });
+  }
+
+  refreshBtn.addEventListener("click", function () { load({ force: true }); });
+  retryBtn.addEventListener("click", function () { load({ initial: true }); });
+
+  // Initial load
+  load({ initial: true });
+
+  // Silent background refresh (no force) — paused when the tab is hidden.
+  setInterval(function () {
+    if (!document.hidden) load({});
+  }, AUTO_REFRESH_MS);
+})();
+</script>
+</body>
+</html>

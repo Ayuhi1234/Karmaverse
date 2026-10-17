@@ -240,7 +240,7 @@ export function SplashScreen({ navigation, route }: any) {
                 out the same way as the original artwork (icon left, wordmark on
                 top, tagline underneath) — the tagline is real text here instead
                 of the tiny raster copy, so it stays crisp at navbar scale. */}
-            <Image source={require('../../assets/logo-icon.png')} resizeMode="contain" style={[s.navIconImg, isMobile && { width: 48, height: 50 }]} />
+            <Image source={require('../../assets/logo-icon.webp')} resizeMode="contain" style={[s.navIconImg, isMobile && { width: 48, height: 50 }]} />
             <View>
               {/* Solid crisp text instead of the hollow/outlined wordmark image
                   (the raster "Karma" was outline-only and read faintly on dark). */}
@@ -306,18 +306,26 @@ export function SplashScreen({ navigation, route }: any) {
               <Text style={s.heroBadgeText}>AI-Powered Sustainability Platform</Text>
             </View>
 
-            <Text style={[s.heroTitle, isMobile && { fontSize: 34 }]}>
-              {typedHeadline.length <= KARMA_SPLIT ? typedHeadline : HEADLINE_TEXT.slice(0, KARMA_SPLIT)}
-              {typedHeadline.length > KARMA_SPLIT && (
-                <Animated.Text style={{ color: coinsColor }}>{typedHeadline.slice(KARMA_SPLIT)}</Animated.Text>
-              )}
-              <Animated.Text style={[s.heroCursor, { opacity: cursorBlink }]}>|</Animated.Text>
-            </Text>
+            {/* The headline types out character by character. A full-text, invisible
+                ghost reserves its final height so the tagline/CTA below never shift as
+                it types (fixes the hero CLS / layout shift). */}
+            <View style={s.heroTitleWrap}>
+              <Text style={[s.heroTitle, isMobile && { fontSize: 34 }, s.heroTitleGhost]}>
+                {HEADLINE_TEXT}
+              </Text>
+              <Text style={[s.heroTitle, isMobile && { fontSize: 34 }, s.heroTitleLive]} aria-hidden>
+                {typedHeadline.length <= KARMA_SPLIT ? typedHeadline : HEADLINE_TEXT.slice(0, KARMA_SPLIT)}
+                {typedHeadline.length > KARMA_SPLIT && (
+                  <Animated.Text style={{ color: coinsColor }}>{typedHeadline.slice(KARMA_SPLIT)}</Animated.Text>
+                )}
+                <Animated.Text style={[s.heroCursor, { opacity: cursorBlink }]}>|</Animated.Text>
+              </Text>
+            </View>
 
             <Text style={[s.heroTagline, isMobile && { fontSize: 18 }]}>“Kar Bhala Toh Ho Bhala.” 🌱</Text>
 
             <Text style={[s.heroSub, isMobile && { fontSize: 16 }]}>
-              KarmaVer$e rewards every sustainable action — schedule doorstep recycling pickups,
+              KarmaVer$e rewards every sustainable action — schedule green pickups,
               sharpen your green knowledge with our AI-powered eco-quiz, and turn it all into
               KarmaCoins with real, measurable impact.
             </Text>
@@ -338,6 +346,14 @@ export function SplashScreen({ navigation, route }: any) {
               <TouchableOpacity style={s.ctaSecondary} onPress={() => scrollToSection('rewards')}>
                 <Gift size={16} color="#4ade80" />
                 <Text style={s.ctaSecondaryText}>Explore rewards</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{ alignItems: 'flex-start', justifyContent: 'center', backgroundColor: '#000000', borderRadius: 12, paddingHorizontal: 18, paddingVertical: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.22)' }}
+                onPress={() => { const u = 'https://play.google.com/store/apps/details?id=com.karmacredits.app'; if (typeof window !== 'undefined') window.open(u, '_blank', 'noopener'); else Linking.openURL(u); }}
+                activeOpacity={0.85}
+              >
+                <Text style={{ color: 'rgba(255,255,255,0.65)', fontSize: 9, fontWeight: '700', letterSpacing: 1.2 }}>GET IT ON</Text>
+                <Text style={{ color: '#ffffff', fontSize: 15, fontWeight: '800' }}>Google Play</Text>
               </TouchableOpacity>
             </View>
 
@@ -538,7 +554,10 @@ export function SplashScreen({ navigation, route }: any) {
                   <Text style={s.footerLink}>Privacy policy</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => navigation.navigate('Legal', { type: 'terms' })}>
-                  <Text style={s.footerLink}>Terms of service</Text>
+                  <Text style={s.footerLink}>Terms & conditions</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate('Legal', { type: 'terms-of-use' })}>
+                  <Text style={s.footerLink}>Terms of use</Text>
                 </TouchableOpacity>
               </View>
 
@@ -615,6 +634,11 @@ const s = StyleSheet.create({
   heroBadgeDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#4ade80' },
   heroBadgeText: { color: 'rgba(255,255,255,0.8)', fontSize: 16, fontWeight: '700' },
   heroTitle: { fontSize: 50, fontWeight: '900', color: 'white', letterSpacing: -1.5, lineHeight: 60, marginBottom: 12 },
+  // Headline layout-shift guard: the ghost (full text) holds the height in-flow,
+  // the live (typing) text overlays it absolutely so nothing below moves.
+  heroTitleWrap: { position: 'relative', marginBottom: 12 },
+  heroTitleGhost: { opacity: 0, marginBottom: 0 },
+  heroTitleLive: { position: 'absolute', top: 0, left: 0, right: 0, marginBottom: 0 },
   heroTagline: { fontSize: 22, fontWeight: '700', fontStyle: 'italic', color: '#4ade80', marginBottom: 18 },
   heroCursor: { color: '#4ade80', fontWeight: '400' },
   heroSub: { fontSize: 18, color: 'rgba(255,255,255,0.7)', fontWeight: '500', lineHeight: 28, maxWidth: 620, marginBottom: 32 },

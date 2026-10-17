@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { X, Trophy, Timer, Flame, CheckCircle2, XCircle, ArrowRight, WifiOff, Leaf } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getToken } from '../utils/tokenStore';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { quizService } from '../services/quiz';
 import { BACKEND_BASE } from '../services/api';
@@ -15,6 +16,7 @@ import { getLocalDateStr, getLocalYesterdayStr } from '../utils/quizDate';
 import { showAlert } from '../utils/alert';
 import { showRedeemInfoOnce } from '../utils/redeemInfo';
 import { getStableUserSuffix } from '../utils/userId';
+import { useTheme, makeStyles } from '../theme';
 
 const CONFETTI_COLORS = ['#fbbf24', '#4ade80', '#f472b6', '#60a5fa', '#fb923c', '#a78bfa', '#34d399', '#f87171'];
 const CONFETTI_COUNT = 40;
@@ -92,6 +94,7 @@ interface AnswerResult {
 }
 
 function RuleRow({ icon, text }: { icon: React.ReactNode; text: string }) {
+  const styles = useStyles();
   return (
     <View style={styles.ruleRow}>
       <View style={styles.ruleIconWrap}>{icon}</View>
@@ -101,6 +104,8 @@ function RuleRow({ icon, text }: { icon: React.ReactNode; text: string }) {
 }
 
 export function QuizScreen({ navigation }: any) {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const { addNotification } = useNotifications();
   const [screenState, setScreenState] = useState<ScreenState>('init');
   const [isLocked, setIsLocked] = useState(false);
@@ -134,7 +139,7 @@ export function QuizScreen({ navigation }: any) {
 
   useEffect(() => {
     const init = async () => {
-      const token = await AsyncStorage.getItem('userToken');
+      const token = await getToken();
       const suffix = getStableUserSuffix(token);
       const dateKey = `lastQuizDate_${suffix}`;
       const streakKey = `quizStreak_${suffix}`;
@@ -361,8 +366,8 @@ export function QuizScreen({ navigation }: any) {
 
   const handleStartQuiz = async () => {
     setIsFetching(true);
-    try {
-      const data = await quizService.start();
+
+    const applyQuizData = (data: any) => {
       setQuestions(data.questions || []);
       setStreak(data.streak?.currentStreak || 0);
       setCurrentQ(0);
@@ -376,7 +381,28 @@ export function QuizScreen({ navigation }: any) {
       setAnswerResult(null);
       setTimeLeft(TIMER_DURATION);
       setScreenState('playing');
+    };
+
+    try {
+      applyQuizData(await quizService.start());
     } catch (err: any) {
+      // Cold-start / transient network failure: the backend free tier can sleep and
+      // the first request times out while it wakes. Retry silently a couple of times
+      // (the Start button keeps spinning) so the quiz just opens once the server is up,
+      // instead of making the user dismiss "Server is waking up" and tap Start again.
+      // Mirrors the login flow's cold-start handling. Skipped when the device is truly
+      // offline, or when the error is a real HTTP response (429/5xx) handled below.
+      const isColdStart = !err?.response || err?.code === 'ECONNABORTED' || err?.message?.includes('Network');
+      const deviceOffline = typeof navigator !== 'undefined' && navigator.onLine === false;
+      if (isColdStart && !deviceOffline) {
+        for (let attempt = 0; attempt < 2; attempt++) {
+          await new Promise((r) => setTimeout(r, 2500));
+          try {
+            applyQuizData(await quizService.start());
+            return; // finally still clears isFetching
+          } catch (_) { /* still waking — keep trying */ }
+        }
+      }
       // A 429 can mean "you've already played today" OR a generic rate-limit —
       // only treat it as the daily lock when the message actually says so, otherwise
       // this would falsely lock a user out of a quiz they never played (see bug where
@@ -393,7 +419,14 @@ export function QuizScreen({ navigation }: any) {
           'Our server takes a few seconds to start. Please wait a moment and try again.',
         );
       } else {
-        showAlert('Could not start quiz', 'Something went wrong. Please try again.');
+        // Surface the real status/message so a backend error is diagnosable
+        // instead of a blank "something went wrong".
+        const status = err?.response?.status;
+        const backendMsg = err?.response?.data?.message || err?.message || '';
+        showAlert(
+          'Could not start quiz',
+          `Please try again in a moment.${status ? `\n\n(error ${status}${backendMsg ? `: ${backendMsg}` : ''})` : ''}`,
+        );
       }
     } finally {
       setIsFetching(false);
@@ -612,7 +645,7 @@ export function QuizScreen({ navigation }: any) {
 
         {isSubmitting && (
           <View style={styles.submittingRow}>
-            <ActivityIndicator size="small" color="#15803d" />
+            <ActivityIndicator size="small" color={colors.primary} />
           </View>
         )}
 
@@ -638,8 +671,8 @@ export function QuizScreen({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8fafc' },
+const useStyles = makeStyles((c) => ({
+  container: { flex: 1, backgroundColor: c.bg },
   fullCenter: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   topBg: { position: 'absolute', top: 0, left: 0, right: 0, height: 280, borderBottomLeftRadius: 36, borderBottomRightRadius: 36 },
 
@@ -672,15 +705,15 @@ const styles = StyleSheet.create({
   playArea: { flex: 1, justifyContent: 'center', width: '100%' },
 
   // Question card
-  questionCard: { marginHorizontal: 16, marginTop: 20, backgroundColor: 'white', borderRadius: 24, padding: 20, elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 16, maxWidth: 600, width: '100%', alignSelf: 'center' },
-  questionText: { fontSize: 20, fontWeight: '800', color: '#0f172a', textAlign: 'center', lineHeight: 30, marginBottom: 24 },
+  questionCard: { marginHorizontal: 16, marginTop: 20, backgroundColor: c.surface, borderRadius: 24, padding: 20, elevation: 8, shadowColor: c.shadow, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 16, maxWidth: 600, width: '100%', alignSelf: 'center' },
+  questionText: { fontSize: 20, fontWeight: '800', color: c.text, textAlign: 'center', lineHeight: 30, marginBottom: 24 },
 
   // Options
   optionsList: { gap: 10 },
-  optionBtn: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, backgroundColor: '#f8fafc', borderRadius: 14, borderWidth: 2, borderColor: '#e2e8f0' },
-  optionLabelBadge: { width: 28, height: 28, borderRadius: 8, backgroundColor: '#e2e8f0', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
-  optionLabelText: { fontSize: 12, fontWeight: '800', color: '#475569' },
-  optionText: { flex: 1, fontSize: 15, fontWeight: '600', color: '#1e293b' },
+  optionBtn: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, backgroundColor: c.surfaceAlt, borderRadius: 14, borderWidth: 2, borderColor: c.border },
+  optionLabelBadge: { width: 28, height: 28, borderRadius: 8, backgroundColor: c.border, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  optionLabelText: { fontSize: 12, fontWeight: '800', color: c.textMuted },
+  optionText: { flex: 1, fontSize: 15, fontWeight: '600', color: c.text },
   optionTextLight: { color: 'white' },
   optionCorrect: { backgroundColor: '#16a34a', borderColor: '#16a34a' },
   optionWrong: { backgroundColor: '#ef4444', borderColor: '#ef4444' },
@@ -720,13 +753,13 @@ const styles = StyleSheet.create({
   resultsTitle: { fontSize: 30, fontWeight: '900', color: 'white', marginTop: 20, marginBottom: 6 },
   resultsSub: { fontSize: 16, fontWeight: '600', color: 'rgba(255,255,255,0.8)' },
 
-  resultsCard: { backgroundColor: 'white', width: '100%', borderRadius: 24, padding: 28, alignItems: 'center', marginBottom: 32, elevation: 10, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 20, shadowOffset: { width: 0, height: 8 } },
-  resultsCardLabel: { fontSize: 12, fontWeight: '700', color: '#94a3b8', letterSpacing: 0.5, marginBottom: 12 },
+  resultsCard: { backgroundColor: c.surface, width: '100%', borderRadius: 24, padding: 28, alignItems: 'center', marginBottom: 32, elevation: 10, shadowColor: c.shadow, shadowOpacity: 0.15, shadowRadius: 20, shadowOffset: { width: 0, height: 8 } },
+  resultsCardLabel: { fontSize: 12, fontWeight: '700', color: c.textFaint, letterSpacing: 0.5, marginBottom: 12 },
   resultsCoinsRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 },
   resultsCoinsValue: { fontSize: 44, fontWeight: '900', color: '#d97706' },
   bonusBreakdown: { backgroundColor: '#fff7ed', paddingHorizontal: 12, paddingVertical: 5, borderRadius: 12, marginBottom: 12 },
   bonusBreakdownText: { fontSize: 12, fontWeight: '800', color: '#ea580c' },
-  resultsCardNote: { fontSize: 13, color: '#64748b', fontWeight: '600', textAlign: 'center', marginBottom: 16 },
+  resultsCardNote: { fontSize: 13, color: c.textMuted, fontWeight: '600', textAlign: 'center', marginBottom: 16 },
   streakPill: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#fff7ed', paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20 },
   streakPillText: { fontSize: 13, fontWeight: '800', color: '#ea580c' },
   lobbyStreakPill: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(255,255,255,0.15)', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, alignSelf: 'center', marginBottom: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)' },
@@ -734,4 +767,4 @@ const styles = StyleSheet.create({
 
   homeBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#fcd34d', paddingVertical: 18, paddingHorizontal: 40, borderRadius: 18, elevation: 4, shadowColor: '#f59e0b', shadowOpacity: 0.4, shadowRadius: 8, shadowOffset: { width: 0, height: 4 } },
   homeBtnText: { fontSize: 16, fontWeight: '900', color: '#78350f' },
-});
+}));

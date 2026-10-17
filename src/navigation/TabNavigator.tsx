@@ -1,6 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Home, PackageCheck, Wallet, ShoppingBag } from 'lucide-react-native';
 
 import { DashboardScreen } from '../screens/DashboardScreen';
@@ -8,17 +9,29 @@ import { WalletScreen } from '../screens/WalletScreen';
 import { OrdersScreen } from '../screens/OrdersScreen';
 import { StoreScreen } from '../screens/StoreScreen';
 import { SCREEN_WIDTH } from '../utils/layout';
+import { useTheme, makeStyles } from '../theme';
 
 const isTablet = SCREEN_WIDTH >= 768;
 const Tab = createBottomTabNavigator();
 
 export function TabNavigator() {
+  const insets = useSafeAreaInsets();
+  const baseHeight = isTablet ? 80 : 70;
+  const styles = useStyles();
+  const { colors } = useTheme();
+
   return (
     <Tab.Navigator
         screenOptions={({ route }) => ({
           headerShown: false,
           tabBarShowLabel: false,
-          tabBarStyle: styles.tabBar,
+          tabBarStyle: [
+            styles.tabBar,
+            {
+              height: baseHeight + insets.bottom,
+              paddingBottom: 10 + insets.bottom,
+            },
+          ],
           tabBarIcon: ({ focused }) => {
             let IconComp = Home;
             let label = '';
@@ -40,9 +53,9 @@ export function TabNavigator() {
             return (
               <View style={styles.tabItem}>
                 <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
-                  <IconComp size={20} color={focused ? '#16a34a' : '#9ca3af'} strokeWidth={focused ? 2.5 : 1.8} />
+                  <IconComp size={20} color={focused ? colors.primary : colors.textFaint} strokeWidth={focused ? 2.5 : 1.8} />
                 </View>
-                <Text style={[styles.tabLabel, { color: focused ? '#16a34a' : '#9ca3af' }]} numberOfLines={1}>
+                <Text style={[styles.tabLabel, { color: focused ? colors.primary : colors.textFaint }]} numberOfLines={1}>
                   {label}
                 </Text>
               </View>
@@ -58,20 +71,18 @@ export function TabNavigator() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   tabBar: {
     position: 'absolute',
     bottom: 0,
-    height: isTablet ? 80 : 70,
-    backgroundColor: 'rgba(255,255,255,0.97)',
+    backgroundColor: c.surface,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.06)',
+    borderTopColor: c.border,
     elevation: 10,
-    shadowColor: '#000',
+    shadowColor: c.shadow,
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.08,
     shadowRadius: 20,
-    paddingBottom: 10,
   },
   tabItem: {
     alignItems: 'center',
@@ -88,11 +99,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   iconContainerActive: {
-    backgroundColor: 'rgba(22,163,74,0.12)',
+    backgroundColor: c.primarySoft,
   },
   tabLabel: {
     fontSize: 10,
     fontWeight: '600',
     marginTop: 2,
   },
-});
+}));

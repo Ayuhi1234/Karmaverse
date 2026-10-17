@@ -9,7 +9,7 @@ Content/copy draft for all Email + Push/In-app Notification use cases across the
 ### 1. Welcome (signup / Google sign-in)
 **Email**
 - Subject: Welcome to KarmaCoins XP, {{name}}!
-- Body: Hi {{name}}, welcome aboard! Start scheduling pickups, earn Karma Coins for every recyclable item, and play the daily quiz to grow your streak. Let's make waste management rewarding.
+- Body: Hi {{name}}, welcome aboard! Start scheduling pickups, earn Karma Coins for every item you recover, and play the daily quiz to grow your streak. Let's make sustainability rewarding.
 
 **Notification**
 - Title: Welcome to KarmaCoins XP
@@ -82,7 +82,7 @@ Content/copy draft for all Email + Push/In-app Notification use cases across the
 ### 8. Pickup completed (`BOOKING_COMPLETED`)
 **Email**
 - Subject: Pickup #{{bookingId}} completed — thank you!
-- Body: Hi {{name}}, your pickup is complete. Thanks for recycling with KarmaCoins XP. Don't forget to rate your agent!
+- Body: Hi {{name}}, your pickup is complete. Thanks for making an impact with KarmaCoins XP. Don't forget to rate your agent!
 
 **Notification** *(existing copy — keep)*
 - Title: Pickup complete

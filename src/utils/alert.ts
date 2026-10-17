@@ -12,13 +12,16 @@ export function registerAlertHandler(fn: ((p: AlertPayload) => void) | null) {
 }
 
 export function showAlert(title: string, message?: string, buttons?: AlertButton[]) {
-  if (Platform.OS !== 'web') {
-    Alert.alert(title, message, buttons);
+  // Prefer the in-app AlertHost on BOTH platforms — it's a branded modal with a
+  // close (X) button, unlike the OS Alert.alert which can't show one.
+  if (webHandler) {
+    webHandler({ title, message, buttons });
     return;
   }
 
-  if (webHandler) {
-    webHandler({ title, message, buttons });
+  // Fallback if the host isn't mounted yet: native OS alert.
+  if (Platform.OS !== 'web') {
+    Alert.alert(title, message, buttons);
     return;
   }
 
