@@ -1022,6 +1022,17 @@ export function LoginScreen({ navigation }: any) {
                 </TouchableOpacity>
               )}
           </View>
+
+          {/* Social sign-up skips the signup form's consent checkbox, so state the
+              terms here before the account is created (DPDP consent). */}
+          <Text style={styles.socialConsentText}>
+            By continuing, you agree to the{' '}
+            <Text style={styles.termsLink} onPress={() => navigation.navigate('Legal', { type: 'terms' })}>Terms & Conditions</Text>
+            {', '}
+            <Text style={styles.termsLink} onPress={() => navigation.navigate('Legal', { type: 'terms-of-use' })}>Terms of Use</Text>
+            {' '}and{' '}
+            <Text style={styles.termsLink} onPress={() => navigation.navigate('Legal', { type: 'privacy' })}>Privacy Policy</Text>.
+          </Text>
         </ScrollView>
       );
     }
@@ -1841,6 +1852,7 @@ const useStyles = makeStyles((c) => ({
   facebookFullBtnText: { color: 'white', fontWeight: '700', fontSize: 15 },
 
   socialRow: { flexDirection: 'row', gap: 14, justifyContent: 'center', marginTop: 4 },
+  socialConsentText: { fontSize: 12, color: c.textMuted, lineHeight: 18, textAlign: 'center', marginTop: 20, paddingHorizontal: 8 },
   socialIconBtnZomato: {
     width: 60,
     height: 60,
