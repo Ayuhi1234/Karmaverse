@@ -26,6 +26,11 @@ const { width: W } = Dimensions.get('window');
 const isMobile = W < 768;
 const MAX = 1100;
 
+// public/index.html paints a static copy of this hero before the JS bundle loads
+// (fixes the landing-page LCP) and sets this flag. When it did, skip the fade-in and
+// typewriter so the swap from the static copy to this screen is seamless.
+const STATIC_HERO_SHOWN = typeof window !== 'undefined' && !!(window as any).__KV_STATIC_HERO__;
+
 const KARMA_PHRASE = 'Rewards.';
 const HEADLINE_TEXT = `Smart Sustainability,\nReal ${KARMA_PHRASE}`;
 const KARMA_SPLIT = HEADLINE_TEXT.length - KARMA_PHRASE.length;
@@ -74,15 +79,15 @@ function Card({ children, style, delay = 0 }: { children: React.ReactNode; style
 }
 
 export function SplashScreen({ navigation, route }: any) {
-  const fadeIn = useRef(new Animated.Value(0)).current;
-  const slideUp = useRef(new Animated.Value(40)).current;
+  const fadeIn = useRef(new Animated.Value(STATIC_HERO_SHOWN ? 1 : 0)).current;
+  const slideUp = useRef(new Animated.Value(STATIC_HERO_SHOWN ? 0 : 40)).current;
   const cursorBlink = useRef(new Animated.Value(1)).current;
   const coinsPulse = useRef(new Animated.Value(0)).current;
   const floatA = useRef(new Animated.Value(0)).current;
   const floatB = useRef(new Animated.Value(0)).current;
   const ctaPulse = useRef(new Animated.Value(0)).current;
   const scrollRef = useRef<ScrollView>(null);
-  const [typedHeadline, setTypedHeadline] = useState('');
+  const [typedHeadline, setTypedHeadline] = useState(STATIC_HERO_SHOWN ? HEADLINE_TEXT : '');
   const sectionY = useRef({ howItWorks: 0, learning: 0, rewards: 0 });
   const [nearFooter, setNearFooter] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -143,6 +148,7 @@ export function SplashScreen({ navigation, route }: any) {
   };
 
   useEffect(() => {
+    if (STATIC_HERO_SHOWN) return;
     Animated.parallel([
       Animated.timing(fadeIn, { toValue: 1, duration: 800, useNativeDriver: true }),
       Animated.timing(slideUp, { toValue: 0, duration: 800, useNativeDriver: true }),
@@ -203,6 +209,7 @@ export function SplashScreen({ navigation, route }: any) {
   // Typewriter: types out the headline once on mount, character by character.
   // Confetti bursts right as "Smart Sustainability, Real Rewards." finishes typing.
   useEffect(() => {
+    if (STATIC_HERO_SHOWN) { setShowHeroConfetti(true); return; }
     let i = 0;
     const interval = setInterval(() => {
       i += 1;

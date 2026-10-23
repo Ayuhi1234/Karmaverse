@@ -192,6 +192,11 @@ export function RootNavigator() {
         }
         routeNameRef.current = navRef.current?.getCurrentRoute()?.name;
         trackPageView(routeNameRef.current);
+        // Fade out the static landing hero from public/index.html once the first
+        // screen has painted (two frames) — it sits outside #root, so React won't.
+        if (Platform.OS === 'web' && typeof window !== 'undefined') {
+          requestAnimationFrame(() => requestAnimationFrame(() => (window as any).__kvHideStaticHero?.()));
+        }
       }}
       onStateChange={() => {
         const previousRouteName = routeNameRef.current;
