@@ -588,7 +588,7 @@ export function SchedulePickupScreen({ navigation }: any) {
 
                   <View style={styles.coinPill}>
                     <KarmaCoin size={12} />
-                    <Text style={styles.coinValue}>+{rateFor(item, activeCond)}</Text>
+                    <Text style={styles.coinValue}>+{rateFor(item, activeCond).toLocaleString('en-IN')}</Text>
                   </View>
 
                   {qty === 0 ? (
@@ -626,12 +626,12 @@ export function SchedulePickupScreen({ navigation }: any) {
           <View style={styles.cartInfo}>
             <Text style={styles.cartItemText}>{cartCalculations.totalItems} {cartCalculations.totalItems === 1 ? 'item' : 'items'} added</Text>
             <View style={{flexDirection: 'row', alignItems: 'center', gap: 4}}>
-              <Text style={styles.cartRewardText}>Est. Reward: +{cartCalculations.totalCoins}</Text>
+              <Text style={styles.cartRewardText}>Est. Reward: +{cartCalculations.totalCoins.toLocaleString('en-IN')}</Text>
               <KarmaCoin size={12} />
             </View>
             {cartCalculations.totalCoins < MIN_ORDER_VALUE && (
               <Text style={styles.minOrderHint}>
-                Add {MIN_ORDER_VALUE - cartCalculations.totalCoins} more KC worth of items to schedule pickup
+                Add {(MIN_ORDER_VALUE - cartCalculations.totalCoins).toLocaleString('en-IN')} more KC worth of items to schedule pickup
               </Text>
             )}
           </View>
@@ -764,7 +764,7 @@ export function SchedulePickupScreen({ navigation }: any) {
           <Text style={styles.estimateLabel}>Estimated earnings</Text>
           <View style={styles.estimateValueRow}>
             <KarmaCoin size={24} />
-            <Text style={styles.estimateValue}>+{cartCalculations.totalCoins}</Text>
+            <Text style={styles.estimateValue}>+{cartCalculations.totalCoins.toLocaleString('en-IN')}</Text>
           </View>
           <Text style={styles.estimateNote}>For {cartCalculations.totalItems} {cartCalculations.totalItems === 1 ? 'item' : 'items'}. Final value credited after verification.</Text>
         </View>
