@@ -300,6 +300,7 @@ export function LoginScreen({ navigation }: any) {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [facebookLoading, setFacebookLoading] = useState(false);
   const [appleLoading, setAppleLoading] = useState(false);
+  const appleInFlight = useRef(false);
   const [isOffline, setIsOffline] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [emailError, setEmailError] = useState('');
@@ -441,6 +442,11 @@ export function LoginScreen({ navigation }: any) {
       showAlert('Not available', 'Apple Sign-In requires a native iOS build.');
       return;
     }
+    // A second tap while Apple's sheet is opening starts a new request, which makes
+    // AuthKit cancel the first one — block re-entry for the whole native prompt.
+    if (appleInFlight.current) return;
+    appleInFlight.current = true;
+    setAppleLoading(true);
     try {
       const credential = await AppleAuthentication.signInAsync({
         requestedScopes: [
@@ -456,9 +462,12 @@ export function LoginScreen({ navigation }: any) {
         : null;
       await finishAppleLogin(credential.identityToken, credential.authorizationCode, fullName);
     } catch (e: any) {
-      // Backing out of the native Apple sheet throws ERR_REQUEST_CANCELED — quiet no-op.
-      if (e?.code === 'ERR_REQUEST_CANCELED') return;
-      showAlert('Apple sign-in failed', 'Please try again.');
+      // Backing out of the native Apple sheet (ASAuthorizationError 1001) is a quiet no-op.
+      const canceled = e?.code === 'ERR_REQUEST_CANCELED' || /cancel/i.test(String(e?.message ?? ''));
+      if (!canceled) showAlert('Apple sign-in failed', 'Please try again.');
+    } finally {
+      appleInFlight.current = false;
+      setAppleLoading(false);
     }
   };
 
