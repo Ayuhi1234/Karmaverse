@@ -26,6 +26,11 @@ const { width: W } = Dimensions.get('window');
 const isMobile = W < 768;
 const MAX = 1100;
 
+// public/index.html paints a static copy of this hero before the JS bundle loads
+// (fixes the landing-page LCP) and sets this flag. When it did, skip the fade-in and
+// typewriter so the swap from the static copy to this screen is seamless.
+const STATIC_HERO_SHOWN = typeof window !== 'undefined' && !!(window as any).__KV_STATIC_HERO__;
+
 const KARMA_PHRASE = 'Rewards.';
 const HEADLINE_TEXT = `Smart Sustainability,\nReal ${KARMA_PHRASE}`;
 const KARMA_SPLIT = HEADLINE_TEXT.length - KARMA_PHRASE.length;
@@ -74,15 +79,15 @@ function Card({ children, style, delay = 0 }: { children: React.ReactNode; style
 }
 
 export function SplashScreen({ navigation, route }: any) {
-  const fadeIn = useRef(new Animated.Value(0)).current;
-  const slideUp = useRef(new Animated.Value(40)).current;
+  const fadeIn = useRef(new Animated.Value(STATIC_HERO_SHOWN ? 1 : 0)).current;
+  const slideUp = useRef(new Animated.Value(STATIC_HERO_SHOWN ? 0 : 40)).current;
   const cursorBlink = useRef(new Animated.Value(1)).current;
   const coinsPulse = useRef(new Animated.Value(0)).current;
   const floatA = useRef(new Animated.Value(0)).current;
   const floatB = useRef(new Animated.Value(0)).current;
   const ctaPulse = useRef(new Animated.Value(0)).current;
   const scrollRef = useRef<ScrollView>(null);
-  const [typedHeadline, setTypedHeadline] = useState('');
+  const [typedHeadline, setTypedHeadline] = useState(STATIC_HERO_SHOWN ? HEADLINE_TEXT : '');
   const sectionY = useRef({ howItWorks: 0, learning: 0, rewards: 0 });
   const [nearFooter, setNearFooter] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -143,6 +148,7 @@ export function SplashScreen({ navigation, route }: any) {
   };
 
   useEffect(() => {
+    if (STATIC_HERO_SHOWN) return;
     Animated.parallel([
       Animated.timing(fadeIn, { toValue: 1, duration: 800, useNativeDriver: true }),
       Animated.timing(slideUp, { toValue: 0, duration: 800, useNativeDriver: true }),
@@ -203,6 +209,7 @@ export function SplashScreen({ navigation, route }: any) {
   // Typewriter: types out the headline once on mount, character by character.
   // Confetti bursts right as "Smart Sustainability, Real Rewards." finishes typing.
   useEffect(() => {
+    if (STATIC_HERO_SHOWN) { setShowHeroConfetti(true); return; }
     let i = 0;
     const interval = setInterval(() => {
       i += 1;
@@ -452,12 +459,12 @@ export function SplashScreen({ navigation, route }: any) {
 
             <View style={[s.featGrid, { marginTop: 28 }, isMobile && { flexDirection: 'column' }]}>
               {[
-                { img: require('../../assets/rewards/green-store.jpg'), title: 'Green Store', desc: 'Sustainable goods that give back to the planet' },
-                { img: require('../../assets/rewards/gift-cards.jpg'), title: 'Eco Gift Cards', desc: 'Green vouchers from your favourite brands' },
-                { img: require('../../assets/rewards/savings.jpg'), title: 'Conscious Savings', desc: 'Save on the everyday things you already buy' },
-                { img: require('../../assets/rewards/experiences.jpg'), title: 'Eco Experiences', desc: 'Unlock green experiences money can\'t buy' },
-                { img: require('../../assets/rewards/partners.jpg'), title: 'Impact Partners', desc: 'Curated offers from our sustainable partners' },
-                { img: require('../../assets/rewards/plant-tree.jpg'), title: 'Plant a Tree', desc: 'Convert coins into real trees, real impact' },
+                { img: require('../../assets/rewards/green-store.webp'), title: 'Green Store', desc: 'Sustainable goods that give back to the planet' },
+                { img: require('../../assets/rewards/gift-cards.webp'), title: 'Eco Gift Cards', desc: 'Green vouchers from your favourite brands' },
+                { img: require('../../assets/rewards/savings.webp'), title: 'Conscious Savings', desc: 'Save on the everyday things you already buy' },
+                { img: require('../../assets/rewards/experiences.webp'), title: 'Eco Experiences', desc: 'Unlock green experiences money can\'t buy' },
+                { img: require('../../assets/rewards/partners.webp'), title: 'Impact Partners', desc: 'Curated offers from our sustainable partners' },
+                { img: require('../../assets/rewards/plant-tree.webp'), title: 'Plant a Tree', desc: 'Convert coins into real trees, real impact' },
               ].map((r, i) => (
                 <Card key={i} delay={i * 70} style={[s.rewardCard, { width: isMobile ? '100%' : '31%' }]}>
                   <Image source={r.img} resizeMode="cover" style={s.rewardImg} />

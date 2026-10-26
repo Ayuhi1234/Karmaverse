@@ -18,6 +18,7 @@ import { bookingService } from '../services/booking';
 import * as Location from 'expo-location';
 import { SCREEN_WIDTH as width } from '../utils/layout';
 import { useTheme, makeStyles } from '../theme';
+import { StatusBarFiller } from '../components/shared/StatusBarFiller';
 
 const CARD_MARGIN = 8;
 const COLS = Platform.OS === 'web' && width > 768 ? 4 : 2;
@@ -593,7 +594,7 @@ export function SchedulePickupScreen({ navigation }: any) {
 
                   <View style={styles.coinPill}>
                     <KarmaCoin size={12} />
-                    <Text style={styles.coinValue}>+{rateFor(item, activeCond)}</Text>
+                    <Text style={styles.coinValue}>+{rateFor(item, activeCond).toLocaleString('en-IN')}</Text>
                   </View>
 
                   {qty === 0 ? (
@@ -631,12 +632,12 @@ export function SchedulePickupScreen({ navigation }: any) {
           <View style={styles.cartInfo}>
             <Text style={styles.cartItemText}>{cartCalculations.totalItems} {cartCalculations.totalItems === 1 ? 'item' : 'items'} added</Text>
             <View style={{flexDirection: 'row', alignItems: 'center', gap: 4}}>
-              <Text style={styles.cartRewardText}>Est. Reward: +{cartCalculations.totalCoins}</Text>
+              <Text style={styles.cartRewardText}>Est. Reward: +{cartCalculations.totalCoins.toLocaleString('en-IN')}</Text>
               <KarmaCoin size={12} />
             </View>
             {cartCalculations.totalCoins < MIN_ORDER_VALUE && (
               <Text style={styles.minOrderHint}>
-                Add {MIN_ORDER_VALUE - cartCalculations.totalCoins} more KC worth of items to schedule pickup
+                Add {(MIN_ORDER_VALUE - cartCalculations.totalCoins).toLocaleString('en-IN')} more KC worth of items to schedule pickup
               </Text>
             )}
           </View>
@@ -769,7 +770,7 @@ export function SchedulePickupScreen({ navigation }: any) {
           <Text style={styles.estimateLabel}>Estimated earnings</Text>
           <View style={styles.estimateValueRow}>
             <KarmaCoin size={24} />
-            <Text style={styles.estimateValue}>+{cartCalculations.totalCoins}</Text>
+            <Text style={styles.estimateValue}>+{cartCalculations.totalCoins.toLocaleString('en-IN')}</Text>
           </View>
           <Text style={styles.estimateNote}>For {cartCalculations.totalItems} {cartCalculations.totalItems === 1 ? 'item' : 'items'}. Final value credited after verification.</Text>
         </View>
@@ -801,7 +802,7 @@ export function SchedulePickupScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#064e3b" />
-      <View style={styles.topNotchFiller} />
+      <StatusBarFiller color="#064e3b" />
       
       {/* Dark Green Header Section */}
       <LinearGradient colors={['#064e3b', '#15803d']} style={styles.header}>
@@ -842,7 +843,6 @@ export function SchedulePickupScreen({ navigation }: any) {
 
 const useStyles = makeStyles((c) => ({
   container: { flex: 1, backgroundColor: c.bg },
-  topNotchFiller: { position: 'absolute', top: 0, left: 0, right: 0, height: 60, backgroundColor: '#064e3b' },
   header: { paddingBottom: 16, borderBottomLeftRadius: 32, borderBottomRightRadius: 32, elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 10, zIndex: 10 },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 10 },
   backBtnInner: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },

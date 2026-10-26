@@ -18,6 +18,7 @@ import { useUserSocket } from '../context/UserSocketContext';
 import { LaunchConfetti } from '../components/shared/LaunchConfetti';
 import { EARLY_BIRD_COINS } from '../utils/earlyBird';
 import { useTheme, makeStyles } from '../theme';
+import { StatusBarFiller } from '../components/shared/StatusBarFiller';
 let GoogleSignin: any = null;
 let isErrorWithCode: any = null;
 let statusCodes: any = {};
@@ -37,10 +38,14 @@ try {
 } catch (_) {}
 
 // Apple authentication is iOS-only. The native module (expo-apple-authentication)
-// is temporarily removed from the Android build — re-add it for the iOS build and
-// restore the require here. Until then this stays null and the Apple button, which
-// only renders on iOS anyway, is inert.
+// is excluded from Android autolinking (package.json → expo.autolinking) after the
+// Android launch-crash isolation, so only require it on iOS.
 let AppleAuthentication: any = null;
+if (Platform.OS === 'ios') {
+  try {
+    AppleAuthentication = require('expo-apple-authentication');
+  } catch (_) {}
+}
 
 // Web OAuth client (karmaverse.earth) — configured for Google Identity Services on web only.
 // Native (Android/iOS) still uses the separate webClientId passed to GoogleSignin.configure in App.tsx.
@@ -296,6 +301,7 @@ export function LoginScreen({ navigation }: any) {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [facebookLoading, setFacebookLoading] = useState(false);
   const [appleLoading, setAppleLoading] = useState(false);
+  const appleInFlight = useRef(false);
   const [isOffline, setIsOffline] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [emailError, setEmailError] = useState('');
@@ -415,10 +421,14 @@ export function LoginScreen({ navigation }: any) {
     }
   };
 
-  const finishAppleLogin = async (identityToken: string, fullName?: string | null) => {
+  const finishAppleLogin = async (
+    identityToken: string,
+    authorizationCode?: string | null,
+    fullName?: string | null,
+  ) => {
     setAppleLoading(true);
     try {
-      await authService.appleLogin(identityToken, fullName);
+      await authService.appleLogin(identityToken, authorizationCode, fullName);
       reconnect();
       navigation.replace('App');
       consumePendingDeepLink(navigation);
@@ -434,6 +444,11 @@ export function LoginScreen({ navigation }: any) {
       showAlert('Not available', 'Apple Sign-In requires a native iOS build.');
       return;
     }
+    // A second tap while Apple's sheet is opening starts a new request, which makes
+    // AuthKit cancel the first one — block re-entry for the whole native prompt.
+    if (appleInFlight.current) return;
+    appleInFlight.current = true;
+    setAppleLoading(true);
     try {
       const credential = await AppleAuthentication.signInAsync({
         requestedScopes: [
@@ -447,11 +462,14 @@ export function LoginScreen({ navigation }: any) {
       const fullName = credential.fullName
         ? [credential.fullName.givenName, credential.fullName.familyName].filter(Boolean).join(' ') || null
         : null;
-      await finishAppleLogin(credential.identityToken, fullName);
+      await finishAppleLogin(credential.identityToken, credential.authorizationCode, fullName);
     } catch (e: any) {
-      // Backing out of the native Apple sheet throws ERR_REQUEST_CANCELED — quiet no-op.
-      if (e?.code === 'ERR_REQUEST_CANCELED') return;
-      showAlert('Apple sign-in failed', 'Please try again.');
+      // Backing out of the native Apple sheet (ASAuthorizationError 1001) is a quiet no-op.
+      const canceled = e?.code === 'ERR_REQUEST_CANCELED' || /cancel/i.test(String(e?.message ?? ''));
+      if (!canceled) showAlert('Apple sign-in failed', 'Please try again.');
+    } finally {
+      appleInFlight.current = false;
+      setAppleLoading(false);
     }
   };
 
@@ -1019,6 +1037,17 @@ export function LoginScreen({ navigation }: any) {
                 </TouchableOpacity>
               )}
           </View>
+
+          {/* Social sign-up skips the signup form's consent checkbox, so state the
+              terms here before the account is created (DPDP consent). */}
+          <Text style={styles.socialConsentText}>
+            By continuing, you agree to the{' '}
+            <Text style={styles.termsLink} onPress={() => navigation.navigate('Legal', { type: 'terms' })}>Terms & Conditions</Text>
+            {', '}
+            <Text style={styles.termsLink} onPress={() => navigation.navigate('Legal', { type: 'terms-of-use' })}>Terms of Use</Text>
+            {' '}and{' '}
+            <Text style={styles.termsLink} onPress={() => navigation.navigate('Legal', { type: 'privacy' })}>Privacy Policy</Text>.
+          </Text>
         </ScrollView>
       );
     }
@@ -1658,9 +1687,7 @@ export function LoginScreen({ navigation }: any) {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
       <StatusBar barStyle="light-content" backgroundColor="#064e3b" />
-      {/* Status-bar filler only — 60 (not 120) so it stays behind the rounded
-          header and doesn't bleed a dark-green band below it (matches other screens). */}
-      <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 60, backgroundColor: '#064e3b' }} />
+      <StatusBarFiller color="#064e3b" />
 
       <SafeAreaView style={{ flex: 1 }}>
         <LinearGradient colors={['#064e3b', '#15803d']} style={styles.header}>
@@ -1671,7 +1698,7 @@ export function LoginScreen({ navigation }: any) {
               the baked-in tagline in logo-nav.png went blurry at header size.
               Text renders sharp at every screen density. */}
           <View style={styles.logoCard}>
-            <Image source={require('../../assets/logo-icon.png')} style={styles.logoIconImg} resizeMode="contain" />
+            <Image source={require('../../assets/logo-icon.webp')} style={styles.logoIconImg} resizeMode="contain" />
             <View>
               <Text style={styles.logoWordText}>
                 <Text style={{ color: '#ffffff' }}>Karma</Text>
@@ -1706,7 +1733,6 @@ const useStyles = makeStyles((c) => ({
   offlineBannerText: { color: c.danger, fontSize: 13, fontWeight: '700', textAlign: 'center' },
   fieldError: { color: c.danger, fontSize: 12, fontWeight: '600', marginTop: -16, paddingLeft: 4 },
   referralHint: { fontSize: 12, fontWeight: '600', marginTop: -16, paddingLeft: 4, color: c.textMuted },
-  topNotchFiller: { position: 'absolute', top: 0, left: 0, right: 0, height: 100, backgroundColor: '#064e3b' },
   container: { flex: 1, backgroundColor: c.bg, maxWidth: 900, width: '100%', alignSelf: 'center' },
   header: {
     alignItems: 'center',
@@ -1841,6 +1867,7 @@ const useStyles = makeStyles((c) => ({
   facebookFullBtnText: { color: 'white', fontWeight: '700', fontSize: 15 },
 
   socialRow: { flexDirection: 'row', gap: 14, justifyContent: 'center', marginTop: 4 },
+  socialConsentText: { fontSize: 12, color: c.textMuted, lineHeight: 18, textAlign: 'center', marginTop: 20, paddingHorizontal: 8 },
   socialIconBtnZomato: {
     width: 60,
     height: 60,

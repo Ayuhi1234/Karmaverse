@@ -181,6 +181,11 @@ export function RootNavigator() {
           navRef.current?.reset({ index: 0, routes: [{ name: 'Login' }] });
         }
         trackPageView(navRef.current?.getCurrentRoute());
+        // Fade out the static landing hero from public/index.html once the first
+        // screen has painted (two frames) — it sits outside #root, so React won't.
+        if (Platform.OS === 'web' && typeof window !== 'undefined') {
+          requestAnimationFrame(() => requestAnimationFrame(() => (window as any).__kvHideStaticHero?.()));
+        }
       }}
       onStateChange={() => {
         // De-duplicated inside trackPageView: a state change that stays on the same
