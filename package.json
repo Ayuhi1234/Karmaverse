@@ -6,7 +6,9 @@
     "autolinking": {
       "android": {
         "exclude": [
-          "expo-apple-authentication"
+          "expo-apple-authentication",
+          "@react-native-firebase/app",
+          "@react-native-firebase/messaging"
         ]
       }
     }

@@ -8,7 +8,7 @@ const { withFirebaseAppDelegate } = require(
 
 // iOS-only slice of @react-native-firebase/app's plugin: configure Firebase in the
 // AppDelegate and pull Firebase in through CocoaPods rather than SPM. The Android
-// half is skipped on purpose (see react-native.config.js).
+// half is skipped on purpose: package.json excludes Firebase from Android autolinking.
 const DISABLE_SPM = '$RNFirebaseDisableSPM = true';
 
 function withFirebaseDisableSpm(config) {
