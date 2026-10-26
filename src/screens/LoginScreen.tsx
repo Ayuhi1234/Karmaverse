@@ -117,6 +117,44 @@ function loadFacebookSdkScript(): Promise<void> {
   return facebookSdkScriptPromise;
 }
 
+// Sign in with Apple for web — Apple's JS SDK in popup mode. Web logins are issued
+// to this Services ID (not the app's bundle ID), so it must exist in the Apple
+// Developer account with karmaverse.earth and the redirect URI below registered,
+// and the backend must accept it as a token audience. Off until both are in place.
+const APPLE_WEB_LOGIN_LIVE = false;
+const APPLE_WEB_SERVICES_ID = 'com.karmacredits.web';
+
+let appleJsScriptPromise: Promise<void> | null = null;
+function loadAppleJsScript(): Promise<void> {
+  if (appleJsScriptPromise) return appleJsScriptPromise;
+  const failAndReset = (reject: (err: Error) => void, err: Error) => {
+    appleJsScriptPromise = null;
+    reject(err);
+  };
+  appleJsScriptPromise = new Promise<void>((resolve, reject) => {
+    if ((window as any).AppleID?.auth) { resolve(); return; }
+    const timeout = setTimeout(() => {
+      failAndReset(reject, new Error('Apple Sign-In script timed out loading — check for an ad blocker, browser extension, or network/firewall blocking appleid.cdn-apple.com.'));
+    }, 8000);
+    const script = document.createElement('script');
+    script.src = 'https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js';
+    script.async = true;
+    script.onload = () => {
+      clearTimeout(timeout);
+      (window as any).AppleID.auth.init({
+        clientId: APPLE_WEB_SERVICES_ID,
+        scope: 'name email',
+        redirectURI: `${window.location.origin}/login`,
+        usePopup: true,
+      });
+      resolve();
+    };
+    script.onerror = () => { clearTimeout(timeout); failAndReset(reject, new Error('Could not load Apple Sign-In. Check your connection.')); };
+    document.head.appendChild(script);
+  });
+  return appleJsScriptPromise;
+}
+
 type Step = 'entry' | 'checking' | 'login' | 'signup' | 'verify_signup_otp' | 'welcome_celebration' | 'referral_bonus' | 'demographics' | 'reset_password';
 
 // Covers the common emoji Unicode blocks — used to reject emojis in email fields.
@@ -467,6 +505,29 @@ export function LoginScreen({ navigation }: any) {
       // Backing out of the native Apple sheet (ASAuthorizationError 1001) is a quiet no-op.
       const canceled = e?.code === 'ERR_REQUEST_CANCELED' || /cancel/i.test(String(e?.message ?? ''));
       if (!canceled) showAlert('Apple sign-in failed', 'Please try again.');
+    } finally {
+      appleInFlight.current = false;
+      setAppleLoading(false);
+    }
+  };
+
+  const handleAppleSignInWeb = async () => {
+    if (appleInFlight.current) return;
+    appleInFlight.current = true;
+    setAppleLoading(true);
+    try {
+      await loadAppleJsScript();
+      const res = await (window as any).AppleID.auth.signIn();
+      const identityToken = res?.authorization?.id_token;
+      if (!identityToken) throw new Error('No identity token received from Apple');
+      // As on iOS, Apple sends the name only on the first authorization.
+      const name = res?.user?.name;
+      const fullName = name ? [name.firstName, name.lastName].filter(Boolean).join(' ') || null : null;
+      await finishAppleLogin(identityToken, res?.authorization?.code, fullName);
+    } catch (e: any) {
+      // Closing Apple's popup rejects with { error: 'popup_closed_by_user' } — a quiet no-op.
+      const canceled = /popup_closed_by_user|user_cancelled_authorize|user_trigger_new_signin_flow/.test(String(e?.error ?? ''));
+      if (!canceled) showAlert('Apple sign-in failed', e?.message || 'Please try again.');
     } finally {
       appleInFlight.current = false;
       setAppleLoading(false);
@@ -1020,12 +1081,12 @@ export function LoginScreen({ navigation }: any) {
                 )}
               </TouchableOpacity>
 
-              {Platform.OS === 'ios' && (
+              {(Platform.OS === 'ios' || (Platform.OS === 'web' && APPLE_WEB_LOGIN_LIVE)) && (
                 <TouchableOpacity
                   style={styles.socialIconBtn}
                   activeOpacity={0.8}
                   disabled={appleLoading}
-                  onPress={handleAppleSignIn}
+                  onPress={Platform.OS === 'web' ? handleAppleSignInWeb : handleAppleSignIn}
                 >
                   {appleLoading ? (
                     <ActivityIndicator color={colors.text} size="small" />
