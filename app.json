@@ -16,12 +16,15 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.karmacredits.app",
-      "buildNumber": "1",
+      "buildNumber": "2",
       "usesAppleSignIn": true,
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "KarmaVerse uses your location to auto-fill your pickup address and show pickup partners near you on the map.",
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIBackgroundModes": [
+          "remote-notification"
+        ]
       }
     },
     "android": {
@@ -48,6 +51,7 @@
       "./plugins/withMappls",
       "./plugins/withIosModularHeaders",
       "./plugins/withIosSceneDelegate",
+      "./plugins/withFirebaseIos",
       "expo-apple-authentication",
       [
         "@react-native-google-signin/google-signin",

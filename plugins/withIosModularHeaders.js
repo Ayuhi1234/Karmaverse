@@ -3,9 +3,19 @@ const fs = require('fs');
 const path = require('path');
 
 // Google Sign-In pulls in the Swift pod AppCheckCore, which imports GoogleUtilities
-// and RecaptchaInterop. Those don't define modules, so pod install fails with static
-// libraries unless they are built with modular headers.
-const MODULAR_PODS = ['GoogleUtilities', 'RecaptchaInterop'];
+// and RecaptchaInterop, and Firebase Messaging's Swift pods import the Firebase core
+// pods. Those don't define modules, so pod install fails with static libraries unless
+// they are built with modular headers.
+const MODULAR_PODS = [
+  'GoogleUtilities',
+  'RecaptchaInterop',
+  'FirebaseCore',
+  'FirebaseCoreExtension',
+  'FirebaseCoreInternal',
+  'FirebaseInstallations',
+  'GoogleDataTransport',
+  'nanopb',
+];
 
 module.exports = function withIosModularHeaders(config) {
   return withDangerousMod(config, [
