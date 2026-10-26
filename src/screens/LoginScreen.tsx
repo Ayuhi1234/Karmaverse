@@ -120,8 +120,8 @@ function loadFacebookSdkScript(): Promise<void> {
 // Sign in with Apple for web — Apple's JS SDK in popup mode. Web logins are issued
 // to this Services ID (not the app's bundle ID), so it must exist in the Apple
 // Developer account with karmaverse.earth and the redirect URI below registered,
-// and the backend must accept it as a token audience. Off until both are in place.
-const APPLE_WEB_LOGIN_LIVE = false;
+// and the backend must accept it as a token audience.
+const APPLE_WEB_LOGIN_LIVE = true;
 const APPLE_WEB_SERVICES_ID = 'com.karmacredits.web';
 
 let appleJsScriptPromise: Promise<void> | null = null;
