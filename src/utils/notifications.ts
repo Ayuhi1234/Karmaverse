@@ -205,8 +205,9 @@ export async function markNotificationOpened(notificationId?: string): Promise<v
 
 export function addPushTokenRefreshListener(callback: (token: string) => void) {
   if (!Notifications) return { remove: () => {} };
+  // On iOS this fires with the raw APNs token — exchange it like registration does.
   return Notifications.addPushTokenListener(({ data }: { data: string }) => {
-    callback(data);
+    getFcmToken(data).then((token) => { if (token) callback(token); });
   });
 }
 

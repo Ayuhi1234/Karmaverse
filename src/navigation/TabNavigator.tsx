@@ -8,14 +8,13 @@ import { DashboardScreen } from '../screens/DashboardScreen';
 import { WalletScreen } from '../screens/WalletScreen';
 import { OrdersScreen } from '../screens/OrdersScreen';
 import { StoreScreen } from '../screens/StoreScreen';
-import { TAB_BAR_BASE_HEIGHT } from '../utils/layout';
+import { tabBarHeight, tabBarBottomPadding } from '../utils/layout';
 import { useTheme, makeStyles } from '../theme';
 
 const Tab = createBottomTabNavigator();
 
 export function TabNavigator() {
   const insets = useSafeAreaInsets();
-  const baseHeight = TAB_BAR_BASE_HEIGHT;
   const styles = useStyles();
   const { colors } = useTheme();
 
@@ -27,8 +26,8 @@ export function TabNavigator() {
           tabBarStyle: [
             styles.tabBar,
             {
-              height: baseHeight + insets.bottom,
-              paddingBottom: 10 + insets.bottom,
+              height: tabBarHeight(insets.bottom),
+              paddingBottom: tabBarBottomPadding(insets.bottom),
             },
           ],
           tabBarIcon: ({ focused }) => {

@@ -19,7 +19,7 @@ import { StreakModal } from '../components/shared/StreakModal';
 import { LaunchDayPopup } from '../components/shared/LaunchDayPopup';
 import { CoachMarkTour, CoachMarkStep } from '../components/shared/CoachMarkTour';
 import { hasSeenTour, markTourSeen } from '../utils/coachMarks';
-import { TAB_BAR_BASE_HEIGHT } from '../utils/layout';
+import { tabBarHeight } from '../utils/layout';
 import { useNotifications } from '../context/NotificationContext';
 import { profileService } from '../services/profile';
 import { getLocalDateStr, getLocalYesterdayStr } from '../utils/quizDate';
@@ -262,7 +262,7 @@ export function DashboardScreen({ navigation, route }: any) {
     },
     {
       getRect: () => {
-        const h = TAB_BAR_BASE_HEIGHT + insets.bottom;
+        const h = tabBarHeight(insets.bottom);
         return { x: 0, y: windowH - h, width: windowW, height: h };
       },
       scroll: 'stay',
@@ -544,13 +544,14 @@ export function DashboardScreen({ navigation, route }: any) {
           </View>
         </View>
 
-        {/* Stats grid — mirrors the web dashboard (Total Karma Coins / Day streak / Eco Quiz Streak / Sustainability Actions) */}
+        {/* Stats grid — mirrors the web dashboard (Total Karma Coins / Day streak / Eco Quiz Streak / Eco Actions).
+            "Sustainability Actions" didn't fit a phone-width tile and was cut off. */}
         <View ref={statsRef} collapsable={false} style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 14 }}>
           {[
             { Icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total Karma Coins', onPress: () => navigation.navigate('Wallet') },
             { Icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Day streak', onPress: () => setShowStreak(true) },
             { Icon: Trophy, color: '#fde68a', val: `${quizStreak}`, label: 'Eco Quiz Streak', onPress: () => setShowQuizCal(true) },
-            { Icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Sustainability Actions', onPress: () => navigation.navigate('Orders', { tab: 'History' }) },
+            { Icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Eco Actions', onPress: () => navigation.navigate('Orders', { tab: 'History' }) },
           ].map((st, i) => (
             <TouchableOpacity key={i} style={styles.statTile} activeOpacity={0.7} onPress={st.onPress}>
               <View style={styles.statTileTop}>

@@ -14,7 +14,7 @@
       "backgroundColor": "#052e16"
     },
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.karmacredits.app",
       "buildNumber": "3",
       "usesAppleSignIn": true,

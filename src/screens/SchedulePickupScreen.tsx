@@ -269,6 +269,9 @@ export function SchedulePickupScreen({ navigation }: any) {
   const [selectedTime, setSelectedTime] = useState('');
   const [instructions, setInstructions] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  // isLoading disables the button only after a re-render; a fast double click on web
+  // lands before that, so a ref blocks a second request synchronously.
+  const submittingRef = useRef(false);
   // Shown when booking creation is blocked because the (OAuth) user hasn't verified
   // a phone number yet — backend returns 403 on POST /bookings in that case.
   const [showPhoneVerify, setShowPhoneVerify] = useState(false);
@@ -435,7 +438,10 @@ export function SchedulePickupScreen({ navigation }: any) {
       return;
     }
 
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     setIsLoading(true);
+    const attemptStartedAt = Date.now();
     // Structure the categories array — send category/subCategory exactly as in the
     // catalogue, and condition only for Working/Not Working items (never null).
     const payloadCategories: any[] = [];
@@ -472,9 +478,7 @@ export function SchedulePickupScreen({ navigation }: any) {
       payload.specialInstruction = instructions.trim();
     }
 
-    try {
-      const res = await bookingService.createBooking(payload);
-      const createdBooking = res?.data || res;
+    const onBookingCreated = async (createdBooking: any) => {
       console.log('[Confirm Pickup] Created booking:', createdBooking);
       // Counts only — never the address, date, instructions or booking ID.
       trackEvent('schedule_pickup', {
@@ -489,6 +493,27 @@ export function SchedulePickupScreen({ navigation }: any) {
         booking: createdBooking,
         estimatedCoins: createdBooking?.estimatedKarmaCoins ?? cartCalculations.totalCoins,
       }), 2500);
+    };
+
+    // With no response (timeout, dropped connection) the booking may still have been
+    // created on the server. Look for it before reporting a failure, so the user
+    // doesn't retry and place the same pickup twice.
+    const findJustPlacedBooking = async () => {
+      try {
+        const bookings = await bookingService.getMyBookings();
+        return bookings.find((b: any) =>
+          b?.timeSlot === selectedTime &&
+          b?.status !== 'CANCELLED' &&
+          new Date(b?.createdAt).getTime() >= attemptStartedAt - 2 * 60 * 1000
+        ) || null;
+      } catch {
+        return null;
+      }
+    };
+
+    try {
+      const res = await bookingService.createBooking(payload);
+      await onBookingCreated(res?.data || res);
     } catch (error: any) {
       // OAuth users with no verified phone are blocked with a 403 before any other
       // validation. Route them to phone verification instead of a dead-end error;
@@ -497,6 +522,13 @@ export function SchedulePickupScreen({ navigation }: any) {
         setShowPhoneVerify(true);
         setIsLoading(false);
         return;
+      }
+      if (!error?.response) {
+        const placed = await findJustPlacedBooking();
+        if (placed) {
+          await onBookingCreated(placed);
+          return;
+        }
       }
       // Surface the real reason so scheduling failures aren't a dead end.
       const data = error?.response?.data;
@@ -508,10 +540,11 @@ export function SchedulePickupScreen({ navigation }: any) {
         validationMsg ||
         (error?.response
           ? `Server error (${error.response.status}).`
-          : 'Could not reach the server. Please check your connection.');
+          : 'Could not reach the server. Please check your connection, and check Orders before trying again.');
       console.error('[Confirm Pickup] Failed:', error?.response?.status, JSON.stringify(data), JSON.stringify(payload));
       showAlert('Scheduling failed', detail);
     } finally {
+      submittingRef.current = false;
       setIsLoading(false);
     }
   };
