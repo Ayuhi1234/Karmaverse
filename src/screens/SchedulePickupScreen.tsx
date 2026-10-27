@@ -272,6 +272,10 @@ export function SchedulePickupScreen({ navigation }: any) {
   // isLoading disables the button only after a re-render; a fast double click on web
   // lands before that, so a ref blocks a second request synchronously.
   const submittingRef = useRef(false);
+  // A retry of the same booking must reuse the same key so the backend can return the
+  // booking it already created instead of placing a second one. Any change to the
+  // cart, date, slot or address makes it a new booking with a new key.
+  const idempotencyRef = useRef<{ payload: string; key: string } | null>(null);
   // Shown when booking creation is blocked because the (OAuth) user hasn't verified
   // a phone number yet — backend returns 403 on POST /bookings in that case.
   const [showPhoneVerify, setShowPhoneVerify] = useState(false);
@@ -478,8 +482,18 @@ export function SchedulePickupScreen({ navigation }: any) {
       payload.specialInstruction = instructions.trim();
     }
 
+    const payloadSignature = JSON.stringify(payload);
+    if (idempotencyRef.current?.payload !== payloadSignature) {
+      idempotencyRef.current = {
+        payload: payloadSignature,
+        key: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}${Math.random().toString(36).slice(2)}`,
+      };
+    }
+    const idempotencyKey = idempotencyRef.current.key;
+
     const onBookingCreated = async (createdBooking: any) => {
       console.log('[Confirm Pickup] Created booking:', createdBooking);
+      idempotencyRef.current = null;
       // Counts only — never the address, date, instructions or booking ID.
       trackEvent('schedule_pickup', {
         category_count: new Set(payloadCategories.map((c) => c.category)).size,
@@ -512,7 +526,7 @@ export function SchedulePickupScreen({ navigation }: any) {
     };
 
     try {
-      const res = await bookingService.createBooking(payload);
+      const res = await bookingService.createBooking(payload, idempotencyKey);
       await onBookingCreated(res?.data || res);
     } catch (error: any) {
       // OAuth users with no verified phone are blocked with a 403 before any other
