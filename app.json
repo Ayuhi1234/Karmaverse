@@ -52,6 +52,7 @@
       "./plugins/withIosModularHeaders",
       "./plugins/withIosSceneDelegate",
       "./plugins/withFirebaseIos",
+      "./plugins/withIosHideScrollEdgeEffect",
       "expo-apple-authentication",
       [
         "@react-native-google-signin/google-signin",
