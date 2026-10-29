@@ -84,7 +84,7 @@ const ALL_ITEMS: CatalogueItem[] = [
   // Smartwatch / wearables disabled until backend seeds them (not in live catalogue yet).
 
   // 2. Mixed E-Waste (kg)
-  { id: 'me1', catId: '2', subCategory: 'Mixed E-waste', unit: 'kg', coins: 200, itemIcon: Cable, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Keyboards_and_mice_in_pile_of_ewaste.jpg/500px-Keyboards_and_mice_in_pile_of_ewaste.jpg' } },
+  { id: 'me1', catId: '2', subCategory: 'Mixed E-waste', unit: 'kg', coins: 300, itemIcon: Cable, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Keyboards_and_mice_in_pile_of_ewaste.jpg/500px-Keyboards_and_mice_in_pile_of_ewaste.jpg' } },
 
   // 3. Glass (kg) — Broken Glass is not accepted, so it is omitted
   { id: 'gl1', catId: '3', subCategory: 'Beer Bottles', unit: 'kg', coins: 20, itemIcon: Wine, image: require('../../assets/catalogue/beer-bottles.jpg') },
