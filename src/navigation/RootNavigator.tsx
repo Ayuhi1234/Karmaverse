@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
-import { View, ActivityIndicator, StyleSheet, Platform } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Platform, Linking } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { getToken } from '../utils/tokenStore';
@@ -16,7 +16,7 @@ import { UnsubscribeScreen } from '../screens/UnsubscribeScreen';
 import { EmailPreferencesScreen } from '../screens/EmailPreferencesScreen';
 import { NotFoundScreen } from '../screens/NotFoundScreen';
 import { navigationRef } from './navRef';
-import { capturePendingDeepLink, clearPendingDeepLink, hasPendingDeepLink, hasPendingReferral } from '../utils/deepLink';
+import { capturePendingAppLink, capturePendingDeepLink, clearPendingDeepLink, hasPendingDeepLink, hasPendingReferral } from '../utils/deepLink';
 import { routeNotification } from '../utils/notificationRoute';
 import { initAnalytics, trackPageView } from '../utils/analytics';
 
@@ -83,6 +83,9 @@ export function RootNavigator() {
         // Already logged in — the router resolves the deep link directly, so drop
         // any captured URL to avoid a stale redirect on a later in-session login.
         if (isValid) clearPendingDeepLink();
+        // Logged out and opened from an App Link: remember it so onReady sends them
+        // to Login and the login returns them to it (web does this at import).
+        else if (Platform.OS !== 'web') capturePendingAppLink(await Linking.getInitialURL());
         setIsLoggedIn(isValid);
       } catch (error) {
         console.error('Auth check failed:', error);
@@ -109,9 +112,22 @@ export function RootNavigator() {
     return () => sub.remove();
   }, []);
 
-  // Web-only URL routing for the public pages — gives them real, shareable, crawlable
-  // URLs. Deliberately excludes the `karmacoin://` scheme so the existing manual
-  // referral-code deep-link handling in App.tsx (native) is unaffected. The root path
+  // An App Link tapped while the app is open but logged out resolves to NotFound (its
+  // path isn't in the logged-out link map). Remember it and show Login instead.
+  useEffect(() => {
+    if (Platform.OS === 'web' || isLoggedIn !== false) return;
+    const sub = Linking.addEventListener('url', ({ url }) => {
+      if (capturePendingAppLink(url)) {
+        setTimeout(() => navRef.current?.reset({ index: 0, routes: [{ name: 'Login' }] }), 0);
+      }
+    });
+    return () => sub.remove();
+  }, [isLoggedIn]);
+
+  // URL routing: on web for real, shareable, crawlable URLs; on Android for App Links
+  // (https://karmaverse.earth/<Screen>, declared in app.json's intentFilters) from
+  // emails and shares. Deliberately excludes the `karmacoin://` scheme so the existing
+  // manual referral-code deep-link handling in App.tsx (native) is unaffected. The root path
   // ('') must map to whichever screen `initialRouteName` would otherwise pick, or a
   // logged-in user visiting '/' would get bounced to the Splash marketing screen.
   // Every authenticated screen needs an entry here or a cold load / refresh of its
@@ -120,7 +136,9 @@ export function RootNavigator() {
   // top-level stack routes. Paths match the route names so the URLs the nav already
   // generates (/Wallet, /Quiz, …) round-trip on refresh, bookmarks and shared links.
   const linking = useMemo(() => ({
-    prefixes: Platform.OS === 'web' && typeof window !== 'undefined' ? [window.location.origin] : [],
+    prefixes: Platform.OS === 'web'
+      ? (typeof window !== 'undefined' ? [window.location.origin] : [])
+      : ['https://karmaverse.earth'],
     config: {
       screens: isLoggedIn
         ? {

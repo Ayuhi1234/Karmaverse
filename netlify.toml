@@ -26,6 +26,12 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
+# Android fetches this to verify the app may open karmaverse.earth links (App Links).
+[[headers]]
+  for = "/.well-known/assetlinks.json"
+  [headers.values]
+    Content-Type = "application/json"
+
 # Legacy URLs from an earlier version of the site — still hold external backlinks and
 # Search Console referrals, so redirect them to their current equivalents instead of
 # silently serving the homepage shell (which the old catch-all below did).
