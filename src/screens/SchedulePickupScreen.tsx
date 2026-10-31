@@ -343,7 +343,7 @@ export function SchedulePickupScreen({ navigation }: any) {
       if (added) setSelectedAddressId(added._id);
     } catch (error: any) {
       if (error?.response?.status === 400) {
-        // Authoritative rejection (e.g. outside the 25km Gurugram service area) —
+        // Authoritative rejection (e.g. outside the 50km Gurugram service area) —
         // don't fall back locally, that would let the user book anyway.
         showAlert('Address not saved', error.response.data?.message || 'This address could not be saved.');
         return;

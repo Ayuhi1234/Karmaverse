@@ -438,7 +438,7 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
             {isOutOfServiceArea && !isGeocoding && (
               <View style={styles.outOfAreaBanner}>
                 <Text style={styles.outOfAreaText}>
-                  We're currently only available in Gurugram and nearby areas (within ~25km). This location is outside our service area.
+                  Sorry, we currently operate only in Gurugram and nearby areas within 50km. This location is outside our service area.
                 </Text>
               </View>
             )}
