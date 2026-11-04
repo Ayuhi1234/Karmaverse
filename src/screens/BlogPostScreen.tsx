@@ -18,7 +18,7 @@ const PROSE_CSS = `
 .kv-prose { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 17px; line-height: 1.75; color: var(--kv-muted); overflow-wrap: anywhere; }
 .kv-prose > * + * { margin-top: 1.1em; }
 .kv-prose p, .kv-prose ul, .kv-prose ol, .kv-prose table, .kv-prose blockquote { margin-bottom: 0; }
-.kv-prose h2 { margin: 1.9em 0 0; font-size: 24px; line-height: 1.25; font-weight: 800; color: var(--kv-text); }
+.kv-prose h2 { scroll-margin-top: 16px; margin: 1.9em 0 0; font-size: 24px; line-height: 1.25; font-weight: 800; color: var(--kv-text); }
 .kv-prose h3 { margin: 1.5em 0 0; font-size: 19px; line-height: 1.3; font-weight: 800; color: var(--kv-text); }
 .kv-prose strong { color: var(--kv-text); }
 .kv-prose a { color: var(--kv-primary); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
@@ -97,6 +97,15 @@ export function BlogPostScreen({ route, navigation }: any) {
   const shareUrl = `https://karmaverse.earth/blog/${slug}`;
 
   const [copied, setCopied] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const onScroll = (e: any) => {
+    const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
+    const total = contentSize.height - layoutMeasurement.height;
+    setProgress(total > 0 ? Math.min(1, Math.max(0, contentOffset.y / total)) : 0);
+  };
+  const jumpTo = (id: string) => {
+    if (Platform.OS === 'web' && typeof document !== 'undefined') document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
   const shareTitle = head?.title ?? 'KarmaVerse blog';
   const shareLinks = [
     { name: 'WhatsApp', Icon: MessageCircle, href: `https://wa.me/?text=${encodeURIComponent(`${shareTitle} ${shareUrl}`)}` },
@@ -174,7 +183,10 @@ export function BlogPostScreen({ route, navigation }: any) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+      <View pointerEvents="none" style={styles.progressTrack}>
+        <View style={[styles.progressBar, { width: `${progress * 100}%` as any }]} />
+      </View>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false} onScroll={onScroll} scrollEventThrottle={32}>
         <View style={styles.header}>
           <TouchableOpacity style={styles.iconBtn} onPress={back} accessibilityLabel="All posts">
             <ChevronLeft size={24} color={colors.text} />
@@ -199,6 +211,18 @@ export function BlogPostScreen({ route, navigation }: any) {
               {!!head.image && <Image source={{ uri: head.image }} style={styles.hero} resizeMode="cover" accessibilityIgnoresInvertColors />}
               {!!head.imageCredit && <Text style={styles.credit}>{head.imageCredit}</Text>}
             </>
+          )}
+
+          {Platform.OS === 'web' && state === 'ready' && (post?.toc?.length ?? 0) >= 3 && (
+            <View style={styles.toc}>
+              <Text style={styles.tocTitle}>IN THIS ARTICLE</Text>
+              {post!.toc!.map((t, i) => (
+                <TouchableOpacity key={t.id} style={styles.tocRow} onPress={() => jumpTo(t.id)}>
+                  <Text style={styles.tocNum}>{i + 1}</Text>
+                  <Text style={styles.tocText}>{t.text}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           )}
 
           {body}
@@ -275,6 +299,13 @@ function CtaBox({ cta, onPress }: { cta: BlogCta; onPress: (href: string) => voi
 }
 
 const useStyles = makeStyles((c) => ({
+  progressTrack: { position: 'absolute', top: 0, left: 0, right: 0, height: 4, zIndex: 10 },
+  progressBar: { height: 4, backgroundColor: c.primary, borderTopRightRadius: 4, borderBottomRightRadius: 4 },
+  toc: { backgroundColor: c.surface, borderWidth: 1, borderColor: c.border, borderRadius: 20, padding: 18, gap: 10, marginTop: 10, marginBottom: 26 },
+  tocTitle: { fontSize: 12, fontWeight: '800', letterSpacing: 1.2, color: c.primary, marginBottom: 2 },
+  tocRow: { flexDirection: 'row', gap: 12 },
+  tocNum: { width: 18, textAlign: 'right', fontSize: 13, color: c.textFaint, fontWeight: '700', lineHeight: 21 },
+  tocText: { flex: 1, fontSize: 15, color: c.text, fontWeight: '600', lineHeight: 21 },
   shareBox: { marginTop: 36, paddingTop: 22, borderTopWidth: 1, borderTopColor: c.border, gap: 12 },
   shareTitle: { fontSize: 17, fontWeight: '800', color: c.text },
   shareRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },

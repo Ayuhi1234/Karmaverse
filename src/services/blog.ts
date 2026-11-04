@@ -30,7 +30,7 @@ export type BlogCta = {
   secondary: { label: string; href: string };
 };
 
-export type BlogPostWithBody = BlogPost & { html: string; faq: { q: string; a: string }[] };
+export type BlogPostWithBody = BlogPost & { html: string; faq: { q: string; a: string }[]; toc?: { id: string; text: string }[] };
 
 let listCache: { at: number; posts: BlogPost[] } | null = null;
 const TTL = 5 * 60_000;
