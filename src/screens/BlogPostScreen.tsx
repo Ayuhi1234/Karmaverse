@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, ActivityIndicator, Platform, Share, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ChevronLeft, Clock, ExternalLink, Share2 } from 'lucide-react-native';
+import { ArrowRight, Check, ChevronLeft, Clock, ExternalLink, Facebook, Link2, Linkedin, MessageCircle, Share2, Twitter } from 'lucide-react-native';
 import {
-  BLOG_SOURCE, BlogPost, BlogPostWithBody, categoryColor, fetchBlogPost, fetchBlogPosts, formatBlogDate, peekBlogPost,
+  BLOG_SOURCE, BlogCta, BlogPost, BlogPostWithBody, categoryColor, fetchBlogPost, fetchBlogPosts, formatBlogDate, peekBlogPost,
 } from '../services/blog';
 import { setPageMeta } from '../utils/pageMeta';
+import { getToken } from '../utils/tokenStore';
 import { WebFooter } from '../components/shared/WebFooter';
 import { useTheme, makeStyles, ThemeColors } from '../theme';
 
@@ -95,6 +96,39 @@ export function BlogPostScreen({ route, navigation }: any) {
   const back = () => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Blog'));
   const shareUrl = `https://karmaverse.earth/blog/${slug}`;
 
+  const [copied, setCopied] = useState(false);
+  const shareTitle = head?.title ?? 'KarmaVerse blog';
+  const shareLinks = [
+    { name: 'WhatsApp', Icon: MessageCircle, href: `https://wa.me/?text=${encodeURIComponent(`${shareTitle} ${shareUrl}`)}` },
+    { name: 'LinkedIn', Icon: Linkedin, href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}` },
+    { name: 'X', Icon: Twitter, href: `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareTitle)}` },
+    { name: 'Facebook', Icon: Facebook, href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}` },
+  ];
+  const openLink = (href: string) => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') window.open(href, '_blank', 'noopener,noreferrer');
+    else Linking.openURL(href);
+  };
+  const copyLink = async () => {
+    try {
+      if (Platform.OS === 'web' && (navigator as any)?.clipboard) {
+        await (navigator as any).clipboard.writeText(shareUrl);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } else await Share.share({ message: `${shareTitle} — ${shareUrl}` });
+    } catch {
+      // clipboard blocked
+    }
+  };
+
+  // KarmaVerse boxes go to the in-app pickup (or login); service boxes open 0waste.co.in.
+  const ctaPress = async (href: string) => {
+    if (/^https:\/\/karmaverse\.earth\/?$/.test(href)) {
+      const token = await getToken().catch(() => null);
+      return navigation.navigate(token ? 'SchedulePickup' : 'Login');
+    }
+    openLink(href);
+  };
+
   const handleShare = async () => {
     const title = head?.title ?? 'KarmaVerse blog';
     try {
@@ -170,6 +204,26 @@ export function BlogPostScreen({ route, navigation }: any) {
           {body}
 
           {state === 'ready' && post && (
+            <View style={styles.shareBox}>
+              <Text style={styles.shareTitle}>Found this useful? Pass it on.</Text>
+              <View style={styles.shareRow}>
+                {shareLinks.map(({ name, Icon, href }) => (
+                  <TouchableOpacity key={name} style={styles.shareBtn} onPress={() => openLink(href)} accessibilityLabel={`Share on ${name}`}>
+                    <Icon size={17} color={colors.text} />
+                    <Text style={styles.shareBtnText}>{name}</Text>
+                  </TouchableOpacity>
+                ))}
+                <TouchableOpacity style={styles.shareBtn} onPress={copyLink} accessibilityLabel="Copy link">
+                  {copied ? <Check size={17} color={colors.primary} /> : <Link2 size={17} color={colors.text} />}
+                  <Text style={styles.shareBtnText}>{copied ? 'Copied' : 'Copy link'}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+
+          {state === 'ready' && post?.cta && <CtaBox cta={post.cta} onPress={ctaPress} />}
+
+          {state === 'ready' && post && (
             <TouchableOpacity style={styles.sourceLink} onPress={() => Linking.openURL(post.url)}>
               <ExternalLink size={14} color={colors.primary} />
               <Text style={styles.sourceText}>Originally published on {BLOG_SOURCE.replace('https://', '')}</Text>
@@ -199,7 +253,46 @@ export function BlogPostScreen({ route, navigation }: any) {
   );
 }
 
+function CtaBox({ cta, onPress }: { cta: BlogCta; onPress: (href: string) => void }) {
+  const styles = useStyles();
+  const dark = cta.kind === 'service';
+  return (
+    <View style={[styles.cta, dark ? styles.ctaDark : styles.ctaLight]}>
+      <Text style={[styles.ctaEyebrow, dark && { color: '#C8F26A' }]}>{cta.eyebrow.toUpperCase()}</Text>
+      <Text style={[styles.ctaTitle, dark && { color: '#F2F6F3' }]}>{cta.title}</Text>
+      <Text style={[styles.ctaText, dark && { color: '#C3D1CA' }]}>{cta.text}</Text>
+      <View style={styles.ctaBtns}>
+        <TouchableOpacity style={[styles.ctaPrimary, dark && { backgroundColor: '#C8F26A' }]} onPress={() => onPress(cta.primary.href)}>
+          <Text style={[styles.ctaPrimaryText, dark && { color: '#07140E' }]}>{cta.primary.label}</Text>
+          <ArrowRight size={16} color={dark ? '#07140E' : '#fff'} />
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.ctaSecondary, dark && { borderColor: 'rgba(255,255,255,0.25)' }]} onPress={() => onPress(cta.secondary.href)}>
+          <Text style={[styles.ctaSecondaryText, dark && { color: '#F2F6F3' }]}>{cta.secondary.label}</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
 const useStyles = makeStyles((c) => ({
+  shareBox: { marginTop: 36, paddingTop: 22, borderTopWidth: 1, borderTopColor: c.border, gap: 12 },
+  shareTitle: { fontSize: 17, fontWeight: '800', color: c.text },
+  shareRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  shareBtn: { flexDirection: 'row', alignItems: 'center', gap: 7, paddingHorizontal: 14, minHeight: 42, borderRadius: 100, borderWidth: 1, borderColor: c.border, backgroundColor: c.surface },
+  shareBtnText: { fontSize: 13.5, fontWeight: '700', color: c.text },
+
+  cta: { marginTop: 28, borderRadius: 24, padding: 24, gap: 10 },
+  ctaLight: { backgroundColor: c.primarySoft },
+  ctaDark: { backgroundColor: '#07140E' },
+  ctaEyebrow: { fontSize: 11, fontWeight: '800', letterSpacing: 1.2, color: c.primary },
+  ctaTitle: { fontSize: 23, fontWeight: '900', color: c.text, lineHeight: 29 },
+  ctaText: { fontSize: 15, color: c.textMuted, lineHeight: 23 },
+  ctaBtns: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 6 },
+  ctaPrimary: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: c.primary, paddingHorizontal: 20, minHeight: 46, borderRadius: 100 },
+  ctaPrimaryText: { color: c.onPrimary, fontWeight: '800', fontSize: 14.5 },
+  ctaSecondary: { justifyContent: 'center', paddingHorizontal: 20, minHeight: 46, borderRadius: 100, borderWidth: 1, borderColor: c.border },
+  ctaSecondaryText: { color: c.text, fontWeight: '700', fontSize: 14.5 },
+
   container: { flex: 1, backgroundColor: c.bg },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 20, paddingBottom: 10, maxWidth: 760, width: '100%', alignSelf: 'center' },
   iconBtn: { padding: 8, backgroundColor: c.surface, borderRadius: 12, elevation: 1 },
@@ -213,7 +306,7 @@ const useStyles = makeStyles((c) => ({
   hero: { width: '100%', aspectRatio: 16 / 9, borderRadius: 20, backgroundColor: c.surfaceAlt, marginBottom: 8 },
   credit: { fontSize: 11.5, color: c.textFaint, textAlign: 'right', marginBottom: 18 },
 
-  sourceLink: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 36, paddingTop: 20, borderTopWidth: 1, borderTopColor: c.border },
+  sourceLink: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 22 },
   sourceText: { color: c.primary, fontWeight: '700', fontSize: 13 },
 
   moreBox: { marginTop: 28, gap: 12 },

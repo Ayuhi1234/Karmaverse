@@ -17,6 +17,17 @@ export type BlogPost = {
   featured: boolean;
   keywords: string[];
   url: string; // canonical article on 0waste.co.in
+  /** Call-to-action box for the end of the post (chosen on 0waste.co.in from the category). */
+  cta?: BlogCta;
+};
+
+export type BlogCta = {
+  kind: 'karmaverse' | 'service';
+  eyebrow: string;
+  title: string;
+  text: string;
+  primary: { label: string; href: string };
+  secondary: { label: string; href: string };
 };
 
 export type BlogPostWithBody = BlogPost & { html: string; faq: { q: string; a: string }[] };
