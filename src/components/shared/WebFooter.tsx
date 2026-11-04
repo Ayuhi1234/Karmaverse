@@ -45,6 +45,7 @@ export function WebFooter() {
     },
     { label: 'Daily quiz', onPress: () => navigation.navigate('Quiz') },
     { label: 'Knowledge hub', onPress: () => navigation.navigate('KnowledgeHub') },
+    { label: 'Blog', onPress: () => navigation.navigate('Blog') },
     { label: 'Referral program', onPress: () => navigation.navigate('Referral') },
     { label: 'About us', onPress: () => navigation.navigate('AboutUs') },
   ];

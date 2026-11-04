@@ -281,6 +281,9 @@ export function SplashScreen({ navigation, route }: any) {
               <TouchableOpacity onPress={() => scrollToSection('learning')}>
                 <Text style={s.navTabText}>Learn</Text>
               </TouchableOpacity>
+              <TouchableOpacity onPress={() => navigation.navigate('Blog')}>
+                <Text style={s.navTabText}>Blog</Text>
+              </TouchableOpacity>
               <TouchableOpacity onPress={() => scrollRef.current?.scrollToEnd({ animated: true })}>
                 <Text style={s.navTabText}>Contact</Text>
               </TouchableOpacity>
@@ -556,6 +559,9 @@ export function SplashScreen({ navigation, route }: any) {
                 <Text style={s.footerLinkTitle}>Company</Text>
                 <TouchableOpacity onPress={() => navigation.navigate('AboutUs')}>
                   <Text style={s.footerLink}>About us</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate('Blog')}>
+                  <Text style={s.footerLink}>Blog</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => navigation.navigate('Legal', { type: 'privacy' })}>
                   <Text style={s.footerLink}>Privacy policy</Text>

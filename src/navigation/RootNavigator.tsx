@@ -15,6 +15,9 @@ import { FeedbackScreen } from '../screens/FeedbackScreen';
 import { UnsubscribeScreen } from '../screens/UnsubscribeScreen';
 import { EmailPreferencesScreen } from '../screens/EmailPreferencesScreen';
 import { NotFoundScreen } from '../screens/NotFoundScreen';
+// Public blog (posts are read live from 0waste.co.in's feed).
+import { BlogScreen } from '../screens/BlogScreen';
+import { BlogPostScreen } from '../screens/BlogPostScreen';
 import { navigationRef } from './navRef';
 import { capturePendingAppLink, capturePendingDeepLink, clearPendingDeepLink, hasPendingDeepLink, hasPendingReferral } from '../utils/deepLink';
 import { routeNotification } from '../utils/notificationRoute';
@@ -166,6 +169,8 @@ export function RootNavigator() {
             Donation: 'Donation',
             Transfer: 'Transfer',
             AboutUs: 'AboutUs',
+            Blog: 'blog',
+            BlogPost: 'blog/:slug',
             Feedback: 'feedback',
             Unsubscribe: 'unsubscribe',
             EmailPreferences: 'preferences',
@@ -173,6 +178,7 @@ export function RootNavigator() {
           }
         : {
             Splash: '', Login: 'login', Legal: 'legal/:type', AboutUs: 'AboutUs',
+            Blog: 'blog', BlogPost: 'blog/:slug',
             // Public, token-based mailer destinations — openable while logged out.
             Feedback: 'feedback', Unsubscribe: 'unsubscribe', EmailPreferences: 'preferences',
             NotFound: '*',
@@ -232,6 +238,8 @@ export function RootNavigator() {
         <Stack.Screen name="Donation" component={DonationScreen} />
         <Stack.Screen name="Transfer" component={TransferScreen} />
         <Stack.Screen name="AboutUs" component={AboutUsScreen} />
+        <Stack.Screen name="Blog" component={BlogScreen} />
+        <Stack.Screen name="BlogPost" component={BlogPostScreen} />
         <Stack.Screen name="Feedback" component={FeedbackScreen} />
         <Stack.Screen name="Unsubscribe" component={UnsubscribeScreen} />
         <Stack.Screen name="EmailPreferences" component={EmailPreferencesScreen} />
