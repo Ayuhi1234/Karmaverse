@@ -8,6 +8,7 @@ import {
 import { setPageMeta } from '../utils/pageMeta';
 import { getToken } from '../utils/tokenStore';
 import { WebFooter } from '../components/shared/WebFooter';
+import { NewsletterBox } from '../components/blog/NewsletterBox';
 import { useTheme, makeStyles, ThemeColors } from '../theme';
 
 // karmaverse.earth/blog/<slug> — the full article, read live from 0waste.co.in.
@@ -269,6 +270,8 @@ export function BlogPostScreen({ route, navigation }: any) {
               ))}
             </View>
           )}
+
+          {state === 'ready' && <NewsletterBox />}
         </View>
 
         {Platform.OS === 'web' && <WebFooter />}

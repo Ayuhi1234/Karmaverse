@@ -7,6 +7,7 @@ import { BlogPost, categoryColor, fetchBlogPosts, formatBlogDate } from '../serv
 import { setPageMeta } from '../utils/pageMeta';
 import { getToken } from '../utils/tokenStore';
 import { WebFooter } from '../components/shared/WebFooter';
+import { NewsletterBox } from '../components/blog/NewsletterBox';
 import { useTheme, makeStyles } from '../theme';
 
 // karmaverse.earth/blog — the same posts as 0waste.co.in/blog, read live from its feed.
@@ -134,6 +135,8 @@ export function BlogScreen({ navigation }: any) {
                   </TouchableOpacity>
                 ))}
               </View>
+
+              <NewsletterBox />
             </>
           )}
         </View>
