@@ -9,6 +9,7 @@ import { setPageMeta } from '../utils/pageMeta';
 import { getToken } from '../utils/tokenStore';
 import { WebFooter } from '../components/shared/WebFooter';
 import { NewsletterBox } from '../components/blog/NewsletterBox';
+import { ReactionBar } from '../components/blog/ReactionBar';
 import { useTheme, makeStyles, ThemeColors } from '../theme';
 
 // karmaverse.earth/blog/<slug> — the full article, read live from 0waste.co.in.
@@ -228,9 +229,11 @@ export function BlogPostScreen({ route, navigation }: any) {
 
           {body}
 
+          {state === 'ready' && post && <ReactionBar slug={post.slug} />}
+
           {state === 'ready' && post && (
             <View style={styles.shareBox}>
-              <Text style={styles.shareTitle}>Found this useful? Pass it on.</Text>
+              <Text style={styles.shareTitle}>Pass it on.</Text>
               <View style={styles.shareRow}>
                 {shareLinks.map(({ name, Icon, href }) => (
                   <TouchableOpacity key={name} style={styles.shareBtn} onPress={() => openLink(href)} accessibilityLabel={`Share on ${name}`}>
@@ -309,7 +312,7 @@ const useStyles = makeStyles((c) => ({
   tocRow: { flexDirection: 'row', gap: 12 },
   tocNum: { width: 18, textAlign: 'right', fontSize: 13, color: c.textFaint, fontWeight: '700', lineHeight: 21 },
   tocText: { flex: 1, fontSize: 15, color: c.text, fontWeight: '600', lineHeight: 21 },
-  shareBox: { marginTop: 36, paddingTop: 22, borderTopWidth: 1, borderTopColor: c.border, gap: 12 },
+  shareBox: { marginTop: 24, gap: 12 },
   shareTitle: { fontSize: 17, fontWeight: '800', color: c.text },
   shareRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   shareBtn: { flexDirection: 'row', alignItems: 'center', gap: 7, paddingHorizontal: 14, minHeight: 42, borderRadius: 100, borderWidth: 1, borderColor: c.border, backgroundColor: c.surface },

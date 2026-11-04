@@ -59,6 +59,38 @@ export async function fetchBlogPost(slug: string): Promise<BlogPostWithBody> {
   return post;
 }
 
+/* ---------- reactions, views, most read (stored on 0waste.co.in) ---------- */
+
+export type BlogReactions = { like: number; love: number; recycle: number };
+
+export async function fetchBlogStats(slug: string): Promise<{ views: number; reactions: BlogReactions }> {
+  return getJson(`/api/blog/stats?slug=${encodeURIComponent(slug)}`);
+}
+
+export async function fetchMostRead(): Promise<{ mostRead: string[]; views: Record<string, number> }> {
+  return getJson('/api/blog/stats');
+}
+
+function postStats(body: object) {
+  return fetch(`${BLOG_SOURCE}/api/blog/stats`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  }).catch(() => undefined);
+}
+
+const viewed = new Set<string>();
+/** Counts one view per post per app session. */
+export function sendBlogView(slug: string) {
+  if (viewed.has(slug)) return;
+  viewed.add(slug);
+  postStats({ slug, action: 'view' });
+}
+
+export function sendBlogReaction(slug: string, reaction: keyof BlogReactions, undo: boolean) {
+  postStats({ slug, action: 'react', reaction, undo });
+}
+
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 export function formatBlogDate(iso: string) {
   const [y, m, d] = iso.split('-').map(Number);

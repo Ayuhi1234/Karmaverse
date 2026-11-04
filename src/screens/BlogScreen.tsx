@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, ActivityIndicator, Platform, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ChevronLeft, Clock, RefreshCw } from 'lucide-react-native';
-import { BlogPost, categoryColor, fetchBlogPosts, formatBlogDate } from '../services/blog';
+import { ChevronLeft, Clock, RefreshCw, TrendingUp } from 'lucide-react-native';
+import { BlogPost, categoryColor, fetchBlogPosts, fetchMostRead, formatBlogDate } from '../services/blog';
 import { setPageMeta } from '../utils/pageMeta';
 import { getToken } from '../utils/tokenStore';
 import { WebFooter } from '../components/shared/WebFooter';
@@ -20,6 +20,16 @@ export function BlogScreen({ navigation }: any) {
   const [posts, setPosts] = useState<BlogPost[] | null>(null);
   const [error, setError] = useState(false);
   const [category, setCategory] = useState('All');
+  const [mostRead, setMostRead] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetchMostRead()
+      .then(({ mostRead: top, views }) => {
+        const total = Object.values(views).reduce((a, b) => a + b, 0);
+        if (top.length >= 3 && total >= 15) setMostRead(top.slice(0, 3));
+      })
+      .catch(() => {});
+  }, []);
 
   const load = useCallback(async (force = false) => {
     setError(false);
@@ -136,6 +146,27 @@ export function BlogScreen({ navigation }: any) {
                 ))}
               </View>
 
+              {category === 'All' && mostRead.length >= 3 && (
+                <View style={styles.mostRead}>
+                  <View style={styles.mostReadHead}>
+                    <TrendingUp size={20} color={colors.primary} />
+                    <Text style={styles.mostReadTitle}>Most read</Text>
+                  </View>
+                  {mostRead
+                    .map((slug) => posts.find((p) => p.slug === slug))
+                    .filter((p): p is BlogPost => Boolean(p))
+                    .map((p, i) => (
+                      <TouchableOpacity key={p.slug} style={styles.mostReadRow} onPress={() => open(p)} activeOpacity={0.85}>
+                        <Text style={styles.mostReadNum}>{i + 1}</Text>
+                        <View style={{ flex: 1 }}>
+                          <Text style={[styles.categoryLabel, { color: categoryColor(p.category) }]}>{p.category.toUpperCase()}</Text>
+                          <Text style={styles.mostReadItem} numberOfLines={2}>{p.title}</Text>
+                        </View>
+                      </TouchableOpacity>
+                    ))}
+                </View>
+              )}
+
               <NewsletterBox />
             </>
           )}
@@ -181,6 +212,12 @@ const useStyles = makeStyles((c) => ({
   cardSummary: { fontSize: 14, color: c.textMuted, lineHeight: 21 },
   cardMeta: { fontSize: 11.5, color: c.textFaint, fontWeight: '500' },
 
+  mostRead: { marginTop: 32, gap: 10 },
+  mostReadHead: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 },
+  mostReadTitle: { fontSize: 22, fontWeight: '900', color: c.text },
+  mostReadRow: { flexDirection: 'row', alignItems: 'center', gap: 16, backgroundColor: c.surface, borderRadius: 18, padding: 16, borderWidth: 1, borderColor: c.border },
+  mostReadNum: { fontSize: 30, fontWeight: '900', color: c.primary, opacity: 0.7, width: 26, textAlign: 'center' },
+  mostReadItem: { fontSize: 16, fontWeight: '800', color: c.text, lineHeight: 22, marginTop: 3 },
   errorBox: { alignItems: 'center', gap: 14, marginTop: 50 },
   errorText: { fontSize: 15, color: c.textMuted, textAlign: 'center' },
   retryBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: c.primary, paddingHorizontal: 20, paddingVertical: 10, borderRadius: 100 },

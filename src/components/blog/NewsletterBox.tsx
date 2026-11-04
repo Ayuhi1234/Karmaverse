@@ -4,8 +4,8 @@ import { Mail } from 'lucide-react-native';
 import { BLOG_SOURCE } from '../../services/blog';
 import { useTheme, makeStyles } from '../../theme';
 
-// Newsletter sign-up for the blog. Goes to the same Mailchimp audience as 0waste.co.in
-// (via its /api/newsletter endpoint); Mailchimp sends a confirmation email first.
+// Newsletter sign-up for the blog. Saved on 0waste.co.in (its /api/newsletter endpoint),
+// in the same list as sign-ups there; the team sees it in the 0waste admin.
 export function NewsletterBox() {
   const styles = useStyles();
   const { colors } = useTheme();
@@ -40,7 +40,7 @@ export function NewsletterBox() {
       <Text style={styles.title}>Get new posts in your inbox</Text>
       <Text style={styles.text}>Practical recycling and zero-waste tips, event invites and KarmaVerse updates. No spam. Unsubscribe anytime.</Text>
       {state === 'done' ? (
-        <Text style={styles.done}>Almost there! Check your inbox and tap the link to confirm.</Text>
+        <Text style={styles.done}>Thanks — you're on the list!</Text>
       ) : (
         <View style={styles.row}>
           <TextInput
