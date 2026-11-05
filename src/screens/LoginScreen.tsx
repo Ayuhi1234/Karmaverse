@@ -390,7 +390,6 @@ export function LoginScreen({ navigation }: any) {
   // Demographics State
   const [age, setAge] = useState('');
   const [gender, setGender] = useState('');
-  const [sexualOrientation, setSexualOrientation] = useState('');
   const [maritalStatus, setMaritalStatus] = useState('');
   const [employment, setEmployment] = useState('');
   const [stateName, setStateName] = useState(''); // required
@@ -932,7 +931,7 @@ export function LoginScreen({ navigation }: any) {
     }
     setIsLoading(true);
     try {
-      await profileService.updateDemographics({ age: ageNum, gender, sexualOrientation, maritalStatus, employment, state: stateName.trim(), city: city.trim() });
+      await profileService.updateDemographics({ age: ageNum, gender, maritalStatus, employment, state: stateName.trim(), city: city.trim() });
       reconnect();
       navigation.replace('App', { screen: 'Dashboard', params: { justClaimedWelcomeBonus: true } });
     } catch (error: any) {
@@ -1643,8 +1642,7 @@ export function LoginScreen({ navigation }: any) {
 
     if (step === 'demographics') {
       // age + state + city are required on this onboarding PATCH (backend requires
-      // state/city here, not at account creation); gender/orientation/marital/employment
-      // stay optional. A recycling signup must never be blocked on sexual orientation.
+      // state/city here, not at account creation); gender/marital/employment stay optional.
       const isComplete = !!age && !!stateName.trim() && !!city.trim();
 
       return (
@@ -1682,20 +1680,6 @@ export function LoginScreen({ navigation }: any) {
                 options={['Male', 'Female', 'Other']}
                 selected={gender}
                 onSelect={setGender}
-              />
-            </View>
-
-            <View style={styles.fieldDivider} />
-
-            <View style={styles.fieldSection}>
-              <View style={styles.labelRow}>
-                <Heart size={18} color={colors.text} />
-                <Text style={styles.fieldLabel}>Sexual orientation</Text>
-              </View>
-              <SelectionPills
-                options={['Straight', 'Lesbian', 'Gay', 'Others']}
-                selected={sexualOrientation}
-                onSelect={setSexualOrientation}
               />
             </View>
 
