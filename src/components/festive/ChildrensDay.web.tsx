@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowRight, Download, Share2, X, Gamepad2 } from 'lucide-react-native';
+import { ArrowRight, Award, Download, Share2, X, Gamepad2 } from 'lucide-react-native';
 
 // Children's Day (14 Nov) decorations for the website: bunting, balloons, confetti,
 // newspaper paper planes, three recycled-material buddies, a balloon-pop game and a
@@ -642,7 +642,7 @@ function Burst({ color }: { color: string }) {
 
 // Balloons float up through the parent; tapping one pops it with confetti and a small
 // eco tip. Popping five unlocks a "Little Eco Hero" badge (kept for this tab).
-export function BalloonPopGame({ count = 4, height = 560 }: { count?: number; height?: number }) {
+export function BalloonPopGame({ count = 4, height = 560, reward }: { count?: number; height?: number; reward?: { label: string; onPress: () => void } }) {
   ensureCss();
   const ref = usePauseOffscreen();
   const [balloons, setBalloons] = useState<GameBalloon[]>(() => Array.from({ length: count }, () => newBalloon(true)));
@@ -664,7 +664,7 @@ export function BalloonPopGame({ count = 4, height = 560 }: { count?: number; he
     const next = score + 1;
     setScore(next);
     try { sessionStorage.setItem(POPS_KEY, String(next)); } catch { /* storage blocked */ }
-    if (next === GOAL) { setWon(true); timers.current.push(setTimeout(() => setWon(false), 5200)); }
+    if (next === GOAL) { setWon(true); timers.current.push(setTimeout(() => setWon(false), reward ? 9000 : 5200)); }
     timers.current.push(setTimeout(() => setPops((list) => list.filter((x) => x.id !== p.id)), 2600));
     timers.current.push(setTimeout(() => setBalloons((list) => [...list, newBalloon(false)]), 1500));
   };
@@ -705,11 +705,14 @@ export function BalloonPopGame({ count = 4, height = 560 }: { count?: number; he
         </div>
       </div>
       {won && (
-        <div className="kvk-pop-in" style={g.win} role="status">
+        <div className="kvk-pop-in" style={{ ...g.win, pointerEvents: reward ? 'auto' : 'none' }} role="status">
           <svg width="44" height="44" viewBox="0 0 24 24" aria-hidden><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17l-6.1 3.4 1.5-6.8L2.2 9l6.9-.7z" fill="#facc15" stroke="#f59e0b" strokeWidth="1" /></svg>
           <div>
             <div style={{ fontSize: 17, fontWeight: 900 }}>You're a Little Eco Hero!</div>
             <div style={{ fontSize: 13, opacity: 0.85, marginTop: 2 }}>Now show a grown-up how to recycle at home.</div>
+            {reward && (
+              <button type="button" onClick={() => { setWon(false); reward.onPress(); }} style={g.rewardBtn}>{reward.label} →</button>
+            )}
           </div>
           <div style={{ position: 'absolute', left: '50%', top: '50%' }}><Burst color="#facc15" /></div>
         </div>
@@ -731,6 +734,10 @@ const g: Record<string, React.CSSProperties> = {
     fontFamily: 'system-ui, -apple-system, sans-serif', border: '1px solid rgba(255,255,255,0.35)',
   },
   hudWon: { color: '#fde68a' },
+  rewardBtn: {
+    marginTop: 10, pointerEvents: 'auto', cursor: 'pointer', border: 0, borderRadius: 10, padding: '8px 12px',
+    background: '#fde68a', color: '#4c1d95', fontSize: 13, fontWeight: 900, fontFamily: 'system-ui, -apple-system, sans-serif',
+  },
   win: {
     position: 'absolute', left: '50%', top: '42%', marginLeft: -150, width: 300, display: 'flex', alignItems: 'center', gap: 12,
     background: 'linear-gradient(135deg, #7c3aed, #db2777)', color: '#ffffff', borderRadius: 18, padding: '14px 16px',
@@ -1021,7 +1028,7 @@ export function KidsHeaderDecor({ wide }: { wide: boolean }) {
 const SKY: [string, string, string] = ['#0284c7', '#6366f1', '#a21caf'];
 
 // "Turn old toys and books into smiles": the day's pickup nudge.
-export function KidsToyCard({ onPress, isMobile = false }: { onPress: () => void; isMobile?: boolean }) {
+export function KidsToyCard({ onPress, onCertificate, isMobile = false }: { onPress: () => void; onCertificate?: () => void; isMobile?: boolean }) {
   ensureCss();
   return (
     <LinearGradient colors={SKY} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[k.card, isMobile && k.cardMobile]}>
@@ -1032,10 +1039,18 @@ export function KidsToyCard({ onPress, isMobile = false }: { onPress: () => void
           <Text style={k.kicker}>Children's Day special</Text>
           <Text style={[k.title, isMobile && { fontSize: 22 }]}>Turn old toys and books into smiles</Text>
           <Text style={k.sub}>Outgrown notebooks, old storybooks and broken plastic toys? Give them a second life and earn KarmaCoins.</Text>
-          <TouchableOpacity style={k.cta} onPress={onPress} activeOpacity={0.85}>
-            <Text style={k.ctaText}>Schedule a pickup</Text>
-            <ArrowRight size={16} color="#4c1d95" />
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+            <TouchableOpacity style={k.cta} onPress={onPress} activeOpacity={0.85}>
+              <Text style={k.ctaText}>Schedule a pickup</Text>
+              <ArrowRight size={16} color="#4c1d95" />
+            </TouchableOpacity>
+            {onCertificate && (
+              <TouchableOpacity style={k.ctaGhost} onPress={onCertificate} activeOpacity={0.85}>
+                <Award size={16} color="#ffffff" />
+                <Text style={k.ctaGhostText}>My certificate</Text>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
         {!isMobile && (
           <div aria-hidden style={{ display: 'flex', alignItems: 'flex-end', gap: 10, paddingRight: 8 }}>
@@ -1078,6 +1093,8 @@ const k = StyleSheet.create({
   sub: { color: 'rgba(255,255,255,0.88)', fontSize: 15, lineHeight: 22, marginBottom: 18 },
   cta: { flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-start', backgroundColor: '#fde68a', borderRadius: 12, paddingHorizontal: 18, paddingVertical: 11 },
   ctaText: { color: '#4c1d95', fontSize: 15, fontWeight: '900' },
+  ctaGhost: { flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-start', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.7)', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 10 },
+  ctaGhostText: { color: '#ffffff', fontSize: 15, fontWeight: '900' },
   strip: { flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 16, overflow: 'hidden', paddingHorizontal: 14, paddingVertical: 12 },
   stripTitle: { color: '#fde68a', fontSize: 15, fontWeight: '900' },
   stripSub: { color: 'rgba(255,255,255,0.88)', fontSize: 12.5, marginTop: 2 },

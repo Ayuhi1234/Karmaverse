@@ -329,7 +329,7 @@ export function SplashScreen({ navigation, route }: any) {
               <KidsBunting />
               <KidsConfetti count={isMobile ? 10 : 22} fall={1000} />
               <KidsPaperPlanes count={isMobile ? 3 : 6} width={W} />
-              <BalloonPopGame count={isMobile ? 4 : 7} height={1000} />
+              <BalloonPopGame reward={{ label: 'Sign in to get your certificate', onPress: () => navigation.navigate('Login') }} count={isMobile ? 4 : 7} height={1000} />
               <RecycleBuddies compact={isMobile} />
             </>
           )}

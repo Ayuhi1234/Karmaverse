@@ -1,7 +1,7 @@
 import { Alert, Platform } from 'react-native';
 
 export type AlertButton = { text: string; onPress?: () => void; style?: 'default' | 'cancel' | 'destructive' };
-export type AlertPayload = { title: string; message?: string; buttons?: AlertButton[] };
+export type AlertPayload = { title: string; message?: string; buttons?: AlertButton[]; onDismiss?: () => void };
 
 // On web we render our own in-app modal (AlertHost) instead of the browser's
 // ugly window.alert. AlertHost registers this handler; if it isn't mounted yet
@@ -11,11 +11,12 @@ export function registerAlertHandler(fn: ((p: AlertPayload) => void) | null) {
   webHandler = fn;
 }
 
-export function showAlert(title: string, message?: string, buttons?: AlertButton[]) {
+// `onDismiss` runs once the in-app alert closes, by any button or the X.
+export function showAlert(title: string, message?: string, buttons?: AlertButton[], onDismiss?: () => void) {
   // Prefer the in-app AlertHost on BOTH platforms — it's a branded modal with a
   // close (X) button, unlike the OS Alert.alert which can't show one.
   if (webHandler) {
-    webHandler({ title, message, buttons });
+    webHandler({ title, message, buttons, onDismiss });
     return;
   }
 

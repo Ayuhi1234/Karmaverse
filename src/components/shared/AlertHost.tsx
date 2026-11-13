@@ -26,7 +26,11 @@ export function AlertHost() {
     return () => registerAlertHandler(null);
   }, []);
 
-  const close = () => setPayload(null);
+  const close = () => {
+    const done = payload?.onDismiss;
+    setPayload(null);
+    done?.();
+  };
   if (!payload) return null;
 
   const buttons = payload.buttons && payload.buttons.length ? payload.buttons : [{ text: 'OK' }];

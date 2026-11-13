@@ -23,13 +23,15 @@ function buildPopupContent() {
   };
 }
 
-// Shows the redeem-info popup once per flagKey, then never again.
-export async function showRedeemInfoOnce(flagKey: string) {
+// Shows the redeem-info popup once per flagKey, then never again. Returns whether it
+// showed; `onClosed` runs after it is closed (web), for a popup that should follow it.
+export async function showRedeemInfoOnce(flagKey: string, onClosed?: () => void): Promise<boolean> {
   const alreadyShown = await AsyncStorage.getItem(flagKey);
-  if (alreadyShown) return;
+  if (alreadyShown) return false;
   await AsyncStorage.setItem(flagKey, 'true');
   const { title, message } = buildPopupContent();
-  showAlert(title, message);
+  showAlert(title, message, undefined, onClosed);
+  return true;
 }
 
 // Manual trigger (e.g. Wallet screen's Redeem/Transfer/Donate buttons) — same dynamic

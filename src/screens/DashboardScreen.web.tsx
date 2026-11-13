@@ -181,14 +181,18 @@ export function DashboardScreen({ navigation, route }: any) {
       // A first-ever visit already gets the redeem info popup; the Diwali greeting
       // waits for the next visit rather than stacking on top of it.
       const returning = !!(await AsyncStorage.getItem(`firstHomeRedeemInfo_${sfx}`));
-      showRedeemInfoOnce(`firstHomeRedeemInfo_${sfx}`);
+      // Children's Day: everyone gets the certificate greeting once; a first visit
+      // gets it right after the redeem info popup is closed, not on top of it.
+      const kidsGreeting = isChildrensDay() && !(await AsyncStorage.getItem(`kidsDayGreeting2026_${sfx}`));
+      if (kidsGreeting) await AsyncStorage.setItem(`kidsDayGreeting2026_${sfx}`, '1');
+      const redeemShown = await showRedeemInfoOnce(
+        `firstHomeRedeemInfo_${sfx}`,
+        kidsGreeting ? () => setTimeout(() => setShowKidsGreeting(true), 400) : undefined,
+      );
+      if (kidsGreeting && !redeemShown) setTimeout(() => setShowKidsGreeting(true), 1400);
       if (isDiwaliSeason() && returning && !(await AsyncStorage.getItem(`diwaliGreeting2026_${sfx}`))) {
         await AsyncStorage.setItem(`diwaliGreeting2026_${sfx}`, '1');
         setTimeout(() => setShowDiwaliGreeting(true), 1200);
-      }
-      if (isChildrensDay() && returning && !(await AsyncStorage.getItem(`kidsDayGreeting2026_${sfx}`))) {
-        await AsyncStorage.setItem(`kidsDayGreeting2026_${sfx}`, '1');
-        setTimeout(() => setShowKidsGreeting(true), 1400);
       }
 
       if (isLaunchDay()) {
@@ -226,7 +230,7 @@ export function DashboardScreen({ navigation, route }: any) {
         {kids && width < 768 && <KidsBunting />}
         {kids && <KidsConfetti count={isMobile ? 10 : 18} fall={700} />}
         {kids && <KidsPaperPlanes count={isMobile ? 2 : 5} width={width} />}
-        {kids && <BalloonPopGame count={isMobile ? 4 : 6} height={isMobile ? 900 : 620} />}
+        {kids && <BalloonPopGame reward={{ label: 'Get your certificate', onPress: () => setShowKidsGreeting(true) }} count={isMobile ? 4 : 6} height={isMobile ? 900 : 620} />}
         {kids && <KidsHeroSun width={width} />}
         {kids && <RecycleBuddies compact={isMobile} />}
         <View style={[z.container, { paddingHorizontal: pad }]}>
@@ -329,7 +333,7 @@ export function DashboardScreen({ navigation, route }: any) {
       )}
       {kids && (
         <View style={[z.container, { marginTop: 24, paddingHorizontal: pad }]}>
-          <KidsToyCard onPress={() => nav('SchedulePickup')} isMobile={isMobile} />
+          <KidsToyCard onPress={() => nav('SchedulePickup')} onCertificate={() => setShowKidsGreeting(true)} isMobile={isMobile} />
         </View>
       )}
       {kids && (
