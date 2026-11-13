@@ -328,8 +328,8 @@ export function SplashScreen({ navigation, route }: any) {
             <>
               <KidsBunting />
               <KidsConfetti count={isMobile ? 10 : 22} fall={1000} />
-              <KidsPaperPlanes count={isMobile ? 1 : 3} width={W} />
-              <BalloonPopGame count={isMobile ? 3 : 5} height={1000} />
+              <KidsPaperPlanes count={isMobile ? 3 : 6} width={W} />
+              <BalloonPopGame count={isMobile ? 4 : 7} height={1000} />
               <RecycleBuddies compact={isMobile} />
             </>
           )}

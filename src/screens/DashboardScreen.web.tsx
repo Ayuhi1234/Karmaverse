@@ -225,8 +225,8 @@ export function DashboardScreen({ navigation, route }: any) {
         {diwali && <DiwaliDiyas count={isMobile ? 5 : 9} />}
         {kids && width < 768 && <KidsBunting />}
         {kids && <KidsConfetti count={isMobile ? 10 : 18} fall={700} />}
-        {kids && <KidsPaperPlanes count={isMobile ? 1 : 2} width={width} />}
-        {kids && <BalloonPopGame count={isMobile ? 3 : 4} height={isMobile ? 900 : 620} />}
+        {kids && <KidsPaperPlanes count={isMobile ? 2 : 5} width={width} />}
+        {kids && <BalloonPopGame count={isMobile ? 4 : 6} height={isMobile ? 900 : 620} />}
         {kids && <RecycleBuddies compact={isMobile} />}
         <View style={[z.container, { paddingHorizontal: pad }]}>
 

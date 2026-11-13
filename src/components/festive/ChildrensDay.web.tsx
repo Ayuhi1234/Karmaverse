@@ -167,14 +167,73 @@ export function KidsBunting({ top = 0, compact = false }: { top?: number; compac
 
 // ─── Balloons ──────────────────────────────────────────────────────────────────
 
-function BalloonSvg({ color, size }: { color: string; size: number }) {
+type BalloonKind = 'round' | 'heart' | 'star' | 'smiley' | 'striped' | 'dotted';
+const BALLOON_KINDS: BalloonKind[] = ['round', 'heart', 'smiley', 'striped', 'star', 'dotted', 'round', 'heart'];
+// A mix of small and big: most medium, a few tiny ones far away, a few big ones close up.
+const BALLOON_SIZES = [16, 20, 26, 30, 34, 40, 48, 58];
+const pickKind = () => pick(BALLOON_KINDS);
+const pickSize = (min = 16, max = 62) => Math.min(max, Math.max(min, pick(BALLOON_SIZES) + Math.random() * 6));
+
+const starPath = (cx: number, cy: number, R: number, r: number) =>
+  Array.from({ length: 10 }, (_, i) => {
+    const a = (Math.PI / 5) * i - Math.PI / 2;
+    const rad = i % 2 ? r : R;
+    return `${i ? 'L' : 'M'}${(cx + rad * Math.cos(a)).toFixed(1)} ${(cy + rad * Math.sin(a)).toFixed(1)}`;
+  }).join(' ') + ' Z';
+
+const HEART = 'M20 38 C8 29 0 21 2 11.5 C4 3 13.5 1 20 9.5 C26.5 1 36 3 38 11.5 C40 21 32 29 20 38 Z';
+const STAR = starPath(20, 19, 19.5, 9.5);
+
+let balloonUid = 0;
+
+// A balloon: classic, heart, foil star, smiley, striped or polka-dot, with a ribbon
+// bow under the knot and a curly string.
+function BalloonSvg({ color, size, kind = 'round' }: { color: string; size: number; kind?: BalloonKind }) {
+  const clip = useMemo(() => `kvk-clip-${++balloonUid}`, []);
+  const isStar = kind === 'star';
+  const bottom = kind === 'heart' ? 38 : isStar ? 28.5 : 39.5;
+  const fill = isStar ? (color === '#facc15' || color === '#fb923c' ? 'url(#kvk-foil-gold)' : 'url(#kvk-foil-silver)') : color;
+  const body = kind === 'heart'
+    ? <path d={HEART} fill={fill} />
+    : isStar
+      ? <path d={STAR} fill={fill} stroke="rgba(255,255,255,0.6)" strokeWidth="0.8" strokeLinejoin="round" />
+      : <ellipse cx="20" cy="20" rx="16" ry="19.5" fill={fill} />;
+  const k = bottom;
   return (
-    <svg width={size} height={size * 1.9} viewBox="0 0 40 76" style={{ overflow: 'visible', display: 'block' }}>
-      <path d="M20 42 q-5 8 0 16 q5 8 0 16" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="1" />
-      <ellipse cx="20" cy="20" rx="16" ry="19.5" fill={color} />
-      <ellipse cx="20" cy="20" rx="16" ry="19.5" fill="url(#kvk-shade)" />
-      <ellipse cx="13.5" cy="12.5" rx="3.6" ry="6" fill="#ffffff" opacity="0.5" transform="rotate(-18 13.5 12.5)" />
-      <path d="M17 38.5 L20 43 L23 38.5 Z" fill={color} />
+    <svg width={size} height={size * 2} viewBox="0 0 40 80" style={{ overflow: 'visible', display: 'block' }}>
+      <path d={`M20 ${k + 4} q-5 7 0 13 q5 7 0 13 q-4 6 0 10`} fill="none" stroke="rgba(255,255,255,0.75)" strokeWidth="1" />
+      {kind === 'striped' && (
+        <defs><clipPath id={clip}><ellipse cx="20" cy="20" rx="16" ry="19.5" /></clipPath></defs>
+      )}
+      {body}
+      {!isStar && (kind === 'heart' ? <path d={HEART} fill="url(#kvk-shade)" /> : <ellipse cx="20" cy="20" rx="16" ry="19.5" fill="url(#kvk-shade)" />)}
+      {kind === 'striped' && (
+        <g clipPath={`url(#${clip})`} stroke="#ffffff" strokeWidth="4" opacity="0.38">
+          <path d="M-4 14 L40 -6" /><path d="M-4 28 L44 6" /><path d="M-2 42 L46 20" />
+        </g>
+      )}
+      {kind === 'dotted' && (
+        <g fill="#ffffff" opacity="0.6">
+          <circle cx="12" cy="13" r="2.2" /><circle cx="25" cy="9" r="1.8" /><circle cx="27" cy="22" r="2.4" />
+          <circle cx="15" cy="27" r="2" /><circle cx="20" cy="18" r="1.6" /><circle cx="9" cy="21" r="1.5" /><circle cx="22" cy="32" r="1.7" />
+        </g>
+      )}
+      {kind === 'smiley' && (
+        <g>
+          <circle cx="14.5" cy="17" r="2" fill="#0f172a" opacity="0.75" />
+          <circle cx="25.5" cy="17" r="2" fill="#0f172a" opacity="0.75" />
+          <path d="M13.5 23.5 Q20 30.5 26.5 23.5" fill="none" stroke="#0f172a" strokeWidth="1.8" strokeLinecap="round" opacity="0.75" />
+          <circle cx="11" cy="22.5" r="2.2" fill="#ffffff" opacity="0.35" /><circle cx="29" cy="22.5" r="2.2" fill="#ffffff" opacity="0.35" />
+        </g>
+      )}
+      {isStar
+        ? <path d="M13 9 l1.2 2.6 2.6 1.2 -2.6 1.2 -1.2 2.6 -1.2 -2.6 -2.6 -1.2 2.6 -1.2 Z" fill="#ffffff" opacity="0.9" />
+        : <ellipse cx={kind === 'heart' ? 11.5 : 13.5} cy={kind === 'heart' ? 11 : 12.5} rx="3.4" ry="5.6" fill="#ffffff" opacity="0.5" transform={`rotate(-18 ${kind === 'heart' ? 11.5 : 13.5} ${kind === 'heart' ? 11 : 12.5})`} />}
+      <path d={`M17.5 ${k - 0.5} L20 ${k + 3.5} L22.5 ${k - 0.5} Z`} fill={isStar ? '#cbd5e1' : color} />
+      <g fill="none" stroke="#ffffff" strokeWidth="1.3" strokeLinecap="round" opacity="0.9">
+        <path d={`M20 ${k + 4} q-6 -4 -6.5 1 q0 4 6.5 -1`} />
+        <path d={`M20 ${k + 4} q6 -4 6.5 1 q0 4 -6.5 -1`} />
+      </g>
     </svg>
   );
 }
@@ -189,6 +248,14 @@ function BalloonDefs() {
           <stop offset="70%" stopColor="#000000" stopOpacity="0" />
           <stop offset="100%" stopColor="#000000" stopOpacity="0.22" />
         </radialGradient>
+        <linearGradient id="kvk-foil-gold" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#fef3c7" /><stop offset="35%" stopColor="#facc15" />
+          <stop offset="60%" stopColor="#fde68a" /><stop offset="100%" stopColor="#d97706" />
+        </linearGradient>
+        <linearGradient id="kvk-foil-silver" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#ffffff" /><stop offset="40%" stopColor="#cbd5e1" />
+          <stop offset="65%" stopColor="#f1f5f9" /><stop offset="100%" stopColor="#94a3b8" />
+        </linearGradient>
       </defs>
     </svg>
   );
@@ -200,8 +267,9 @@ export function KidsBalloons({ count = 8, height = 600, from = 0 }: { count?: nu
   const ref = usePauseOffscreen();
   const items = useMemo(
     () => Array.from({ length: count }, (_, i) => ({
-      left: from + 3 + ((i * 97) % 94) * ((100 - from) / 100),
-      size: 22 + Math.random() * 16,
+      left: from + ((i + 0.15 + Math.random() * 0.7) * (96 - from)) / count,
+      size: pickSize(16, 58),
+      kind: BALLOON_KINDS[(i * 3) % BALLOON_KINDS.length],
       dur: 14 + Math.random() * 10,
       delay: -Math.random() * 24,
       dx: (Math.random() - 0.5) * 80,
@@ -215,7 +283,7 @@ export function KidsBalloons({ count = 8, height = 600, from = 0 }: { count?: nu
       <BalloonDefs />
       {items.map((b, i) => (
         <div key={i} className="kvk-rise" style={{ left: `${b.left}%`, opacity: b.o, animationDelay: `${b.delay.toFixed(1)}s`, ...cssVars({ '--dur': `${b.dur.toFixed(1)}s`, '--dx': `${b.dx.toFixed(0)}px`, '--h': `${height}px` }) }}>
-          <div className="kvk-sway" style={{ animationDelay: `${-i * 0.7}s` }}><BalloonSvg color={b.color} size={b.size} /></div>
+          <div className="kvk-sway" style={{ animationDelay: `${-i * 0.7}s` }}><BalloonSvg color={b.color} size={b.size} kind={b.kind} /></div>
         </div>
       ))}
     </div>
@@ -258,30 +326,57 @@ export function KidsConfetti({ count = 18, fall = 520 }: { count?: number; fall?
   );
 }
 
-// A paper plane folded from a newspaper page (grey print lines on it).
-function PlaneSvg({ size = 56 }: { size?: number }) {
+// A paper plane: folded from a newspaper page (grey print lines) or from coloured
+// paper, with a dotted flight trail behind it.
+const PLANE_PAPERS = [null, '#f9a8d4', null, '#7dd3fc', '#fde68a', null, '#86efac'];
+
+function PlaneSvg({ size = 56, paper = null }: { size?: number; paper?: string | null }) {
+  const top = paper || '#f8fafc';
+  const side = paper ? 'rgba(15,23,42,0.12)' : '#e2e8f0';
+  const under = paper ? 'rgba(15,23,42,0.22)' : '#cbd5e1';
   return (
-    <svg width={size} height={size * 0.62} viewBox="0 0 64 40" style={{ overflow: 'visible', display: 'block' }}>
-      <path d="M2 20 L62 3 L26 25 Z" fill="#f8fafc" />
-      <path d="M26 25 L62 3 L32 37 Z" fill="#e2e8f0" />
-      <path d="M26 25 L32 37 L23 30 Z" fill="#cbd5e1" />
-      <g stroke="#94a3b8" strokeWidth="0.9" opacity="0.8">
-        <path d="M14 18 L44 9.5" /><path d="M18 20 L48 11.5" /><path d="M23 21.5 L52 13" />
-        <path d="M33 27 L52 13.5" /><path d="M35 30 L55 12" />
-      </g>
-      <path d="M2 20 L62 3" stroke="#cbd5e1" strokeWidth="0.8" />
+    <svg width={size * 2.1} height={size * 0.7} viewBox="-70 0 134 44" style={{ overflow: 'visible', display: 'block' }}>
+      <path d="M-66 30 C-50 18 -36 38 -20 26 S4 22 4 22" fill="none" stroke="#ffffff" strokeWidth="1.6" strokeLinecap="round" strokeDasharray="0.5 5" opacity="0.7" />
+      <path d="M2 20 L62 3 L26 25 Z" fill={top} />
+      <path d="M26 25 L62 3 L32 37 Z" fill={top} />
+      <path d="M26 25 L62 3 L32 37 Z" fill={side} />
+      <path d="M26 25 L32 37 L23 30 Z" fill={paper ? top : under} />
+      <path d="M26 25 L32 37 L23 30 Z" fill={paper ? under : 'transparent'} />
+      {paper ? (
+        <path d="M2 20 L62 3" stroke="#ffffff" strokeWidth="0.9" opacity="0.7" />
+      ) : (
+        <g stroke="#94a3b8" strokeWidth="0.9" opacity="0.8">
+          <path d="M14 18 L44 9.5" /><path d="M18 20 L48 11.5" /><path d="M23 21.5 L52 13" />
+          <path d="M33 27 L52 13.5" /><path d="M35 30 L55 12" /><path d="M2 20 L62 3" stroke="#cbd5e1" />
+        </g>
+      )}
     </svg>
   );
 }
 
+// Paper planes crossing the parent at different heights, sizes and speeds; every
+// other one flies the other way.
 export function KidsPaperPlanes({ count = 2, width = 1200 }: { count?: number; width?: number }) {
   ensureCss();
   const ref = usePauseOffscreen();
+  const planes = useMemo(
+    () => Array.from({ length: count }, (_, i) => ({
+      top: 6 + ((i + 0.5) * 80) / count + (Math.random() - 0.5) * 6,
+      size: 30 + Math.random() * 26,
+      dur: 13 + Math.random() * 9,
+      delay: -(i * 17) / count - Math.random() * 4,
+      paper: PLANE_PAPERS[i % PLANE_PAPERS.length],
+      flip: i % 2 === 1,
+    })),
+    [count],
+  );
   return (
     <div ref={ref} aria-hidden style={layer}>
-      {Array.from({ length: count }, (_, i) => (
-        <div key={i} className="kvk-plane" style={{ top: `${18 + i * 34}%`, animationDelay: `${-i * 7.5}s`, ...cssVars({ '--dur': `${15 + i * 4}s`, '--w': `${width}px` }) }}>
-          <PlaneSvg size={i ? 44 : 58} />
+      {planes.map((pl, i) => (
+        <div key={i} style={{ ...layer, transform: pl.flip ? 'scaleX(-1)' : undefined }}>
+          <div className="kvk-plane" style={{ top: `${pl.top.toFixed(1)}%`, animationDelay: `${pl.delay.toFixed(1)}s`, ...cssVars({ '--dur': `${pl.dur.toFixed(1)}s`, '--w': `${width}px` }) }}>
+            <PlaneSvg size={pl.size} paper={pl.paper} />
+          </div>
         </div>
       ))}
     </div>
@@ -506,7 +601,7 @@ const POP_FACTS = [
 const GOAL = 5;
 const POPS_KEY = 'kvKidsPops';
 
-type GameBalloon = { id: number; left: number; color: string; dur: number; delay: number; size: number };
+type GameBalloon = { id: number; left: number; color: string; dur: number; delay: number; size: number; kind: BalloonKind };
 type Pop = { id: number; x: number; y: number; color: string; fact: string };
 
 let balloonId = 0;
@@ -516,7 +611,8 @@ const newBalloon = (initial: boolean): GameBalloon => ({
   color: pick(RAINBOW),
   dur: 11 + Math.random() * 6,
   delay: initial ? -Math.random() * 10 : 0,
-  size: 30 + Math.random() * 10,
+  size: pickSize(26, 64),
+  kind: pickKind(),
 });
 
 const readPops = () => { try { return Number(sessionStorage.getItem(POPS_KEY)) || 0; } catch { return 0; } };
@@ -572,7 +668,7 @@ export function BalloonPopGame({ count = 4, height = 560 }: { count?: number; he
           onClick={(e) => pop(bl, e)}
           style={{ left: `${bl.left}%`, animationDelay: `${bl.delay.toFixed(1)}s`, ...cssVars({ '--dur': `${bl.dur.toFixed(1)}s`, '--dx': '0px', '--h': `${height}px` }) }}
         >
-          <div className="kvk-sway"><BalloonSvg color={bl.color} size={bl.size} /></div>
+          <div className="kvk-sway"><BalloonSvg color={bl.color} size={bl.size} kind={bl.kind} /></div>
         </div>
       ))}
       {pops.map((p) => (
@@ -673,11 +769,11 @@ export function KidsHeaderDecor({ wide }: { wide: boolean }) {
       <BalloonDefs />
       {!wide && <KidsBunting compact />}
       <KidsConfetti count={wide ? 14 : 8} fall={260} />
-      <KidsPaperPlanes count={1} width={width} />
+      <KidsPaperPlanes count={wide ? 3 : 2} width={width} />
       <div style={{ position: 'absolute', right: wide ? 40 : 14, top: wide ? 18 : 40, display: 'flex', alignItems: 'flex-start', opacity: 0.95 }}>
-        {[['#f472b6', 24, 10], ['#38bdf8', 30, 0], ['#facc15', 22, 14]].map(([c, s, y], i) => (
-          <div key={i} className="kvk-sway" style={{ marginLeft: -6, marginTop: y as number, animationDelay: `${-i * 1.1}s` }}>
-            <BalloonSvg color={c as string} size={(s as number) * (wide ? 1.2 : 1)} />
+        {([['#f472b6', 22, 12, 'heart'], ['#38bdf8', 32, 0, 'smiley'], ['#facc15', 26, 16, 'star'], ['#a78bfa', 18, 26, 'dotted']] as const).map(([c, sz, y, kind], i) => (
+          <div key={i} className="kvk-sway" style={{ marginLeft: -6, marginTop: y, animationDelay: `${-i * 1.1}s` }}>
+            <BalloonSvg color={c} size={sz * (wide ? 1.25 : 1)} kind={kind} />
           </div>
         ))}
       </div>
