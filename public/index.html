@@ -263,6 +263,8 @@
           if (dq) sessionStorage.setItem('kvDiwaliPreview', dq);
           var kq = (location.search.match(/[?&]kids=([01])/) || [])[1];
           if (kq) sessionStorage.setItem('kvKidsPreview', kq);
+          var nq = (location.search.match(/[?&]night=([01])/) || [])[1];
+          if (nq) sessionStorage.setItem('kvKidsNight', nq);
         } catch (e) {}
         var hero = document.getElementById('kv-hero');
         var path = location.pathname.replace(/\/+$/, '');
