@@ -822,15 +822,99 @@ function CornerSun({ size }: { size: number }) {
   );
 }
 
-// The sun for the Home hero's top-right corner (the hero hides the page background).
+// Night is 6 PM to 6 AM on the visitor's own clock. ?night=1 / ?night=0 previews it
+// (kept for the tab). It is checked again every minute, so a page left open at
+// sunset switches to the moon by itself.
+function nightOverride(): boolean | null {
+  try {
+    const q = new URLSearchParams(window.location.search).get('night');
+    if (q === '1' || q === '0') sessionStorage.setItem('kvKidsNight', q);
+    const saved = sessionStorage.getItem('kvKidsNight');
+    return saved === null ? null : saved === '1';
+  } catch {
+    return null;
+  }
+}
+const isNightNow = () => {
+  const o = nightOverride();
+  if (o !== null) return o;
+  const h = new Date().getHours();
+  return h < 6 || h >= 18;
+};
+export function useKidsNight(): boolean {
+  const [night, setNight] = useState(isNightNow);
+  useEffect(() => {
+    const t = setInterval(() => setNight(isNightNow()), 60_000);
+    return () => clearInterval(t);
+  }, []);
+  return night;
+}
+
+let moonUid = 0;
+
+// A sleepy crescent moon with a smile, a soft blue glow and twinkling stars.
+function CornerMoon({ size }: { size: number }) {
+  const id = useMemo(() => `kvk-moon-${++moonUid}`, []);
+  return (
+    <div style={{ position: 'relative', width: size, height: size, filter: 'drop-shadow(0 0 16px rgba(191,219,254,0.6))' }}>
+      <div className="kvk-sun-glow" style={{ position: 'absolute', left: '-25%', top: '-25%', width: '150%', height: '150%', borderRadius: '50%', background: 'radial-gradient(circle, rgba(219,234,254,0.7) 0%, rgba(165,180,252,0.25) 40%, transparent 70%)' }} />
+      <svg width={size} height={size} viewBox="-60 -60 120 120" aria-hidden style={{ position: 'relative', overflow: 'visible' }}>
+        <defs>
+          <radialGradient id={`${id}-face`} cx="35%" cy="35%" r="75%">
+            <stop offset="0%" stopColor="#fffbeb" /><stop offset="60%" stopColor="#fde68a" /><stop offset="100%" stopColor="#facc15" />
+          </radialGradient>
+          <mask id={`${id}-cut`}>
+            <rect x="-60" y="-60" width="120" height="120" fill="#ffffff" />
+            <circle cx="22" cy="-14" r="32" fill="#000000" />
+          </mask>
+        </defs>
+        <g mask={`url(#${id}-cut)`} transform="rotate(-10)">
+          <circle r="40" fill={`url(#${id}-face)`} stroke="#eab308" strokeWidth="2.5" />
+          <circle cx="-22" cy="12" r="5" fill="#eab308" opacity="0.35" /><circle cx="-8" cy="28" r="3.5" fill="#eab308" opacity="0.3" />
+        </g>
+        <path d="M-28 0 q4 4 8 0" fill="none" stroke="#78350f" strokeWidth="3" strokeLinecap="round" />
+        <path d="M-26 14 q6 7 12 2" fill="none" stroke="#78350f" strokeWidth="3" strokeLinecap="round" />
+        <circle cx="-31" cy="10" r="4.5" fill="#fb7185" opacity="0.55" />
+        <text x="12" y="-26" fontSize="13" fontWeight="900" fill="#e0e7ff" fontFamily="system-ui, sans-serif" className="kvk-twinkle" style={{ animationDuration: '3s' }}>z</text>
+        <text x="22" y="-38" fontSize="10" fontWeight="900" fill="#e0e7ff" fontFamily="system-ui, sans-serif" className="kvk-twinkle" style={{ animationDuration: '3s', animationDelay: '0.8s' }}>z</text>
+        {[[34, 20, 0], [44, -6, 0.9], [-46, -36, 1.7], [-44, 40, 2.3], [16, 44, 1.2]].map(([x, y, d], i) => (
+          <path key={i} className="kvk-twinkle" style={{ animationDelay: `${d}s` }} d={`M${x} ${(y as number) - 6} L${(x as number) + 1.8} ${(y as number) - 1.8} L${(x as number) + 6} ${y} L${(x as number) + 1.8} ${(y as number) + 1.8} L${x} ${(y as number) + 6} L${(x as number) - 1.8} ${(y as number) + 1.8} L${(x as number) - 6} ${y} L${(x as number) - 1.8} ${(y as number) - 1.8} Z`} fill={i % 2 ? '#fde68a' : '#ffffff'} />
+        ))}
+      </svg>
+    </div>
+  );
+}
+
+// The sun by day, the moon by night.
+function SkyBody({ size, night }: { size: number; night: boolean }) {
+  return night ? <CornerMoon size={size} /> : <CornerSun size={size} />;
+}
+
+// Small twinkling stars over the top of the page, for the night.
+function NightStars({ dark }: { dark: boolean }) {
+  const stars = useMemo(
+    () => Array.from({ length: 22 }, () => ({ left: Math.random() * 100, top: Math.random() * 55, s: 2 + Math.random() * 3, d: Math.random() * 3 })),
+    [],
+  );
+  return (
+    <div style={layer}>
+      {stars.map((st, i) => (
+        <span key={i} className="kvk-twinkle" style={{ position: 'absolute', left: `${st.left}%`, top: `${st.top}%`, width: st.s, height: st.s, borderRadius: '50%', background: dark ? '#fef9c3' : '#a5b4fc', boxShadow: `0 0 ${st.s * 2}px ${dark ? 'rgba(254,249,195,0.8)' : 'rgba(129,140,248,0.6)'}`, animationDelay: `${st.d.toFixed(1)}s` }} />
+      ))}
+    </div>
+  );
+}
+
+// The sun (or moon) for the Home hero's top-right corner (the hero hides the page background).
 export function KidsHeroSun({ width }: { width: number }) {
   ensureCss();
   const ref = usePauseOffscreen();
   const mobile = width < 768;
   const size = mobile ? 76 : width >= 1400 ? 130 : 96;
+  const night = useKidsNight();
   return (
     <div ref={ref} aria-hidden style={{ position: 'absolute', right: mobile ? 10 : width >= 1400 ? 28 : -18, top: mobile ? 58 : 84, pointerEvents: 'none', zIndex: 1 }}>
-      <CornerSun size={size} />
+      <SkyBody size={size} night={night} />
     </div>
   );
 }
@@ -882,12 +966,18 @@ export function KidsBackdrop({ dark }: { dark: boolean }) {
   const ref = usePauseOffscreen();
   const { width } = useWindowDimensions();
   const narrow = width < 768;
+  const night = useKidsNight();
+  // Light mode stays light at night (page text is dark): a soft lavender evening.
+  const lightSky = night
+    ? 'linear-gradient(180deg, #e0e7ff 0%, #ede9fe 45%, #fae8ff 80%, #fdf4ff 100%)'
+    : 'linear-gradient(180deg, #e0f2fe 0%, #f5f3ff 45%, #fdf2f8 75%, #fefce8 100%)';
   return (
     <div ref={ref} aria-hidden style={layer}>
-      <div style={{ ...layer, background: dark ? 'radial-gradient(60vw 50vh at 10% 0%, rgba(56,189,248,0.16), transparent), radial-gradient(60vw 50vh at 90% 60%, rgba(244,114,182,0.14), transparent)' : 'linear-gradient(180deg, #e0f2fe 0%, #f5f3ff 45%, #fdf2f8 75%, #fefce8 100%)' }} />
+      <div style={{ ...layer, background: dark ? 'radial-gradient(60vw 50vh at 10% 0%, rgba(56,189,248,0.16), transparent), radial-gradient(60vw 50vh at 90% 60%, rgba(244,114,182,0.14), transparent)' : lightSky }} />
+      {night && <NightStars dark={dark} />}
       <div style={{ ...layer, backgroundImage: kidsTile(), backgroundSize: narrow ? '220px 220px' : '300px 300px', opacity: dark ? 0.1 : 0.22 }} />
       <div style={{ position: 'absolute', right: narrow ? -30 : 24, top: narrow ? 110 : 96 }}>
-        <CornerSun size={narrow ? 110 : 150} />
+        <SkyBody size={narrow ? 110 : 150} night={night} />
       </div>
       {[0, 1, 2].map((i) => (
         <div key={i} className="kvk-cloud" style={{ top: `${14 + i * 24}%`, opacity: dark ? 0.12 : 0.9 - i * 0.15, animationDelay: `${-i * 23}s`, ...cssVars({ '--dur': `${70 + i * 18}s` }) }}>
