@@ -1297,8 +1297,8 @@ export function KidsGreetingModal({ visible, name, pickups, quizDays, onClose, o
 const m = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(15,23,42,0.6)', alignItems: 'center', justifyContent: 'center', padding: 18 },
   card: { borderRadius: 24, overflow: 'hidden', paddingHorizontal: 22, paddingTop: 50, paddingBottom: 22, alignItems: 'center' },
-  close: { position: 'absolute', top: 40, right: 12, padding: 6 },
-  greet: { fontSize: 25, fontWeight: '900', textAlign: 'center', marginBottom: 8, paddingHorizontal: 16 },
+  close: { position: 'absolute', top: 40, right: 12, padding: 6, zIndex: 10 },
+  greet: { fontSize: 25, fontWeight: '900', textAlign: 'center', marginBottom: 8, paddingHorizontal: 28 },
   sub: { color: 'rgba(255,255,255,0.9)', fontSize: 14.5, lineHeight: 21, textAlign: 'center', marginBottom: 16 },
   cert: { width: '100%', backgroundColor: '#fffdf5', borderRadius: 18, paddingVertical: 18, paddingHorizontal: 16, alignItems: 'center', marginBottom: 16 },
   certBrand: { color: '#15803d', fontSize: 13, fontWeight: '900' },
