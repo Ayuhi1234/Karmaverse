@@ -12,3 +12,4 @@ export function KidsHeaderDecor(_: { wide: boolean }) { return null; }
 export function KidsToyCard(_: { onPress: () => void; isMobile?: boolean }) { return null; }
 export function KidsStrip(_: { onPress: () => void }) { return null; }
 export function KidsGreetingModal(_: { visible: boolean; name: string; pickups: number; quizDays: number; onClose: () => void; onQuiz: () => void }) { return null; }
+export function KidsHeroSun(_: { width: number }) { return null; }

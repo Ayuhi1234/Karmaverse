@@ -18,7 +18,7 @@ import { isLaunchDay } from '../utils/launchDay';
 import { isDiwaliSeason, isChildrensDay } from '../utils/festive';
 import {
   KidsBunting, KidsConfetti, KidsPaperPlanes, BalloonPopGame, RecycleBuddies, KidsShimmerText, KidsRainbowBorder,
-  KidsBackdrop, KidsToyCard, KidsGreetingModal,
+  KidsBackdrop, KidsToyCard, KidsGreetingModal, KidsHeroSun,
 } from '../components/festive/ChildrensDay';
 import {
   DiwaliLights, DiwaliShimmerText, DiwaliCleanupCard, DiwaliKandils, DiwaliEmbers, DiwaliDiyas, DiwaliCoinRangoli,
@@ -227,6 +227,7 @@ export function DashboardScreen({ navigation, route }: any) {
         {kids && <KidsConfetti count={isMobile ? 10 : 18} fall={700} />}
         {kids && <KidsPaperPlanes count={isMobile ? 2 : 5} width={width} />}
         {kids && <BalloonPopGame count={isMobile ? 4 : 6} height={isMobile ? 900 : 620} />}
+        {kids && <KidsHeroSun width={width} />}
         {kids && <RecycleBuddies compact={isMobile} />}
         <View style={[z.container, { paddingHorizontal: pad }]}>
 

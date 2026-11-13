@@ -79,6 +79,10 @@ const CSS = `
 
 .kvk-spin-slow { transform-origin: 0 0; animation: kvk-spin 40s linear infinite; }
 @keyframes kvk-spin { to { transform: rotate(360deg); } }
+.kvk-sun-glow { animation: kvk-sun-glow 3.2s ease-in-out infinite; }
+@keyframes kvk-sun-glow { 0%, 100% { transform: scale(0.92); opacity: 0.8; } 50% { transform: scale(1.08); opacity: 1; } }
+.kvk-twinkle { transform-box: fill-box; transform-origin: center; animation: kvk-twinkle 2.4s ease-in-out infinite; }
+@keyframes kvk-twinkle { 0%, 100% { opacity: 0.2; transform: scale(0.5); } 50% { opacity: 1; transform: scale(1.1); } }
 .kvk-hint { animation: kvk-hint 1.6s ease-in-out infinite; }
 @keyframes kvk-hint {
   0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(244,114,182,0.55); }
@@ -91,7 +95,7 @@ const CSS = `
 
 @media (prefers-reduced-motion: reduce) {
   .kvk-flag, .kvk-rise, .kvk-sway, .kvk-confetti, .kvk-plane, .kvk-cloud, .kvk-rainbow, .kvk-border,
-  .kvk-buddy, .kvk-bob, .kvk-hint, .kvk-spin-slow, .kvk-jump, .kvk-eyes, .kvk-wave, .kvk-bubble, .kvk-pop-in, .kvk-card-in { animation: none !important; }
+  .kvk-buddy, .kvk-bob, .kvk-hint, .kvk-spin-slow, .kvk-sun-glow, .kvk-twinkle, .kvk-jump, .kvk-eyes, .kvk-wave, .kvk-bubble, .kvk-pop-in, .kvk-card-in { animation: none !important; }
   .kvk-confetti, .kvk-plane, .kvk-cloud, .kvk-burst { display: none; }
   .kvk-rise { bottom: 20%; opacity: .9; }
 }
@@ -787,20 +791,47 @@ function Cloud({ w, face = false }: { w: number; face?: boolean }) {
   );
 }
 
-// A big smiling sun in the corner, its rays turning slowly.
+// A big smiling sun, its rays turning slowly, with a soft pulsing glow and a few
+// twinkling sparkles around it.
 function CornerSun({ size }: { size: number }) {
   return (
-    <svg width={size} height={size} viewBox="-60 -60 120 120" aria-hidden style={{ overflow: 'visible' }}>
-      <g className="kvk-spin-slow">
-        {Array.from({ length: 12 }, (_, i) => (
-          <path key={i} d="M0 -56 L7 -38 L-7 -38 Z" fill={i % 2 ? '#fbbf24' : '#fde047'} transform={`rotate(${i * 30})`} />
+    <div style={{ position: 'relative', width: size, height: size, filter: 'drop-shadow(0 0 18px rgba(253,224,71,0.55))' }}>
+      <div className="kvk-sun-glow" style={{ position: 'absolute', left: '-25%', top: '-25%', width: '150%', height: '150%', borderRadius: '50%', background: 'radial-gradient(circle, rgba(254,240,138,0.75) 0%, rgba(253,224,71,0.25) 40%, transparent 70%)' }} />
+      <svg width={size} height={size} viewBox="-60 -60 120 120" aria-hidden style={{ position: 'relative', overflow: 'visible' }}>
+        <defs>
+          <radialGradient id="kvk-sun-face" cx="40%" cy="35%" r="70%">
+            <stop offset="0%" stopColor="#fff7c2" /><stop offset="55%" stopColor="#fde047" /><stop offset="100%" stopColor="#f59e0b" />
+          </radialGradient>
+        </defs>
+        <g className="kvk-spin-slow">
+          {Array.from({ length: 12 }, (_, i) => (
+            <path key={i} d={i % 2 ? 'M0 -54 L6 -38 L-6 -38 Z' : 'M0 -60 L8 -38 L-8 -38 Z'} fill={i % 2 ? '#fb923c' : '#fde047'} stroke="#f59e0b" strokeWidth="1.2" strokeLinejoin="round" transform={`rotate(${i * 30})`} />
+          ))}
+        </g>
+        <circle r="34" fill="url(#kvk-sun-face)" stroke="#f59e0b" strokeWidth="3" />
+        <ellipse cx="-12" cy="-18" rx="9" ry="5" fill="#ffffff" opacity="0.45" transform="rotate(-25 -12 -18)" />
+        <circle cx="-12" cy="-4" r="4.2" fill="#78350f" /><circle cx="12" cy="-4" r="4.2" fill="#78350f" />
+        <circle cx="-10.6" cy="-5.4" r="1.4" fill="#ffffff" /><circle cx="13.4" cy="-5.4" r="1.4" fill="#ffffff" />
+        <path d="M-14 9 q14 15 28 0" fill="#b45309" stroke="#78350f" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="-22" cy="7" r="6.5" fill="#fb7185" opacity="0.6" /><circle cx="22" cy="7" r="6.5" fill="#fb7185" opacity="0.6" />
+        {[[-52, -40, 0], [50, -46, 0.8], [56, 30, 1.6], [-48, 44, 2.4]].map(([x, y, d], i) => (
+          <path key={i} className="kvk-twinkle" style={{ animationDelay: `${d}s` }} d={`M${x} ${(y as number) - 7} L${(x as number) + 2} ${(y as number) - 2} L${(x as number) + 7} ${y} L${(x as number) + 2} ${(y as number) + 2} L${x} ${(y as number) + 7} L${(x as number) - 2} ${(y as number) + 2} L${(x as number) - 7} ${y} L${(x as number) - 2} ${(y as number) - 2} Z`} fill="#ffffff" />
         ))}
-      </g>
-      <circle r="34" fill="#fde047" stroke="#f59e0b" strokeWidth="3" />
-      <circle cx="-12" cy="-6" r="4" fill="#78350f" /><circle cx="12" cy="-6" r="4" fill="#78350f" />
-      <path d="M-14 8 q14 14 28 0" fill="none" stroke="#78350f" strokeWidth="4" strokeLinecap="round" />
-      <circle cx="-22" cy="6" r="6" fill="#fb7185" opacity="0.55" /><circle cx="22" cy="6" r="6" fill="#fb7185" opacity="0.55" />
-    </svg>
+      </svg>
+    </div>
+  );
+}
+
+// The sun for the Home hero's top-right corner (the hero hides the page background).
+export function KidsHeroSun({ width }: { width: number }) {
+  ensureCss();
+  const ref = usePauseOffscreen();
+  const mobile = width < 768;
+  const size = mobile ? 76 : width >= 1400 ? 130 : 96;
+  return (
+    <div ref={ref} aria-hidden style={{ position: 'absolute', right: mobile ? 10 : width >= 1400 ? 28 : -18, top: mobile ? 58 : 84, pointerEvents: 'none', zIndex: 1 }}>
+      <CornerSun size={size} />
+    </div>
   );
 }
 
@@ -855,7 +886,7 @@ export function KidsBackdrop({ dark }: { dark: boolean }) {
     <div ref={ref} aria-hidden style={layer}>
       <div style={{ ...layer, background: dark ? 'radial-gradient(60vw 50vh at 10% 0%, rgba(56,189,248,0.16), transparent), radial-gradient(60vw 50vh at 90% 60%, rgba(244,114,182,0.14), transparent)' : 'linear-gradient(180deg, #e0f2fe 0%, #f5f3ff 45%, #fdf2f8 75%, #fefce8 100%)' }} />
       <div style={{ ...layer, backgroundImage: kidsTile(), backgroundSize: narrow ? '220px 220px' : '300px 300px', opacity: dark ? 0.1 : 0.22 }} />
-      <div style={{ position: 'absolute', right: narrow ? -40 : 24, top: narrow ? 110 : 96, opacity: dark ? 0.55 : 0.95 }}>
+      <div style={{ position: 'absolute', right: narrow ? -30 : 24, top: narrow ? 110 : 96 }}>
         <CornerSun size={narrow ? 110 : 150} />
       </div>
       {[0, 1, 2].map((i) => (
