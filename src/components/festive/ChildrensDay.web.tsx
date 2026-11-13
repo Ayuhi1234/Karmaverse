@@ -77,6 +77,13 @@ const CSS = `
 .kvk-balloon:hover svg { transform: scale(1.08); }
 .kvk-balloon svg { transition: transform .15s ease; }
 
+.kvk-spin-slow { transform-origin: 0 0; animation: kvk-spin 40s linear infinite; }
+@keyframes kvk-spin { to { transform: rotate(360deg); } }
+.kvk-hint { animation: kvk-hint 1.6s ease-in-out infinite; }
+@keyframes kvk-hint {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(244,114,182,0.55); }
+  50% { transform: scale(1.06); box-shadow: 0 0 0 8px rgba(244,114,182,0); }
+}
 .kvk-pop-in { animation: kvk-popin .45s cubic-bezier(.2, 1.5, .4, 1) both; }
 @keyframes kvk-popin { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
 .kvk-card-in { animation: kvk-cardin .7s cubic-bezier(.2, 1.3, .4, 1) .15s both; }
@@ -84,7 +91,7 @@ const CSS = `
 
 @media (prefers-reduced-motion: reduce) {
   .kvk-flag, .kvk-rise, .kvk-sway, .kvk-confetti, .kvk-plane, .kvk-cloud, .kvk-rainbow, .kvk-border,
-  .kvk-buddy, .kvk-bob, .kvk-jump, .kvk-eyes, .kvk-wave, .kvk-bubble, .kvk-pop-in, .kvk-card-in { animation: none !important; }
+  .kvk-buddy, .kvk-bob, .kvk-hint, .kvk-spin-slow, .kvk-jump, .kvk-eyes, .kvk-wave, .kvk-bubble, .kvk-pop-in, .kvk-card-in { animation: none !important; }
   .kvk-confetti, .kvk-plane, .kvk-cloud, .kvk-burst { display: none; }
   .kvk-rise { bottom: 20%; opacity: .9; }
 }
@@ -680,11 +687,18 @@ export function BalloonPopGame({ count = 4, height = 560 }: { count?: number; he
         </div>
       ))}
       <div style={g.hud}>
-        {score >= GOAL ? (
-          <span style={g.hudWon}>Little Eco Hero unlocked</span>
-        ) : (
-          <span>{narrow ? `Pop ${GOAL} balloons` : `Pop ${GOAL} balloons to become a Little Eco Hero`} · {score}/{GOAL}</span>
-        )}
+        <div className={score === 0 ? 'kvk-hint' : undefined} style={g.hudInner}>
+          <span style={{ display: 'inline-block', width: 14, height: 26, marginTop: -2 }} aria-hidden>
+            <BalloonSvg color="#f472b6" size={13} kind="heart" />
+          </span>
+          {score >= GOAL ? (
+            <span style={g.hudWon}>Little Eco Hero unlocked</span>
+          ) : score === 0 ? (
+            <span>{narrow ? 'Tap a balloon to pop it' : `Tap the balloons! Pop ${GOAL} to become a Little Eco Hero`} · 0/{GOAL}</span>
+          ) : (
+            <span>{narrow ? `Pop ${GOAL} balloons` : `Pop ${GOAL} to become a Little Eco Hero`} · {score}/{GOAL}</span>
+          )}
+        </div>
       </div>
       {won && (
         <div className="kvk-pop-in" style={g.win} role="status">
@@ -706,10 +720,11 @@ const g: Record<string, React.CSSProperties> = {
     borderRadius: 12, padding: '8px 10px', fontSize: 12.5, fontWeight: 700, lineHeight: '16px',
     boxShadow: '0 8px 20px rgba(15,23,42,0.25)', fontFamily: 'system-ui, -apple-system, sans-serif',
   },
-  hud: {
-    position: 'absolute', left: '50%', bottom: 10, transform: 'translateX(-50%)', whiteSpace: 'nowrap', pointerEvents: 'none',
-    background: 'rgba(15,23,42,0.35)', color: '#ffffff', borderRadius: 100, padding: '6px 14px', fontSize: 12, fontWeight: 700,
-    fontFamily: 'system-ui, -apple-system, sans-serif', border: '1px solid rgba(255,255,255,0.25)', maxWidth: '92%', overflow: 'hidden', textOverflow: 'ellipsis',
+  hud: { position: 'absolute', left: '50%', bottom: 10, transform: 'translateX(-50%)', pointerEvents: 'none', maxWidth: '92%' },
+  hudInner: {
+    display: 'flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+    background: 'rgba(15,23,42,0.45)', color: '#ffffff', borderRadius: 100, padding: '6px 16px 6px 12px', fontSize: 13, fontWeight: 800,
+    fontFamily: 'system-ui, -apple-system, sans-serif', border: '1px solid rgba(255,255,255,0.35)',
   },
   hudWon: { color: '#fde68a' },
   win: {
@@ -721,40 +736,137 @@ const g: Record<string, React.CSSProperties> = {
 
 // ─── Page backdrop and header decoration ───────────────────────────────────────
 
-const doodleTile = (color: string) => {
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'>`
-    + `<g fill='none' stroke='${color}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>`
-    + `<path d='M30 18l4 9 10 1-7 7 2 10-9-5-9 5 2-10-7-7 10-1z'/>`
-    + `<path d='M120 40c8-10 22-6 22 6 0 10-22 22-22 22s-22-12-22-22c0-12 14-16 22-6z'/>`
-    + `<path d='M40 120c10-18 34-18 40 0-10 12-30 12-40 0z M60 112v20'/>`
-    + `<circle cx='140' cy='130' r='12'/><path d='M140 112v-6 M140 154v-6 M122 130h-6 M164 130h-6'/>`
-    + `<path d='M96 160c6-6 12 6 18 0s12 6 18 0'/></g></svg>`;
+// A kids' wallpaper tile: colourful crayon doodles (a smiling sun, rainbow, kite,
+// paper boat, ABC block, toy car, pencil, star, heart, flower), tiled faintly across
+// the page like the Diwali rangoli print.
+const kidsTile = () => {
+  const g = (c: string, d: string) => `<g fill='none' stroke='${c}' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'>${d}</g>`;
+  const sunRays = Array.from({ length: 8 }, (_, i) => {
+    const a = (i * Math.PI) / 4;
+    return `M${(46 + Math.cos(a) * 17).toFixed(1)} ${(46 + Math.sin(a) * 17).toFixed(1)} L${(46 + Math.cos(a) * 23).toFixed(1)} ${(46 + Math.sin(a) * 23).toFixed(1)}`;
+  }).join(' ');
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'>`
+    // smiling sun
+    + g('#f59e0b', `<circle cx='46' cy='46' r='12'/><path d='${sunRays}'/><path d='M41 49 q5 4 10 0'/>`)
+    + `<circle cx='42' cy='43' r='1.6' fill='#f59e0b'/><circle cx='50' cy='43' r='1.6' fill='#f59e0b'/>`
+    // rainbow
+    + g('#ef4444', `<path d='M120 70 a34 34 0 0 1 68 0'/>`) + g('#f59e0b', `<path d='M127 70 a27 27 0 0 1 54 0'/>`)
+    + g('#22c55e', `<path d='M134 70 a20 20 0 0 1 40 0'/>`) + g('#3b82f6', `<path d='M141 70 a13 13 0 0 1 26 0'/>`)
+    // kite with a bowed tail
+    + g('#ec4899', `<path d='M252 24 l18 22 -18 26 -18 -26 Z M252 24 L252 72 M234 46 L270 46'/><path d='M252 72 q-6 10 2 16 q8 6 0 16 q-6 8 2 14'/><path d='M248 88 l8 -4 M246 104 l8 -4'/>`)
+    // paper boat on waves
+    + g('#0ea5e9', `<path d='M28 150 L92 150 L80 166 L40 166 Z M60 150 L60 118 L80 146'/><path d='M22 176 q10 -6 20 0 t20 0 t20 0 t20 0'/>`)
+    // ABC block
+    + g('#8b5cf6', `<rect x='132' y='122' width='40' height='40' rx='5'/><path d='M143 152 L152 130 L161 152 M146 145 L158 145'/>`)
+    // flower
+    + g('#f43f5e', `<circle cx='238' cy='150' r='6'/><circle cx='238' cy='137' r='6'/><circle cx='251' cy='150' r='6'/><circle cx='238' cy='163' r='6'/><circle cx='225' cy='150' r='6'/>`)
+    + g('#16a34a', `<path d='M238 169 L238 196 M238 186 q10 -10 16 -4'/>`)
+    // toy car
+    + g('#ef4444', `<path d='M24 252 L24 238 L42 238 L52 226 L80 226 L92 238 L104 240 L104 252 Z'/><circle cx='44' cy='254' r='7'/><circle cx='86' cy='254' r='7'/>`)
+    // pencil
+    + g('#eab308', `<path d='M128 268 L196 228 L204 240 L136 280 L124 284 Z M196 228 L204 240'/><path d='M128 268 L136 280'/>`)
+    // star and heart
+    + g('#f97316', `<path d='M258 222 l6 13 14 2 -10 10 2 14 -12 -7 -12 7 2 -14 -10 -10 14 -2 Z'/>`)
+    + g('#ec4899', `<path d='M210 286 c-10 -8 -16 -14 -14 -21 c2 -6 10 -7 14 -1 c4 -6 12 -5 14 1 c2 7 -4 13 -14 21 Z'/>`)
+    + `</svg>`;
   return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
 };
 
-function Cloud({ w }: { w: number }) {
+function Cloud({ w, face = false }: { w: number; face?: boolean }) {
   return (
     <svg width={w} height={w * 0.5} viewBox="0 0 120 60" aria-hidden>
       <path d="M20 50 Q4 50 6 36 Q8 24 22 26 Q24 8 44 10 Q58 0 72 12 Q92 6 96 24 Q114 24 114 38 Q114 50 98 50 Z" fill="#ffffff" />
+      {face && (
+        <g>
+          <circle cx="50" cy="32" r="2.6" fill="#334155" /><circle cx="70" cy="32" r="2.6" fill="#334155" />
+          <path d="M53 40 q7 6 14 0" fill="none" stroke="#334155" strokeWidth="2.2" strokeLinecap="round" />
+          <circle cx="44" cy="39" r="3.4" fill="#fda4af" opacity="0.7" /><circle cx="76" cy="39" r="3.4" fill="#fda4af" opacity="0.7" />
+        </g>
+      )}
     </svg>
   );
 }
 
-// Page background for the day: a soft sky, clouds drifting, a faint doodle print and
-// a few balloons rising. Place it first inside a full-size parent; it doesn't scroll.
+// A big smiling sun in the corner, its rays turning slowly.
+function CornerSun({ size }: { size: number }) {
+  return (
+    <svg width={size} height={size} viewBox="-60 -60 120 120" aria-hidden style={{ overflow: 'visible' }}>
+      <g className="kvk-spin-slow">
+        {Array.from({ length: 12 }, (_, i) => (
+          <path key={i} d="M0 -56 L7 -38 L-7 -38 Z" fill={i % 2 ? '#fbbf24' : '#fde047'} transform={`rotate(${i * 30})`} />
+        ))}
+      </g>
+      <circle r="34" fill="#fde047" stroke="#f59e0b" strokeWidth="3" />
+      <circle cx="-12" cy="-6" r="4" fill="#78350f" /><circle cx="12" cy="-6" r="4" fill="#78350f" />
+      <path d="M-14 8 q14 14 28 0" fill="none" stroke="#78350f" strokeWidth="4" strokeLinecap="round" />
+      <circle cx="-22" cy="6" r="6" fill="#fb7185" opacity="0.55" /><circle cx="22" cy="6" r="6" fill="#fb7185" opacity="0.55" />
+    </svg>
+  );
+}
+
+// A cartoon strip along the bottom: rolling hills, round trees, a little house,
+// flowers and a recycling bin with a face.
+function HillsScene({ dark }: { dark: boolean }) {
+  const back = dark ? '#14532d' : '#bbf7d0';
+  const front = dark ? '#166534' : '#86efac';
+  return (
+    <svg width="100%" height="150" viewBox="0 0 1200 150" preserveAspectRatio="xMidYMax slice" aria-hidden style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
+      <path d="M0 80 Q150 30 320 70 T640 60 T960 70 T1200 50 L1200 150 L0 150 Z" fill={back} />
+      <path d="M0 110 Q200 70 420 104 T860 96 T1200 100 L1200 150 L0 150 Z" fill={front} />
+      {[[90, 92], [250, 74], [760, 70], [1080, 64]].map(([x, y], i) => (
+        <g key={i}>
+          <rect x={x - 3} y={y} width="6" height="22" rx="2" fill="#92400e" />
+          <circle cx={x} cy={y - 8} r="18" fill={i % 2 ? '#22c55e' : '#16a34a'} />
+          <circle cx={x - 6} cy={y - 14} r="5" fill="#ffffff" opacity="0.18" />
+        </g>
+      ))}
+      <g transform="translate(560 62)">
+        <rect x="0" y="16" width="48" height="34" rx="3" fill="#fef3c7" stroke="#f59e0b" strokeWidth="2" />
+        <path d="M-6 18 L24 -6 L54 18 Z" fill="#f87171" />
+        <rect x="18" y="30" width="12" height="20" rx="2" fill="#a16207" />
+        <rect x="6" y="24" width="9" height="9" rx="1.5" fill="#7dd3fc" /><rect x="33" y="24" width="9" height="9" rx="1.5" fill="#7dd3fc" />
+      </g>
+      <g transform="translate(900 82)">
+        <rect x="0" y="6" width="30" height="34" rx="5" fill="#3b82f6" />
+        <rect x="-3" y="0" width="36" height="8" rx="3" fill="#2563eb" />
+        <circle cx="10" cy="20" r="2.4" fill="#ffffff" /><circle cx="20" cy="20" r="2.4" fill="#ffffff" />
+        <path d="M10 27 q5 4 10 0" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />
+      </g>
+      {[[160, 120, '#f472b6'], [340, 116, '#facc15'], [470, 124, '#a78bfa'], [700, 118, '#fb7185'], [1000, 122, '#38bdf8'], [1140, 116, '#f472b6']].map(([x, y, c], i) => (
+        <g key={i}>
+          <path d={`M${x} ${y} L${x} ${(y as number) + 14}`} stroke="#15803d" strokeWidth="2" />
+          <circle cx={x} cy={y} r="5" fill={c as string} /><circle cx={x} cy={y} r="2" fill="#fde047" />
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+// Page background for the day: a soft sky, a smiling sun in the corner, clouds
+// drifting (some with faces), a colourful crayon-doodle print, balloons rising and
+// a cartoon hills scene along the bottom. Place it first inside a full-size parent;
+// it doesn't scroll.
 export function KidsBackdrop({ dark }: { dark: boolean }) {
   ensureCss();
   const ref = usePauseOffscreen();
+  const { width } = useWindowDimensions();
+  const narrow = width < 768;
   return (
     <div ref={ref} aria-hidden style={layer}>
       <div style={{ ...layer, background: dark ? 'radial-gradient(60vw 50vh at 10% 0%, rgba(56,189,248,0.16), transparent), radial-gradient(60vw 50vh at 90% 60%, rgba(244,114,182,0.14), transparent)' : 'linear-gradient(180deg, #e0f2fe 0%, #f5f3ff 45%, #fdf2f8 75%, #fefce8 100%)' }} />
-      {!dark && [0, 1, 2].map((i) => (
-        <div key={i} className="kvk-cloud" style={{ top: `${8 + i * 26}%`, opacity: 0.85 - i * 0.15, animationDelay: `${-i * 23}s`, ...cssVars({ '--dur': `${70 + i * 18}s` }) }}>
-          <Cloud w={150 - i * 20} />
+      <div style={{ ...layer, backgroundImage: kidsTile(), backgroundSize: narrow ? '220px 220px' : '300px 300px', opacity: dark ? 0.1 : 0.22 }} />
+      <div style={{ position: 'absolute', right: narrow ? -40 : 24, top: narrow ? 110 : 96, opacity: dark ? 0.55 : 0.95 }}>
+        <CornerSun size={narrow ? 110 : 150} />
+      </div>
+      {[0, 1, 2].map((i) => (
+        <div key={i} className="kvk-cloud" style={{ top: `${14 + i * 24}%`, opacity: dark ? 0.12 : 0.9 - i * 0.15, animationDelay: `${-i * 23}s`, ...cssVars({ '--dur': `${70 + i * 18}s` }) }}>
+          <Cloud w={(narrow ? 110 : 160) - i * 20} face={i !== 1} />
         </div>
       ))}
-      <div style={{ ...layer, backgroundImage: doodleTile(dark ? '#a78bfa' : '#8b5cf6'), backgroundSize: '180px 180px', opacity: dark ? 0.06 : 0.1 }} />
-      <KidsBalloons count={6} height={1000} />
+      <KidsBalloons count={narrow ? 5 : 8} height={1000} />
+      <div style={{ ...layer, top: 'auto', height: 150, opacity: dark ? 0.5 : 0.9 }}>
+        <HillsScene dark={dark} />
+      </div>
     </div>
   );
 }
