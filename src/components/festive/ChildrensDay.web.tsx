@@ -192,7 +192,8 @@ function BalloonSvg({ color, size, kind = 'round' }: { color: string; size: numb
   const clip = useMemo(() => `kvk-clip-${++balloonUid}`, []);
   const isStar = kind === 'star';
   const bottom = kind === 'heart' ? 38 : isStar ? 28.5 : 39.5;
-  const fill = isStar ? (color === '#facc15' || color === '#fb923c' ? 'url(#kvk-foil-gold)' : 'url(#kvk-foil-silver)') : color;
+  const gold = color === '#facc15' || color === '#fb923c';
+  const fill = isStar ? `url(#${clip}-foil)` : color;
   const body = kind === 'heart'
     ? <path d={HEART} fill={fill} />
     : isStar
@@ -204,6 +205,15 @@ function BalloonSvg({ color, size, kind = 'round' }: { color: string; size: numb
       <path d={`M20 ${k + 4} q-5 7 0 13 q5 7 0 13 q-4 6 0 10`} fill="none" stroke="rgba(255,255,255,0.75)" strokeWidth="1" />
       {kind === 'striped' && (
         <defs><clipPath id={clip}><ellipse cx="20" cy="20" rx="16" ry="19.5" /></clipPath></defs>
+      )}
+      {isStar && (
+        <defs>
+          <linearGradient id={`${clip}-foil`} x1="0" y1="0" x2="1" y2="1">
+            {(gold ? ['#fef3c7', '#facc15', '#fde68a', '#d97706'] : ['#ffffff', '#cbd5e1', '#f1f5f9', '#94a3b8']).map((c, i) => (
+              <stop key={i} offset={`${[0, 35, 60, 100][i]}%`} stopColor={c} />
+            ))}
+          </linearGradient>
+        </defs>
       )}
       {body}
       {!isStar && (kind === 'heart' ? <path d={HEART} fill="url(#kvk-shade)" /> : <ellipse cx="20" cy="20" rx="16" ry="19.5" fill="url(#kvk-shade)" />)}
@@ -248,14 +258,6 @@ function BalloonDefs() {
           <stop offset="70%" stopColor="#000000" stopOpacity="0" />
           <stop offset="100%" stopColor="#000000" stopOpacity="0.22" />
         </radialGradient>
-        <linearGradient id="kvk-foil-gold" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#fef3c7" /><stop offset="35%" stopColor="#facc15" />
-          <stop offset="60%" stopColor="#fde68a" /><stop offset="100%" stopColor="#d97706" />
-        </linearGradient>
-        <linearGradient id="kvk-foil-silver" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#ffffff" /><stop offset="40%" stopColor="#cbd5e1" />
-          <stop offset="65%" stopColor="#f1f5f9" /><stop offset="100%" stopColor="#94a3b8" />
-        </linearGradient>
       </defs>
     </svg>
   );
@@ -770,7 +772,7 @@ export function KidsHeaderDecor({ wide }: { wide: boolean }) {
       {!wide && <KidsBunting compact />}
       <KidsConfetti count={wide ? 14 : 8} fall={260} />
       <KidsPaperPlanes count={wide ? 3 : 2} width={width} />
-      <div style={{ position: 'absolute', right: wide ? 40 : 14, top: wide ? 18 : 40, display: 'flex', alignItems: 'flex-start', opacity: 0.95 }}>
+      <div style={{ position: 'absolute', right: wide ? 40 : 14, top: wide ? 62 : 48, display: 'flex', alignItems: 'flex-start', opacity: 0.95 }}>
         {([['#f472b6', 22, 12, 'heart'], ['#38bdf8', 32, 0, 'smiley'], ['#facc15', 26, 16, 'star'], ['#a78bfa', 18, 26, 'dotted']] as const).map(([c, sz, y, kind], i) => (
           <div key={i} className="kvk-sway" style={{ marginLeft: -6, marginTop: y, animationDelay: `${-i * 1.1}s` }}>
             <BalloonSvg color={c} size={sz * (wide ? 1.25 : 1)} kind={kind} />
