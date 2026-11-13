@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowRight, Award, Download, Share2, X, Gamepad2 } from 'lucide-react-native';
+import { ArrowRight, Award, Download, Share2, X, Gamepad2, Lock } from 'lucide-react-native';
 
 // Children's Day (14 Nov) decorations for the website: bunting, balloons, confetti,
 // newspaper paper planes, three recycled-material buddies, a balloon-pop game and a
@@ -628,7 +628,25 @@ const newBalloon = (initial: boolean): GameBalloon => ({
   kind: pickKind(),
 });
 
-const readPops = () => { try { return Number(sessionStorage.getItem(POPS_KEY)) || 0; } catch { return 0; } };
+// Winning the game unlocks the certificate in this browser, also across reloads and sign-in.
+const HERO_KEY = 'kvKidsHero2026';
+const HERO_EVENT = 'kvk-hero';
+const readHero = () => { try { return localStorage.getItem(HERO_KEY) === '1'; } catch { return false; } };
+const readPops = () => {
+  if (readHero()) return GOAL;
+  try { return Number(sessionStorage.getItem(POPS_KEY)) || 0; } catch { return 0; }
+};
+
+export function useKidsHero(): boolean {
+  const [hero, setHero] = useState(readHero);
+  useEffect(() => {
+    const sync = () => setHero(readHero());
+    window.addEventListener(HERO_EVENT, sync);
+    window.addEventListener('storage', sync);
+    return () => { window.removeEventListener(HERO_EVENT, sync); window.removeEventListener('storage', sync); };
+  }, []);
+  return hero;
+}
 
 function Burst({ color }: { color: string }) {
   return (
@@ -664,7 +682,12 @@ export function BalloonPopGame({ count = 4, height = 560, reward }: { count?: nu
     const next = score + 1;
     setScore(next);
     try { sessionStorage.setItem(POPS_KEY, String(next)); } catch { /* storage blocked */ }
-    if (next === GOAL) { setWon(true); timers.current.push(setTimeout(() => setWon(false), reward ? 9000 : 5200)); }
+    if (next === GOAL) {
+      try { localStorage.setItem(HERO_KEY, '1'); } catch { /* storage blocked */ }
+      window.dispatchEvent(new Event(HERO_EVENT));
+      setWon(true);
+      timers.current.push(setTimeout(() => setWon(false), reward ? 9000 : 5200));
+    }
     timers.current.push(setTimeout(() => setPops((list) => list.filter((x) => x.id !== p.id)), 2600));
     timers.current.push(setTimeout(() => setBalloons((list) => [...list, newBalloon(false)]), 1500));
   };
@@ -1030,6 +1053,7 @@ const SKY: [string, string, string] = ['#0284c7', '#6366f1', '#a21caf'];
 // "Turn old toys and books into smiles": the day's pickup nudge.
 export function KidsToyCard({ onPress, onCertificate, isMobile = false }: { onPress: () => void; onCertificate?: () => void; isMobile?: boolean }) {
   ensureCss();
+  const hero = useKidsHero();
   return (
     <LinearGradient colors={SKY} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[k.card, isMobile && k.cardMobile]}>
       <KidsConfetti count={isMobile ? 8 : 14} fall={320} />
@@ -1046,8 +1070,8 @@ export function KidsToyCard({ onPress, onCertificate, isMobile = false }: { onPr
             </TouchableOpacity>
             {onCertificate && (
               <TouchableOpacity style={k.ctaGhost} onPress={onCertificate} activeOpacity={0.85}>
-                <Award size={16} color="#ffffff" />
-                <Text style={k.ctaGhostText}>My certificate</Text>
+                {hero ? <Award size={16} color="#ffffff" /> : <Lock size={16} color="#ffffff" />}
+                <Text style={k.ctaGhostText}>{hero ? 'My certificate' : 'Unlock certificate'}</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -1164,6 +1188,7 @@ export function KidsGreetingModal({ visible, name, pickups, quizDays, onClose, o
   visible: boolean; name: string; pickups: number; quizDays: number; onClose: () => void; onQuiz: () => void;
 }) {
   ensureCss();
+  const hero = useKidsHero();
   const [note, setNote] = useState('');
   const fileName = 'little-green-hero.png';
   const shareText = `I'm a Little Green Hero on KarmaVer$e! Join me in keeping our planet clean and green.`;
@@ -1205,11 +1230,24 @@ export function KidsGreetingModal({ visible, name, pickups, quizDays, onClose, o
             </TouchableOpacity>
             <Text style={m.greet}><KidsShimmerText text={`Happy Children's Day${name ? `, ${name}` : ''}!`} /></Text>
             <Text style={m.sub}>
-              {pickups > 0
-                ? `Thank you for ${pickups} eco ${pickups === 1 ? 'action' : 'actions'}. Here's your Little Green Hero certificate.`
-                : "Here's your Little Green Hero certificate. Today, play the eco-quiz with your kids."}
+              {!hero
+                ? `${pickups > 0 ? `Thank you for ${pickups} eco ${pickups === 1 ? 'action' : 'actions'}. ` : ''}Your Little Green Hero certificate is waiting. Pop ${GOAL} balloons on this page to unlock it.`
+                : pickups > 0
+                  ? `Thank you for ${pickups} eco ${pickups === 1 ? 'action' : 'actions'}. Here's your Little Green Hero certificate.`
+                  : "Here's your Little Green Hero certificate. Today, play the eco-quiz with your kids."}
             </Text>
 
+            {!hero ? (
+              <View style={m.cert}>
+                <KidsRainbowBorder />
+                <Text style={m.certBrand}>KarmaVer$e</Text>
+                <Text style={m.certTitle}><KidsShimmerText text="Little Green Hero" /></Text>
+                <View style={m.lockBadge}>
+                  <Lock size={22} color="#7c3aed" />
+                </View>
+                <Text style={m.lockText}>Locked · pop {GOAL} balloons to unlock</Text>
+              </View>
+            ) : (
             <View style={m.cert}>
               <KidsRainbowBorder />
               <Text style={m.certBrand}>KarmaVer$e</Text>
@@ -1223,16 +1261,26 @@ export function KidsGreetingModal({ visible, name, pickups, quizDays, onClose, o
               </View>
               <Text style={m.certDate}>Children's Day, {CERT_DATE}</Text>
             </View>
+            )}
 
             <View style={m.row}>
-              <TouchableOpacity style={m.cta} onPress={download} activeOpacity={0.85}>
-                <Download size={16} color="#4c1d95" />
-                <Text style={m.ctaText}>Download</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={m.cta} onPress={share} activeOpacity={0.85}>
-                <Share2 size={16} color="#4c1d95" />
-                <Text style={m.ctaText}>Share</Text>
-              </TouchableOpacity>
+              {!hero ? (
+                <TouchableOpacity style={m.cta} onPress={onClose} activeOpacity={0.85}>
+                  <BalloonSvg color="#f472b6" size={10} kind="heart" />
+                  <Text style={m.ctaText}>Pop balloons</Text>
+                </TouchableOpacity>
+              ) : (
+                <>
+                  <TouchableOpacity style={m.cta} onPress={download} activeOpacity={0.85}>
+                    <Download size={16} color="#4c1d95" />
+                    <Text style={m.ctaText}>Download</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={m.cta} onPress={share} activeOpacity={0.85}>
+                    <Share2 size={16} color="#4c1d95" />
+                    <Text style={m.ctaText}>Share</Text>
+                  </TouchableOpacity>
+                </>
+              )}
               <TouchableOpacity style={m.ctaAlt} onPress={onQuiz} activeOpacity={0.85}>
                 <Gamepad2 size={16} color="#ffffff" />
                 <Text style={m.ctaAltText}>Play quiz</Text>
@@ -1266,4 +1314,6 @@ const m = StyleSheet.create({
   ctaAlt: { flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 1, borderColor: 'rgba(255,255,255,0.5)', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10 },
   ctaAltText: { color: '#ffffff', fontSize: 14, fontWeight: '800' },
   note: { color: '#fde68a', fontSize: 12.5, fontWeight: '700', marginTop: 10 },
+  lockBadge: { width: 48, height: 48, borderRadius: 24, backgroundColor: '#ede9fe', alignItems: 'center', justifyContent: 'center', marginTop: 12 },
+  lockText: { color: '#64748b', fontSize: 13, fontWeight: '800', marginTop: 8 },
 });
