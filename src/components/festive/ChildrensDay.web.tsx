@@ -381,26 +381,20 @@ function BuddyArt({ name }: { name: BuddyName }) {
   );
 }
 
-function Buddy({ name, style, delay, scale = 1 }: { name: BuddyName; style: React.CSSProperties; delay: number; scale?: number }) {
-  const [line, setLine] = useState<string | null>(null);
-  const [jump, setJump] = useState(0);
-  const turn = useRef(0);
-  const hide = useRef<any>(null);
-  useEffect(() => () => clearTimeout(hide.current), []);
-  const tap = () => {
-    const lines = BUDDY_LINES[name];
-    setLine(lines[turn.current % lines.length]);
-    turn.current += 1;
-    setJump((j) => j + 1);
-    clearTimeout(hide.current);
-    hide.current = setTimeout(() => setLine(null), 4200);
-  };
+type BubbleSide = 'left' | 'right';
+
+// One buddy. The parent decides who is talking, so only one bubble shows at a time.
+// `side` is where the bubble opens towards, so it never runs off the screen edge.
+function Buddy({ name, style, delay, scale = 1, side, line, jump, onTap }: {
+  name: BuddyName; style: React.CSSProperties; delay: number; scale?: number;
+  side: BubbleSide; line: string | null; jump: number; onTap: () => void;
+}) {
   return (
-    <div style={{ position: 'absolute', bottom: 0, ...style }}>
+    <div style={{ position: 'absolute', bottom: 0, ...style, zIndex: line ? 6 : 3 }}>
       {line && (
-        <div className="kvk-bubble" style={b.bubble}>
+        <div className="kvk-bubble" style={{ ...b.bubble, ...(side === 'right' ? b.openRight : b.openLeft) }}>
           {line}
-          <span style={b.tail} />
+          <span style={{ ...b.tail, ...(side === 'right' ? b.tailLeft : b.tailRight) }} />
         </div>
       )}
       <div
@@ -409,8 +403,8 @@ function Buddy({ name, style, delay, scale = 1 }: { name: BuddyName; style: Reac
         role="button"
         tabIndex={0}
         aria-label={`${name === 'botlu' ? 'Botlu the bottle' : name === 'kaagzi' ? 'Kaagzi the newspaper' : 'Tinku the can'}: tap for a recycling fact`}
-        onClick={tap}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') tap(); }}
+        onClick={onTap}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onTap(); }}
         style={{ animationDelay: `${delay}s`, transform: `scale(${scale})` }}
       >
         <div className="kvk-bob" style={{ animationDelay: `${-delay * 2}s` }}>
@@ -423,19 +417,42 @@ function Buddy({ name, style, delay, scale = 1 }: { name: BuddyName; style: Reac
 
 const b: Record<string, React.CSSProperties> = {
   bubble: {
-    position: 'absolute', bottom: '100%', left: '50%', marginLeft: -100, marginBottom: 10, width: 200,
+    position: 'absolute', bottom: '100%', marginBottom: 12, width: 210, boxSizing: 'border-box',
     background: '#ffffff', color: '#0f172a', borderRadius: 14, padding: '10px 12px', fontSize: 12.5, lineHeight: '17px',
-    fontWeight: 600, boxShadow: '0 10px 24px rgba(15,23,42,0.25)', fontFamily: 'system-ui, -apple-system, sans-serif', zIndex: 5,
+    fontWeight: 600, boxShadow: '0 10px 24px rgba(15,23,42,0.25)', fontFamily: 'system-ui, -apple-system, sans-serif',
   },
-  tail: { position: 'absolute', top: '100%', left: '50%', marginLeft: -7, width: 0, height: 0, borderLeft: '7px solid transparent', borderRight: '7px solid transparent', borderTop: '8px solid #ffffff' },
+  // Opens to the right of the buddy (a buddy at the left edge) or to its left.
+  openRight: { left: 4 },
+  openLeft: { right: 4 },
+  tail: { position: 'absolute', top: '100%', width: 0, height: 0, borderLeft: '7px solid transparent', borderRight: '7px solid transparent', borderTop: '8px solid #ffffff' },
+  tailLeft: { left: 22 },
+  tailRight: { right: 22 },
 };
 
 // Botlu the bottle, Kaagzi the newspaper and Tinku the can peek up from the bottom
 // edge of their parent. Their eyes follow the pointer; a tap makes them jump and say
-// a recycling fact. Give the parent some bottom padding so they don't cover content.
+// a recycling fact (one talks at a time). Give the parent some bottom padding so they
+// don't cover content.
 export function RecycleBuddies({ compact = false }: { compact?: boolean }) {
   ensureCss();
   const ref = usePauseOffscreen();
+  const [talking, setTalking] = useState<{ name: BuddyName; line: string } | null>(null);
+  const [jumps, setJumps] = useState<Record<BuddyName, number>>({ botlu: 0, kaagzi: 0, tinku: 0 });
+  const turns = useRef<Record<BuddyName, number>>({ botlu: 0, kaagzi: 0, tinku: 0 });
+  const hide = useRef<any>(null);
+  useEffect(() => () => clearTimeout(hide.current), []);
+  const tap = (name: BuddyName) => {
+    const lines = BUDDY_LINES[name];
+    setTalking({ name, line: lines[turns.current[name] % lines.length] });
+    turns.current[name] += 1;
+    setJumps((j) => ({ ...j, [name]: j[name] + 1 }));
+    clearTimeout(hide.current);
+    hide.current = setTimeout(() => setTalking(null), 4200);
+  };
+  const props = (name: BuddyName, side: BubbleSide) => ({
+    name, side, jump: jumps[name], onTap: () => tap(name),
+    line: talking?.name === name ? talking.line : null,
+  });
   useEffect(() => {
     const root = ref.current;
     if (!root || reducedMotion()) return;
@@ -457,17 +474,17 @@ export function RecycleBuddies({ compact = false }: { compact?: boolean }) {
     return () => { window.removeEventListener('pointermove', move); cancelAnimationFrame(frame); };
   }, [ref]);
   return (
-    <div ref={ref} style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 0, pointerEvents: 'none', zIndex: 3 }}>
+    <div ref={ref} style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 0, pointerEvents: 'none', zIndex: 5 }}>
       {compact ? (
         <>
-          <Buddy name="botlu" style={{ left: 10 }} delay={0.6} scale={0.8} />
-          <Buddy name="tinku" style={{ right: 12 }} delay={0.9} scale={0.8} />
+          <Buddy {...props('botlu', 'right')} style={{ left: 10 }} delay={0.6} scale={0.8} />
+          <Buddy {...props('tinku', 'left')} style={{ right: 12 }} delay={0.9} scale={0.8} />
         </>
       ) : (
         <>
-          <Buddy name="botlu" style={{ left: '3%' }} delay={0.6} />
-          <Buddy name="kaagzi" style={{ right: 'calc(3% + 78px)' }} delay={0.9} />
-          <Buddy name="tinku" style={{ right: '3%' }} delay={1.2} />
+          <Buddy {...props('botlu', 'right')} style={{ left: '3%' }} delay={0.6} />
+          <Buddy {...props('kaagzi', 'left')} style={{ right: 'calc(3% + 78px)' }} delay={0.9} />
+          <Buddy {...props('tinku', 'left')} style={{ right: '3%' }} delay={1.2} />
         </>
       )}
     </div>
