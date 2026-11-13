@@ -25,7 +25,8 @@ import { OrdersScreen } from '../screens/OrdersScreen';
 import { StoreScreen } from '../screens/StoreScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { navigationRef } from './navRef';
-import { isDiwaliSeason } from '../utils/festive';
+import { isDiwaliSeason, isChildrensDay } from '../utils/festive';
+import { KidsBunting } from '../components/festive/ChildrensDay';
 import { DiwaliLights } from '../components/festive/Diwali';
 
 const Tab = createBottomTabNavigator();
@@ -186,6 +187,7 @@ function TopNavbar({ state, navigation }: any) {
         </View>
       </View>
       {isDiwaliSeason() && <DiwaliLights top={NAV_HEIGHT} />}
+      {isChildrensDay() && <KidsBunting top={NAV_HEIGHT} />}
       {notifPanel}
     </View>
   );

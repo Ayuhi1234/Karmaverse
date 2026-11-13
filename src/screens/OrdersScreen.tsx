@@ -6,7 +6,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Package, Truck, CheckCircle2, ChevronRight, Clock, Star } from 'lucide-react-native';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { RatingModal } from '../components/shared/RatingModal';
-import { isDiwaliSeason } from '../utils/festive';
+import { isDiwaliSeason, isChildrensDay } from '../utils/festive';
+import { KidsBackdrop, KidsHeaderDecor, KidsStrip } from '../components/festive/ChildrensDay';
 import { DiwaliHeaderDecor, DiwaliStrip, DiwaliBackdrop } from '../components/festive/Diwali';
 import { bookingService } from '../services/booking';
 import { useTheme, makeStyles } from '../theme';
@@ -17,6 +18,8 @@ export function OrdersScreen({ navigation, route }: any) {
   const styles = useStyles();
   const { width } = useWindowDimensions();
   const diwali = isDiwaliSeason();
+  const kids = isChildrensDay();
+  const festive = diwali || kids;
   const { colors, isDark } = useTheme();
   const [activeTab, setActiveTab] = useState<'Active' | 'History'>(route?.params?.tab === 'History' ? 'History' : 'Active');
   // Opened again with a tab (a cancelled-booking push) while Orders was already open.
@@ -116,11 +119,13 @@ export function OrdersScreen({ navigation, route }: any) {
   return (
     <View style={styles.rootContainer}>
       {diwali && <DiwaliBackdrop dark={isDark} />}
+      {kids && <KidsBackdrop dark={isDark} />}
       <StatusBar barStyle="light-content" />
-      <ScrollView style={[styles.container, diwali && { backgroundColor: 'transparent' }]} contentContainerStyle={{ paddingBottom: Platform.OS === 'web' ? 0 : 100 }} showsVerticalScrollIndicator={false}>
+      <ScrollView style={[styles.container, festive && { backgroundColor: 'transparent' }]} contentContainerStyle={{ paddingBottom: Platform.OS === 'web' ? 0 : 100 }} showsVerticalScrollIndicator={false}>
 
-        <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={[styles.header, diwali && { overflow: 'hidden' }]}>
+        <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={[styles.header, festive && { overflow: 'hidden' }]}>
           {diwali && <DiwaliHeaderDecor wide={width >= 768} />}
+          {kids && <KidsHeaderDecor wide={width >= 768} />}
           <View style={styles.headerTop}>
             <Text style={styles.headerSubtitle}>Track your impact</Text>
             <Text style={styles.headerTitle}>My sustainable pickups</Text>
@@ -145,6 +150,7 @@ export function OrdersScreen({ navigation, route }: any) {
 
         <View style={styles.scrollContent}>
           {diwali && <DiwaliStrip onPress={() => navigation.navigate('SchedulePickup')} />}
+          {kids && <KidsStrip onPress={() => navigation.navigate('SchedulePickup')} />}
 
           {isLoading ? (
              <View style={{ marginTop: 40, alignItems: 'center' }}>

@@ -21,7 +21,8 @@ import { AddressSearch, AddressDetails } from '../components/shared/AddressSearc
 import { authService } from '../services/auth';
 import * as Location from 'expo-location';
 import { useTheme, makeStyles } from '../theme';
-import { isDiwaliSeason } from '../utils/festive';
+import { isDiwaliSeason, isChildrensDay } from '../utils/festive';
+import { KidsBackdrop, KidsHeaderDecor, KidsRainbowBorder } from '../components/festive/ChildrensDay';
 import { applyOtpInput, OTP_AUTOFILL } from '../utils/otpBoxes';
 import { isValidEmail } from '../utils/email';
 import { DiwaliHeaderDecor, DiwaliGoldBorder, DiwaliBackdrop } from '../components/festive/Diwali';
@@ -78,6 +79,8 @@ export function ProfileScreen({ navigation }: any) {
   const { colors, isDark } = useTheme();
   const { width } = useWindowDimensions();
   const diwali = isDiwaliSeason();
+  const kids = isChildrensDay();
+  const festive = diwali || kids;
   const { pushEnabled, enablePush } = useNotifications();
   // Main Profile State
   const [userProfile, setUserProfile] = useState<any>(null);
@@ -763,11 +766,13 @@ export function ProfileScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       {diwali && <DiwaliBackdrop dark={isDark} />}
+      {kids && <KidsBackdrop dark={isDark} />}
       <StatusBar barStyle="light-content" />
 
-        <ScrollView style={diwali && { backgroundColor: 'transparent' }} contentContainerStyle={{ paddingBottom: Platform.OS === 'web' ? 0 : 100 }} showsVerticalScrollIndicator={false}>
-        <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={[styles.backgroundGradient, diwali && { overflow: 'hidden' }]}>
+        <ScrollView style={festive && { backgroundColor: 'transparent' }} contentContainerStyle={{ paddingBottom: Platform.OS === 'web' ? 0 : 100 }} showsVerticalScrollIndicator={false}>
+        <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={[styles.backgroundGradient, festive && { overflow: 'hidden' }]}>
         {diwali && <DiwaliHeaderDecor wide={width >= 768} />}
+        {kids && <KidsHeaderDecor wide={width >= 768} />}
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.backBtn} onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('App')}>
@@ -809,6 +814,7 @@ export function ProfileScreen({ navigation }: any) {
               {/* Avatar & Basic Info Card */}
               <View style={styles.profileInfoCard}>
                 {diwali && <DiwaliGoldBorder />}
+                {kids && <KidsRainbowBorder />}
                 <TouchableOpacity style={styles.avatarMain} onPress={() => setAvatarPickerVisible(true)} activeOpacity={0.85}>
                   {avatarId ? (
                     <Avatar avatarId={avatarId} size={66} />

@@ -29,3 +29,27 @@ export function isDiwaliSeason(now: number = Date.now()): boolean {
   if (override !== null) return override;
   return now >= START && now < END;
 }
+
+// Children's Day theme on the website, 14 Nov 00:00 to 15 Nov 00:00 IST. It switches
+// itself off after the day. ?kids=1 previews it on any day, ?kids=0 hides it; the
+// choice is kept for the rest of the tab.
+const KIDS_START = Date.parse('2026-11-14T00:00:00+05:30');
+const KIDS_END = Date.parse('2026-11-15T00:00:00+05:30');
+
+function kidsPreviewOverride(): boolean | null {
+  try {
+    const q = new URLSearchParams(window.location.search).get('kids');
+    if (q === '1' || q === '0') sessionStorage.setItem('kvKidsPreview', q);
+    const saved = sessionStorage.getItem('kvKidsPreview');
+    return saved === null ? null : saved === '1';
+  } catch {
+    return null;
+  }
+}
+
+export function isChildrensDay(now: number = Date.now()): boolean {
+  if (Platform.OS !== 'web') return false;
+  const override = kidsPreviewOverride();
+  if (override !== null) return override;
+  return now >= KIDS_START && now < KIDS_END;
+}

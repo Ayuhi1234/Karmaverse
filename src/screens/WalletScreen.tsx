@@ -6,7 +6,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowDownLeft, ArrowUpRight, Heart, History, Clock, Flame, Snowflake, Recycle, Gift, Award, X, ChevronRight } from 'lucide-react-native';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { CoinShower } from '../components/shared/CoinShower';
-import { isDiwaliSeason } from '../utils/festive';
+import { isDiwaliSeason, isChildrensDay } from '../utils/festive';
+import { KidsBackdrop, KidsHeaderDecor, KidsRainbowBorder, KidsShimmerText } from '../components/festive/ChildrensDay';
 import { DiwaliHeaderDecor, DiwaliCoinRangoli, DiwaliGoldBorder, DiwaliShimmerText, useDiwaliOncePerTab, DiwaliBackdrop } from '../components/festive/Diwali';
 import { profileService } from '../services/profile';
 import { streakService, StreakStatus } from '../services/streak';
@@ -32,6 +33,8 @@ export function WalletScreen({ navigation, route }: any) {
   const styles = useStyles();
   const { width } = useWindowDimensions();
   const diwali = isDiwaliSeason();
+  const kids = isChildrensDay();
+  const festive = diwali || kids;
   // Diwali: gold coins shower down the first time the wallet opens in a tab.
   const diwaliShower = useDiwaliOncePerTab('kvDiwaliWalletShower') && diwali;
   const [showShower, setShowShower] = useState(diwaliShower);
@@ -142,11 +145,13 @@ export function WalletScreen({ navigation, route }: any) {
         </View>
       )}
       {diwali && <DiwaliBackdrop dark={isDark} />}
-      <ScrollView ref={scrollRef} style={[styles.container, diwali && { backgroundColor: 'transparent' }]} contentContainerStyle={{ paddingBottom: Platform.OS === 'web' ? 0 : 100 }} showsVerticalScrollIndicator={false}>
+      {kids && <KidsBackdrop dark={isDark} />}
+      <ScrollView ref={scrollRef} style={[styles.container, festive && { backgroundColor: 'transparent' }]} contentContainerStyle={{ paddingBottom: Platform.OS === 'web' ? 0 : 100 }} showsVerticalScrollIndicator={false}>
 
         {/* Header — same as home screen: paddingTop 60, same gradient, same radius */}
-        <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={[styles.header, diwali && { overflow: 'hidden' }]}>
+        <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={[styles.header, festive && { overflow: 'hidden' }]}>
           {diwali && <DiwaliHeaderDecor wide={width >= 768} />}
+          {kids && <KidsHeaderDecor wide={width >= 768} />}
           <View style={styles.titleRow}>
             <Text style={styles.headerTitle}>My wallet</Text>
             <View style={{ flexDirection: 'row', gap: 10 }}>
@@ -163,6 +168,7 @@ export function WalletScreen({ navigation, route }: any) {
           {/* Balance card */}
           <View style={styles.balanceCard}>
             {diwali && <DiwaliGoldBorder />}
+            {kids && <KidsRainbowBorder />}
             <View style={styles.cardTopRow}>
               <Text style={styles.cardLabel}>Total earned</Text>
               <TouchableOpacity style={styles.tierPill} onPress={() => setTierModalVisible(true)} activeOpacity={0.8}>
@@ -180,6 +186,9 @@ export function WalletScreen({ navigation, route }: any) {
                 <Text style={styles.unitTag} numberOfLines={1}>KarmaCoins XP</Text>
               </View>
             </View>
+            {kids && (
+              <Text style={styles.diwaliWish}><KidsShimmerText text="Happy Children's Day! Every coin here helped a greener tomorrow." /></Text>
+            )}
             {diwali && (
               <Text style={styles.diwaliWish}><DiwaliShimmerText text="Shubh Deepavali! May your KarmaCoins keep growing." /></Text>
             )}

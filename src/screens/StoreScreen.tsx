@@ -5,7 +5,8 @@ import { WebFooter } from '../components/shared/WebFooter';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ShoppingBag, Gift, ArrowRight } from 'lucide-react-native';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
-import { isDiwaliSeason } from '../utils/festive';
+import { isDiwaliSeason, isChildrensDay } from '../utils/festive';
+import { KidsBackdrop, KidsHeaderDecor, KidsConfetti } from '../components/festive/ChildrensDay';
 import { DiwaliHeaderDecor, DiwaliCoinRangoli, DiwaliSparkles, DiwaliBackdrop } from '../components/festive/Diwali';
 import { makeStyles, useTheme } from '../theme';
 import { trackEvent } from '../utils/analytics';
@@ -15,6 +16,8 @@ export function StoreScreen({ navigation }: any) {
   const { width } = useWindowDimensions();
   const { isDark } = useTheme();
   const diwali = isDiwaliSeason();
+  const kids = isChildrensDay();
+  const festive = diwali || kids;
   // Tab screens stay mounted, so count each time the tab is focused rather than on mount.
   useFocusEffect(useCallback(() => {
     trackEvent('reward_view', { reward_context: 'store' });
@@ -23,10 +26,12 @@ export function StoreScreen({ navigation }: any) {
   return (
     <View style={styles.rootContainer}>
       {diwali && <DiwaliBackdrop dark={isDark} />}
+      {kids && <KidsBackdrop dark={isDark} />}
       <StatusBar barStyle="light-content" />
-      <ScrollView style={[styles.container, diwali && { backgroundColor: 'transparent' }]} contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-        <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={[styles.header, diwali && { overflow: 'hidden' }]}>
+      <ScrollView style={[styles.container, festive && { backgroundColor: 'transparent' }]} contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+        <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={[styles.header, festive && { overflow: 'hidden' }]}>
           {diwali && <DiwaliHeaderDecor wide={width >= 768} />}
+          {kids && <KidsHeaderDecor wide={width >= 768} />}
           <View style={styles.headerTop}>
             <View>
               <Text style={styles.headerSubtitle}>Spend your rewards</Text>
@@ -42,6 +47,7 @@ export function StoreScreen({ navigation }: any) {
 
           <View style={[styles.coinWrap, diwali && { marginTop: 48, marginBottom: 64 }]}>
             {diwali && <DiwaliSparkles count={8} />}
+            {kids && <KidsConfetti count={10} fall={300} />}
             {diwali && <DiwaliCoinRangoli size={240} opacity={0.9} />}
             <KarmaCoin size={110} glow animated />
             <View style={styles.giftBadge}>

@@ -15,7 +15,11 @@ import { REDEEM_INFO_MESSAGE, showRedeemInfoOnce } from '../utils/redeemInfo';
 import { getStableUserSuffix } from '../utils/userId';
 import { loadQuizDays, QuizDays } from '../utils/quizHistory';
 import { isLaunchDay } from '../utils/launchDay';
-import { isDiwaliSeason } from '../utils/festive';
+import { isDiwaliSeason, isChildrensDay } from '../utils/festive';
+import {
+  KidsBunting, KidsConfetti, KidsPaperPlanes, BalloonPopGame, RecycleBuddies, KidsShimmerText, KidsRainbowBorder,
+  KidsBackdrop, KidsToyCard, KidsGreetingModal,
+} from '../components/festive/ChildrensDay';
 import {
   DiwaliLights, DiwaliShimmerText, DiwaliCleanupCard, DiwaliKandils, DiwaliEmbers, DiwaliDiyas, DiwaliCoinRangoli,
   DiwaliGoldBorder, DiwaliBurst, useDiwaliCountUp, DiwaliDiyaTracker, DiwaliGreetingModal, DiwaliBackdrop,
@@ -93,6 +97,8 @@ export function DashboardScreen({ navigation, route }: any) {
   // the desktop row squeezes the redeem banner into a tall unreadable sliver.
   const isMobile = width < 900;
   const diwali = isDiwaliSeason();
+  const kids = isChildrensDay();
+  const festive = diwali || kids;
   const isTablet = width >= 768 && width < 1024;
   const pad = isMobile ? 16 : 32;
 
@@ -110,6 +116,7 @@ export function DashboardScreen({ navigation, route }: any) {
   const [pickupDays, setPickupDays] = useState<string[]>([]);
   const [userSuffix, setUserSuffix] = useState('');
   const [showDiwaliGreeting, setShowDiwaliGreeting] = useState(false);
+  const [showKidsGreeting, setShowKidsGreeting] = useState(false);
   const [shownBalance, balanceBurst] = useDiwaliCountUp(balance, diwali);
 
   // New signup arriving straight from the Welcome Celebration scratch card —
@@ -179,6 +186,10 @@ export function DashboardScreen({ navigation, route }: any) {
         await AsyncStorage.setItem(`diwaliGreeting2026_${sfx}`, '1');
         setTimeout(() => setShowDiwaliGreeting(true), 1200);
       }
+      if (isChildrensDay() && returning && !(await AsyncStorage.getItem(`kidsDayGreeting2026_${sfx}`))) {
+        await AsyncStorage.setItem(`kidsDayGreeting2026_${sfx}`, '1');
+        setTimeout(() => setShowKidsGreeting(true), 1400);
+      }
 
       if (isLaunchDay()) {
         const suffix = getStableUserSuffix(token);
@@ -198,12 +209,13 @@ export function DashboardScreen({ navigation, route }: any) {
   const nav = (screen: string, p?: any) => navigation.navigate(screen, p);
 
   return (
-    <View style={[{ flex: 1 }, diwali && { backgroundColor: colors.bg }]}>
+    <View style={[{ flex: 1 }, festive && { backgroundColor: colors.bg }]}>
     {diwali && <DiwaliBackdrop dark={isDark} />}
-    <ScrollView style={[z.root, diwali && { backgroundColor: 'transparent' }]} showsVerticalScrollIndicator={false}>
+    {kids && <KidsBackdrop dark={isDark} />}
+    <ScrollView style={[z.root, festive && { backgroundColor: 'transparent' }]} showsVerticalScrollIndicator={false}>
 
       {/* ════════ HERO ════════ */}
-      <LinearGradient colors={['#052e16', '#064e3b', '#0f766e']} style={[z.hero, diwali && { paddingTop: 44, paddingBottom: 76 }]}>
+      <LinearGradient colors={['#052e16', '#064e3b', '#0f766e']} style={[z.hero, diwali && { paddingTop: 44, paddingBottom: 76 }, kids && { paddingTop: 44, paddingBottom: isMobile ? 150 : 130 }]}>
         <View style={z.heroDecor1} />
         <View style={z.heroDecor2} />
         {/* Below 768 there's no top navbar to hang the lights from (see AppTopBar). */}
@@ -211,13 +223,18 @@ export function DashboardScreen({ navigation, route }: any) {
         {diwali && (width < 768 || width >= 1360) && <DiwaliKandils wide={width >= 1360} variant="dashboard" />}
         {diwali && <DiwaliEmbers count={isMobile ? 6 : 12} />}
         {diwali && <DiwaliDiyas count={isMobile ? 5 : 9} />}
+        {kids && width < 768 && <KidsBunting />}
+        {kids && <KidsConfetti count={isMobile ? 10 : 18} fall={700} />}
+        {kids && <KidsPaperPlanes count={isMobile ? 1 : 2} width={width} />}
+        {kids && <BalloonPopGame count={isMobile ? 3 : 4} height={isMobile ? 900 : 620} />}
+        {kids && <RecycleBuddies compact={isMobile} />}
         <View style={[z.container, { paddingHorizontal: pad }]}>
 
           {/* Hero content */}
           <View style={[z.heroGrid, isMobile && { flexDirection: 'column', gap: 20, alignItems: 'stretch' }]}>
             {/* Left: Greeting + Balance */}
             <View style={z.heroLeft}>
-              <Text style={z.heroGreet}>{diwali ? <DiwaliShimmerText text="Happy Diwali" /> : getGreeting()},</Text>
+              <Text style={z.heroGreet}>{diwali ? <DiwaliShimmerText text="Happy Diwali" /> : kids ? <KidsShimmerText text="Happy Children's Day" /> : getGreeting()},</Text>
               <Text style={[z.heroName, isMobile && { fontSize: 20 }]}>{userName || '...'}</Text>
               <View style={[z.heroBalance, diwali && { gap: 28 }]}>
                 <View style={z.heroCoinGlow}>
@@ -247,6 +264,7 @@ export function DashboardScreen({ navigation, route }: any) {
                 ].map((st, i) => (
                   <View key={i} style={{ width: Math.floor((width - 2 * pad - 8) / 2), backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 14, padding: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}>
                     {diwali && <DiwaliGoldBorder delay={i * 1} />}
+                    {kids && <KidsRainbowBorder delay={i * 1} />}
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 }}>
                       <View style={{ width: 26, height: 26, borderRadius: 8, backgroundColor: st.color + '20', alignItems: 'center', justifyContent: 'center' }}>
                         <st.icon size={14} color={st.color} />
@@ -267,6 +285,7 @@ export function DashboardScreen({ navigation, route }: any) {
                 ].map((st, i) => (
                   <View key={i} style={z.statCard}>
                     {diwali && <DiwaliGoldBorder delay={i * 1} />}
+                    {kids && <KidsRainbowBorder delay={i * 1} />}
                     <View style={z.statTop}>
                       <View style={[z.statIconBg, { backgroundColor: st.color + '20' }]}>
                         <st.icon size={18} color={st.color} />
@@ -306,6 +325,21 @@ export function DashboardScreen({ navigation, route }: any) {
           />
           <DiwaliCleanupCard onPress={() => nav('SchedulePickup')} isMobile={isMobile} />
         </View>
+      )}
+      {kids && (
+        <View style={[z.container, { marginTop: 24, paddingHorizontal: pad }]}>
+          <KidsToyCard onPress={() => nav('SchedulePickup')} isMobile={isMobile} />
+        </View>
+      )}
+      {kids && (
+        <KidsGreetingModal
+          visible={showKidsGreeting}
+          name={userName}
+          pickups={totalPickups}
+          quizDays={quizDays.length}
+          onClose={() => setShowKidsGreeting(false)}
+          onQuiz={() => { setShowKidsGreeting(false); nav('Quiz'); }}
+        />
       )}
       {diwali && (
         <DiwaliGreetingModal visible={showDiwaliGreeting} name={userName} pickups={totalPickups} onClose={() => setShowDiwaliGreeting(false)} />

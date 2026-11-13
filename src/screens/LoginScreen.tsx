@@ -22,7 +22,8 @@ import { StatusBarFiller } from '../components/shared/StatusBarFiller';
 import { PhoneVerifyForm } from '../components/shared/PhoneVerifyForm';
 import { applyOtpInput, OTP_AUTOFILL } from '../utils/otpBoxes';
 import { isValidEmail } from '../utils/email';
-import { isDiwaliSeason } from '../utils/festive';
+import { isDiwaliSeason, isChildrensDay } from '../utils/festive';
+import { KidsBackdrop, KidsHeaderDecor } from '../components/festive/ChildrensDay';
 import { DiwaliHeaderDecor, DiwaliBackdrop } from '../components/festive/Diwali';
 let GoogleSignin: any = null;
 let isErrorWithCode: any = null;
@@ -280,6 +281,7 @@ export function LoginScreen({ navigation, route }: any) {
   const styles = useStyles();
   const { colors, isDark } = useTheme();
   const diwali = isDiwaliSeason();
+  const kids = isChildrensDay();
   const { width: winWidth } = useWindowDimensions();
   const insets = useSafeAreaInsets(); // bottom inset so "Skip for now" clears the Android gesture pill
   const { reconnect } = useUserSocket();
@@ -1053,6 +1055,11 @@ export function LoginScreen({ navigation, route }: any) {
                 <Text style={styles.diwaliChipText}>🪔  Happy Diwali</Text>
               </LinearGradient>
             )}
+            {kids && (
+              <LinearGradient colors={['#0284c7', '#7c3aed', '#db2777']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.kidsChip}>
+                <Text style={styles.kidsChipText}>Happy Children's Day</Text>
+              </LinearGradient>
+            )}
             <Text style={styles.title}>Welcome 👋</Text>
             <Text style={styles.subtitle}>Enter your email or mobile number to get started</Text>
             {!!referralCode && referralStatus !== 'invalid' && (
@@ -1806,12 +1813,14 @@ export function LoginScreen({ navigation, route }: any) {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
       {diwali && !(step === 'demographics' || step === 'referral_bonus' || step === 'welcome_celebration') && <DiwaliBackdrop dark={isDark} />}
+      {kids && !(step === 'demographics' || step === 'referral_bonus' || step === 'welcome_celebration') && <KidsBackdrop dark={isDark} />}
       <StatusBar barStyle="light-content" backgroundColor="#064e3b" />
       <StatusBarFiller color="#064e3b" />
 
       <SafeAreaView style={{ flex: 1 }}>
-        <LinearGradient colors={['#064e3b', '#15803d']} style={[styles.header, diwali && winWidth < 768 && { paddingTop: 44 }]}>
+        <LinearGradient colors={['#064e3b', '#15803d']} style={[styles.header, (diwali || kids) && winWidth < 768 && { paddingTop: 44 }, kids && { overflow: 'hidden' }]}>
           {diwali && <DiwaliHeaderDecor wide={winWidth >= 768} />}
+          {kids && <KidsHeaderDecor wide={winWidth >= 768} />}
           {/* Decorative shapes so the header reads as a designed panel, not a flat block */}
           <View style={[styles.headerCircle, { top: -50, right: -40, width: 160, height: 160, opacity: 0.08 }]} />
           <View style={[styles.headerCircle, { bottom: -60, left: -50, width: 140, height: 140, opacity: 0.06 }]} />
@@ -1888,6 +1897,8 @@ const useStyles = makeStyles((c) => ({
   stepContent: { gap: 14 },
   diwaliChip: { alignSelf: 'center', borderRadius: 100, paddingHorizontal: 12, paddingVertical: 5, marginBottom: 10, borderWidth: 1, borderColor: 'rgba(251,191,36,0.55)' },
   diwaliChipText: { color: '#fde68a', fontSize: 12, fontWeight: '900', letterSpacing: 0.6 },
+  kidsChip: { alignSelf: 'center', borderRadius: 100, paddingHorizontal: 12, paddingVertical: 5, marginBottom: 10, borderWidth: 1, borderColor: 'rgba(255,255,255,0.45)' },
+  kidsChipText: { color: '#ffffff', fontSize: 12, fontWeight: '900', letterSpacing: 0.6 },
   scrollStepContent: { paddingHorizontal: 24, paddingBottom: 50, gap: 16 },
   
   title: { fontSize: 24, fontWeight: '900', color: c.text },

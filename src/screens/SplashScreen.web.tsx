@@ -26,7 +26,8 @@ import { CoinShower } from '../components/shared/CoinShower';
 import { EarlyBirdPopup } from '../components/shared/EarlyBirdPopup';
 import { isLaunchDay } from '../utils/launchDay';
 import { getLocalDateStr } from '../utils/quizDate';
-import { isDiwaliSeason } from '../utils/festive';
+import { isDiwaliSeason, isChildrensDay } from '../utils/festive';
+import { KidsBunting, KidsConfetti, KidsPaperPlanes, BalloonPopGame, RecycleBuddies, KidsShimmerText, KidsToyCard } from '../components/festive/ChildrensDay';
 import {
   DiwaliLights, DiwaliDiyas, DiwaliEmbers, DiwaliSparkles, DiwaliMarigolds, DiwaliRangoli, DiwaliKandils,
   DiwaliCursorSparks, DiwaliShimmerText, DiwaliCleanupCard,
@@ -106,6 +107,7 @@ export function SplashScreen({ navigation, route }: any) {
   const [showRewardsCoinShower, setShowRewardsCoinShower] = useState(false);
   const rewardsSectionRef = useRef<any>(null);
   const diwali = isDiwaliSeason();
+  const kids = isChildrensDay();
 
   // Launch-day confetti — once per day per browser, guest visitors included.
   useEffect(() => {
@@ -318,10 +320,19 @@ export function SplashScreen({ navigation, route }: any) {
       <ScrollView ref={scrollRef} showsVerticalScrollIndicator={false} style={{ flex: 1 }} onScroll={handleScroll} scrollEventThrottle={32}>
 
         {/* ── HERO ── */}
-        <LinearGradient colors={['#052e16', '#064e3b', '#0f766e']} style={s.hero}>
+        <LinearGradient colors={['#052e16', '#064e3b', '#0f766e']} style={[s.hero, kids && { paddingBottom: (isMobile ? 60 : 80) + 90 }]}>
           {/* Decorative circles */}
           <Animated.View style={[s.heroCircle, { top: -80, right: -60, width: 300, height: 300, opacity: 0.08, transform: [{ translateY: floatA.interpolate({ inputRange: [0, 1], outputRange: [0, -22] }) }] }]} />
           <Animated.View style={[s.heroCircle, { bottom: -40, left: -80, width: 250, height: 250, opacity: 0.06, transform: [{ translateY: floatB.interpolate({ inputRange: [0, 1], outputRange: [0, 18] }) }] }]} />
+          {kids && (
+            <>
+              <KidsBunting />
+              <KidsConfetti count={isMobile ? 10 : 22} fall={1000} />
+              <KidsPaperPlanes count={isMobile ? 1 : 3} width={W} />
+              <BalloonPopGame count={isMobile ? 3 : 5} height={1000} />
+              <RecycleBuddies compact={isMobile} />
+            </>
+          )}
           {diwali && (
             <>
               <DiwaliSparkles count={isMobile ? 6 : 14} from={isMobile ? 0 : 55} />
@@ -337,8 +348,8 @@ export function SplashScreen({ navigation, route }: any) {
           <Animated.View style={[s.heroContent, isMobile && { paddingHorizontal: 20 }, { opacity: fadeIn, transform: [{ translateY: slideUp }] }]}>
             {/* Badge */}
             <View style={s.heroBadge}>
-              <View style={[s.heroBadgeDot, diwali && { backgroundColor: '#fbbf24' }]} />
-              <Text style={s.heroBadgeText}>{diwali ? <DiwaliShimmerText text="Happy Diwali from KarmaVer$e" /> : 'AI-Powered Sustainability Platform'}</Text>
+              <View style={[s.heroBadgeDot, diwali && { backgroundColor: '#fbbf24' }, kids && { backgroundColor: '#f472b6' }]} />
+              <Text style={s.heroBadgeText}>{diwali ? <DiwaliShimmerText text="Happy Diwali from KarmaVer$e" /> : kids ? <KidsShimmerText text="Happy Children's Day from KarmaVer$e" /> : 'AI-Powered Sustainability Platform'}</Text>
             </View>
 
             {/* The headline types out character by character. A full-text, invisible
@@ -413,6 +424,13 @@ export function SplashScreen({ navigation, route }: any) {
           {diwali && !isMobile && <DiwaliCursorSparks />}
         </LinearGradient>
 
+        {kids && (
+          <View style={{ backgroundColor: '#f8fafc', paddingTop: isMobile ? 32 : 48 }}>
+            <View style={[s.container, isMobile && { paddingHorizontal: 20 }]}>
+              <KidsToyCard onPress={() => navigation.navigate('Login')} isMobile={isMobile} />
+            </View>
+          </View>
+        )}
         {diwali && (
           <View style={{ backgroundColor: '#f8fafc', paddingTop: isMobile ? 32 : 48 }}>
             <View style={[s.container, isMobile && { paddingHorizontal: 20 }]}>
