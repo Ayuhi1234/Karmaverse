@@ -77,6 +77,11 @@ const EVENT_LABELS: Record<string, string> = {
   QUIZ_COMPLETED: 'Daily quiz complete!',
 };
 
+// Some older server records were saved with no title, body or message, so all the
+// bell could show was "Notification". They're left out of the list and the badge.
+const isBlankServerItem = (n: any) =>
+  !String(n?.title || '').trim() && !String(n?.body || '').trim() && !String(n?.data?.message || '').trim() && !EVENT_LABELS[n?.event];
+
 const fromServer = (n: any): AppNotification => ({
   id: String(n._id ?? n.id),
   type: n.event || n.type || '',
@@ -147,8 +152,9 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       const body = res.data?.items ? res.data : (res.data?.data ?? res.data);
       const items: any[] = Array.isArray(body?.items) ? body.items : [];
       serverMode.current = true;
-      setNotifications(items.map(fromServer));
-      setServerUnread(typeof body?.unreadCount === 'number' ? body.unreadCount : null);
+      const blankUnread = items.filter((n) => isBlankServerItem(n) && !n.read).length;
+      setNotifications(items.filter((n) => !isBlankServerItem(n)).map(fromServer));
+      setServerUnread(typeof body?.unreadCount === 'number' ? Math.max(0, body.unreadCount - blankUnread) : null);
       return true;
     } catch (e: any) {
       if (e?.response?.status === 404) serverMode.current = false;

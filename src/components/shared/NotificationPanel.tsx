@@ -4,7 +4,7 @@ import {
   StyleSheet, Animated,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { X, Trash2, Truck, MapPin, Coins, CheckCircle2, Clock, XCircle, Brain, Bell } from 'lucide-react-native';
+import { X, Trash2, Truck, MapPin, Coins, CheckCircle2, Clock, XCircle, Brain, Bell, Flame, Trophy, Leaf, Gift, Tag, Newspaper, ShieldCheck, Star, MessageSquare, PartyPopper } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppNotification, useNotifications } from '../../context/NotificationContext';
 import { routeNotification } from '../../utils/notificationRoute';
@@ -23,46 +23,69 @@ interface Props {
 
 const PANEL_WIDTH = Math.min(SCREEN_WIDTH * 0.9, 420);
 
-const TYPE_CONFIG: Record<string, {
+type TypeCfg = {
   icon: (size: number, color: string) => React.ReactNode;
   color: string;
   gradientBg: [string, string];
   label: string;
-}> = {
-  BOOKING_ACCEPTED: {
-    icon: (s, c) => <Truck size={s} color={c} />,
-    color: '#15803d', gradientBg: ['#f0fdf4', '#dcfce7'], label: 'Booking',
-  },
-  AGENT_REACHED: {
-    icon: (s, c) => <MapPin size={s} color={c} />,
-    color: '#0369a1', gradientBg: ['#eff6ff', '#dbeafe'], label: 'Booking',
-  },
-  BOOKING_PICKED_UP: {
-    icon: (s, c) => <Coins size={s} color={c} />,
-    color: '#d97706', gradientBg: ['#fffbeb', '#fef3c7'], label: 'Wallet',
-  },
-  BOOKING_COMPLETED: {
-    icon: (s, c) => <CheckCircle2 size={s} color={c} />,
-    color: '#15803d', gradientBg: ['#f0fdf4', '#dcfce7'], label: 'Booking',
-  },
-  BOOKING_IN_POOL: {
-    icon: (s, c) => <Clock size={s} color={c} />,
-    color: '#b45309', gradientBg: ['#fefce8', '#fef9c3'], label: 'Booking',
-  },
-  BOOKING_CANCEL_SUCCESS: {
-    icon: (s, c) => <XCircle size={s} color={c} />,
-    color: '#dc2626', gradientBg: ['#fff1f2', '#ffe4e6'], label: 'Booking',
-  },
-  QUIZ_COMPLETED: {
-    icon: (s, c) => <Brain size={s} color={c} />,
-    color: '#7c3aed', gradientBg: ['#faf5ff', '#ede9fe'], label: 'Quiz',
-  },
 };
 
-const DEFAULT_CFG = {
-  icon: (s: number, c: string) => <Bell size={s} color={c} />,
-  color: '#475569', gradientBg: ['#f8fafc', '#f1f5f9'] as [string, string], label: 'Activity',
+// One look per kind of notification, so a quiz reminder, a streak warning and a
+// cash-out nudge don't all show the same grey bell and "Activity".
+const KIND: Record<string, TypeCfg> = {
+  booking:    { icon: (s, c) => <Truck size={s} color={c} />,         color: '#15803d', gradientBg: ['#f0fdf4', '#dcfce7'], label: 'Booking' },
+  reached:    { icon: (s, c) => <MapPin size={s} color={c} />,        color: '#0369a1', gradientBg: ['#eff6ff', '#dbeafe'], label: 'Booking' },
+  done:       { icon: (s, c) => <CheckCircle2 size={s} color={c} />,  color: '#15803d', gradientBg: ['#f0fdf4', '#dcfce7'], label: 'Booking' },
+  waiting:    { icon: (s, c) => <Clock size={s} color={c} />,         color: '#b45309', gradientBg: ['#fefce8', '#fef9c3'], label: 'Booking' },
+  cancelled:  { icon: (s, c) => <XCircle size={s} color={c} />,       color: '#dc2626', gradientBg: ['#fff1f2', '#ffe4e6'], label: 'Booking' },
+  wallet:     { icon: (s, c) => <Coins size={s} color={c} />,         color: '#d97706', gradientBg: ['#fffbeb', '#fef3c7'], label: 'Wallet' },
+  failed:     { icon: (s, c) => <XCircle size={s} color={c} />,       color: '#dc2626', gradientBg: ['#fff1f2', '#ffe4e6'], label: 'Wallet' },
+  quiz:       { icon: (s, c) => <Brain size={s} color={c} />,         color: '#7c3aed', gradientBg: ['#faf5ff', '#ede9fe'], label: 'Quiz' },
+  streak:     { icon: (s, c) => <Flame size={s} color={c} />,         color: '#ea580c', gradientBg: ['#fff7ed', '#ffedd5'], label: 'Streak' },
+  reward:     { icon: (s, c) => <Trophy size={s} color={c} />,        color: '#ca8a04', gradientBg: ['#fefce8', '#fef9c3'], label: 'Reward' },
+  impact:     { icon: (s, c) => <Leaf size={s} color={c} />,          color: '#16a34a', gradientBg: ['#f0fdf4', '#dcfce7'], label: 'Impact' },
+  referral:   { icon: (s, c) => <Gift size={s} color={c} />,          color: '#db2777', gradientBg: ['#fdf2f8', '#fce7f3'], label: 'Referral' },
+  offer:      { icon: (s, c) => <Tag size={s} color={c} />,           color: '#0d9488', gradientBg: ['#f0fdfa', '#ccfbf1'], label: 'Offer' },
+  news:       { icon: (s, c) => <Newspaper size={s} color={c} />,     color: '#0284c7', gradientBg: ['#f0f9ff', '#e0f2fe'], label: 'News' },
+  rating:     { icon: (s, c) => <Star size={s} color={c} />,          color: '#d97706', gradientBg: ['#fffbeb', '#fef3c7'], label: 'Rating' },
+  account:    { icon: (s, c) => <ShieldCheck size={s} color={c} />,   color: '#475569', gradientBg: ['#f8fafc', '#f1f5f9'], label: 'Account' },
+  greeting:   { icon: (s, c) => <PartyPopper size={s} color={c} />,   color: '#c026d3', gradientBg: ['#fdf4ff', '#fae8ff'], label: 'Greeting' },
+  feedback:   { icon: (s, c) => <MessageSquare size={s} color={c} />, color: '#4f46e5', gradientBg: ['#eef2ff', '#e0e7ff'], label: 'Feedback' },
 };
+
+// Backend notification types (push templates) → look.
+const TYPE_KIND: Record<string, keyof typeof KIND> = {
+  BOOKING_ACCEPTED: 'booking', AGENT_REACHED: 'reached', BOOKING_PICKED_UP: 'wallet', BOOKING_COMPLETED: 'done',
+  BOOKING_IN_POOL: 'waiting', BOOKING_CANCEL_SUCCESS: 'cancelled', PICKUP_REMINDER: 'waiting', RATING_REQUEST: 'rating',
+  QUIZ_COMPLETED: 'quiz', DAILY_QUIZ_REMINDER: 'quiz',
+  STREAK_AT_RISK: 'streak', STREAK_MILESTONE: 'streak',
+  REDEMPTION_READY: 'wallet', REDEMPTION_CONFIRMED: 'wallet', COINS_EXPIRING: 'wallet', PAYOUT_SUCCESS: 'wallet', PAYOUT_FAILED: 'failed',
+  TIER_UPGRADE: 'reward', FIRST_PICKUP_DONE: 'reward', PICKUP_MILESTONE: 'reward',
+  IMPACT_REPORT: 'impact', IMPACT_MILESTONE: 'impact',
+  REFERRAL_NUDGE: 'referral',
+  WIN_BACK: 'offer', FIRST_PICKUP_NUDGE: 'offer', LIMITED_OFFER: 'offer', SERVICE_AREA_LIVE: 'offer', DIWALI_GREETING: 'offer',
+  NEWSLETTER: 'news', FEATURE_ANNOUNCEMENT: 'news',
+  LOGIN_ALERT: 'account', SEASONAL_GREETING: 'greeting', BIRTHDAY: 'greeting', FEEDBACK_SURVEY: 'feedback',
+};
+
+// A type the app doesn't know yet still gets a sensible look from where it leads.
+const ROUTE_KIND: Record<string, keyof typeof KIND> = {
+  Quiz: 'quiz', Wallet: 'wallet', Redeem: 'wallet', Referral: 'referral', SchedulePickup: 'offer',
+  OrderTracking: 'booking', BookingDetails: 'booking', KnowledgeHub: 'news', Blog: 'news', News: 'news',
+};
+
+const DEFAULT_CFG: TypeCfg = {
+  icon: (s: number, c: string) => <Bell size={s} color={c} />,
+  color: '#475569', gradientBg: ['#f8fafc', '#f1f5f9'], label: 'Update',
+};
+
+function configFor(n: AppNotification): TypeCfg {
+  const type = String(n.type || '').toUpperCase();
+  if (/^WITHDRAWAL_(FAILED|REVERSED)$/.test(type)) return KIND.failed;
+  if (/^WITHDRAWAL_/.test(type)) return KIND.wallet;
+  const kind = TYPE_KIND[type] || ROUTE_KIND[n.target?.screen || n.target?.route || ''];
+  return kind ? KIND[kind] : DEFAULT_CFG;
+}
 
 function relativeTime(ts: number): string {
   const diff = Date.now() - ts;
@@ -77,7 +100,7 @@ function relativeTime(ts: number): string {
 function NotifCard({ notif, onOpen }: { notif: AppNotification; onOpen: (n: AppNotification) => void }) {
   const styles = useStyles();
   const { colors, isDark } = useTheme();
-  const cfg = TYPE_CONFIG[notif.type] || DEFAULT_CFG;
+  const cfg = configFor(notif);
 
   // The type gradients are light tints that only read under dark text. In dark mode
   // the text is light, so an unread card uses a subtle dark tint of the type colour
