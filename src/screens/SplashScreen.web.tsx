@@ -32,6 +32,7 @@ import {
   DiwaliLights, DiwaliDiyas, DiwaliEmbers, DiwaliSparkles, DiwaliMarigolds, DiwaliRangoli, DiwaliKandils,
   DiwaliCursorSparks, DiwaliShimmerText, DiwaliCleanupCard,
 } from '../components/festive/Diwali';
+import { openCookieSettings } from '../utils/cookieConsent';
 
 const { width: W } = Dimensions.get('window');
 const isMobile = W < 768;
@@ -655,6 +656,9 @@ export function SplashScreen({ navigation, route }: any) {
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => navigation.navigate('Legal', { type: 'terms-of-use' })}>
                   <Text style={s.footerLink}>Terms of use</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={openCookieSettings}>
+                  <Text style={s.footerLink}>Cookie settings</Text>
                 </TouchableOpacity>
               </View>
 

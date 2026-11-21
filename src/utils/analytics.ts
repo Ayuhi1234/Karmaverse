@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import { currentCookieChoice, onCookieChoice } from './cookieConsent';
 
 // GA4 (web only). The Measurement ID comes from EXPO_PUBLIC_GA_MEASUREMENT_ID, which Expo
 // inlines at bundle time (it must be read as a literal `process.env.EXPO_PUBLIC_…`
@@ -30,6 +31,38 @@ const PHONE_RE = /\+?\d[\d\s-]{8,}\d/;
 
 let initialized = false;
 let lastPageKey: string | null = null;
+// Screen seen before the visitor accepted analytics; reported once they accept.
+let pendingRoute: { name?: string; params?: any } | undefined;
+
+// Analytics cookies only after the visitor accepts them in the cookie banner (KAR-296).
+const allowed = () => IS_ENABLED && currentCookieChoice() === 'granted';
+
+if (IS_ENABLED) {
+  onCookieChoice((choice) => {
+    const w = window as any;
+    if (choice === 'granted') {
+      w[`ga-disable-${MEASUREMENT_ID}`] = false;
+      initAnalytics();
+      if (pendingRoute) { lastPageKey = null; trackPageView(pendingRoute); }
+      return;
+    }
+    // Declined (or changed their mind): stop GA and remove the cookies it set.
+    w[`ga-disable-${MEASUREMENT_ID}`] = true;
+    clearGaCookies();
+  });
+}
+
+function clearGaCookies() {
+  try {
+    const host = window.location.hostname;
+    const domains = ['', host, `.${host}`, `.${host.split('.').slice(-2).join('.')}`];
+    document.cookie.split(';').map((c) => c.split('=')[0].trim())
+      .filter((name) => name === '_ga' || name.startsWith('_ga_') || name === '_gid')
+      .forEach((name) => domains.forEach((d) => {
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/${d ? `; domain=${d}` : ''}`;
+      }));
+  } catch { /* nothing to clear */ }
+}
 // Sanitized URL of the previous screen. Sent as page_referrer so gtag never falls back
 // to the raw previous URL (with its query string) as the referrer after an in-app navigation.
 let lastPageLocation: string | undefined;
@@ -80,7 +113,7 @@ function cleanParams(params: Record<string, unknown> = {}) {
 // by trackPageView on every React Navigation route change (initial load included), so
 // letting gtag send its own would double-count the first page.
 export function initAnalytics() {
-  if (!IS_ENABLED || initialized) return;
+  if (!allowed() || initialized) return;
   initialized = true;
   const w = window as any;
   w.dataLayer = w.dataLayer || [];
@@ -101,7 +134,7 @@ export function initAnalytics() {
 }
 
 export function trackEvent(name: string, params?: Record<string, unknown>) {
-  if (!IS_ENABLED) return;
+  if (!allowed()) return;
   initAnalytics();
   gtag('event', name, cleanParams({ page_location: sanitizeUrl(window.location.href), ...params }));
 }
@@ -112,6 +145,7 @@ export function trackEvent(name: string, params?: Record<string, unknown>) {
 // produce duplicates.
 export function trackPageView(route: { name?: string; params?: any } | undefined) {
   if (!IS_ENABLED || !route?.name) return;
+  if (!allowed()) { pendingRoute = { name: route.name, params: route.params?.type ? { type: route.params.type } : undefined }; return; }
   const legalType = route.name === 'Legal' && typeof route.params?.type === 'string' ? route.params.type : '';
   const key = legalType ? `${route.name}:${legalType}` : route.name;
   if (key === lastPageKey) return;
@@ -131,7 +165,7 @@ export function trackPageView(route: { name?: string; params?: any } | undefined
 // and in several tabs, so it's de-duplicated per booking. The booking ID is only used
 // locally for that check and is never sent to GA.
 export function trackPickupCompleted(bookingId: string | undefined) {
-  if (!IS_ENABLED || !bookingId || completedPickups.has(bookingId)) return;
+  if (!allowed() || !bookingId || completedPickups.has(bookingId)) return;
   completedPickups.add(bookingId);
   const storageKey = 'ga_pickup_completed_ids';
   try {

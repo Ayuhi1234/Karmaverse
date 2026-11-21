@@ -6,6 +6,7 @@ import { UserSocketProvider } from './src/context/UserSocketContext';
 import { NotificationProvider } from './src/context/NotificationContext';
 import { ResponsiveContainer } from './src/components/shared/ResponsiveContainer';
 import { AlertHost } from './src/components/shared/AlertHost';
+import { CookieBanner } from './src/components/shared/CookieBanner';
 import { RootErrorBoundary } from './src/components/shared/RootErrorBoundary';
 import {
   registerForPushNotifications,
@@ -64,6 +65,7 @@ export default function App() {
           <NotificationProvider>
             <UserSocketProvider>
               <RootNavigator />
+              <CookieBanner />
               <AlertHost />
             </UserSocketProvider>
           </NotificationProvider>

@@ -4,6 +4,7 @@ import { Mail, MapPin, Phone, Instagram, Facebook, Linkedin, Twitter, Youtube } 
 import { getToken } from '../../utils/tokenStore';
 import { useNavigation } from '@react-navigation/native';
 import { GooglePlayLogo, AppleLogo } from './StoreLogos';
+import { openCookieSettings } from '../../utils/cookieConsent';
 
 const MAX = 1200;
 const ADDRESS = 'Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051';
@@ -170,6 +171,10 @@ export function WebFooter() {
             <Text style={s.legalDot}>·</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Legal', { type: 'terms-of-use' })}>
               <Text style={s.legalLink}>Terms of use</Text>
+            </TouchableOpacity>
+            <Text style={s.legalDot}>·</Text>
+            <TouchableOpacity onPress={openCookieSettings}>
+              <Text style={s.legalLink}>Cookie settings</Text>
             </TouchableOpacity>
           </View>
         </View>
