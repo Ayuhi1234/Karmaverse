@@ -10,6 +10,7 @@ const MAX = 1200;
 const ADDRESS = 'Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051';
 const MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ADDRESS)}`;
 const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.karmacredits.app';
+const APP_STORE_URL = 'https://apps.apple.com/in/app/karmaver%24e/id6823133168';
 
 const SOCIALS = [
   { key: 'instagram', Icon: Instagram, url: 'https://www.instagram.com/mykarmaverse/' },
@@ -143,14 +144,13 @@ export function WebFooter() {
                   <Text style={s.storeBtnText}>Google Play</Text>
                 </View>
               </TouchableOpacity>
-              <View style={[s.storeBtn, s.storeBtnDisabled, { flexGrow: 1 }]}>
+              <TouchableOpacity style={[s.storeBtn, { flexGrow: 1 }]} onPress={() => openExternal(APP_STORE_URL)} activeOpacity={0.85}>
                 <AppleLogo size={24} />
                 <View>
-                  <Text style={s.storeBtnSub}>DOWNLOAD ON</Text>
+                  <Text style={s.storeBtnSub}>DOWNLOAD ON THE</Text>
                   <Text style={s.storeBtnText}>App Store</Text>
-                  <Text style={s.comingSoonInline}>Coming soon</Text>
                 </View>
-              </View>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -209,10 +209,8 @@ const s = StyleSheet.create({
   addressLink: { textDecorationLine: 'underline' },
 
   storeBtn: { minWidth: 130, flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#1e293b', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 10, marginBottom: 10, borderWidth: 1, borderColor: '#334155' },
-  storeBtnDisabled: { opacity: 0.5 },
   storeBtnSub: { color: '#94a3b8', fontSize: 9, fontWeight: '700', letterSpacing: 1 },
   storeBtnText: { color: 'white', fontSize: 14, fontWeight: '700', marginTop: 1 },
-  comingSoonInline: { color: '#4ade80', fontSize: 10, fontWeight: '700', opacity: 0.85, marginTop: 2 },
 
   bottomBar: { borderTopWidth: 1, borderTopColor: '#1e293b' },
   bottomContent: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 18 },
