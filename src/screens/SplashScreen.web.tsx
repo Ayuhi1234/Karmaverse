@@ -16,7 +16,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { MascotPopupBanner } from '../components/shared/MascotPopupBanner';
 import { LaunchDayBanner } from '../components/shared/LaunchDayBanner';
-import { GooglePlayLogo } from '../components/shared/StoreLogos';
+import { GooglePlayLogo, AppleLogo } from '../components/shared/StoreLogos';
 import { NewsCard } from '../components/shared/NewsCard';
 import { NEWSLETTERS } from '../data/newsletters';
 import { NewsletterStrip } from '../components/shared/NewsletterCard';
@@ -89,6 +89,11 @@ function Card({ children, style, delay = 0 }: { children: React.ReactNode; style
     </Animated.View>
   );
 }
+
+const STORE_BUTTONS = [
+  { key: 'play', url: 'https://play.google.com/store/apps/details?id=com.karmacredits.app', sub: 'GET IT ON', label: 'Google Play', Logo: GooglePlayLogo },
+  { key: 'appstore', url: 'https://apps.apple.com/in/app/karmaver$e/id6823133168', sub: 'DOWNLOAD ON THE', label: 'App Store', Logo: AppleLogo },
+];
 
 export function SplashScreen({ navigation, route }: any) {
   const fadeIn = useRef(new Animated.Value(STATIC_HERO_SHOWN ? 1 : 0)).current;
@@ -394,17 +399,22 @@ export function SplashScreen({ navigation, route }: any) {
                 <Gift size={16} color="#4ade80" />
                 <Text style={s.ctaSecondaryText}>Explore rewards</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={{ flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#000000', borderRadius: 12, paddingHorizontal: 18, paddingVertical: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.22)' }}
-                onPress={() => { const u = 'https://play.google.com/store/apps/details?id=com.karmacredits.app'; if (typeof window !== 'undefined') window.open(u, '_blank', 'noopener'); else Linking.openURL(u); }}
-                activeOpacity={0.85}
-              >
-                <GooglePlayLogo size={24} />
-                <View>
-                  <Text style={{ color: 'rgba(255,255,255,0.65)', fontSize: 9, fontWeight: '700', letterSpacing: 1.2 }}>GET IT ON</Text>
-                  <Text style={{ color: '#ffffff', fontSize: 15, fontWeight: '800' }}>Google Play</Text>
-                </View>
-              </TouchableOpacity>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+                {STORE_BUTTONS.map(({ key, url, sub, label, Logo }) => (
+                  <TouchableOpacity
+                    key={key}
+                    style={{ flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#000000', borderRadius: 12, paddingHorizontal: 18, paddingVertical: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.22)' }}
+                    onPress={() => { if (typeof window !== 'undefined') window.open(url, '_blank', 'noopener'); else Linking.openURL(url); }}
+                    activeOpacity={0.85}
+                  >
+                    <Logo size={24} />
+                    <View>
+                      <Text style={{ color: 'rgba(255,255,255,0.65)', fontSize: 9, fontWeight: '700', letterSpacing: 1.2 }}>{sub}</Text>
+                      <Text style={{ color: '#ffffff', fontSize: 15, fontWeight: '800' }}>{label}</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
 
             {/* Highlights: Act → Earn → Redeem */}
@@ -747,7 +757,7 @@ const s = StyleSheet.create({
   heroTagline: { fontSize: 22, fontWeight: '700', fontStyle: 'italic', color: '#4ade80', marginBottom: 18 },
   heroCursor: { color: '#4ade80', fontWeight: '400' },
   heroSub: { fontSize: 18, color: 'rgba(255,255,255,0.7)', fontWeight: '500', lineHeight: 28, maxWidth: 620, marginBottom: 32 },
-  heroCTA: { flexDirection: 'row', gap: 16, marginTop: 28, marginBottom: 44 },
+  heroCTA: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 16, marginTop: 28, marginBottom: 44 },
   ctaPrimary: {
     flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#4ade80', borderRadius: 14, paddingHorizontal: 28, paddingVertical: 16,
     shadowColor: '#4ade80', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.35, shadowRadius: 16, elevation: 6,

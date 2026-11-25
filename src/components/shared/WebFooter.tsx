@@ -10,7 +10,7 @@ const MAX = 1200;
 const ADDRESS = 'Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051';
 const MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ADDRESS)}`;
 const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.karmacredits.app';
-const APP_STORE_URL = 'https://apps.apple.com/in/app/karmaver%24e/id6823133168';
+const APP_STORE_URL = 'https://apps.apple.com/in/app/karmaver$e/id6823133168';
 
 const SOCIALS = [
   { key: 'instagram', Icon: Instagram, url: 'https://www.instagram.com/mykarmaverse/' },

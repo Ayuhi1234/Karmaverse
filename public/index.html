@@ -188,6 +188,7 @@
       #kv-hero .secondary { color: #4ade80; font-weight: 700; font-size: 15px; padding: 16px 24px; border-radius: 14px; border: 1.5px solid rgba(255,255,255,0.2); }
       #kv-hero .play { display: flex; flex-direction: column; background: #000; border: 1px solid rgba(255,255,255,0.22); border-radius: 12px;
         padding: 8px 18px; color: #fff; font-size: 15px; font-weight: 800; text-decoration: none; }
+      #kv-hero .stores { display: flex; flex-wrap: wrap; gap: 12px; }
       #kv-hero .play small { color: rgba(255,255,255,0.65); font-size: 9px; font-weight: 700; letter-spacing: 1.2px; }
       @media (min-width: 768px) {
         #kv-hero .nav-inner { padding: 14px 32px; }
@@ -198,7 +199,7 @@
         #kv-hero .h1 { font-size: 50px; }
         #kv-hero .tagline { font-size: 22px; line-height: 33px; }
         #kv-hero .sub { font-size: 18px; }
-        #kv-hero .cta { flex-direction: row; gap: 16px; }
+        #kv-hero .cta { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 16px; }
       }
     </style>
   </head>
@@ -248,7 +249,10 @@
           <div class="cta">
             <a class="primary" href="/login">Start your journey →</a>
             <span class="secondary">Explore rewards</span>
-            <a class="play" href="https://play.google.com/store/apps/details?id=com.karmacredits.app"><small>GET IT ON</small>Google Play</a>
+            <div class="stores">
+              <a class="play" href="https://play.google.com/store/apps/details?id=com.karmacredits.app"><small>GET IT ON</small>Google Play</a>
+              <a class="play" href="https://apps.apple.com/in/app/karmaver$e/id6823133168"><small>DOWNLOAD ON THE</small>App Store</a>
+            </div>
           </div>
         </div>
       </div>
