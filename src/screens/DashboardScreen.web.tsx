@@ -313,7 +313,7 @@ export function DashboardScreen({ navigation, route }: any) {
 
       {bf && (
         <View style={[z.container, { paddingHorizontal: pad, marginTop: 24 }]}>
-          <BFHomeBanner onPress={() => navigation.navigate('SchedulePickup')} />
+          <BFHomeBanner wide={!isMobile} onPress={() => navigation.navigate('SchedulePickup')} />
         </View>
       )}
 

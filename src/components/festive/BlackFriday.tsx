@@ -117,10 +117,10 @@ export function BF2x({ label = '2X', style, dark }: { label?: string; style?: ob
 const MONO = Platform.select({ ios: 'Menlo', android: 'monospace', default: 'ui-monospace, Menlo, monospace' });
 const RECEIPT_BARS = [2, 1, 3, 1, 1, 2, 4, 1, 2, 1, 1, 3, 2, 1, 3, 1, 1, 2, 1, 4, 1, 2];
 
-function Perforation({ edge, bg }: { edge: 'top' | 'bottom'; bg: string }) {
+function Perforation({ edge, bg, wide }: { edge: 'top' | 'bottom'; bg: string; wide?: boolean }) {
   return (
-    <View style={[s.perf, edge === 'top' ? { top: -5 } : { bottom: -5 }]} pointerEvents="none">
-      {Array.from({ length: 40 }).map((_, i) => <View key={i} style={[s.perfDot, { backgroundColor: bg }]} />)}
+    <View style={[s.perf, edge === 'top' ? { top: -5 } : { bottom: -5 }, wide && { justifyContent: 'flex-start', gap: 4 }]} pointerEvents="none">
+      {Array.from({ length: wide ? 150 : 40 }).map((_, i) => <View key={i} style={[s.perfDot, { backgroundColor: bg }]} />)}
     </View>
   );
 }
@@ -129,7 +129,7 @@ function ReceiptLine({ label, value, strong }: { label: string; value: string; s
   return (
     <View style={s.rLine}>
       <Text style={[s.rText, strong && s.rStrong]}>{label}</Text>
-      <Text style={s.rDots} numberOfLines={1} ellipsizeMode="clip">{' . . . . . . . . . . . . . . . . . . . . . . . . .'}</Text>
+      <Text style={s.rDots} numberOfLines={1} ellipsizeMode="clip">{' .'.repeat(140)}</Text>
       <Text style={[s.rText, strong && s.rStrong]}>{value}</Text>
     </View>
   );
@@ -137,14 +137,14 @@ function ReceiptLine({ label, value, strong }: { label: string; value: string; s
 
 // Home banner: a Black Friday receipt turned around. Things go out, nothing is spent, and the
 // coins come in double. Kept short so it shows in full below the Home header without scrolling.
-export function BFHomeBanner({ onPress }: { onPress: () => void }) {
+export function BFHomeBanner({ onPress, wide }: { onPress: () => void; wide?: boolean }) {
   const { colors } = useTheme();
   return (
     <TouchableOpacity activeOpacity={0.92} onPress={onPress} accessibilityRole="button"
       accessibilityLabel={`${bfCopy().receiptTitle}. Old stuff out, pickup free, you spend nothing, 2X KarmaCoins. Schedule pickup`}
-      style={s.receiptWrap}>
-      <View style={s.receipt}>
-        <Perforation edge="top" bg={colors.bg} />
+      style={[s.receiptWrap, wide && { maxWidth: '100%' }]}>
+      <View style={[s.receipt, wide && { paddingHorizontal: 22, transform: [{ rotate: '-0.3deg' }] }]}>
+        <Perforation edge="top" bg={colors.bg} wide={wide} />
         <View style={s.rHead}>
           <Text style={s.rBrand}>{bfCopy().receiptTitle}</Text>
           <Text style={s.rDate}>{bfCopy().receiptDate}</Text>
@@ -171,7 +171,7 @@ export function BFHomeBanner({ onPress }: { onPress: () => void }) {
             <ArrowRight size={14} color="#ffffff" />
           </View>
         </View>
-        <Perforation edge="bottom" bg={colors.bg} />
+        <Perforation edge="bottom" bg={colors.bg} wide={wide} />
       </View>
     </TouchableOpacity>
   );
