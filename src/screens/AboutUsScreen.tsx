@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StatusBar, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { isBlackFriday } from '../utils/blackFriday';
+import { bfHeaderEdge, BFHeaderWatermark } from '../components/festive/BlackFriday';
 import { ChevronLeft, Target, Eye, Recycle, Users, Truck, Coins, Sparkles } from 'lucide-react-native';
 import { useTheme, makeStyles } from '../theme';
 import { goBackOrHome } from '../utils/navBack';
@@ -27,7 +29,8 @@ export function AboutUsScreen({ navigation }: any) {
   return (
     <View style={styles.root}>
       <StatusBar barStyle="light-content" />
-      <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={styles.header}>
+      <LinearGradient colors={isBlackFriday() ? ['#000000', '#1c1c1c'] : ['#052e16', '#166534', '#15803d']} style={[styles.header, isBlackFriday() && bfHeaderEdge]}>
+        {isBlackFriday() && <BFHeaderWatermark />}
         <SafeAreaView edges={['top']}>
           <View style={styles.headerInner}>
             <View style={styles.headerTopRow}>

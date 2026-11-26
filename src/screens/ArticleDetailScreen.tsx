@@ -5,6 +5,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, Share2, Heart, Clock, Lightbulb } from 'lucide-react-native';
 import { getArticleById, ARTICLES, articleThumb } from '../data/articles';
 import { useTheme, makeStyles } from '../theme';
+import { isBlackFriday } from '../utils/blackFriday';
+import { BFHeaderWatermark, bfGhostBtn, bfPlainHeader } from '../components/festive/BlackFriday';
+import { StatusBarFiller } from '../components/shared/StatusBarFiller';
 
 // Liked Knowledge hub articles, kept on this device (articles are built into the app).
 const LIKED_KEY = 'likedArticles';
@@ -58,16 +61,18 @@ export function ArticleDetailScreen({ route, navigation }: any) {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.bg} />
+      <StatusBar barStyle={isDark || isBlackFriday() ? 'light-content' : 'dark-content'} backgroundColor={colors.bg} />
+      {isBlackFriday() && <StatusBarFiller color="#000000" />}
 
       <SafeAreaView style={styles.safeArea}>
         {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('App')}>
-            <ChevronLeft size={24} color={colors.text} />
+        <View style={[styles.header, isBlackFriday() && bfPlainHeader]}>
+          {isBlackFriday() && <BFHeaderWatermark />}
+          <TouchableOpacity style={[styles.backBtn, isBlackFriday() && bfGhostBtn]} onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('App')}>
+            <ChevronLeft size={24} color={isBlackFriday() ? '#ffffff' : colors.text} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionBtn} onPress={handleShare}>
-            <Share2 size={20} color={colors.text} />
+          <TouchableOpacity style={[styles.actionBtn, isBlackFriday() && bfGhostBtn]} onPress={handleShare}>
+            <Share2 size={20} color={isBlackFriday() ? '#ffffff' : colors.text} />
           </TouchableOpacity>
         </View>
 

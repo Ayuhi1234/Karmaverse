@@ -10,6 +10,8 @@ import { KidsBackdrop, KidsHeaderDecor, KidsConfetti } from '../components/festi
 import { DiwaliHeaderDecor, DiwaliCoinRangoli, DiwaliSparkles, DiwaliBackdrop } from '../components/festive/Diwali';
 import { makeStyles, useTheme } from '../theme';
 import { trackEvent } from '../utils/analytics';
+import { isBlackFriday, BF_HEADER } from '../utils/blackFriday';
+import { BFTicker, bfHeaderEdge, BFHeaderWatermark } from '../components/festive/BlackFriday';
 
 export function StoreScreen({ navigation }: any) {
   const styles = useStyles();
@@ -29,7 +31,8 @@ export function StoreScreen({ navigation }: any) {
       {kids && <KidsBackdrop dark={isDark} />}
       <StatusBar barStyle="light-content" />
       <ScrollView style={[styles.container, festive && { backgroundColor: 'transparent' }]} contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-        <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={[styles.header, festive && { overflow: 'hidden' }]}>
+        <LinearGradient colors={isBlackFriday() ? BF_HEADER : ['#052e16', '#166534', '#15803d']} style={[styles.header, festive && { overflow: 'hidden' }, isBlackFriday() && bfHeaderEdge]}>
+          {isBlackFriday() && <BFHeaderWatermark />}
           {diwali && <DiwaliHeaderDecor wide={width >= 768} />}
           {kids && <KidsHeaderDecor wide={width >= 768} />}
           <View style={styles.headerTop}>
@@ -41,6 +44,7 @@ export function StoreScreen({ navigation }: any) {
               <ShoppingBag size={24} color="#fff" />
             </View>
           </View>
+          {isBlackFriday() && <BFTicker />}
         </LinearGradient>
 
         <View style={styles.content}>

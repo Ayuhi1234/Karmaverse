@@ -20,6 +20,8 @@ import { SCREEN_WIDTH as width } from '../utils/layout';
 import { useTheme, makeStyles } from '../theme';
 import { StatusBarFiller } from '../components/shared/StatusBarFiller';
 import { rememberBooking } from '../utils/bookingCache';
+import { isBlackFriday, isCyberMonday, bfCopy } from '../utils/blackFriday';
+import { BFStrip, bfHeaderEdge, BFHeaderWatermark, BF2x } from '../components/festive/BlackFriday';
 
 const CARD_MARGIN = 8;
 const COLS = Platform.OS === 'web' && width > 768 ? 4 : 2;
@@ -681,8 +683,9 @@ export function SchedulePickupScreen({ navigation }: any) {
           <View style={styles.cartInfo}>
             <Text style={styles.cartItemText}>{cartCalculations.totalItems} {cartCalculations.totalItems === 1 ? 'item' : 'items'} added</Text>
             <View style={{flexDirection: 'row', alignItems: 'center', gap: 4}}>
-              <Text style={styles.cartRewardText}>Est. Reward: +{cartCalculations.totalCoins.toLocaleString('en-IN')}</Text>
+              <Text style={styles.cartRewardText}>Est. Reward: +{(cartCalculations.totalCoins * (isBlackFriday() ? 2 : 1)).toLocaleString('en-IN')}</Text>
               <KarmaCoin size={12} />
+              {isBlackFriday() && <BF2x style={{ marginLeft: 2 }} />}
             </View>
             {cartCalculations.totalCoins < MIN_ORDER_VALUE && (
               <Text style={styles.minOrderHint}>
@@ -819,9 +822,10 @@ export function SchedulePickupScreen({ navigation }: any) {
           <Text style={styles.estimateLabel}>Estimated earnings</Text>
           <View style={styles.estimateValueRow}>
             <KarmaCoin size={24} />
-            <Text style={styles.estimateValue}>+{cartCalculations.totalCoins.toLocaleString('en-IN')}</Text>
+            <Text style={styles.estimateValue}>+{(cartCalculations.totalCoins * (isBlackFriday() ? 2 : 1)).toLocaleString('en-IN')}</Text>
+            {isBlackFriday() && <BF2x style={{ marginLeft: 6, alignSelf: 'center' }} />}
           </View>
-          <Text style={styles.estimateNote}>For {cartCalculations.totalItems} {cartCalculations.totalItems === 1 ? 'item' : 'items'}. Final value credited after verification.</Text>
+          <Text style={styles.estimateNote}>For {cartCalculations.totalItems} {cartCalculations.totalItems === 1 ? 'item' : 'items'}{isBlackFriday() ? `, including the ${isCyberMonday() ? 'Cyber Monday' : 'Black Friday'} 2X bonus` : ''}. Final value credited after verification.</Text>
         </View>
         <View style={styles.estimateBigCoin}><KarmaCoin size={60} glow /></View>
       </View>
@@ -851,10 +855,12 @@ export function SchedulePickupScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#064e3b" />
-      <StatusBarFiller color="#064e3b" />
+      <StatusBarFiller color={isBlackFriday() ? '#000000' : '#064e3b'} />
       
       {/* Dark Green Header Section */}
-      <LinearGradient colors={['#064e3b', '#15803d']} style={styles.header}>
+      <LinearGradient colors={isBlackFriday() ? ['#000000', '#1c1c1c'] : ['#064e3b', '#15803d']} style={[styles.header, isBlackFriday() && bfHeaderEdge]}>
+
+        {isBlackFriday() && <BFHeaderWatermark />}
         <SafeAreaView>
           <View style={styles.headerRow}>
             <TouchableOpacity 
@@ -874,6 +880,7 @@ export function SchedulePickupScreen({ navigation }: any) {
           </View>
         </SafeAreaView>
       </LinearGradient>
+      {isBlackFriday() && <View style={{ marginTop: 12, marginHorizontal: 16, borderRadius: 12, overflow: 'hidden' }}><BFStrip text={bfCopy().scheduleNote} /></View>}
 
       {/* Main Content Router */}
       {currentStep === 1 ? renderCatalogStep() : renderDetailsStep()}

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image, ActivityIndicator, Platform, useWindowDimensions } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image, ActivityIndicator, Platform, useWindowDimensions, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ChevronLeft, Clock, RefreshCw, TrendingUp } from 'lucide-react-native';
@@ -9,6 +9,9 @@ import { goBackOrHome } from '../utils/navBack';
 import { WebFooter } from '../components/shared/WebFooter';
 import { NewsletterBox } from '../components/blog/NewsletterBox';
 import { useTheme, makeStyles } from '../theme';
+import { isBlackFriday } from '../utils/blackFriday';
+import { BFHeaderWatermark, bfGhostBtn, bfPlainHeader } from '../components/festive/BlackFriday';
+import { StatusBarFiller } from '../components/shared/StatusBarFiller';
 
 // karmaverse.earth/blog — the same posts as 0waste.co.in/blog, read live from its feed.
 export function BlogScreen({ navigation }: any) {
@@ -59,14 +62,17 @@ export function BlogScreen({ navigation }: any) {
 
   return (
     <SafeAreaView style={styles.container}>
+      {isBlackFriday() && <StatusBar barStyle="light-content" />}
+      {isBlackFriday() && <StatusBarFiller color="#000000" />}
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.backBtn} onPress={goHome} accessibilityLabel="Back">
-            <ChevronLeft size={24} color={colors.text} />
+        <View style={[styles.header, isBlackFriday() && bfPlainHeader]}>
+          {isBlackFriday() && <BFHeaderWatermark />}
+          <TouchableOpacity style={[styles.backBtn, isBlackFriday() && bfGhostBtn]} onPress={goHome} accessibilityLabel="Back">
+            <ChevronLeft size={24} color={isBlackFriday() ? '#ffffff' : colors.text} />
           </TouchableOpacity>
           <View style={{ flex: 1 }}>
-            <Text style={styles.headerTitle} accessibilityRole="header">Blog</Text>
-            <Text style={styles.headerSub}>Guides and stories on recycling, zero waste and climate action</Text>
+            <Text style={[styles.headerTitle, isBlackFriday() && { color: '#ffffff' }]} accessibilityRole="header">Blog</Text>
+            <Text style={[styles.headerSub, isBlackFriday() && { color: 'rgba(255,255,255,0.7)' }]}>Guides and stories on recycling, zero waste and climate action</Text>
           </View>
         </View>
 

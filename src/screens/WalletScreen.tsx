@@ -14,6 +14,8 @@ import { streakService, StreakStatus } from '../services/streak';
 import { showRedeemInfoNow, isRedeemLive } from '../utils/redeemInfo';
 import { showAlert } from '../utils/alert';
 import { PICKUP_RATE, STREAK_FREEZE_COST, STREAK_TIERS, tierByName, rupeesFor, formatRupees, LedgerType } from '../utils/streakTiers';
+import { isBlackFriday, BF_HEADER } from '../utils/blackFriday';
+import { BFTicker, bfHeaderEdge, BFHeaderWatermark } from '../components/festive/BlackFriday';
 
 const showWithdrawInfo = () => showRedeemInfoNow();
 
@@ -149,7 +151,8 @@ export function WalletScreen({ navigation, route }: any) {
       <ScrollView ref={scrollRef} style={[styles.container, festive && { backgroundColor: 'transparent' }]} contentContainerStyle={{ paddingBottom: Platform.OS === 'web' ? 0 : 100 }} showsVerticalScrollIndicator={false}>
 
         {/* Header — same as home screen: paddingTop 60, same gradient, same radius */}
-        <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={[styles.header, festive && { overflow: 'hidden' }]}>
+        <LinearGradient colors={isBlackFriday() ? BF_HEADER : ['#052e16', '#166534', '#15803d']} style={[styles.header, festive && { overflow: 'hidden' }, isBlackFriday() && bfHeaderEdge]}>
+          {isBlackFriday() && <BFHeaderWatermark />}
           {diwali && <DiwaliHeaderDecor wide={width >= 768} />}
           {kids && <KidsHeaderDecor wide={width >= 768} />}
           <View style={styles.titleRow}>
@@ -222,6 +225,7 @@ export function WalletScreen({ navigation, route }: any) {
               </View>
             </View>
           </View>
+          {isBlackFriday() && <BFTicker />}
         </LinearGradient>
 
         {/* At-risk / freeze banner — only when a missed day is freeze-eligible */}

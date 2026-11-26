@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StatusBar, ActivityIndicator, Switch, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { isBlackFriday } from '../utils/blackFriday';
+import { bfHeaderEdge, BFHeaderWatermark } from '../components/festive/BlackFriday';
 import { SlidersHorizontal, Check, AlertCircle } from 'lucide-react-native';
 import { getPreferences, savePreferences, EmailPrefs, DEFAULT_PREFS, PREF_META } from '../services/emailPrefs';
 import { useTheme, makeStyles } from '../theme';
@@ -61,7 +63,8 @@ export function EmailPreferencesScreen({ route, navigation }: any) {
   return (
     <View style={styles.root}>
       <StatusBar barStyle="light-content" />
-      <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={styles.header}>
+      <LinearGradient colors={isBlackFriday() ? ['#000000', '#1c1c1c'] : ['#052e16', '#166534', '#15803d']} style={[styles.header, isBlackFriday() && bfHeaderEdge]}>
+        {isBlackFriday() && <BFHeaderWatermark />}
         <SafeAreaView edges={['top']}>
           <View style={styles.headerInner}>
             <View style={styles.headerIconBox}><SlidersHorizontal size={22} color="white" /></View>

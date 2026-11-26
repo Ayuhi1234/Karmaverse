@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { isBlackFriday } from '../utils/blackFriday';
+import { bfHeaderEdge, BFHeaderWatermark } from '../components/festive/BlackFriday';
 import { ChevronLeft, ShieldCheck, FileText, Trash2 } from 'lucide-react-native';
 import { TERMS, TERMS_OF_USE, PRIVACY, DATA_DELETION, LegalDoc, LegalSection } from '../data/legalContent';
 import { makeStyles } from '../theme';
@@ -45,7 +47,8 @@ export function LegalScreen({ route, navigation }: any) {
   return (
     <View style={styles.root}>
       <StatusBar barStyle="light-content" />
-      <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={styles.header}>
+      <LinearGradient colors={isBlackFriday() ? ['#000000', '#1c1c1c'] : ['#052e16', '#166534', '#15803d']} style={[styles.header, isBlackFriday() && bfHeaderEdge]}>
+        {isBlackFriday() && <BFHeaderWatermark />}
         <SafeAreaView edges={['top']}>
           <View style={styles.headerInner}>
             <View style={styles.headerTopRow}>

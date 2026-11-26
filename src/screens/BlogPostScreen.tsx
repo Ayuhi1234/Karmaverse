@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image, ActivityIndicator, Platform, Share, Linking } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image, ActivityIndicator, Platform, Share, Linking, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowRight, Check, ChevronLeft, Clock, ExternalLink, Facebook, Link2, Linkedin, MessageCircle, Share2, Twitter } from 'lucide-react-native';
 import {
@@ -11,6 +11,9 @@ import { WebFooter } from '../components/shared/WebFooter';
 import { NewsletterBox } from '../components/blog/NewsletterBox';
 import { ReactionBar } from '../components/blog/ReactionBar';
 import { useTheme, makeStyles, ThemeColors } from '../theme';
+import { isBlackFriday } from '../utils/blackFriday';
+import { BFHeaderWatermark, bfGhostBtn, bfPlainHeader } from '../components/festive/BlackFriday';
+import { StatusBarFiller } from '../components/shared/StatusBarFiller';
 
 // karmaverse.earth/blog/<slug> — the full article, read live from 0waste.co.in.
 // The canonical URL points at 0waste.co.in so search engines credit the original.
@@ -185,16 +188,19 @@ export function BlogPostScreen({ route, navigation }: any) {
 
   return (
     <SafeAreaView style={styles.container}>
+      {isBlackFriday() && <StatusBar barStyle="light-content" />}
+      {isBlackFriday() && <StatusBarFiller color="#000000" />}
       <View pointerEvents="none" style={styles.progressTrack}>
         <View style={[styles.progressBar, { width: `${progress * 100}%` as any }]} />
       </View>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false} onScroll={onScroll} scrollEventThrottle={32}>
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.iconBtn} onPress={back} accessibilityLabel="All posts">
-            <ChevronLeft size={24} color={colors.text} />
+        <View style={[styles.header, isBlackFriday() && bfPlainHeader]}>
+          {isBlackFriday() && <BFHeaderWatermark />}
+          <TouchableOpacity style={[styles.iconBtn, isBlackFriday() && bfGhostBtn]} onPress={back} accessibilityLabel="All posts">
+            <ChevronLeft size={24} color={isBlackFriday() ? '#ffffff' : colors.text} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.iconBtn} onPress={handleShare} accessibilityLabel="Share">
-            <Share2 size={20} color={colors.text} />
+          <TouchableOpacity style={[styles.iconBtn, isBlackFriday() && bfGhostBtn]} onPress={handleShare} accessibilityLabel="Share">
+            <Share2 size={20} color={isBlackFriday() ? '#ffffff' : colors.text} />
           </TouchableOpacity>
         </View>
 

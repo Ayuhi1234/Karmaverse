@@ -11,8 +11,10 @@ import {
 } from 'lucide-react-native';
 import { bookingService } from '../services/booking';
 import { useTheme, makeStyles } from '../theme';
-import { bookingCoins } from '../utils/bookingCoins';
+import { bookingCoins, isBoostedBooking } from '../utils/bookingCoins';
 import { rememberBooking } from '../utils/bookingCache';
+import { isBlackFriday } from '../utils/blackFriday';
+import { BF2x, BFHeaderWatermark, bfGhostBtn, bfPlainHeader } from '../components/festive/BlackFriday';
 
 const FALLBACK = {
   id: 'KC12345',
@@ -61,6 +63,7 @@ export function BookingDetailsScreen({ navigation, route }: any) {
     address: addressText,
     wasteType,
     estCoins: bookingCoins(fullBooking) ?? bookingCoins(passed),
+    boosted: isBoostedBooking(fullBooking ? { ...passed, ...fullBooking } : passed),
     // Real agent only — never the mock, or a booking cancelled before assignment
     // would show a fake "Ravi Kumar".
     agent: agentData || passed?.agent || null,
@@ -80,14 +83,15 @@ export function BookingDetailsScreen({ navigation, route }: any) {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.bg} />
-      <SafeAreaView edges={['top']}>
+      <StatusBar barStyle={isDark || isBlackFriday() ? 'light-content' : 'dark-content'} backgroundColor={colors.bg} />
+      <SafeAreaView edges={['top']} style={isBlackFriday() ? bfPlainHeader : undefined}>
+        {isBlackFriday() && <BFHeaderWatermark />}
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('App')} style={styles.backBtn}>
-            <ArrowLeft size={20} color={colors.text} />
+          <TouchableOpacity onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('App')} style={[styles.backBtn, isBlackFriday() && bfGhostBtn]}>
+            <ArrowLeft size={20} color={isBlackFriday() ? '#ffffff' : colors.text} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Booking details</Text>
+          <Text style={[styles.headerTitle, isBlackFriday() && { color: '#ffffff' }]}>Booking details</Text>
           {/* Keeps the title centred opposite the back button. */}
           <View style={styles.headerSpacer} />
         </View>
@@ -131,6 +135,7 @@ export function BookingDetailsScreen({ navigation, route }: any) {
               <View style={styles.coinsRow}>
                 <Text style={styles.gridValue}>{booking.estCoins == null ? '—' : booking.estCoins.toLocaleString('en-IN')} </Text>
                 <KarmaCoin size={14} />
+                {booking.boosted && <BF2x style={{ marginLeft: 6 }} />}
               </View>
             </View>
           </View>

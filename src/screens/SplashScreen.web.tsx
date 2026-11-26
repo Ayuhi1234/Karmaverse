@@ -28,6 +28,8 @@ import { isLaunchDay } from '../utils/launchDay';
 import { getLocalDateStr } from '../utils/quizDate';
 import { isDiwaliSeason, isChildrensDay } from '../utils/festive';
 import { KidsBunting, KidsConfetti, KidsPaperPlanes, BalloonPopGame, RecycleBuddies, KidsShimmerText, KidsToyCard } from '../components/festive/ChildrensDay';
+import { isBlackFriday, bfAccent, bfCopy } from '../utils/blackFriday';
+import { BFTicker, BFHeroBadge, BFHeaderWatermark } from '../components/festive/BlackFriday';
 import {
   DiwaliLights, DiwaliDiyas, DiwaliEmbers, DiwaliSparkles, DiwaliMarigolds, DiwaliRangoli, DiwaliKandils,
   DiwaliCursorSparks, DiwaliShimmerText, DiwaliCleanupCard,
@@ -114,6 +116,7 @@ export function SplashScreen({ navigation, route }: any) {
   const rewardsSectionRef = useRef<any>(null);
   const diwali = isDiwaliSeason();
   const kids = isChildrensDay();
+  const bf = isBlackFriday();
 
   // Launch-day confetti — once per day per browser, guest visitors included.
   useEffect(() => {
@@ -255,7 +258,7 @@ export function SplashScreen({ navigation, route }: any) {
       <MascotPopupBanner suppressed={nearFooter} />
 
       {/* ── NAV BAR ── */}
-      <View style={s.navBar}>
+      <View style={[s.navBar, bf && { backgroundColor: '#000000' }]}>
         <View style={[s.navInner, isMobile && { paddingHorizontal: 20 }]}>
           <TouchableOpacity
             onPress={() => scrollRef.current?.scrollTo({ y: 0, animated: true })}
@@ -326,7 +329,10 @@ export function SplashScreen({ navigation, route }: any) {
       <ScrollView ref={scrollRef} showsVerticalScrollIndicator={false} style={{ flex: 1 }} onScroll={handleScroll} scrollEventThrottle={32}>
 
         {/* ── HERO ── */}
-        <LinearGradient colors={['#052e16', '#064e3b', '#0f766e']} style={[s.hero, kids && { paddingBottom: (isMobile ? 60 : 80) + 90 }]}>
+        <LinearGradient colors={bf ? ['#000000', '#0a0a0a', '#151515'] : ['#052e16', '#064e3b', '#0f766e']} style={[s.hero, kids && { paddingBottom: (isMobile ? 60 : 80) + 90 }]}>
+          {bf && <BFTicker style={{ borderRadius: 0, marginTop: 0, paddingVertical: 9, transform: [] }} />}
+          {bf && <BFHeaderWatermark />}
+          {bf && !isMobile && W >= 1100 && <View style={{ position: 'absolute', right: Math.max(40, (W - 1200) / 2 + 40), top: 120 }}><BFHeroBadge /></View>}
           {/* Decorative circles */}
           <Animated.View style={[s.heroCircle, { top: -80, right: -60, width: 300, height: 300, opacity: 0.08, transform: [{ translateY: floatA.interpolate({ inputRange: [0, 1], outputRange: [0, -22] }) }] }]} />
           <Animated.View style={[s.heroCircle, { bottom: -40, left: -80, width: 250, height: 250, opacity: 0.06, transform: [{ translateY: floatB.interpolate({ inputRange: [0, 1], outputRange: [0, 18] }) }] }]} />
@@ -354,13 +360,18 @@ export function SplashScreen({ navigation, route }: any) {
           <Animated.View style={[s.heroContent, isMobile && { paddingHorizontal: 20 }, { opacity: fadeIn, transform: [{ translateY: slideUp }] }]}>
             {/* Badge */}
             <View style={s.heroBadge}>
-              <View style={[s.heroBadgeDot, diwali && { backgroundColor: '#fbbf24' }, kids && { backgroundColor: '#f472b6' }]} />
-              <Text style={s.heroBadgeText}>{diwali ? <DiwaliShimmerText text="Happy Diwali from KarmaVer$e" /> : kids ? <KidsShimmerText text="Happy Children's Day from KarmaVer$e" /> : 'AI-Powered Sustainability Platform'}</Text>
+              <View style={[s.heroBadgeDot, bf ? { backgroundColor: bfAccent() } : diwali ? { backgroundColor: '#fbbf24' } : kids && { backgroundColor: '#f472b6' }]} />
+              <Text style={s.heroBadgeText}>{bf ? bfCopy().eyebrow : diwali ? <DiwaliShimmerText text="Happy Diwali from KarmaVer$e" /> : kids ? <KidsShimmerText text="Happy Children's Day from KarmaVer$e" /> : 'AI-Powered Sustainability Platform'}</Text>
             </View>
 
             {/* The headline types out character by character. A full-text, invisible
                 ghost reserves its final height so the tagline/CTA below never shift as
                 it types (fixes the hero CLS / layout shift). */}
+            {bf ? (
+              <Text style={[s.heroTitle, { fontSize: isMobile ? 40 : 68, lineHeight: isMobile ? 44 : 72, letterSpacing: -2 }]}>
+                {bfCopy().headline}{'\n'}<Text style={{ color: '#4ade80' }}>{bfCopy().headlineAccent}</Text>
+              </Text>
+            ) : (
             <View style={s.heroTitleWrap}>
               <Text style={[s.heroTitle, isMobile && { fontSize: 34 }, s.heroTitleGhost]}>
                 {HEADLINE_TEXT}
@@ -373,14 +384,21 @@ export function SplashScreen({ navigation, route }: any) {
                 <Animated.Text style={[s.heroCursor, { opacity: cursorBlink }]}>|</Animated.Text>
               </Text>
             </View>
+            )}
 
             <Text style={[s.heroTagline, isMobile && { fontSize: 18 }]}>“Kar Bhala Toh Ho Bhala.” 🌱</Text>
 
+            {bf ? (
+              <Text style={[s.heroSub, isMobile && { fontSize: 16 }]}>
+                {bfCopy().heroSub}
+              </Text>
+            ) : (
             <Text style={[s.heroSub, isMobile && { fontSize: 16 }]}>
               KarmaVer$e rewards every sustainable action — schedule green pickups,
               sharpen your green knowledge with our AI-powered eco-quiz, and turn it all into
               KarmaCoins with real, measurable impact.
             </Text>
+            )}
 
             <View style={s.poweredByBadge}>
               <View style={s.poweredByDot}><Text style={s.poweredByDotText}>3R</Text></View>
@@ -391,7 +409,7 @@ export function SplashScreen({ navigation, route }: any) {
             <View style={[s.heroCTA, isMobile && { flexDirection: 'column', gap: 12 }]}>
               <Animated.View style={{ transform: [{ scale: ctaScale }] }}>
                 <TouchableOpacity style={s.ctaPrimary} onPress={() => navigation.navigate('Login')}>
-                  <Text style={s.ctaPrimaryText}>Start your journey</Text>
+                  <Text style={s.ctaPrimaryText}>{bf ? bfCopy().heroCta : 'Start your journey'}</Text>
                   <ArrowRight size={18} color="#052e16" />
                 </TouchableOpacity>
               </Animated.View>

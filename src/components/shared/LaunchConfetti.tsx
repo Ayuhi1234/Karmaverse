@@ -1,11 +1,17 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Animated, Easing, StyleSheet, Dimensions } from 'react-native';
+import { isBlackFriday } from '../../utils/blackFriday';
+import { BFCoinRain } from '../festive/BFCoinRain';
 
 const COLORS = ['#f59e0b', '#ec4899', '#8b5cf6', '#22c55e', '#38bdf8', '#facc15'];
 const PIECE_COUNT = 90;
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 
 export function LaunchConfetti({ onDone }: { onDone?: () => void }) {
+  return isBlackFriday() ? <BFCoinRain onDone={onDone} /> : <RainbowConfetti onDone={onDone} />;
+}
+
+function RainbowConfetti({ onDone }: { onDone?: () => void }) {
   const pieces = useRef(
     Array.from({ length: PIECE_COUNT }, (_, i) => ({
       x: Math.random() * SCREEN_W,

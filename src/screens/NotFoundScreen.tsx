@@ -1,8 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, StatusBar } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { isBlackFriday } from '../utils/blackFriday';
 import { Compass, Home } from 'lucide-react-native';
 import { getToken } from '../utils/tokenStore';
+import { BFHeaderWatermark } from '../components/festive/BlackFriday';
 
 export function NotFoundScreen({ navigation }: any) {
   const goHome = async () => {
@@ -15,7 +17,8 @@ export function NotFoundScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#064e3b" />
-      <LinearGradient colors={['#064e3b', '#15803d']} style={StyleSheet.absoluteFillObject} />
+      <LinearGradient colors={isBlackFriday() ? ['#000000', '#1c1c1c'] : ['#064e3b', '#15803d']} style={StyleSheet.absoluteFillObject} />
+      {isBlackFriday() && <BFHeaderWatermark />}
       <View style={styles.content}>
         <View style={styles.iconBg}>
           <Compass size={44} color="#4ade80" />

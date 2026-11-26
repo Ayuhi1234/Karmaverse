@@ -3,6 +3,8 @@ import { View, Text, ScrollView, TouchableOpacity, StatusBar, ActivityIndicator 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, Clock, CheckCircle2, XCircle, History } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { isBlackFriday } from '../utils/blackFriday';
+import { bfHeaderEdge, BFHeaderWatermark } from '../components/festive/BlackFriday';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { redeemService } from '../services/redeem';
 import { useTheme, makeStyles } from '../theme';
@@ -53,9 +55,10 @@ export function RedeemHistoryScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#064e3b" />
-      <StatusBarFiller color="#064e3b" />
+      <StatusBarFiller color={isBlackFriday() ? '#000000' : '#064e3b'} />
 
-      <LinearGradient colors={['#064e3b', '#15803d']} style={styles.header}>
+      <LinearGradient colors={isBlackFriday() ? ['#000000', '#1c1c1c'] : ['#064e3b', '#15803d']} style={[styles.header, isBlackFriday() && bfHeaderEdge]}>
+        {isBlackFriday() && <BFHeaderWatermark />}
         <SafeAreaView>
           <View style={styles.headerRow}>
             <TouchableOpacity style={styles.backBtnInner} onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('App')}>

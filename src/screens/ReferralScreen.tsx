@@ -4,6 +4,8 @@ import { showAlert } from '../utils/alert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, Share2, Copy, Users, Gift, CheckCircle2, Clock, X, MessageCircle, Linkedin, Facebook, Twitter, Instagram, Mail, Link2 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { isBlackFriday } from '../utils/blackFriday';
+import { bfHeaderEdge, BFHeaderWatermark } from '../components/festive/BlackFriday';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { referralService } from '../services/referral';
 import { useTheme, makeStyles } from '../theme';
@@ -118,14 +120,15 @@ export function ReferralScreen({ navigation }: any) {
     new Date(iso).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
 
   return (
-    <View style={styles.rootContainer}>
+    <View style={[styles.rootContainer, isBlackFriday() && { backgroundColor: '#000000' }]}>
       <StatusBar barStyle="light-content" />
-      <StatusBarFiller color="#7e22ce" />
+      <StatusBarFiller color={isBlackFriday() ? '#000000' : '#7e22ce'} />
       <SafeAreaView style={styles.container}>
         <ScrollView style={styles.scrollBg} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 60 }}>
 
           {/* ── Hero ── */}
-          <LinearGradient colors={['#7e22ce', '#db2777']} style={styles.heroSection}>
+          <LinearGradient colors={isBlackFriday() ? ['#000000', '#1c1c1c'] : ['#7e22ce', '#db2777']} style={[styles.heroSection, isBlackFriday() && bfHeaderEdge]}>
+            {isBlackFriday() && <BFHeaderWatermark />}
             <View style={styles.header}>
               <TouchableOpacity style={styles.backBtn} onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('App')}>
                 <ChevronLeft size={24} color="white" />

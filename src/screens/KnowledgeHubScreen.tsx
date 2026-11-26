@@ -1,10 +1,13 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ChevronLeft, Clock } from 'lucide-react-native';
 import { ARTICLES, articleThumb } from '../data/articles';
 import { useTheme, makeStyles } from '../theme';
+import { isBlackFriday } from '../utils/blackFriday';
+import { BFHeaderWatermark, bfGhostBtn, bfPlainHeader } from '../components/festive/BlackFriday';
+import { StatusBarFiller } from '../components/shared/StatusBarFiller';
 
 export function KnowledgeHubScreen({ navigation }: any) {
   const styles = useStyles();
@@ -13,12 +16,15 @@ export function KnowledgeHubScreen({ navigation }: any) {
 
   return (
     <SafeAreaView style={styles.container}>
+      {isBlackFriday() && <StatusBar barStyle="light-content" />}
+      {isBlackFriday() && <StatusBarFiller color="#000000" />}
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('App')}>
-          <ChevronLeft size={24} color={colors.text} />
+      <View style={[styles.header, isBlackFriday() && bfPlainHeader]}>
+        {isBlackFriday() && <BFHeaderWatermark />}
+        <TouchableOpacity style={[styles.backBtn, isBlackFriday() && bfGhostBtn]} onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('App')}>
+          <ChevronLeft size={24} color={isBlackFriday() ? '#ffffff' : colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Knowledge hub</Text>
+        <Text style={[styles.headerTitle, isBlackFriday() && { color: '#ffffff' }]}>Knowledge hub</Text>
         <View style={styles.placeholderBox} />
       </View>
 

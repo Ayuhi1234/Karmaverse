@@ -26,6 +26,8 @@ import { KidsBackdrop, KidsHeaderDecor, KidsRainbowBorder } from '../components/
 import { applyOtpInput, OTP_AUTOFILL } from '../utils/otpBoxes';
 import { isValidEmail } from '../utils/email';
 import { DiwaliHeaderDecor, DiwaliGoldBorder, DiwaliBackdrop } from '../components/festive/Diwali';
+import { isBlackFriday, BF_HEADER } from '../utils/blackFriday';
+import { BFTicker, bfHeaderEdge, BFHeaderWatermark } from '../components/festive/BlackFriday';
 
 // Reusable Components
 function InputField({ placeholder, value, onChange, keyboardType = 'default', maxLength }: any) {
@@ -770,7 +772,8 @@ export function ProfileScreen({ navigation }: any) {
       <StatusBar barStyle="light-content" />
 
         <ScrollView style={festive && { backgroundColor: 'transparent' }} contentContainerStyle={{ paddingBottom: Platform.OS === 'web' ? 0 : 100 }} showsVerticalScrollIndicator={false}>
-        <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={[styles.backgroundGradient, festive && { overflow: 'hidden' }]}>
+        <LinearGradient colors={isBlackFriday() ? BF_HEADER : ['#052e16', '#166534', '#15803d']} style={[styles.backgroundGradient, festive && { overflow: 'hidden' }, isBlackFriday() && bfHeaderEdge]}>
+          {isBlackFriday() && <BFHeaderWatermark />}
         {diwali && <DiwaliHeaderDecor wide={width >= 768} />}
         {kids && <KidsHeaderDecor wide={width >= 768} />}
         {/* Header */}
@@ -781,6 +784,7 @@ export function ProfileScreen({ navigation }: any) {
           <Text style={styles.headerTitle}>My profile</Text>
           <View style={styles.placeholderBox} />
         </View>
+        {isBlackFriday() && <BFTicker style={{ marginTop: 0, marginHorizontal: 20 }} />}
         </LinearGradient>
 
         <View style={styles.scrollContent}>

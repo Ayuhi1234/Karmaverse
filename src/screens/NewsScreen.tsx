@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StatusBar, StyleSheet, Platform, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { isBlackFriday } from '../utils/blackFriday';
+import { bfHeaderEdge, BFHeaderWatermark } from '../components/festive/BlackFriday';
 import { ChevronLeft, Newspaper } from 'lucide-react-native';
 import { NEWS } from '../data/news';
 import { NewsCard } from '../components/shared/NewsCard';
@@ -26,7 +28,8 @@ export function NewsScreen({ navigation }: any) {
     <View style={s.root}>
       <StatusBar barStyle="light-content" />
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
-        <LinearGradient colors={['#052e16', '#064e3b', '#0f766e']} style={s.header}>
+        <LinearGradient colors={isBlackFriday() ? ['#000000', '#1c1c1c'] : ['#052e16', '#064e3b', '#0f766e']} style={[s.header, isBlackFriday() && bfHeaderEdge]}>
+          {isBlackFriday() && <BFHeaderWatermark />}
           <SafeAreaView edges={['top']}>
             <View style={[s.headerInner, { paddingHorizontal: pad }]}>
               <TouchableOpacity style={s.backBtn} onPress={goBack} activeOpacity={0.7} accessibilityLabel="Back">

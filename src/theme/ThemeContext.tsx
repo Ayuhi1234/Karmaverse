@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
-import { useColorScheme } from 'react-native';
+import { AppState, useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { lightColors, darkColors, ThemeColors } from './colors';
+import { bfDarkColors, festivePhase, msToNextFestiveChange } from '../utils/blackFriday';
 
 // Theme mode the user picked. 'system' follows the OS setting; 'light'/'dark' force it.
 export type ThemeMode = 'light' | 'dark' | 'system';
@@ -11,6 +12,7 @@ type ThemeContextValue = {
   isDark: boolean;      // the resolved theme right now
   colors: ThemeColors;  // the active token set
   setMode: (m: ThemeMode) => void;
+  festive?: 'off' | 'bf' | 'cm';
 };
 
 const ThemeContext = createContext<ThemeContextValue>({
@@ -40,12 +42,26 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     AsyncStorage.setItem(STORAGE_KEY, m).catch(() => {});
   }, []);
 
+  const [festive, setFestive] = useState(festivePhase);
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const sync = () => {
+      setFestive(festivePhase());
+      if (timer) clearTimeout(timer);
+      const ms = msToNextFestiveChange();
+      timer = ms === null ? undefined : setTimeout(sync, Math.min(ms + 1000, 2147483647));
+    };
+    sync();
+    const sub = AppState.addEventListener('change', (s) => { if (s === 'active') sync(); });
+    return () => { if (timer) clearTimeout(timer); sub.remove(); };
+  }, []);
+
   const isDark = mode === 'system' ? system === 'dark' : mode === 'dark';
-  const colors = isDark ? darkColors : lightColors;
+  const colors = isDark ? (festive !== 'off' ? bfDarkColors : darkColors) : lightColors;
 
   const value = useMemo(
-    () => ({ mode, isDark, colors, setMode }),
-    [mode, isDark, colors, setMode]
+    () => ({ mode, isDark, colors, setMode, festive }),
+    [mode, isDark, colors, setMode, festive]
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

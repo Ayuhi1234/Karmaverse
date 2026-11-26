@@ -20,6 +20,8 @@ import {
   KidsBunting, KidsConfetti, KidsPaperPlanes, BalloonPopGame, RecycleBuddies, KidsShimmerText, KidsRainbowBorder,
   KidsBackdrop, KidsToyCard, KidsGreetingModal, KidsHeroSun,
 } from '../components/festive/ChildrensDay';
+import { isBlackFriday, bfAccent } from '../utils/blackFriday';
+import { BFTicker, BFHomeBanner, BFHeaderWatermark } from '../components/festive/BlackFriday';
 import {
   DiwaliLights, DiwaliShimmerText, DiwaliCleanupCard, DiwaliKandils, DiwaliEmbers, DiwaliDiyas, DiwaliCoinRangoli,
   DiwaliGoldBorder, DiwaliBurst, useDiwaliCountUp, DiwaliDiyaTracker, DiwaliGreetingModal, DiwaliBackdrop,
@@ -99,6 +101,7 @@ export function DashboardScreen({ navigation, route }: any) {
   const diwali = isDiwaliSeason();
   const kids = isChildrensDay();
   const festive = diwali || kids;
+  const bf = isBlackFriday();
   const isTablet = width >= 768 && width < 1024;
   const pad = isMobile ? 16 : 32;
 
@@ -219,7 +222,8 @@ export function DashboardScreen({ navigation, route }: any) {
     <ScrollView style={[z.root, festive && { backgroundColor: 'transparent' }]} showsVerticalScrollIndicator={false}>
 
       {/* ════════ HERO ════════ */}
-      <LinearGradient colors={['#052e16', '#064e3b', '#0f766e']} style={[z.hero, diwali && { paddingTop: 44, paddingBottom: 76 }, kids && { paddingTop: 44, paddingBottom: isMobile ? 150 : 130 }]}>
+      <LinearGradient colors={bf ? ['#000000', '#0a0a0a', '#1c1c1c'] : ['#052e16', '#064e3b', '#0f766e']} style={[z.hero, bf && { borderBottomWidth: 2, borderColor: bfAccent(), overflow: 'hidden' }, diwali && { paddingTop: 44, paddingBottom: 76 }, kids && { paddingTop: 44, paddingBottom: isMobile ? 150 : 130 }]}>
+        {bf && <BFHeaderWatermark />}
         <View style={z.heroDecor1} />
         <View style={z.heroDecor2} />
         {/* Below 768 there's no top navbar to hang the lights from (see AppTopBar). */}
@@ -304,7 +308,14 @@ export function DashboardScreen({ navigation, route }: any) {
             )}
           </View>
         </View>
+        {bf && <View style={[z.container, { paddingHorizontal: pad }]}><BFTicker /></View>}
       </LinearGradient>
+
+      {bf && (
+        <View style={[z.container, { paddingHorizontal: pad, marginTop: 24 }]}>
+          <BFHomeBanner onPress={() => navigation.navigate('SchedulePickup')} />
+        </View>
+      )}
 
       {/* Welcome bonus banner — shown once, right after claiming on the scratch card */}
       {showWelcomeBonusBanner && (

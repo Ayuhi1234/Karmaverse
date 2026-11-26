@@ -11,8 +11,10 @@ import { KidsBackdrop, KidsHeaderDecor, KidsStrip } from '../components/festive/
 import { DiwaliHeaderDecor, DiwaliStrip, DiwaliBackdrop } from '../components/festive/Diwali';
 import { bookingService } from '../services/booking';
 import { useTheme, makeStyles } from '../theme';
-import { bookingCoins, formatBookingCoins } from '../utils/bookingCoins';
+import { bookingCoins, formatBookingCoins, isBoostedBooking } from '../utils/bookingCoins';
 import { rememberBooking } from '../utils/bookingCache';
+import { isBlackFriday, BF_HEADER } from '../utils/blackFriday';
+import { BFTicker, bfHeaderEdge, BFHeaderWatermark, BF2x } from '../components/festive/BlackFriday';
 
 export function OrdersScreen({ navigation, route }: any) {
   const styles = useStyles();
@@ -93,6 +95,7 @@ export function OrdersScreen({ navigation, route }: any) {
       date: `${dateStr}, ${order.timeSlot}`,
       status: uiStatus,
       credits: bookingCoins(order),
+      boosted: isBoostedBooking(order),
       weight: 'Est. calculation',
       rawStatus: order.status,
       isRated: !!order.isRated
@@ -123,7 +126,8 @@ export function OrdersScreen({ navigation, route }: any) {
       <StatusBar barStyle="light-content" />
       <ScrollView style={[styles.container, festive && { backgroundColor: 'transparent' }]} contentContainerStyle={{ paddingBottom: Platform.OS === 'web' ? 0 : 100 }} showsVerticalScrollIndicator={false}>
 
-        <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={[styles.header, festive && { overflow: 'hidden' }]}>
+        <LinearGradient colors={isBlackFriday() ? BF_HEADER : ['#052e16', '#166534', '#15803d']} style={[styles.header, festive && { overflow: 'hidden' }, isBlackFriday() && bfHeaderEdge]}>
+          {isBlackFriday() && <BFHeaderWatermark />}
           {diwali && <DiwaliHeaderDecor wide={width >= 768} />}
           {kids && <KidsHeaderDecor wide={width >= 768} />}
           <View style={styles.headerTop}>
@@ -146,6 +150,7 @@ export function OrdersScreen({ navigation, route }: any) {
               <Text style={[styles.tabText, activeTab === 'History' && styles.tabTextActive]}>Past history</Text>
             </TouchableOpacity>
           </View>
+          {isBlackFriday() && <BFTicker />}
         </LinearGradient>
 
         <View style={styles.scrollContent}>
@@ -208,6 +213,7 @@ export function OrdersScreen({ navigation, route }: any) {
                       <View style={styles.creditsRow}>
                         <KarmaCoin size={16} />
                         <Text style={styles.creditsValue}>{formatBookingCoins(order.credits)}</Text>
+                        {order.boosted && <BF2x style={{ marginLeft: 6, alignSelf: 'center' }} />}
                       </View>
                     </View>
                     <ChevronRight size={20} color={colors.textFaint} />

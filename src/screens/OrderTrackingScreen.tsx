@@ -9,7 +9,7 @@ import {
   CheckCircle2, Circle, XCircle
 } from 'lucide-react-native';
 import { bookingService } from '../services/booking';
-import { bookingCoins } from '../utils/bookingCoins';
+import { bookingCoins, isBoostedBooking } from '../utils/bookingCoins';
 import { cachedBooking, isBookingObjectId } from '../utils/bookingCache';
 import { showAlert } from '../utils/alert';
 import { useUserSocket } from '../context/UserSocketContext';
@@ -17,6 +17,8 @@ import { trackPickupCompleted } from '../utils/analytics';
 import { RatingModal } from '../components/shared/RatingModal';
 import { TrackingMap } from '../components/shared/TrackingMap';
 import { useTheme, makeStyles } from '../theme';
+import { isBlackFriday } from '../utils/blackFriday';
+import { BFHeaderWatermark, bfPlainHeader } from '../components/festive/BlackFriday';
 
 const { height } = Dimensions.get('window');
 
@@ -366,7 +368,8 @@ export function OrderTrackingScreen({ route, navigation }: any) {
       <StatusBar barStyle="light-content" backgroundColor="#15803d" />
 
       {/* â"€â"€ Header â"€â"€ */}
-      <SafeAreaView edges={['top']} style={styles.header}>
+      <SafeAreaView edges={['top']} style={[styles.header, isBlackFriday() && bfPlainHeader]}>
+        {isBlackFriday() && <BFHeaderWatermark />}
         <TouchableOpacity onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('App')} style={styles.backBtn}>
           <ArrowLeft size={20} color="white" />
         </TouchableOpacity>
@@ -485,7 +488,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
             <Text style={styles.statValue}>{Number(earnedCoins ?? estimatedCoins).toLocaleString('en-IN')} KC</Text>
-            <Text style={styles.statLabel}>{earnedCoins !== null ? 'Coins earned' : 'Est. coins'}</Text>
+            <Text style={styles.statLabel}>{earnedCoins !== null ? 'Coins earned' : isBoostedBooking(booking) ? 'Est. coins · 2X' : 'Est. coins'}</Text>
           </View>
         </View>
 

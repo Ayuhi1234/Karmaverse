@@ -4,6 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, Phone, Coins, CheckCircle2, Info, Recycle, Gift, ArrowDown } from 'lucide-react-native';
 import { useTheme, makeStyles } from '../theme';
 import { LinearGradient } from 'expo-linear-gradient';
+import { isBlackFriday } from '../utils/blackFriday';
+import { bfHeaderEdge, BFHeaderWatermark } from '../components/festive/BlackFriday';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { transferService, CoinType, TransferQuote } from '../services/transfer';
 import { profileService } from '../services/profile';
@@ -182,9 +184,10 @@ export function TransferScreen({ navigation }: any) {
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <StatusBar barStyle="light-content" backgroundColor="#064e3b" />
-      <StatusBarFiller color="#064e3b" />
+      <StatusBarFiller color={isBlackFriday() ? '#000000' : '#064e3b'} />
 
-      <LinearGradient colors={['#064e3b', '#15803d']} style={styles.header}>
+      <LinearGradient colors={isBlackFriday() ? ['#000000', '#1c1c1c'] : ['#064e3b', '#15803d']} style={[styles.header, isBlackFriday() && bfHeaderEdge]}>
+        {isBlackFriday() && <BFHeaderWatermark />}
         <SafeAreaView>
           <View style={styles.headerRow}>
             <TouchableOpacity style={styles.backBtnInner} onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('App')}>

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, TextInput, StatusBar, ActivityIndicator, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { isBlackFriday } from '../utils/blackFriday';
+import { bfHeaderEdge, BFHeaderWatermark } from '../components/festive/BlackFriday';
 import { MessageSquareHeart, Check, AlertCircle } from 'lucide-react-native';
 import { submitFeedback } from '../services/emailPrefs';
 import { BACKEND_BASE } from '../services/api';
@@ -40,7 +42,8 @@ export function FeedbackScreen({ route, navigation }: any) {
   return (
     <View style={styles.root}>
       <StatusBar barStyle="light-content" />
-      <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={styles.header}>
+      <LinearGradient colors={isBlackFriday() ? ['#000000', '#1c1c1c'] : ['#052e16', '#166534', '#15803d']} style={[styles.header, isBlackFriday() && bfHeaderEdge]}>
+        {isBlackFriday() && <BFHeaderWatermark />}
         <SafeAreaView edges={['top']}>
           <View style={styles.headerInner}>
             <View style={styles.headerIconBox}>

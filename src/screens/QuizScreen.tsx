@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { isBlackFriday } from '../utils/blackFriday';
 import { X, Trophy, Timer, Flame, CheckCircle2, XCircle, ArrowRight, WifiOff, Leaf } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getToken } from '../utils/tokenStore';
@@ -18,6 +19,7 @@ import { showRedeemInfoOnce } from '../utils/redeemInfo';
 import { getStableUserSuffix } from '../utils/userId';
 import { loadQuizDays, quizStreakFrom, QuizDays } from '../utils/quizHistory';
 import { useTheme, makeStyles } from '../theme';
+import { BFHeaderWatermark } from '../components/festive/BlackFriday';
 
 const CONFETTI_COLORS = ['#fbbf24', '#4ade80', '#f472b6', '#60a5fa', '#fb923c', '#a78bfa', '#34d399', '#f87171'];
 const CONFETTI_COUNT = 40;
@@ -426,7 +428,8 @@ export function QuizScreen({ navigation }: any) {
   if (screenState === 'init') {
     return (
       <View style={styles.fullCenter}>
-        <LinearGradient colors={['#064e3b', '#15803d']} style={StyleSheet.absoluteFillObject} />
+        <LinearGradient colors={isBlackFriday() ? ['#000000', '#1c1c1c'] : ['#064e3b', '#15803d']} style={StyleSheet.absoluteFillObject} />
+        {isBlackFriday() && <BFHeaderWatermark />}
         <ActivityIndicator color="white" size="large" />
       </View>
     );
@@ -438,7 +441,8 @@ export function QuizScreen({ navigation }: any) {
     return (
       <View style={styles.container}>
         <StatusBar barStyle="light-content" backgroundColor="#064e3b" />
-        <LinearGradient colors={isPerfect ? ['#052e16', '#065f46'] : ['#064e3b', '#15803d']} style={StyleSheet.absoluteFillObject} />
+        <LinearGradient colors={isBlackFriday() ? ['#000000', '#1c1c1c'] : isPerfect ? ['#052e16', '#065f46'] : ['#064e3b', '#15803d']} style={StyleSheet.absoluteFillObject} />
+        {isBlackFriday() && <BFHeaderWatermark />}
         {isPerfect && <Confetti />}
         <SafeAreaView style={styles.resultsArea}>
           <View style={styles.trophyContainer}>
@@ -481,7 +485,8 @@ export function QuizScreen({ navigation }: any) {
     return (
       <View style={styles.container}>
         <StatusBar barStyle="light-content" backgroundColor="#064e3b" />
-        <LinearGradient colors={['#064e3b', '#166534']} style={StyleSheet.absoluteFillObject} />
+        <LinearGradient colors={isBlackFriday() ? ['#000000', '#1c1c1c'] : ['#064e3b', '#166534']} style={StyleSheet.absoluteFillObject} />
+        {isBlackFriday() && <BFHeaderWatermark />}
         <SafeAreaView style={styles.lobbyArea}>
           <TouchableOpacity style={styles.closeBtn} onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('App')}>
             <X size={22} color="white" />
@@ -541,7 +546,9 @@ export function QuizScreen({ navigation }: any) {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar barStyle="light-content" backgroundColor="#064e3b" />
-      <LinearGradient colors={['#064e3b', '#166534']} style={styles.topBg} />
+      <LinearGradient colors={isBlackFriday() ? ['#000000', '#1c1c1c'] : ['#064e3b', '#166534']} style={[styles.topBg, isBlackFriday() && { overflow: 'hidden' }]}>
+        {isBlackFriday() && <BFHeaderWatermark />}
+      </LinearGradient>
 
       {/* Header */}
       <View style={styles.header}>

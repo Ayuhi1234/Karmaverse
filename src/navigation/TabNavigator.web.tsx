@@ -27,6 +27,7 @@ import { ProfileScreen } from '../screens/ProfileScreen';
 import { navigationRef } from './navRef';
 import { isDiwaliSeason, isChildrensDay } from '../utils/festive';
 import { KidsBunting } from '../components/festive/ChildrensDay';
+import { isBlackFriday } from '../utils/blackFriday';
 import { DiwaliLights } from '../components/festive/Diwali';
 
 const Tab = createBottomTabNavigator();
@@ -70,7 +71,7 @@ function TopNavbar({ state, navigation }: any) {
   if (isMobile) {
     return (
       <>
-        <View style={s.bottomBar}>
+        <View style={[s.bottomBar, isBlackFriday() && { backgroundColor: '#000000' }]}>
           {NAV_ITEMS.map((item, index) => {
             const active = state.index === index;
             const { Icon } = item;
@@ -103,7 +104,7 @@ function TopNavbar({ state, navigation }: any) {
   }
 
   return (
-    <View style={s.navOuter}>
+    <View style={[s.navOuter, isBlackFriday() && { backgroundColor: '#000000' }]}>
       <View style={s.nav}>
         <Pressable
           style={({ hovered }: any) => [s.navLeft, HOVER_TRANSITION, hovered && { opacity: 0.85 }]}

@@ -25,6 +25,8 @@ import { isValidEmail } from '../utils/email';
 import { isDiwaliSeason, isChildrensDay } from '../utils/festive';
 import { KidsBackdrop, KidsHeaderDecor } from '../components/festive/ChildrensDay';
 import { DiwaliHeaderDecor, DiwaliBackdrop } from '../components/festive/Diwali';
+import { isBlackFriday } from '../utils/blackFriday';
+import { bfHeaderEdge, BFHeaderWatermark } from '../components/festive/BlackFriday';
 let GoogleSignin: any = null;
 let isErrorWithCode: any = null;
 let statusCodes: any = {};
@@ -1815,10 +1817,11 @@ export function LoginScreen({ navigation, route }: any) {
       {diwali && !(step === 'demographics' || step === 'referral_bonus' || step === 'welcome_celebration') && <DiwaliBackdrop dark={isDark} />}
       {kids && !(step === 'demographics' || step === 'referral_bonus' || step === 'welcome_celebration') && <KidsBackdrop dark={isDark} />}
       <StatusBar barStyle="light-content" backgroundColor="#064e3b" />
-      <StatusBarFiller color="#064e3b" />
+      <StatusBarFiller color={isBlackFriday() ? '#000000' : '#064e3b'} />
 
       <SafeAreaView style={{ flex: 1 }}>
-        <LinearGradient colors={['#064e3b', '#15803d']} style={[styles.header, (diwali || kids) && winWidth < 768 && { paddingTop: 44 }, kids && { overflow: 'hidden' }]}>
+        <LinearGradient colors={isBlackFriday() ? ['#000000', '#1c1c1c'] : ['#064e3b', '#15803d']} style={[styles.header, (diwali || kids) && winWidth < 768 && { paddingTop: 44 }, kids && { overflow: 'hidden' }, isBlackFriday() && bfHeaderEdge]}>
+          {isBlackFriday() && <BFHeaderWatermark />}
           {diwali && <DiwaliHeaderDecor wide={winWidth >= 768} />}
           {kids && <KidsHeaderDecor wide={winWidth >= 768} />}
           {/* Decorative shapes so the header reads as a designed panel, not a flat block */}
