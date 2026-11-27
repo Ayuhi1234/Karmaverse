@@ -53,14 +53,7 @@ export function DonationScreen({ navigation }: any) {
       .catch(() => {});
   }, []);
 
-  const handleDonate = (option: typeof DONATION_OPTIONS[number], canAfford: boolean, shortfall: number) => {
-    if (!canAfford) {
-      showAlert(
-        'Not enough KarmaCoins XP',
-        `You need ${shortfall.toLocaleString()} more KarmaCoins XP to make the "${option.title}" donation. Keep earning and come back soon.`
-      );
-      return;
-    }
+  const handleDonate = (option: typeof DONATION_OPTIONS[number]) => {
     showAlert(
       'Donations opening soon',
       `Thanks for supporting 3R ZeroWaste. The "${option.title}" donation will be live shortly — check back soon.`
@@ -133,7 +126,7 @@ export function DonationScreen({ navigation }: any) {
                 </View>
                 <TouchableOpacity
                   style={styles.donateBtn}
-                  onPress={() => handleDonate(option, canAfford, shortfall)}
+                  onPress={() => handleDonate(option)}
                   activeOpacity={0.85}
                 >
                   <Text style={styles.donateBtnText}>Donate</Text>
