@@ -14,6 +14,7 @@ import { PhoneVerificationModal } from '../components/shared/PhoneVerificationMo
 import { LinearGradient } from 'expo-linear-gradient';
 import { CupSoda, ShoppingBag, Archive, Newspaper as NewsIcon, BookOpen, Database, Cog, Utensils, Activity, Laptop, Cable, Tv, Battery, Shirt, Fan, AirVent, WashingMachine, Refrigerator, Flame, Home as HomeIcon, Briefcase } from 'lucide-react-native';
 import { addressService, SavedAddress, AddressLabel } from '../services/address';
+import { catalogueService } from '../services/catalogue';
 import { bookingService } from '../services/booking';
 import * as Location from 'expo-location';
 import { SCREEN_WIDTH as width } from '../utils/layout';
@@ -98,9 +99,9 @@ const ALL_ITEMS: CatalogueItem[] = [
   { id: 'gl5', catId: '3', subCategory: 'Other Glass', unit: 'kg', coins: 10, itemIcon: Wine, image: require('../../assets/catalogue/other-glass.jpg') },
 
   // 4. Paper (kg)
-  { id: 'pa1', catId: '4', subCategory: 'Newspapers', unit: 'kg', coins: 100, itemIcon: NewsIcon, image: require('../../assets/catalogue/newspapers.jpg') },
+  { id: 'pa1', catId: '4', subCategory: 'Newspapers', unit: 'kg', coins: 120, itemIcon: NewsIcon, image: require('../../assets/catalogue/newspapers.jpg') },
   { id: 'pa2', catId: '4', subCategory: 'Cardboard', unit: 'kg', coins: 80, itemIcon: PackageOpen, image: require('../../assets/catalogue/cardboard.jpg') },
-  { id: 'pa3', catId: '4', subCategory: 'Magazines / Books', unit: 'kg', coins: 80, itemIcon: BookOpen, image: require('../../assets/catalogue/magazines-books.jpg') },
+  { id: 'pa3', catId: '4', subCategory: 'Magazines / Books', unit: 'kg', coins: 120, itemIcon: BookOpen, image: require('../../assets/catalogue/magazines-books.jpg') },
   { id: 'pa4', catId: '4', subCategory: 'Other Paper', unit: 'kg', coins: 40, itemIcon: FileText, image: require('../../assets/catalogue/other-paper.jpg') },
 
   // 5. Home Appliances & Electronics (piece, condition)
@@ -253,6 +254,24 @@ function ItemImage({ image, Icon, color }: { image?: any; Icon: any; color: stri
   return <Icon size={46} color={color} strokeWidth={1.5} opacity={0.8} />;
 }
 
+// Take per-unit rates from the live catalogue so a rate change shows without an app
+// update. Working / Not Working items keep their built-in rates. Returns true if any
+// rate changed.
+function applyLiveRates(catalogue: any[]): boolean {
+  let changed = false;
+  for (const cat of catalogue) {
+    const local = CATEGORIES.find((k) => k.backendName === cat?.category);
+    if (!local) continue;
+    for (const sub of cat?.subCategories || []) {
+      const rate = sub?.karmaCoinsPerUnit;
+      if (typeof rate !== 'number' || rate <= 0) continue;
+      const item = ALL_ITEMS.find((i) => i.catId === local.id && i.subCategory === sub?.name && !i.hasCondition);
+      if (item && item.coins !== rate) { item.coins = rate; changed = true; }
+    }
+  }
+  return changed;
+}
+
 export function SchedulePickupScreen({ navigation }: any) {
   const styles = useStyles();
   const { colors } = useTheme();
@@ -260,6 +279,13 @@ export function SchedulePickupScreen({ navigation }: any) {
   // Step Management
   const [currentStep, setCurrentStep] = useState<1 | 2>(1);
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const [ratesVersion, setRatesVersion] = useState(0);
+  useEffect(() => {
+    catalogueService.getCatalogue()
+      .then((catalogue) => { if (applyLiveRates(catalogue)) setRatesVersion((v) => v + 1); })
+      .catch(() => {});
+  }, []);
 
   // Cart State { cartKey: quantity } — cartKey encodes condition for dropdown items
   const [cart, setCart] = useState<Record<string, number>>({});
@@ -410,7 +436,7 @@ export function SchedulePickupScreen({ navigation }: any) {
     item.hasCondition ? (item.coinsWorking || 0) : (item.coins || 0);
   const displayedItems = useMemo(
     () => ALL_ITEMS.filter(item => item.catId === activeCategory).sort((a, b) => sortCoins(b) - sortCoins(a)),
-    [activeCategory]
+    [activeCategory, ratesVersion]
   );
   const activeCatData = CATEGORIES.find(c => c.id === activeCategory);
 
