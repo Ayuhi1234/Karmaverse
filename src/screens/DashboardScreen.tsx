@@ -13,7 +13,7 @@ import NotificationPermissionBanner from '../components/shared/NotificationPermi
 import NotificationPrimerModal from '../components/shared/NotificationPrimerModal';
 import { UserAvatar } from '../components/shared/UserAvatar';
 import { Avatar } from '../components/shared/Avatar';
-import { getStoredAvatarId, setStoredAvatarId } from '../utils/avatar';
+import { resolveAvatar } from '../utils/avatar';
 import { AnimatedPickupCta } from '../components/shared/AnimatedPickupCta';
 import { QuizCalendarModal } from '../components/shared/QuizCalendarModal';
 import { loadQuizDays, QuizDays } from '../utils/quizHistory';
@@ -320,11 +320,7 @@ export function DashboardScreen({ navigation, route }: any) {
             .join(' ')
         );
         setUserGender(profileData.demographics?.gender || profileData.gender || null);
-        const resolvedAvatar = profileData.avatarId || (await getStoredAvatarId());
-        if (resolvedAvatar) {
-          setAvatarId(resolvedAvatar);
-          if (profileData.avatarId) setStoredAvatarId(profileData.avatarId);
-        }
+        setAvatarId(await resolveAvatar(profileData, profileService.updateAvatar));
         setBalance(profileData.karmaCoins || profileData.coins || 0);
 
         if (ordersData && Array.isArray(ordersData)) {

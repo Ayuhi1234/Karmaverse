@@ -25,18 +25,49 @@ export async function getStoredAvatarId(): Promise<string | null> {
 
 // In-memory subscribers so every avatar surface (profile, dashboard, top nav)
 // updates the instant a new avatar is picked — no refetch needed.
-type AvatarListener = (id: string) => void;
+type AvatarListener = (id: string | null) => void;
 const listeners = new Set<AvatarListener>();
 export function subscribeAvatar(fn: AvatarListener): () => void {
   listeners.add(fn);
   return () => { listeners.delete(fn); };
 }
 
-export async function setStoredAvatarId(id: string): Promise<void> {
+// null removes the pick, so the default image shows again.
+export async function setStoredAvatarId(id: string | null): Promise<void> {
   try {
-    await AsyncStorage.setItem(await userKey(), id);
+    const key = await userKey();
+    if (id) await AsyncStorage.setItem(key, id);
+    else await AsyncStorage.removeItem(key);
   } catch {}
   listeners.forEach((fn) => fn(id));
+}
+
+// The avatar to show for a freshly loaded profile. Once the backend stores
+// avatarId (the key is present, even as null) it is the source of truth, so every
+// device shows the same picture. A pick made before that, which only lives on this
+// phone, is sent up once instead of being wiped by the backend's null.
+export async function resolveAvatar(profile: any, save: (id: string) => Promise<unknown>): Promise<string | null> {
+  const local = await getStoredAvatarId();
+  if (!profile || !Object.prototype.hasOwnProperty.call(profile, 'avatarId')) return local;
+  const remote: string | null = profile.avatarId || null;
+  if (remote) {
+    if (remote !== local) await setStoredAvatarId(remote);
+    return remote;
+  }
+  if (local) {
+    const syncedKey = `${await userKey()}_synced`;
+    let synced = false;
+    try { synced = !!(await AsyncStorage.getItem(syncedKey)); } catch {}
+    if (!synced) {
+      try {
+        await save(local);
+        await AsyncStorage.setItem(syncedKey, '1');
+      } catch {}
+      return local;
+    }
+    await setStoredAvatarId(null);
+  }
+  return null;
 }
 
 // Registration flow: no token yet, so stash the pick and claim it after login.

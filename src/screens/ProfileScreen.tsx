@@ -10,7 +10,7 @@ import { UserAvatar } from '../components/shared/UserAvatar';
 import { Avatar } from '../components/shared/Avatar';
 import { ThemeToggle } from '../components/shared/ThemeToggle';
 import { AvatarPickerModal } from '../components/shared/AvatarPickerModal';
-import { getStoredAvatarId, setStoredAvatarId } from '../utils/avatar';
+import { resolveAvatar, setStoredAvatarId } from '../utils/avatar';
 import { addressService, SavedAddress, AddressLabel, AddressInput } from '../services/address';
 import { LinearGradient } from 'expo-linear-gradient';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
@@ -127,13 +127,7 @@ export function ProfileScreen({ navigation }: any) {
            phone: isRealPhone(data.phone) ? cleanPhone(data.phone) : '',
            email: data.email || '',
         });
-        // Prefer the backend avatarId; fall back to the locally-stored pick so it
-        // shows even if the backend hasn't persisted it yet.
-        const resolvedAvatar = data.avatarId || (await getStoredAvatarId());
-        if (resolvedAvatar) {
-          setAvatarId(resolvedAvatar);
-          if (data.avatarId) setStoredAvatarId(data.avatarId);
-        }
+        setAvatarId(await resolveAvatar(data, profileService.updateAvatar));
       } catch (error) {
         console.error('Failed to load profile', error);
       } finally {
@@ -143,10 +137,9 @@ export function ProfileScreen({ navigation }: any) {
     fetchProfile();
   }, []));
 
-  // Save the chosen avatar: reflect it instantly, cache locally, and push to the
-  // backend (fire-and-forget — the local cache keeps it even if that field isn't
-  // wired server-side yet).
-  const chooseAvatar = (id: string) => {
+  // Save the chosen avatar (null = default): reflect it instantly, cache locally,
+  // and push to the backend.
+  const chooseAvatar = (id: string | null) => {
     setAvatarId(id);
     setStoredAvatarId(id);
     profileService.updateAvatar(id).catch(() => {});
@@ -971,6 +964,7 @@ export function ProfileScreen({ navigation }: any) {
       <AvatarPickerModal
         visible={avatarPickerVisible}
         currentId={avatarId}
+        defaultGender={userProfile?.demographics?.gender}
         onSelect={chooseAvatar}
         onClose={() => setAvatarPickerVisible(false)}
       />

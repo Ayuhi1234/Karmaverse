@@ -13,7 +13,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 function useCurrentAvatar() {
   const [avatarId, setAvatarId] = useState<string | null>(null);
   useEffect(() => {
-    getStoredAvatarId().then((id) => { if (id) setAvatarId(id); });
+    getStoredAvatarId().then(setAvatarId);
     return subscribeAvatar(setAvatarId);
   }, []);
   return avatarId;

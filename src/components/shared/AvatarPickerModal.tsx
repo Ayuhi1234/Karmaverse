@@ -2,20 +2,23 @@ import React from 'react';
 import { View, Text, Modal, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import { X } from 'lucide-react-native';
 import { Avatar, AVATAR_IDS, PERSON_AVATAR_IDS } from './Avatar';
+import { UserAvatar } from './UserAvatar';
 import { useTheme, makeStyles } from '../../theme';
 
-// Lets the user pick a profile avatar — the illustrated people first, then the
-// eco-creatures. Selection is immediate: tapping an avatar calls onSelect and
-// closes. The current pick is highlighted with a green ring.
-export function AvatarPickerModal({ visible, currentId, onSelect, onClose }: {
+// Lets the user pick a profile avatar — the default image first (removes the
+// pick), then the illustrated people, then the eco-creatures. Selection is
+// immediate: tapping an avatar calls onSelect and closes. The current pick is
+// highlighted with a green ring.
+export function AvatarPickerModal({ visible, currentId, defaultGender, onSelect, onClose }: {
   visible: boolean;
   currentId?: string | null;
-  onSelect: (id: string) => void;
+  defaultGender?: string | null;
+  onSelect: (id: string | null) => void;
   onClose: () => void;
 }) {
   const styles = useStyles();
   const { colors } = useTheme();
-  const pick = (id: string) => {
+  const pick = (id: string | null) => {
     onSelect(id);
     onClose();
   };
@@ -46,6 +49,19 @@ export function AvatarPickerModal({ visible, currentId, onSelect, onClose }: {
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 440 }}>
+            <Text style={styles.section}>Default</Text>
+            <View style={styles.grid}>
+              <TouchableOpacity
+                onPress={() => pick(null)}
+                activeOpacity={0.8}
+                style={[styles.cell, !currentId && styles.cellActive]}
+                accessibilityRole="button"
+                accessibilityLabel="No avatar, use the default image"
+              >
+                <UserAvatar gender={defaultGender || undefined} size={62} />
+              </TouchableOpacity>
+            </View>
+
             <Text style={styles.section}>People</Text>
             <Grid ids={PERSON_AVATAR_IDS} />
 
