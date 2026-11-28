@@ -7,6 +7,8 @@ import { getToken } from '../utils/tokenStore';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { WebFooter } from '../components/shared/WebFooter';
 import { LaunchDayPopup } from '../components/shared/LaunchDayPopup';
+import { StreakModal } from '../components/shared/StreakModal';
+import { QuizCalendarModal } from '../components/shared/QuizCalendarModal';
 import { profileService } from '../services/profile';
 import { bookingService } from '../services/booking';
 import { streakService } from '../services/streak';
@@ -109,6 +111,8 @@ export function DashboardScreen({ navigation, route }: any) {
   const [balance, setBalance] = useState(0);
   const [streak, setStreak] = useState(0);
   const [quizStreak, setQuizStreak] = useState(0);
+  const [showStreak, setShowStreak] = useState(false);
+  const [showQuizCal, setShowQuizCal] = useState(false);
   const [totalPickups, setTotalPickups] = useState(0);
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [selectedFeature, setSelectedFeature] = useState<typeof FEATURE_DETAILS[0] | null>(null);
@@ -267,11 +271,11 @@ export function DashboardScreen({ navigation, route }: any) {
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
                 {[
                   { icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total Karma Coins' },
-                  { icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Pickup streak' },
-                  { icon: Trophy, color: '#c084fc', val: `${quizStreak}`, label: 'Eco Quiz Streak' },
+                  { icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Pickup streak', onPress: () => setShowStreak(true) },
+                  { icon: Trophy, color: '#c084fc', val: `${quizStreak}`, label: 'Eco Quiz Streak', onPress: () => setShowQuizCal(true) },
                   { icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Sustainability Actions' },
-                ].map((st, i) => (
-                  <View key={i} style={{ width: Math.floor((width - 2 * pad - 8) / 2), backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 14, padding: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}>
+                ].map((st: { icon: any; color: string; val: string; label: string; onPress?: () => void }, i) => (
+                  <TouchableOpacity key={i} disabled={!st.onPress} onPress={st.onPress} activeOpacity={0.8} accessibilityRole={st.onPress ? 'button' : undefined} style={{ width: Math.floor((width - 2 * pad - 8) / 2), backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 14, padding: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}>
                     {diwali && <DiwaliGoldBorder delay={i * 1} />}
                     {kids && <KidsRainbowBorder delay={i * 1} />}
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 }}>
@@ -281,18 +285,18 @@ export function DashboardScreen({ navigation, route }: any) {
                       <Text style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', fontWeight: '600' }}>{st.label}</Text>
                     </View>
                     <Text style={{ fontSize: 20, fontWeight: '900', color: st.color }}>{st.val}</Text>
-                  </View>
+                  </TouchableOpacity>
                 ))}
               </View>
             ) : (
               <View style={z.heroRight}>
                 {[
                   { icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total Karma Coins' },
-                  { icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Pickup streak' },
-                  { icon: Trophy, color: '#c084fc', val: `${quizStreak}`, label: 'Eco Quiz Streak' },
+                  { icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Pickup streak', onPress: () => setShowStreak(true) },
+                  { icon: Trophy, color: '#c084fc', val: `${quizStreak}`, label: 'Eco Quiz Streak', onPress: () => setShowQuizCal(true) },
                   { icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Sustainability Actions' },
-                ].map((st, i) => (
-                  <View key={i} style={z.statCard}>
+                ].map((st: { icon: any; color: string; val: string; label: string; onPress?: () => void }, i) => (
+                  <TouchableOpacity key={i} style={z.statCard} disabled={!st.onPress} onPress={st.onPress} activeOpacity={0.8} accessibilityRole={st.onPress ? 'button' : undefined}>
                     {diwali && <DiwaliGoldBorder delay={i * 1} />}
                     {kids && <KidsRainbowBorder delay={i * 1} />}
                     <View style={z.statTop}>
@@ -302,7 +306,7 @@ export function DashboardScreen({ navigation, route }: any) {
                       <Text style={z.statLabel}>{st.label}</Text>
                     </View>
                     <Text style={[z.statVal, { color: st.color }]}>{st.val}</Text>
-                  </View>
+                  </TouchableOpacity>
                 ))}
               </View>
             )}
@@ -577,6 +581,8 @@ export function DashboardScreen({ navigation, route }: any) {
       )}
     </ScrollView>
 
+    <StreakModal visible={showStreak} onClose={() => setShowStreak(false)} streak={streak} />
+    <QuizCalendarModal visible={showQuizCal} onClose={() => setShowQuizCal(false)} playedDates={quizDays} streak={quizStreak} />
     {showLaunchPopup && <LaunchDayPopup onClose={() => setShowLaunchPopup(false)} />}
     </View>
   );
